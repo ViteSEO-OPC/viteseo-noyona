@@ -350,7 +350,6 @@ function woocom_ct_register_blocks() {
     register_block_type( get_stylesheet_directory() . '/blocks/contact' );
     register_block_type( get_stylesheet_directory() . '/blocks/location' );
     register_block_type( get_stylesheet_directory() . '/blocks/not-found' );
-    register_block_type( get_stylesheet_directory() . '/blocks/smoke' );
     register_block_type( get_stylesheet_directory() . '/blocks/contact-form' );
     register_block_type( get_stylesheet_directory() . '/blocks/blog-list' );
     register_block_type( get_stylesheet_directory() . '/blocks/blog-slide' );
