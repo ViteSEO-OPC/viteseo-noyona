@@ -10,7 +10,7 @@
 $defaults = array(
     'eyebrow'         => '',
     'titleLine'       => 'Radiate Natural,',
-    'body'            => 'Noyona test celebrates beauty that feels like you elevated by nature, crafted for everyday wear, and made to last. Discover effortless formulas that care for skin while enhancing your glow.',
+    'body'            => 'Noyona celebrates beauty that feels like you elevated by nature, crafted for everyday wear, and made to last. Discover effortless formulas that care for skin while enhancing your glow.',
     'searchEnabled'   => false,
     'searchPlaceholder' => 'Search articles',
     'searchPostType'  => '',
