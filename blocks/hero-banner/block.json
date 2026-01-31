@@ -17,7 +17,7 @@
     },
     "titleLine": {
       "type": "string",
-      "default": "Radiate Natural,test"
+      "default": "Radiate Natural,"
     },
     "body": {
       "type": "string",
