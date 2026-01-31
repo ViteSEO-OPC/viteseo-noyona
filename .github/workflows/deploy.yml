@@ -1,0 +1,696 @@
+# GitHub Actions Workflow: Multi-Environment SSH Deployment
+#
+# OVERVIEW:
+# This workflow automatically deploys to different servers based on which branch is pushed:
+#   - Push to PROD_BRANCH    → Deploy to production server using PROD_* secrets
+#   - Push to STAGING_BRANCH → Deploy to staging server using STAGING_* secrets
+#   - Push to other branches → Skipped (no deployment)
+#
+# Manual deployments can also be triggered via workflow_dispatch with environment selection.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+# REQUIRED GITHUB SECRETS (Settings > Secrets and variables > Actions)
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Branch Configuration:
+#   - PROD_BRANCH              : Branch name for production (e.g., "main")
+#   - STAGING_BRANCH           : Branch name for staging (e.g., "dev" or "develop")
+#
+# Production Environment (PROD_*):
+#   - PROD_SSH_PRIVATE_KEY     : SSH private key for production server
+#   - PROD_SSH_HOST            : Production server hostname or IP
+#   - PROD_SSH_PORT            : SSH port (typically 22)
+#   - PROD_SSH_USER            : SSH username on production server
+#   - PROD_THEME_DIR           : Theme directory path on production server
+#
+# Staging Environment (STAGING_*):
+#   - STAGING_SSH_PRIVATE_KEY  : SSH private key for staging server
+#   - STAGING_SSH_HOST         : Staging server hostname or IP
+#   - STAGING_SSH_PORT         : SSH port (typically 22)
+#   - STAGING_SSH_USER         : SSH username on staging server
+#   - STAGING_THEME_DIR        : Theme directory path on staging server
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+# REMOTE SERVER SETUP (for each environment)
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+#   1. SSH server must be running and accessible from GitHub Actions runners
+#   2. User account must exist with SSH key authentication enabled
+#   3. Repository must be cloned at the theme directory path (specified in *_THEME_DIR) with authenticated remote URL (either via SSH or cloning with PAT added to the git URL)
+#   4. deploy/pull.sh must have execute permissions: chmod +x deploy/pull.sh
+#   5. User must have write permissions to the theme directory
+#   6. Git credentials configured for pulling (SSH key or PAT)
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+# DEPLOYMENT FLOW
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+#   1. Validate PROD_BRANCH and STAGING_BRANCH secrets exist
+#   2. Determine environment based on pushed branch or manual selection
+#   3. Validate environment-specific secrets (PROD_* or STAGING_*)
+#   4. SSH into the appropriate server
+#   5. Execute: ./deploy/pull.sh --branch <target-branch>
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+# ERROR HANDLING
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+#   - Missing branch secrets       → Fails with list of missing secrets
+#   - Missing environment secrets  → Fails with list of missing secrets
+#   - Non-deployment branch        → Skips gracefully (success, no action)
+#   - SSH connection failure       → Fails with SSH error
+#   - deploy/pull.sh failure       → Fails with script error
+#
+#
+name: Run remote script over SSH
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+  push:
+    # Note: This triggers on all branches, but the job validates against PROD_BRANCH and STAGING_BRANCH secrets
+    branches: [ "**" ]
+
+# Concurrency control: only one deployment per environment at a time
+# This prevents race conditions when multiple pushes happen quickly
+concurrency:
+  group: deploy-${{ github.event.inputs.environment || github.ref_name }}
+  cancel-in-progress: false  # Don't cancel running deployments, queue new ones
+
+jobs:
+  remote-ssh:
+    runs-on: ubuntu-latest
+    
+    # Job timeout: prevent hanging deployments (15 minutes max)
+    timeout-minutes: 15
+
+    steps:
+      - name: Validate branch configuration secrets
+        id: validate-branches
+        shell: bash
+        run: |
+          set -e
+          
+          echo "🔍 Validating required branch configuration secrets..."
+          
+          MISSING_SECRETS=""
+          VALIDATION_ERRORS=""
+          
+          if [ -z "${{ secrets.PROD_BRANCH }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}\n  - PROD_BRANCH"
+          fi
+          
+          if [ -z "${{ secrets.STAGING_BRANCH }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}\n  - STAGING_BRANCH"
+          fi
+          
+          # Validate branch names don't contain dangerous characters
+          PROD_BRANCH="${{ secrets.PROD_BRANCH }}"
+          STAGING_BRANCH="${{ secrets.STAGING_BRANCH }}"
+          
+          if [ -n "$PROD_BRANCH" ]; then
+            if [[ "$PROD_BRANCH" =~ [^a-zA-Z0-9/_.-] ]]; then
+              VALIDATION_ERRORS="${VALIDATION_ERRORS}\n  - PROD_BRANCH contains invalid characters"
+            fi
+          fi
+          
+          if [ -n "$STAGING_BRANCH" ]; then
+            if [[ "$STAGING_BRANCH" =~ [^a-zA-Z0-9/_.-] ]]; then
+              VALIDATION_ERRORS="${VALIDATION_ERRORS}\n  - STAGING_BRANCH contains invalid characters"
+            fi
+          fi
+          
+          if [ -n "$MISSING_SECRETS" ]; then
+            echo "❌ ERROR: Missing required secrets:${MISSING_SECRETS}"
+            echo ""
+            echo "Please configure these secrets in GitHub → Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          
+          if [ -n "$VALIDATION_ERRORS" ]; then
+            echo "❌ ERROR: Invalid secret values:${VALIDATION_ERRORS}"
+            exit 1
+          fi
+          
+          echo "✅ Branch configuration secrets validated"
+          echo "   PROD_BRANCH: ${{ secrets.PROD_BRANCH }}"
+          echo "   STAGING_BRANCH: ${{ secrets.STAGING_BRANCH }}"
+
+      - name: Determine deployment environment
+        id: detect-env
+        shell: bash
+        run: |
+          set -e
+          
+          CURRENT_BRANCH="${{ github.ref_name }}"
+          PROD_BRANCH="${{ secrets.PROD_BRANCH }}"
+          STAGING_BRANCH="${{ secrets.STAGING_BRANCH }}"
+          
+          echo "📌 Current branch: $CURRENT_BRANCH"
+          echo "📌 Production branch: $PROD_BRANCH"
+          echo "📌 Staging branch: $STAGING_BRANCH"
+          
+          # Validate we have branch values
+          if [ -z "$PROD_BRANCH" ] && [ -z "$STAGING_BRANCH" ]; then
+            echo "❌ ERROR: Neither PROD_BRANCH nor STAGING_BRANCH is configured"
+            exit 1
+          fi
+          
+          DEPLOY_ENV=""
+          TARGET_BRANCH=""
+          
+          # For manual dispatch, use the selected environment
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            DEPLOY_ENV="${{ github.event.inputs.environment }}"
+            
+            if [ "$DEPLOY_ENV" == "production" ]; then
+              if [ -z "$PROD_BRANCH" ]; then
+                echo "❌ ERROR: PROD_BRANCH secret not configured for production deployment"
+                exit 1
+              fi
+              TARGET_BRANCH="$PROD_BRANCH"
+            else
+              if [ -z "$STAGING_BRANCH" ]; then
+                echo "❌ ERROR: STAGING_BRANCH secret not configured for staging deployment"
+                exit 1
+              fi
+              TARGET_BRANCH="$STAGING_BRANCH"
+            fi
+            echo "🔧 Manual trigger: deploying to $DEPLOY_ENV (branch: $TARGET_BRANCH)"
+          # For push events, detect environment from branch
+          elif [ -n "$PROD_BRANCH" ] && [ "$CURRENT_BRANCH" == "$PROD_BRANCH" ]; then
+            DEPLOY_ENV="production"
+            TARGET_BRANCH="$PROD_BRANCH"
+            echo "🚀 Detected PRODUCTION deployment"
+          elif [ -n "$STAGING_BRANCH" ] && [ "$CURRENT_BRANCH" == "$STAGING_BRANCH" ]; then
+            DEPLOY_ENV="staging"
+            TARGET_BRANCH="$STAGING_BRANCH"
+            echo "🧪 Detected STAGING deployment"
+          else
+            echo "⏭️ Branch '$CURRENT_BRANCH' is not configured for deployment"
+            echo "   Configured branches:"
+            [ -n "$PROD_BRANCH" ] && echo "     - $PROD_BRANCH (production)"
+            [ -n "$STAGING_BRANCH" ] && echo "     - $STAGING_BRANCH (staging)"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Final validation
+          if [ -z "$DEPLOY_ENV" ] || [ -z "$TARGET_BRANCH" ]; then
+            echo "❌ ERROR: Failed to determine deployment environment"
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ Deployment target determined:"
+          echo "   Environment: $DEPLOY_ENV"
+          echo "   Branch: $TARGET_BRANCH"
+          
+          {
+            echo "deploy_env=$DEPLOY_ENV"
+            echo "target_branch=$TARGET_BRANCH"
+            echo "skip=false"
+          } >> $GITHUB_OUTPUT
+
+      - name: Skip non-deployment branches
+        if: steps.detect-env.outputs.skip == 'true'
+        run: |
+          echo "ℹ️ Skipping deployment - branch not configured for deployment"
+
+      - name: Checkout
+        if: steps.detect-env.outputs.skip != 'true'
+        uses: actions/checkout@v4
+
+      - name: Validate environment secrets
+        if: steps.detect-env.outputs.skip != 'true'
+        id: deploy-vars
+        shell: bash
+        run: |
+          set -e
+          
+          DEPLOY_ENV="${{ steps.detect-env.outputs.deploy_env }}"
+          TARGET_BRANCH="${{ steps.detect-env.outputs.target_branch }}"
+          
+          echo "🔍 Validating $DEPLOY_ENV environment secrets..."
+          
+          if [ "$DEPLOY_ENV" == "production" ]; then
+            SSH_KEY="${{ secrets.PROD_SSH_PRIVATE_KEY }}"
+            SSH_HOST="${{ secrets.PROD_SSH_HOST }}"
+            SSH_PORT="${{ secrets.PROD_SSH_PORT }}"
+            SSH_USER="${{ secrets.PROD_SSH_USER }}"
+            THEME_DIR="${{ secrets.PROD_THEME_DIR }}"
+            PREFIX="PROD_"
+          else
+            SSH_KEY="${{ secrets.STAGING_SSH_PRIVATE_KEY }}"
+            SSH_HOST="${{ secrets.STAGING_SSH_HOST }}"
+            SSH_PORT="${{ secrets.STAGING_SSH_PORT }}"
+            SSH_USER="${{ secrets.STAGING_SSH_USER }}"
+            THEME_DIR="${{ secrets.STAGING_THEME_DIR }}"
+            PREFIX="STAGING_"
+          fi
+          
+          MISSING_SECRETS=""
+          VALIDATION_ERRORS=""
+          
+          # Check for missing secrets
+          if [ -z "$SSH_KEY" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}\n  - ${PREFIX}SSH_PRIVATE_KEY"
+          fi
+          if [ -z "$SSH_HOST" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}\n  - ${PREFIX}SSH_HOST"
+          fi
+          if [ -z "$SSH_PORT" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}\n  - ${PREFIX}SSH_PORT"
+          fi
+          if [ -z "$SSH_USER" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}\n  - ${PREFIX}SSH_USER"
+          fi
+          if [ -z "$THEME_DIR" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}\n  - ${PREFIX}THEME_DIR"
+          fi
+          
+          # Validate SSH port is a number
+          if [ -n "$SSH_PORT" ]; then
+            if ! [[ "$SSH_PORT" =~ ^[0-9]+$ ]]; then
+              VALIDATION_ERRORS="${VALIDATION_ERRORS}\n  - ${PREFIX}SSH_PORT must be a number (got: $SSH_PORT)"
+            elif [ "$SSH_PORT" -lt 1 ] || [ "$SSH_PORT" -gt 65535 ]; then
+              VALIDATION_ERRORS="${VALIDATION_ERRORS}\n  - ${PREFIX}SSH_PORT must be between 1-65535 (got: $SSH_PORT)"
+            fi
+          fi
+          
+          # Validate SSH host format (basic check)
+          if [ -n "$SSH_HOST" ]; then
+            if [[ "$SSH_HOST" =~ [[:space:]] ]]; then
+              VALIDATION_ERRORS="${VALIDATION_ERRORS}\n  - ${PREFIX}SSH_HOST contains spaces"
+            fi
+          fi
+          
+          # Validate SSH user format (basic check)
+          if [ -n "$SSH_USER" ]; then
+            if [[ "$SSH_USER" =~ [[:space:]] ]] || [[ "$SSH_USER" =~ [@] ]]; then
+              VALIDATION_ERRORS="${VALIDATION_ERRORS}\n  - ${PREFIX}SSH_USER contains invalid characters (spaces or @)"
+            fi
+          fi
+          
+          # Validate theme directory is an absolute path
+          if [ -n "$THEME_DIR" ]; then
+            if [[ ! "$THEME_DIR" =~ ^/ ]]; then
+              VALIDATION_ERRORS="${VALIDATION_ERRORS}\n  - ${PREFIX}THEME_DIR must be an absolute path (got: $THEME_DIR)"
+            fi
+          fi
+          
+          # Validate SSH key format (basic check)
+          if [ -n "$SSH_KEY" ]; then
+            if [[ ! "$SSH_KEY" =~ ^-----BEGIN ]]; then
+              VALIDATION_ERRORS="${VALIDATION_ERRORS}\n  - ${PREFIX}SSH_PRIVATE_KEY does not appear to be a valid private key"
+            fi
+          fi
+          
+          if [ -n "$MISSING_SECRETS" ]; then
+            echo "❌ ERROR: Missing required secrets for $DEPLOY_ENV environment:${MISSING_SECRETS}"
+            echo ""
+            echo "Please configure these secrets in GitHub → Settings → Secrets and variables → Actions"
+            echo ""
+            echo "💡 TIP: Use ./deploy/setup-deployment.sh to generate these values"
+            exit 1
+          fi
+          
+          if [ -n "$VALIDATION_ERRORS" ]; then
+            echo "❌ ERROR: Invalid secret values for $DEPLOY_ENV environment:${VALIDATION_ERRORS}"
+            exit 1
+          fi
+          
+          echo "✅ All $DEPLOY_ENV secrets validated"
+          echo "   Host: $SSH_HOST:$SSH_PORT"
+          echo "   User: $SSH_USER"
+          echo "   Theme directory: $THEME_DIR"
+          
+          # Output values for subsequent steps (using heredoc for multiline SSH key)
+          {
+            echo "ssh_key<<EOF"
+            echo "$SSH_KEY"
+            echo "EOF"
+            echo "ssh_host=$SSH_HOST"
+            echo "ssh_port=$SSH_PORT"
+            echo "ssh_user=$SSH_USER"
+            echo "theme_dir=$THEME_DIR"
+            echo "target_branch=$TARGET_BRANCH"
+          } >> $GITHUB_OUTPUT
+
+      # Loads your private key into ssh-agent
+      - name: Start ssh-agent
+        if: steps.detect-env.outputs.skip != 'true'
+        id: ssh-agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ steps.deploy-vars.outputs.ssh_key }}
+
+      # Verify SSH agent is working correctly
+      - name: Verify SSH agent
+        if: steps.detect-env.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -e
+          
+          echo "🔑 Verifying SSH agent..."
+          
+          # Check if ssh-agent is running
+          if [ -z "${SSH_AUTH_SOCK:-}" ]; then
+            echo "❌ ERROR: SSH_AUTH_SOCK is not set. ssh-agent may not be running."
+            exit 1
+          fi
+          
+          # Check if key was loaded
+          if ! ssh-add -l &>/dev/null; then
+            SSH_ADD_EXIT=$?
+            if [ $SSH_ADD_EXIT -eq 1 ]; then
+              echo "❌ ERROR: No SSH keys loaded in agent"
+              echo "   Please verify your SSH private key secret is correctly formatted"
+              exit 1
+            elif [ $SSH_ADD_EXIT -eq 2 ]; then
+              echo "❌ ERROR: Cannot connect to ssh-agent"
+              exit 1
+            fi
+          fi
+          
+          echo "✅ SSH agent verified"
+          echo "   Keys loaded: $(ssh-add -l | wc -l)"
+
+      # Add the server host key so SSH can verify the server (prevents MITM)
+      - name: Add known_hosts
+        if: steps.detect-env.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -e
+          
+          SSH_HOST="${{ steps.deploy-vars.outputs.ssh_host }}"
+          SSH_PORT="${{ steps.deploy-vars.outputs.ssh_port }}"
+          
+          # Validate inputs before using in commands
+          if [[ ! "$SSH_PORT" =~ ^[0-9]+$ ]]; then
+            echo "❌ ERROR: Invalid SSH port: $SSH_PORT"
+            exit 1
+          fi
+          
+          if [[ "$SSH_HOST" =~ [[:space:]\;\|\&\$\`] ]]; then
+            echo "❌ ERROR: SSH host contains invalid characters"
+            exit 1
+          fi
+          
+          echo "🔐 Adding host key for $SSH_HOST:$SSH_PORT..."
+          
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          
+          # Create temporary file for ssh-keyscan output
+          KEYSCAN_OUTPUT=$(mktemp)
+          trap "rm -f $KEYSCAN_OUTPUT" EXIT
+          
+          # Retry ssh-keyscan with timeout (host might not be immediately reachable)
+          MAX_ATTEMPTS=3
+          ATTEMPT=0
+          SCAN_SUCCESS=false
+          
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "   Attempt $ATTEMPT of $MAX_ATTEMPTS..."
+            
+            # Run ssh-keyscan and capture output
+            if ssh-keyscan -T 30 -p "$SSH_PORT" -H "$SSH_HOST" > "$KEYSCAN_OUTPUT" 2>/dev/null; then
+              # Verify we got actual key data (not empty or just comments)
+              KEY_LINES=$(grep -v '^#' "$KEYSCAN_OUTPUT" | grep -v '^$' | wc -l)
+              
+              if [ "$KEY_LINES" -gt 0 ]; then
+                # Validate key format (should contain ssh-rsa, ecdsa, or ed25519)
+                if grep -qE '(ssh-rsa|ecdsa-sha2|ssh-ed25519)' "$KEYSCAN_OUTPUT"; then
+                  cat "$KEYSCAN_OUTPUT" >> ~/.ssh/known_hosts
+                  SCAN_SUCCESS=true
+                  echo "   ✅ Received $KEY_LINES host key(s)"
+                  break
+                else
+                  echo "   ⚠️ Received data but no valid SSH keys found"
+                fi
+              else
+                echo "   ⚠️ ssh-keyscan returned empty response"
+              fi
+            else
+              echo "   ⚠️ ssh-keyscan attempt $ATTEMPT failed"
+            fi
+            
+            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+              echo "   Retrying in 5 seconds..."
+              sleep 5
+            fi
+          done
+          
+          if [ "$SCAN_SUCCESS" != "true" ]; then
+            echo "❌ ERROR: Failed to get valid host key from $SSH_HOST:$SSH_PORT after $MAX_ATTEMPTS attempts"
+            echo ""
+            echo "   Please verify:"
+            echo "   - Host '$SSH_HOST' is accessible from GitHub Actions runners"
+            echo "   - SSH is running on port $SSH_PORT"
+            echo "   - Firewall allows connections from GitHub Actions IP ranges"
+            echo "   - The server has SSH host keys configured"
+            echo ""
+            echo "   Debug: Try running manually:"
+            echo "   ssh-keyscan -p $SSH_PORT $SSH_HOST"
+            exit 1
+          fi
+          
+          chmod 600 ~/.ssh/known_hosts
+          echo "✅ Host key added successfully"
+
+      # Run your remote script
+      # Note: The deploy/pull.sh script is inside the repository on the server
+      # The -lc flag ensures a login shell is used, which loads user environment
+      - name: Run remote pull script
+        if: steps.detect-env.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -e
+          
+          DEPLOY_ENV="${{ steps.detect-env.outputs.deploy_env }}"
+          TARGET_BRANCH="${{ steps.deploy-vars.outputs.target_branch }}"
+          THEME_DIR="${{ steps.deploy-vars.outputs.theme_dir }}"
+          SSH_HOST="${{ steps.deploy-vars.outputs.ssh_host }}"
+          SSH_PORT="${{ steps.deploy-vars.outputs.ssh_port }}"
+          SSH_USER="${{ steps.deploy-vars.outputs.ssh_user }}"
+          
+          # Validate all required variables are set
+          MISSING_VARS=""
+          [ -z "$DEPLOY_ENV" ] && MISSING_VARS="$MISSING_VARS DEPLOY_ENV"
+          [ -z "$TARGET_BRANCH" ] && MISSING_VARS="$MISSING_VARS TARGET_BRANCH"
+          [ -z "$THEME_DIR" ] && MISSING_VARS="$MISSING_VARS THEME_DIR"
+          [ -z "$SSH_HOST" ] && MISSING_VARS="$MISSING_VARS SSH_HOST"
+          [ -z "$SSH_PORT" ] && MISSING_VARS="$MISSING_VARS SSH_PORT"
+          [ -z "$SSH_USER" ] && MISSING_VARS="$MISSING_VARS SSH_USER"
+          
+          if [ -n "$MISSING_VARS" ]; then
+            echo "❌ ERROR: Missing required variables:$MISSING_VARS"
+            echo "   This usually indicates a previous step failed silently."
+            exit 1
+          fi
+          
+          # Sanitize inputs for shell safety
+          # Validate SSH port
+          if [[ ! "$SSH_PORT" =~ ^[0-9]+$ ]]; then
+            echo "❌ ERROR: Invalid SSH port: $SSH_PORT"
+            exit 1
+          fi
+          
+          # Validate SSH host (no shell metacharacters)
+          if [[ "$SSH_HOST" =~ [[:space:]\;\|\&\$\`\"\'] ]]; then
+            echo "❌ ERROR: SSH host contains invalid characters"
+            exit 1
+          fi
+          
+          # Validate SSH user (no shell metacharacters)
+          if [[ "$SSH_USER" =~ [[:space:]\;\|\&\$\`\"\'\@] ]]; then
+            echo "❌ ERROR: SSH user contains invalid characters"
+            exit 1
+          fi
+          
+          # Validate branch name (alphanumeric, slash, dash, dot, underscore)
+          if [[ ! "$TARGET_BRANCH" =~ ^[a-zA-Z0-9/_.-]+$ ]]; then
+            echo "❌ ERROR: Branch name contains invalid characters: $TARGET_BRANCH"
+            exit 1
+          fi
+          
+          # Validate theme directory (must be absolute path, no shell metacharacters)
+          if [[ ! "$THEME_DIR" =~ ^/ ]]; then
+            echo "❌ ERROR: Theme directory must be absolute path: $THEME_DIR"
+            exit 1
+          fi
+          if [[ "$THEME_DIR" =~ [\;\|\&\$\`] ]]; then
+            echo "❌ ERROR: Theme directory contains invalid characters"
+            exit 1
+          fi
+          
+          echo "📦 Deploying to: $DEPLOY_ENV"
+          echo "🌿 Branch: $TARGET_BRANCH"
+          echo "📁 Theme directory: $THEME_DIR"
+          echo "🖥️  Server: $SSH_USER@$SSH_HOST:$SSH_PORT"
+          echo ""
+          
+          # SSH options for better reliability and security
+          SSH_OPTS=(
+            -o "BatchMode=yes"              # Non-interactive mode (fail if password needed)
+            -o "ConnectTimeout=30"          # Connection timeout
+            -o "ServerAliveInterval=15"     # Keep connection alive
+            -o "ServerAliveCountMax=3"      # Max keepalive attempts
+            -o "StrictHostKeyChecking=yes"  # Verify host key
+            -o "PasswordAuthentication=no"  # Only use key auth
+            -o "PubkeyAuthentication=yes"   # Use public key auth
+            -p "$SSH_PORT"
+          )
+          
+          # Retry logic for SSH connection
+          MAX_ATTEMPTS=3
+          ATTEMPT=0
+          SSH_EXIT_CODE=0
+          
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "🔄 Deployment attempt $ATTEMPT of $MAX_ATTEMPTS..."
+            echo ""
+            
+            # Build the remote command safely
+            # Using printf to safely escape the variables for the remote shell
+            REMOTE_CMD=$(printf 'cd %q && ./deploy/pull.sh --branch %q' "$THEME_DIR" "$TARGET_BRANCH")
+            
+            # Run the remote pull script
+            if ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" "bash -lc '$REMOTE_CMD'"; then
+              echo ""
+              echo "✅ Deployment completed successfully!"
+              exit 0
+            else
+              SSH_EXIT_CODE=$?
+              echo ""
+              echo "⚠️ Attempt $ATTEMPT failed with exit code $SSH_EXIT_CODE"
+              
+              # Interpret exit codes
+              case $SSH_EXIT_CODE in
+                255)
+                  echo "   → SSH connection failed"
+                  ;;
+                1)
+                  echo "   → General error in deploy/pull.sh"
+                  ;;
+                2)
+                  echo "   → Missing prerequisites on server"
+                  ;;
+                3)
+                  echo "   → Git error on server"
+                  ;;
+                4)
+                  echo "   → Network error during git operations"
+                  ;;
+                5)
+                  echo "   → Merge conflict detected"
+                  # Don't retry on merge conflicts
+                  echo "   ⚠️ Merge conflict - manual intervention required"
+                  break
+                  ;;
+                *)
+                  echo "   → Unknown error"
+                  ;;
+              esac
+              
+              # Determine if we should retry based on exit code
+              if [ $SSH_EXIT_CODE -eq 255 ] && [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                echo "   SSH connection issue detected. Retrying in 10 seconds..."
+                sleep 10
+              elif [ $SSH_EXIT_CODE -eq 5 ]; then
+                # Don't retry merge conflicts
+                break
+              elif [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                echo "   Retrying in 5 seconds..."
+                sleep 5
+              fi
+            fi
+          done
+          
+          # All attempts failed
+          echo ""
+          echo "❌ ERROR: Deployment failed after $MAX_ATTEMPTS attempts (exit code: $SSH_EXIT_CODE)"
+          echo ""
+          echo "Troubleshooting steps:"
+          echo "  1. Verify SSH connectivity:"
+          echo "     ssh -p $SSH_PORT $SSH_USER@$SSH_HOST"
+          echo ""
+          echo "  2. Check deploy/pull.sh exists and is executable:"
+          echo "     ls -la $THEME_DIR/deploy/pull.sh"
+          echo ""
+          echo "  3. Check deployment logs on server:"
+          echo "     ls -la $THEME_DIR/logs/"
+          echo "     cat $THEME_DIR/logs/pull-*.log | tail -100"
+          echo ""
+          echo "  4. Verify git repository status:"
+          echo "     cd $THEME_DIR && git status"
+          echo ""
+          echo "  5. Check for merge conflicts or lock files:"
+          echo "     ls -la $THEME_DIR/.git/index.lock"
+          echo "     git -C $THEME_DIR diff --check"
+          exit $SSH_EXIT_CODE
+
+      # Summary step - always runs to show deployment status
+      - name: Deployment Summary
+        if: always()
+        shell: bash
+        run: |
+          echo ""
+          echo "═══════════════════════════════════════════════════════════════════════"
+          echo "  DEPLOYMENT SUMMARY"
+          echo "═══════════════════════════════════════════════════════════════════════"
+          echo ""
+          
+          # Check if deployment was skipped
+          SKIP="${{ steps.detect-env.outputs.skip }}"
+          if [ "$SKIP" = "true" ]; then
+            echo "  Status:      ⏭️ SKIPPED (branch not configured for deployment)"
+            echo "  Branch:      ${{ github.ref_name }}"
+            echo "  Trigger:     ${{ github.event_name }}"
+            echo "  Commit:      ${{ github.sha }}"
+          else
+            # Get values with fallbacks for missing outputs
+            DEPLOY_ENV="${{ steps.detect-env.outputs.deploy_env }}"
+            TARGET_BRANCH="${{ steps.deploy-vars.outputs.target_branch }}"
+            SSH_HOST="${{ steps.deploy-vars.outputs.ssh_host }}"
+            THEME_DIR="${{ steps.deploy-vars.outputs.theme_dir }}"
+            
+            echo "  Environment: ${DEPLOY_ENV:-unknown}"
+            echo "  Branch:      ${TARGET_BRANCH:-${{ github.ref_name }}}"
+            echo "  Server:      ${SSH_HOST:-not configured}"
+            echo "  Directory:   ${THEME_DIR:-not configured}"
+            echo "  Trigger:     ${{ github.event_name }}"
+            echo "  Commit:      ${{ github.sha }}"
+            echo "  Actor:       ${{ github.actor }}"
+            echo "  Workflow:    ${{ github.run_id }}"
+            echo "  Run attempt: ${{ github.run_attempt }}"
+            
+            # Show job status
+            echo ""
+            if [ "${{ job.status }}" = "success" ]; then
+              echo "  Status:      ✅ SUCCESS"
+            elif [ "${{ job.status }}" = "failure" ]; then
+              echo "  Status:      ❌ FAILED"
+            elif [ "${{ job.status }}" = "cancelled" ]; then
+              echo "  Status:      ⚠️ CANCELLED"
+            else
+              echo "  Status:      ${{ job.status }}"
+            fi
+          fi
+          
+          echo ""
+          echo "═══════════════════════════════════════════════════════════════════════"
+          echo ""
+          echo "  Workflow URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo ""
