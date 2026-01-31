@@ -1,0 +1,134 @@
+.collection-grid {
+    padding-block: 4rem;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    padding-right: var(--page-gutter-right, 1rem);
+    padding-left: var(--page-gutter-left, 1rem);
+}
+
+.collection-grid__header {
+    text-align: center;
+    margin-bottom: 3rem;
+    max-width: 800px;
+    margin-inline: auto;
+}
+
+.collection-grid__heading {
+    font-size: var(--wp--preset--font-size--h-1) !important;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    color: #000;
+}
+
+.collection-grid__description {
+    color: #555;
+    font-size: var(--wp--preset--font-size--body);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Grid Layout */
+.collection-grid__items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+/* Card Styling */
+.collection-card {
+    background: #E5989B;  
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    aspect-ratio: 3 / 3.5; /* Portrait-ish aspect ratio */
+    isolation: isolate;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.collection-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+}
+
+.collection-card__bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.5s ease;
+    z-index: -2;
+}
+
+.collection-card:hover .collection-card__bg {
+    transform: scale(1.05);
+}
+
+.collection-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.2) 100%);
+    z-index: -1;
+    transition: background 0.3s ease;
+}
+
+.collection-card:hover .collection-card__overlay {
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,0.4) 100%);
+}
+
+.collection-card__content {
+    position: absolute;
+    bottom: 2rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    pointer-events: none; /* Let clicks pass to link */
+}
+
+/* Pill Button */
+.collection-card__pill {      
+    border: 3px solid #fff;
+    border-radius: 16px;
+    padding: 0.6rem 1.5rem;
+    color: #fff;
+    backdrop-filter: blur(4px);
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.collection-card__title {
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: capitalize;
+}
+
+/* Hover Data (Hidden by default) */
+.collection-card__hover-data {
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.collection-card:hover .collection-card__hover-data {
+    height: auto;
+    opacity: 1;
+    transform: translateY(0);
+    margin-top: 0.5rem;
+}
+
+.collection-card__count {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.collection-card__link {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+}

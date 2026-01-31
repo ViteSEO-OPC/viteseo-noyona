@@ -1,0 +1,61 @@
+{
+  "apiVersion": 2,
+  "name": "noyona/brand-carousel",
+  "title": "Brand / Reviews Carousel",
+  "category": "widgets",
+  "icon": "slides",
+  "description": "Scrolling carousel for brands or top reviews.",
+  "supports": {
+    "align": [ "full", "wide" ],
+    "html": false
+  },
+  "attributes": {
+    "items": {
+      "type": "array",
+      "default": []
+    },
+    "speed": {
+      "type": "number",
+      "default": 40
+    },
+    "heading": {
+      "type": "string",
+      "default": "Top Reviews"
+    },
+    "mode": {
+      "type": "string",
+      "default": "reviews"
+    },
+    "minRating": {
+      "type": "number",
+      "default": 0
+    },
+
+    "brandFontSize": {
+      "type": "string",
+      "default": ""
+    },
+    "brandFontWeight": {
+      "type": "string",
+      "default": ""
+    },
+    "brandFontColor": {
+      "type": "string",
+      "default": ""
+    },
+    "paddingTop": {
+      "type": "string",
+      "default": ""
+    },
+    "paddingBottom": {
+      "type": "string",
+      "default": ""
+    },
+    "backgroundColor": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "render": "file:./render.php",
+  "style": "file:./style.css"
+}

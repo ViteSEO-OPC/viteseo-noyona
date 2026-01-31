@@ -1,0 +1,62 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/hero-banner",
+  "version": "1.0.0",
+  "title": "Hero Banner",
+  "category": "design",
+  "icon": "cover-image",
+  "description": "Wide hero banner with left-aligned text and background image.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "eyebrow": {
+      "type": "string",
+      "default": ""
+    },
+    "titleLine": {
+      "type": "string",
+      "default": "Radiate Natural,"
+    },
+    "body": {
+      "type": "string",
+      "default": "Noyona celebrates beauty that feels like you elevated by nature, crafted for everyday wear, and made to last. Discover effortless formulas that care for skin while enhancing your glow."
+    },
+    "searchEnabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "searchPlaceholder": {
+      "type": "string",
+      "default": "Search articles"
+    },
+    "searchPostType": {
+      "type": "string",
+      "default": ""
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Discover Your Glow"
+    },
+    "buttonUrl": {
+      "type": "string",
+      "default": "/shop/"
+    },
+    "backgroundImage": {
+      "type": "string",
+      "default": ""
+    },
+    "backgroundSize": {
+      "type": "string",
+      "default": "cover"
+    },
+    "backgroundPosition": {
+      "type": "string",
+      "default": "center"
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

@@ -1,0 +1,259 @@
+.product-highlight {
+    padding-block: 3rem;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    padding-right: var(--page-gutter-right);
+    padding-left: var(--page-gutter-left);
+}
+
+.product-highlight__header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.product-highlight__heading {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: #000;
+}
+
+.product-highlight__subheading {
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Carousel Layout */
+.product-highlight__carousel-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.product-highlight__track-container {
+    overflow: hidden;
+    width: 100%;
+}
+
+.product-highlight__track {
+    display: flex;
+    transition: transform 0.4s ease-in-out;
+    width: 100%;
+}
+
+.product-highlight__card {
+    /* 
+       Width calculation:
+       If cardsVisible = 3, width = 100% / 3 = 33.333%
+       We subtract gap if we used gap, but here we can use padding inside card or calc.
+    */
+    flex: 0 0 calc(100% / var(--cards-visible));
+    max-width: calc(100% / var(--cards-visible));
+    padding: 0 10px; /* Gutter */
+    box-sizing: border-box;
+}
+
+/* Card Styling */
+.ph-card__media {
+    position: relative;
+    background: #E5989B; /* Pinkish bg from image */
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+    aspect-ratio: 1 / .6;
+}
+
+.ph-card__badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.ph-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1)); */
+}
+
+.ph-card__body {
+    text-align: left;
+}
+
+.ph-card__swatches {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 0.8rem;
+}
+
+.ph-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.ph-card__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: #000;
+}
+
+.ph-card__desc {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+    margin-bottom: 0.8rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ph-card__price-row {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+}
+
+.ph-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #000;
+}
+
+.ph-compare-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.95rem;
+}
+
+.ph-card__rating {
+    color: #ffc107; /* Star color */
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ph-rating-count {
+    color: #777;
+    font-size: 0.8rem;
+    margin-left: 4px;
+}
+
+.ph-card__actions {
+    display: flex;
+    gap: 10px;
+}
+
+.ph-btn-primary {
+    flex: 1;
+    background: #E30B5D;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: opacity 0.2s;
+}
+
+.ph-btn-primary:hover {
+    opacity: 0.8;
+}
+
+.ph-btn-cart {
+    width: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #E30B5D;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.ph-btn-cart:hover {
+    opacity: 0.9;
+}
+
+/* Navigation Buttons */
+.ph-nav-btn {
+    background: transparent;
+    border: none;
+    color: #E30B5D; /* Pinkish arrow */
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0 10px;
+    transition: color 0.2s;
+}
+
+.ph-nav-btn:hover:not(:disabled) {
+    color: #e40071;
+}
+
+.ph-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* Dots */
+.product-highlight__dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 2rem;
+}
+
+.ph-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e68a8a;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.ph-dot.active {
+    opacity: 1;
+    transform: scale(1.2);
+    /* Make it a ring or hollow if desired, but image shows solid/ring mix? 
+       Image shows: active is ring, inactive is solid dots. 
+       Let's try to match: Active = Ring, Inactive = Solid.
+    */
+    background: transparent;
+    border: 2px solid #e68a8a;
+}
+
+/* Responsive tweaks */
+@media (max-width: 720px) {
+    .product-highlight {
+        padding-inline: 1rem;
+    }
+
+    .ph-nav-btn {
+        font-size: 1.6rem;
+    }
+}

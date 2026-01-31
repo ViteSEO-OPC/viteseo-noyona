@@ -1,0 +1,128 @@
+.wp-block-noyona-not-found {
+    position: relative;
+    overflow: hidden;
+    min-height: 50vh;
+    padding: clamp(96px, 14vw, 170px) 24px 120px;
+    background: linear-gradient(135deg, #fdecef 0%, #ffffff 55%, #ffffff 100%);
+    text-align: center;
+    color: #2b2b2b;
+}
+
+.wp-block-noyona-not-found::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 20;
+    width: min(55%, 95%);
+    height: 100%;
+    background-image: var(--noyona-404-watermark);
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: cover;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+.wp-block-noyona-not-found::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #f8a8bc 0%, #ff4d6d 50%, #f8a8bc 100%);
+}
+
+.noyona-404__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding-top: clamp(24px, 6vh, 80px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.noyona-404__title {
+    margin: 0;
+    font-size: 96px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+}
+
+.noyona-404__title-number {
+    color: #1f1f1f;
+}
+
+.noyona-404__title-text {
+    color: #ff4d6d;
+}
+
+.noyona-404__copy {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: #5b4b4b;
+    max-width: 720px;
+}
+
+.noyona-404__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 32px;
+    border-radius: 999px;
+    background: #ff4d6d;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(255, 77, 109, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.noyona-404__cta:hover,
+.noyona-404__cta:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(255, 77, 109, 0.3);
+    background-color: #ff2f57;
+}
+
+@media (max-width: 960px) {
+    .wp-block-noyona-not-found {
+        padding: 100px 20px 110px;
+    }
+
+    .noyona-404__title {
+        font-size: 72px;
+    }
+
+    .wp-block-noyona-not-found::before {
+        width: 65%;
+        opacity: 0.15;
+    }
+}
+
+@media (max-width: 640px) {
+    .wp-block-noyona-not-found {
+        padding: 80px 18px 96px;
+    }
+
+    .noyona-404__title {
+        font-size: 52px;
+    }
+
+    .wp-block-noyona-not-found::before {
+        width: 100%;
+        opacity: 0.1;
+    }
+
+    .noyona-404__copy {
+        font-size: 16px;
+    }
+}

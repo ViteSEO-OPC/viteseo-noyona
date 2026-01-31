@@ -1,0 +1,68 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/blog-slide",
+  "version": "1.0.0",
+  "title": "Blog Slide",
+  "category": "design",
+  "icon": "slides",
+  "description": "Related blogs carousel.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Related Blogs"
+    },
+    "cardsToShow": {
+      "type": "number",
+      "default": 3
+    },
+    "items": {
+      "type": "array",
+      "default": [
+        {
+          "tag": "Noyona Insights",
+          "title": "The Future of Hybrid Beauty",
+          "image": "/wp-content/themes/noyona-childtheme/assets/images/hero-banner.png",
+          "dateDay": "6",
+          "dateLabel": "Jan 2026",
+          "author": "Noyona Essentials",
+          "authorAvatar": "",
+          "shareUrl": "#",
+          "readMoreUrl": "/blog/"
+        },
+        {
+          "tag": "Noyona Insights",
+          "title": "The Future of Hybrid Beauty",
+          "image": "/wp-content/themes/noyona-childtheme/assets/images/hero-banner.png",
+          "dateDay": "6",
+          "dateLabel": "Jan 2026",
+          "author": "Noyona Essentials",
+          "authorAvatar": "",
+          "shareUrl": "#",
+          "readMoreUrl": "/blog/"
+        },
+        {
+          "tag": "Noyona Insights",
+          "title": "The Future of Hybrid Beauty",
+          "image": "/wp-content/themes/noyona-childtheme/assets/images/hero-banner.png",
+          "dateDay": "6",
+          "dateLabel": "Jan 2026",
+          "author": "Noyona Essentials",
+          "authorAvatar": "",
+          "shareUrl": "#",
+          "readMoreUrl": "/blog/"
+        }
+      ],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js",
+  "textdomain": "noyona-childtheme"
+}

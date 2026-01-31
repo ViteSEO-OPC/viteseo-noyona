@@ -1,0 +1,26 @@
+#store-map-picker {
+    border: 1px solid #ccc;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Products Table */
+#store-products-table th {
+    text-align: left;
+}
+
+#store-products-table textarea {
+    width: 100%;
+    min-height: 60px;
+    resize: vertical;
+}
+
+.store-product-image-container {
+    position: relative;
+    min-height: 40px;
+}
+
+.ui-state-highlight {
+    height: 60px;
+    background: #f0f0f1;
+    border: 1px dashed #ccc;
+}

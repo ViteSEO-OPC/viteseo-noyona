@@ -1,0 +1,41 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/founder-section",
+  "title": "Founder Section",
+  "category": "layout",
+  "icon": "id-alt",
+  "description": "Founder image, logo badge, copy and CTA button.",
+  "supports": {
+    "align": [ "wide", "full" ],
+    "anchor": true,
+    "html": false
+  },
+  "attributes": {
+    "image": {
+      "type": "object",
+      "default": {
+        "main": 0,
+        "icon": 0
+      }
+    },
+    "title": {
+      "type": "string",
+      "default": "About the Founder"
+    },
+    "body": {
+      "type": "string",
+      "default": ""
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Learn More"
+    },
+    "buttonUrl": {
+      "type": "string",
+      "default": "#"
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "your-textdomain"
+}

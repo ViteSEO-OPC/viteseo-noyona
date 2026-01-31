@@ -1,0 +1,69 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/mosaic-grid",
+  "version": "1.0.0",
+  "title": "Mosaic Grid",
+  "category": "design",
+  "icon": "grid-view",
+  "description": "Mosaic grid of editorial tiles.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "tiles": {
+      "type": "array",
+      "default": [
+        {
+          "id": "tl",
+          "heading": "Soft Rose",
+          "body": "Layer blush and balm tones inspired by warm mornings."
+        },
+        {
+          "id": "tb",
+          "heading": "Everyday Glow",
+          "body": "Lightweight formulas that blend fast and feel like skin."
+        },
+        {
+          "id": "tg",
+          "heading": "Bold Color",
+          "body": "Pigment-rich statements for lips, eyes, and cheeks."
+        },
+        {
+          "id": "tr",
+          "heading": "Clean Finish",
+          "body": "Polished, balanced, and built for long days."
+        },
+        {
+          "id": "ll",
+          "heading": "Skin-First",
+          "body": "Comforting textures that keep hydration in focus."
+        },
+        {
+          "id": "cc",
+          "heading": "Noyona Mosaic",
+          "body": "A curated mix of essentials designed for Filipino skin tones."
+        },
+        {
+          "id": "rr",
+          "heading": "Vegan Care",
+          "body": "Responsibly made, cruelty-free, and gentle to wear."
+        },
+        {
+          "id": "bb",
+          "heading": "Night Ritual",
+          "body": "Soothe and reset with calm, nourishing layers."
+        },
+        {
+          "id": "bg",
+          "heading": "Community",
+          "body": "Real routines and honest reviews from our circle."
+        }
+      ]
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "editorScript": "file:./view.js",
+  "textdomain": "noyona-childtheme"
+}

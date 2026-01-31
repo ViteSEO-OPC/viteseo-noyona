@@ -1,0 +1,535 @@
+/* =========================
+   Core layout
+========================= */
+
+:root {
+  --slider-accent: #fd593c;
+}
+
+.carousel-block {
+  --cr-title-size: var(--wp--preset--font-size--h-2);
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-block.has-bg {
+  padding-top: 2rem;
+  padding-bottom: 2.25rem;
+}
+
+/* header for this block */
+
+.discover-carousel {
+  width: 100%;
+  font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  position: relative;
+}
+
+.discover-carousel__header-wrap {
+  padding-right: var(--page-gutter-right);
+  padding-left: var(--page-gutter-left);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.discover-carousel__title {
+  margin: 0 0 0.5rem;
+  font-size: 55px;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.1;
+}
+
+.discover-carousel__subtitle {
+    margin: 0;
+    color: #555;
+    max-width: 600px;
+    font-size: var(--wp--preset--font-size--body);
+    line-height: 1.5;
+}
+
+.discover-carousel__filter-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.discover-carousel__filter-btn {
+    background: #fff;
+    border: 1px solid #000;
+    border-radius: 999px;
+    padding: 0.5rem 1.25rem;
+    font-size: var(--wp--preset--font-size--body);
+    color: #000;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.discover-carousel__filter-btn:hover {
+    background: #000;
+    color: #fff;
+}
+
+/* =========================
+   Product card visuals (User Reference)
+========================= */
+
+.product-card {
+  width: 100%;
+  border-radius: 24px;
+  position: relative;
+  /* background: transparent; */
+}
+
+/* Top image block */
+.product-card__media {
+  width: 100%;
+  aspect-ratio: 1 / .5;
+  background: #f7a7b4;
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.product-card__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-card__thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Body uses SVG path as background */
+.product-card__body {
+  position: relative;
+  margin-top: -4px;
+  width: 100%;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.05)); /* Optional shadow for depth */
+}
+
+.product-card__body-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.product-card__body-inner {
+  position: relative;
+  z-index: 1;
+  padding: 16px 18px 22px;
+  right: 0;
+  bottom: 0;
+}
+
+/* Header: title + heart */
+.product-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.product-card__title {
+  margin: 0;
+  font-size: var(--wp--preset--font-size--h-3);
+  color: #111827;
+}
+
+.product-card__favorite {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 40px;
+  color: #f97373;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.product-card__favorite:hover {
+    transform: scale(1.1);
+}
+
+.product-card__description {
+  margin: 0 0 12px;
+  font-size: var(--wp--preset--font-size--body);
+  line-height: 1.5;
+  color: #4b5563;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  /* -webkit-box-orient: vertical; */
+  width: 80%;
+}
+
+.product-card__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.product-card__pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.product-card__price {
+  font-size: 36px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.product-card__price--old {
+  font-size: 24px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.product-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.product-card__stars {
+  font-size: var(--wp--preset--font-size--body);
+  color: #fbbf24;
+}
+
+.product-card__rating-count {
+  font-size: var(--wp--preset--font-size--body);
+  color: #6b7280;
+}
+
+/* Cart icon button */
+.product-card__cart {
+  position: absolute;
+  right: clamp(0.5rem, 2vw, 1rem);
+  bottom: clamp(0.5rem, 2vw, 1rem);
+
+  /* responsive square button */
+  width: clamp(2.6rem, 7vw, 6rem);
+  height: clamp(2.6rem, 7vw, 6rem);
+
+  border-radius: 15px;
+  border: none;
+  background: #ffffff;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+
+  /* keep transform for hover but base it here */
+  transform: translate(20%, 20%);
+  transition:
+    background-color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* icon inside the button (FontAwesome adaptation) */
+.product-card__cart-icon {
+  font-size: clamp(1.2rem, 4vw, 1.9rem);
+  color: #E30B5D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-card__cart:hover {
+  background: #E30B5D;
+  transform: translate(20%, 15%);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+}
+
+.product-card__cart:hover .product-card__cart-icon {
+  color: #ffffff;
+}
+
+
+/* Small-screen tuning */
+@media (max-width: 480px) {
+  .product-card__body-inner {
+    padding: 12px 14px 18px;
+  }
+
+  .product-card__title {
+    font-size: 1rem;
+  }
+
+  .product-card__price {
+    font-size: 1rem;
+  }
+
+  .product-card__cart {
+    width: 3.1rem;
+    height: 3.1rem;
+  }
+}
+
+
+/* =========================
+   Desktop carousel chrome
+========================= */
+
+.generic-carousel {
+  overflow: visible;
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+/* Bootstrap controls with custom round arrows */
+
+.slider-prev,
+.slider-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--slider-accent);
+  border: 1px solid #e9ecef;
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.generic-carousel .carousel-control-prev,
+.generic-carousel .carousel-control-next {
+  width: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 1;
+  z-index: 5;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.25));
+}
+
+.generic-carousel .carousel-control-prev {
+  left: -22px !important;
+}
+
+.generic-carousel .carousel-control-next {
+  right: -22px !important;
+}
+
+.generic-carousel .carousel-control-prev .slider-prev:hover,
+.generic-carousel .carousel-control-next .slider-next:hover {
+  color: #fff !important;
+  background-color: var(--slider-accent) !important;
+}
+
+/* Outer shell that arrows are anchored to */
+.peek-shell {
+  position: relative;
+  /* padding-right: var(--page-gutter-right);
+  padding-left: var(--page-gutter-left); */
+}
+
+/* Indicators */
+
+.generic-carousel .carousel-indicators {
+  bottom: -3rem;
+  z-index: 4;
+}
+
+.generic-carousel .carousel-indicators [data-bs-target] {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #fd593c;
+  opacity: 0.35;
+}
+
+.generic-carousel .carousel-indicators .active {
+  opacity: 1;
+}
+
+/* =========================
+   Mobile / tablet / desktop: peek slider
+========================= */
+
+.peek-slider {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  padding: 0 0.75rem 1.5rem;
+  margin: 0 -0.75rem;
+  scrollbar-width: none;
+}
+
+.peek-slider::-webkit-scrollbar {
+  height: 0;
+  display: none;
+}
+
+.peek-track {
+  display: flex;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.peek-slide {
+  flex: 0 0 85%; /* Mobile: 1 item + peek */
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  display: flex;
+}
+
+/* Dots */
+.peek-indicators {
+  display: none;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.peek-indicators .pi-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fd593c;
+  opacity: 0.35;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.peek-indicators .pi-dot.is-active {
+  opacity: 1;
+}
+
+.peek-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: none;
+  background: #ffffff;
+  color: var(--slider-accent);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 5;
+}
+
+.peek-arrow--prev { left: 3.5rem; }
+.peek-arrow--next { right: 3.5rem; }
+
+/* Show arrows when hovering the shell, not the scroll container */
+.peek-shell:hover .peek-arrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Hide arrows below 1200px stays the same */
+@media (max-width: 1199.98px) {
+  .peek-arrow {
+    display: none;
+  }
+}
+
+.discover-carousel__cta-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.discover-carousel__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 2.75rem;
+  border-radius: 16px;
+  border: none;
+  background: #ff2b7b; /* strong pink */
+  color: #ffffff;
+  font-weight: 600;
+  font-size: var(--wp--preset--font-size--body);
+  text-decoration: none;
+  /* box-shadow: 0 10px 26px rgba(0,0,0,0.18); */
+  transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.discover-carousel__cta-btn:hover {
+  background: #e12068;
+  /* box-shadow: 0 12px 30px rgba(0,0,0,0.24); */
+  transform: translateY(-1px);
+}
+
+/* =========================
+   Responsive tweaks
+========================= */
+
+@media (min-width: 576px) {
+  .peek-slide {
+    flex-basis: 60%; /* Small tablet: 1.5 items */
+  }
+}
+
+@media (min-width: 768px) {
+  .peek-slide {
+    flex-basis: 45%; /* Tablet: 2 items */
+  }
+}
+
+@media (min-width: 992px) {
+  .peek-slide {
+    flex-basis: 31%; /* Desktop: 3 items */
+  }
+}
+
+@media (min-width: 1200px) {
+  .peek-slider {
+    padding: 0 0 2rem;
+    margin: 0;
+    /* keep it scrollable horizontally */
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+
+  .peek-track {
+    flex-wrap: nowrap; /* Force horizontal */
+  }
+
+  .peek-slide {
+    flex-basis: 31%; /* Large Desktop: 3 items */
+  }
+}

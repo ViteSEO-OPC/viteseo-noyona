@@ -1,0 +1,114 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/terms",
+  "version": "1.0.0",
+  "title": "Terms",
+  "category": "design",
+  "icon": "media-document",
+  "description": "Terms & policy layout with table of contents.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Terms & Policy"
+    },
+    "subheading": {
+      "type": "string",
+      "default": "At Noyona Cosmetics and Skin Care Products OPC, we prioritize transparency and trust by providing clear guidelines on how we handle your orders, protect your rights, and ensure a seamless shopping experience."
+    },
+    "tocTitle": {
+      "type": "string",
+      "default": "Terms of Service"
+    },
+    "tocItems": {
+      "type": "array",
+      "default": [
+        { "label": "Overview", "id": "overview" },
+        { "label": "Section 1 - Access and Account", "id": "section-1" },
+        { "label": "Section 2 - Our Products", "id": "section-2" },
+        { "label": "Section 3 - Orders", "id": "section-3" }
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "contentTitle": {
+      "type": "string",
+      "default": "Terms of Service"
+    },
+    "intro": {
+      "type": "array",
+      "default": [
+        "Welcome to Noyona Cosmetics! The terms \"We\", \"Us\", and \"Our\" refer to Noyona Cosmetics. Noyona Cosmetics operates this store and website, including all related information, content, features, tools, products and services in order to provide you, the customer, with a curated shopping experience (the \"Service\").",
+        "The following terms and conditions, together with any policies referenced herein (these \"Terms of Service\" or \"Terms\") describe your rights and responsibilities when you use the Services. Please read these Terms of Service carefully, as they include important information about your legal rights and cover areas such as warranty disclaimers and limitations of liability."
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "sections": {
+      "type": "array",
+      "default": [
+        {
+          "id": "overview",
+          "title": "Overview",
+          "paragraphs": [
+            "By visiting, interacting with or using our Services, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these Terms of Service or Privacy Policy, you should not use or access our Services."
+          ]
+        },
+        {
+          "id": "section-1",
+          "title": "Section 1 - Access and Account",
+          "paragraphs": [
+            "By agreeing to these Terms of Service, you represent that you are at least the age of majority in your state or province of residence, and you have given us your consent to allow any of your minor dependents to use the Services on this site.",
+            "To use the Service, including accessing or browsing our online stores or purchasing any of the products or services we offer, you may be asked to provide certain information, such as your email address, billing, payment, and shipping information. You represent and warrant that the information you provide in our Service is correct, current and complete and that you have all rights necessary to provide this information."
+          ]
+        },
+        {
+          "id": "section-2",
+          "title": "Section 2 - Our Products",
+          "paragraphs": [
+            "We have made every effort to provide an accurate representation of our products and services in our online stores. However, please note that colors or product appearance may differ from how they may appear on your screen due to the type of device used to access the store and your device settings and configuration.",
+            "We do not warrant that the appearance or quality of any products or services purchased by you will meet your expectations or be as described in our store.",
+            "All descriptions of products are subject to change at any time without notice at our sole discretion. We reserve the right to discontinue any product at any time and may limit the quantities of any products that we offer to any person, geographic region or jurisdiction, on a case-by-case basis."
+          ]
+        },
+        {
+          "id": "section-3",
+          "title": "Section 3 - Orders",
+          "paragraphs": [
+            "When you place an order, you are making an offer to purchase. Noyona Cosmetics reserves the right to accept or decline your order for any reason at its discretion. Your order is not accepted until Noyona Cosmetics confirms acceptance and notifies you by email about your order. Please review your order carefully. If we are unable to fulfill the order due to change of circumstances or inventory, we will attempt to notify you by contacting the email, billing address, and/or phone number provided.",
+            "Your purchases are subject to return or exchange solely in accordance with our Refund Policy."
+          ]
+        }
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "policies": {
+      "type": "array",
+      "default": [
+        { "label": "Shipping Policy", "url": "#" },
+        { "label": "Refund Policy", "url": "#" }
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "tabs": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

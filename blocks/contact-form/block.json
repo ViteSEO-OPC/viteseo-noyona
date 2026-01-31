@@ -1,0 +1,90 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/contact-form",
+  "version": "1.0.0",
+  "title": "Contact Form",
+  "category": "design",
+  "icon": "email",
+  "description": "Community contact form with info card and map.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Connect with our <span class=\"contact-form__accent\">Community</span>"
+    },
+    "subheading": {
+      "type": "string",
+      "default": "Stay updated on product drops, ingredient deep dives, application tips, and behind-the-scenes content from our team."
+    },
+    "leftTitle": {
+      "type": "string",
+      "default": "Let's Connect"
+    },
+    "brandImage": {
+      "type": "string",
+      "default": "/wp-content/themes/noyona-childtheme/assets/images/noyona-cosmetic-icon.png"
+    },
+    "socials": {
+      "type": "array",
+      "default": [
+        { "icon": "/wp-content/themes/noyona-childtheme/blocks/contact-form/assets/fb.png", "url": "https://facebook.com", "label": "Facebook" },
+        { "icon": "/wp-content/themes/noyona-childtheme/blocks/contact-form/assets/tiktok.png", "url": "https://tiktok.com", "label": "TikTok" },
+        { "icon": "/wp-content/themes/noyona-childtheme/blocks/contact-form/assets/instagram.png", "url": "https://instagram.com", "label": "Instagram" },
+        { "icon": "/wp-content/themes/noyona-childtheme/blocks/contact-form/assets/lazada.png", "url": "https://www.lazada.com.ph", "label": "Lazada" }
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "contactLabel": {
+      "type": "string",
+      "default": "Our Contact"
+    },
+    "phone": {
+      "type": "string",
+      "default": "0900 000 5555"
+    },
+    "email": {
+      "type": "string",
+      "default": "hello@noyonacosmetics.com"
+    },
+    "locationLabel": {
+      "type": "string",
+      "default": "Our Location"
+    },
+    "address": {
+      "type": "string",
+      "default": "No. 24 City Hall, Bustos, Bulacan, Philippines"
+    },
+    "mapEmbedUrl": {
+      "type": "string",
+      "default": "https://maps.google.com/maps?q=Bustos%20Bulacan%20Philippines&t=&z=13&ie=UTF8&iwloc=&output=embed"
+    },
+    "mapNote": {
+      "type": "string",
+      "default": "Visit our team to explore our newest launches and exclusive store-only offers."
+    },
+    "mapButtonText": {
+      "type": "string",
+      "default": "View Store Locations"
+    },
+    "mapButtonUrl": {
+      "type": "string",
+      "default": "/store-location/"
+    },
+    "formAction": {
+      "type": "string",
+      "default": ""
+    },
+    "formButtonText": {
+      "type": "string",
+      "default": "Submit Message"
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

@@ -1,0 +1,204 @@
+/* Base Trigger */
+.search-expand-trigger {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: inherit;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Overlay — sits under the header and reveals the bar */
+.search-expand-overlay {
+    position: fixed;
+    inset: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    padding-top: 96px;
+    padding-inline: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 9999;
+}
+
+.search-expand-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Container */
+.search-expand-container {
+    width: min(960px, 100%);
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1rem 1.5rem 1.25rem;
+    margin-top: 10px;
+}
+
+/* Input Wrapper */
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid #f0f0f0;
+    border-radius: 999px;
+    padding: 0.6rem 0.9rem 0.6rem 1rem;
+    background: #faf7f4;
+}
+
+.search-icon-input {
+    font-size: 1.2rem;
+    color: #8b5a3c;
+}
+
+.search-expand-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    outline: none;
+    color: #4b2f1e;
+    font-family: inherit;
+}
+
+.search-expand-close {
+    background: transparent;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: #c5a899;
+    transition: color 0.15s ease;
+}
+
+.search-expand-close:hover {
+    color: #8b5a3c;
+}
+
+/* Remove default clear button */
+.search-expand-input::-webkit-search-decoration,
+.search-expand-input::-webkit-search-cancel-button,
+.search-expand-input::-webkit-search-results-button,
+.search-expand-input::-webkit-search-results-decoration {
+    display: none;
+    -webkit-appearance: none;
+}
+
+/* Results */
+.search-expand-results {
+    /* Removed fixed min-height to avoid empty space */
+    min-height: 0;
+}
+
+.search-suggestions-group {
+    display: grid;
+    grid-template-columns: 1fr 1.8fr;
+    gap: 1.5rem;
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+}
+
+.suggestions-column h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #9a7d6a;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.04em;
+}
+
+.suggestions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.suggestions-list li {
+    margin-bottom: 0.65rem;
+}
+
+.suggestions-list a {
+    text-decoration: none;
+    color: #4b2f1e;
+    font-size: 1rem;
+    transition: color 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.suggestions-list a:hover {
+    color: #8b5a3c;
+}
+
+.suggestion-thumb {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Footer */
+.search-expand-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #eee;
+    padding-top: 0.9rem;
+    font-size: 0.9rem;
+    color: #9a7d6a;
+}
+
+.view-all-results {
+    color: #8b5a3c;
+    text-decoration: underline;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Header pushes down slightly when search is open */
+.search-expand-open header.wp-block-template-part {
+    margin-bottom: 18px;
+    transition: margin-bottom 0.2s ease;
+    z-index: 12000;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+    .search-expand-container {
+        width: min(720px, 100%);
+    }
+
+    .search-suggestions-group {
+        grid-template-columns: 1fr;
+    }
+
+    .search-expand-overlay {
+        padding-top: 72px;
+    }
+}
+
+@media (max-width: 540px) {
+    .search-expand-container {
+        padding: 0.9rem 1rem 1rem;
+    }
+
+    .search-input-wrapper {
+        padding-inline: 0.75rem;
+    }
+}

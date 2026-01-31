@@ -1,0 +1,19 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "noyona/location",
+    "version": "1.0.2",
+    "title": "Noyona Location (Store Locator)",
+    "category": "widgets",
+    "icon": "location-alt",
+    "description": "A store locator block with map and list.",
+    "supports": {
+        "html": false,
+        "align": true
+    },
+    "textdomain": "noyona",
+    "editorScript": "file:./script.js",
+    "script": "file:./script.js",
+    "style": "file:./style.css",
+    "render": "file:./render.php"
+}

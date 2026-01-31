@@ -1,0 +1,38 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/product-slide",
+  "version": "1.0.0",
+  "title": "Product Slide",
+  "category": "design",
+  "icon": "slides",
+  "description": "Carousel of best seller product cards.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Our Best Seller"
+    },
+    "subheading": {
+      "type": "string",
+      "default": "Loved for skin-friendly formulas, flattering shades, and all-day wear."
+    },
+    "cardsToShow": {
+      "type": "number",
+      "default": 3
+    },
+    "items": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js",
+  "textdomain": "noyona-childtheme"
+}

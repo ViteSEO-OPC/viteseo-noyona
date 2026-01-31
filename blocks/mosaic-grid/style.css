@@ -1,0 +1,116 @@
+.mosaic-grid {
+    padding: 48px 24px;
+}
+
+.mosaic-grid__grid {
+    display: grid;
+    grid-template-areas:
+        'tl tl tg tr'
+        'll cc cc rr'
+        'll cc cc rr'
+        'bb bg bg rr';
+    gap: 16px;
+}
+
+.mosaic-grid__tile {
+    display: flex;
+    flex-direction: column;
+    padding: 32px;
+}
+
+.mosaic-grid__tile--tl {
+    grid-area: tl;
+    background-color: #EBAAAC;
+    align-items: flex-start;
+}
+
+.mosaic-grid__tile--tb {
+    grid-area: tb;
+    background-color: #FFFFFF;
+    align-items: center;
+}
+
+.mosaic-grid__tile--tg {
+    grid-area: tg;
+    background-color: #E30B5D;
+    align-items: center;
+}
+
+.mosaic-grid__tile--tr {
+    grid-area: tr;
+    background-color: #FFFFFF;
+    align-items: flex-end;
+}
+
+.mosaic-grid__tile--ll {
+    grid-area: ll;
+    background-color: #F5F5F5;
+    align-items: center;
+}
+
+.mosaic-grid__tile--cc {
+    grid-area: cc;
+    background-color: #FFFFFF;
+    padding: 64px;
+    align-items: center;
+}
+
+.mosaic-grid__tile--rr {
+    grid-area: rr;
+    background-color: #EBAAAC;
+    align-items: center;
+}
+
+.mosaic-grid__tile--bb {
+    grid-area: bb;
+    background-color: #333333;
+    align-items: flex-end;
+}
+
+.mosaic-grid__tile--bg {
+    grid-area: bg;
+    background-color: #FFFFFF;
+    align-items: center;
+}
+
+.mosaic-grid__heading {
+    font-family: "Playfair Display", serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: #333333;
+    margin: 0;
+}
+
+.mosaic-grid__body {
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: 16px;
+    font-weight: 400;
+    color: #666666;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .mosaic-grid__grid {
+        grid-template-areas:
+            'tl tr'
+            'tg tg'
+            'll rr'
+            'cc cc'
+            'bb bg';
+    }
+}
+
+@media (max-width: 480px) {
+    .mosaic-grid__grid {
+        grid-template-areas:
+            'tl'
+            'tb'
+            'tg'
+            'tr'
+            'll'
+            'cc'
+            'rr'
+            'bb'
+            'bg';
+    }
+}

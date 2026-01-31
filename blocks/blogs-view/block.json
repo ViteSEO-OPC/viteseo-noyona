@@ -1,0 +1,17 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/blogs-view",
+  "version": "1.0.0",
+  "title": "Blogs View",
+  "category": "design",
+  "icon": "media-document",
+  "description": "Single post view with table of contents.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "render": "file:./render.php",
+  "style": "file:./style.css",
+  "viewScript": "file:./view.js",
+  "textdomain": "noyona-childtheme"
+}

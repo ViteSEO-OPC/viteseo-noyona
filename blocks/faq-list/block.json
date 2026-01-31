@@ -1,0 +1,89 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/faq-list",
+  "version": "1.0.0",
+  "title": "FAQ List",
+  "category": "design",
+  "icon": "editor-help",
+  "description": "FAQ list with categories, search, and accordion items.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "How can we <span class=\"faq-list__accent\">help you?</span>"
+    },
+    "searchPlaceholder": {
+      "type": "string",
+      "default": "Search here"
+    },
+    "searchButtonLabel": {
+      "type": "string",
+      "default": "Search"
+    },
+    "title": {
+      "type": "string",
+      "default": "Frequently Asked Questions"
+    },
+    "subtitle": {
+      "type": "string",
+      "default": "Quick answers to your questions about shipping, returns, and how to get the most out of our products"
+    },
+    "categories": {
+      "type": "array",
+      "default": [
+        { "label": "Product Information" },
+        { "label": "About the Company" },
+        { "label": "Distributors & Reseller Inquiries" },
+        { "label": "Customer Support" }
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "items": {
+      "type": "array",
+      "default": [
+        {
+          "question": "What products are offered under Noyona Cosmetics?",
+          "answer": "",
+          "category": "Product Information"
+        },
+        {
+          "question": "What products are offered under Lovial?",
+          "answer": "",
+          "category": "Product Information"
+        }
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "disclaimers": {
+      "type": "array",
+      "default": [
+        {
+          "title": "Disclaimer",
+          "body": "Product information provided on this website is for general informational purposes only. Individual results may vary. Products are not intended to diagnose, treat, cure, or prevent any disease. Always follow usage instructions on the product label. For individuals with sensitive skin, scalp conditions, or medical concerns, please consult a healthcare professional before use."
+        },
+        {
+          "title": "Hair Color Disclaimer",
+          "body": "Hair color results may vary depending on hair type, condition, and previous treatments. A patch test is strongly recommended prior to full application."
+        }
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "emptyMessage": {
+      "type": "string",
+      "default": "No questions found."
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js",
+  "textdomain": "noyona-childtheme"
+}

@@ -1,0 +1,33 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/collection-grid",
+  "version": "1.0.0",
+  "title": "Collection Grid",
+  "category": "design",
+  "icon": "grid-view",
+  "description": "Grid of collection cards with hover reveal for product count.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Our Collections"
+    },
+    "description": {
+      "type": "string",
+      "default": "Noyona offers makeup, hair, and body care essentials designed for Filipino skin tones, simple, effective, and confidence-boosting every day."
+    },
+    "items": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

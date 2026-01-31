@@ -1,0 +1,33 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/reviews-carousel",
+  "version": "1.0.0",
+  "title": "Top Reviews",
+  "category": "design",
+  "icon": "format-quote",
+  "description": "Infinite scrolling carousel for customer reviews.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "items": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "speed": {
+      "type": "number",
+      "default": 40
+    },
+    "heading": {
+        "type": "string",
+        "default": "Top Reviews"
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

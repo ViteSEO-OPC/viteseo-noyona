@@ -1,0 +1,50 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/coming-soon",
+  "version": "1.0.0",
+  "title": "Coming Soon",
+  "category": "design",
+  "icon": "megaphone",
+  "description": "Coming soon hero with email notify form.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "titlePrefix": {
+      "type": "string",
+      "default": "Something"
+    },
+    "titleHighlight": {
+      "type": "string",
+      "default": "beautiful"
+    },
+    "titleSuffix": {
+      "type": "string",
+      "default": "is blooming"
+    },
+    "message": {
+      "type": "string",
+      "default": "We're perfecting our natural, high-quality formulas to bring you the glow you deserve. Noyona Essentials is leveling up - stay tuned!"
+    },
+    "inputPlaceholder": {
+      "type": "string",
+      "default": "Your Email Address"
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Notify Me"
+    },
+    "formAction": {
+      "type": "string",
+      "default": ""
+    },
+    "backgroundImage": {
+      "type": "string",
+      "default": "http://noyona.local/wp-content/uploads/2026/01/Rectangle-1-scaled.png"
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

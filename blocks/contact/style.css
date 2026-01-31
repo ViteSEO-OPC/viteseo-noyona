@@ -1,0 +1,387 @@
+.noyona-store-locator-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    color: #000;
+}
+
+@media (min-width: 960px) {
+    .noyona-store-locator-wrapper {
+        flex-direction: row;
+        height: 600px;
+        /* Fixed height for desktop map view */
+        /* ADJUST DESKTOP LEFT/RIGHT PADDING HERE */
+        padding: 20px 150px;
+    }
+}
+
+/* Left Content Column */
+.noyona-store-locator-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* For scrolling list */
+    min-width: 400px;
+}
+
+/* Header */
+.nsl-breadcrumbs {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.nsl-breadcrumbs .active {
+    color: #FF4D6D;
+}
+
+.nsl-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    line-height: 1.2;
+}
+
+.nsl-description {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 20px 0;
+}
+
+/* Search Box */
+.nsl-search-box {
+    margin-bottom: 12px;
+}
+
+.nsl-input-wrapper {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.nsl-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    /* Slightly darker to stand out */
+    border-radius: 40px;
+    /* Fully rounded */
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.nsl-search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.nsl-use-location {
+    background: none;
+    border: none;
+    color: #FF4D6D;
+    font-weight: 600;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Tabs */
+.nsl-tabs {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.nsl-tab {
+    background: none;
+    border: none;
+    padding: 8px 0;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    position: relative;
+    font-weight: 500;
+}
+
+.nsl-tab.active {
+    color: #FF4D6D;
+}
+
+.nsl-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #FF4D6D;
+}
+
+/* Results List */
+.nsl-results-list {
+    overflow-y: auto;
+    padding-right: 4px;
+    /* Avoid scrollbar covering content */
+}
+
+/* Scrollbar styling */
+.nsl-results-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nsl-results-list::-webkit-scrollbar-thumb {
+    background-color: #ddd;
+    border-radius: 3px;
+}
+
+.nsl-store-item {
+    border-bottom: 1px solid #eee;
+    padding: 20px 0;
+}
+
+
+.nsl-store-list {
+    /* Container styles */
+}
+
+/* Store Item Card */
+.nsl-store-item {
+    background: transparent;
+    padding: 14px 0;
+    border-radius: 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.nsl-store-item:hover {
+    background-color: #fafafa;
+}
+
+.nsl-store-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    gap: 10px;
+}
+
+.nsl-store-name {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.3;
+    color: #000;
+}
+
+.nsl-card-bookmark {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.nsl-card-bookmark.active svg path {
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.nsl-store-address {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.nsl-store-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.nsl-store-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0;
+    font-size: 13px;
+}
+
+.nsl-status-badge {
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.nsl-status-badge.is-open {
+    background-color: #d1f7c4;
+    color: #0b8043;
+}
+
+.nsl-status-badge.is-closed {
+    background-color: #fde2e1;
+    color: #b3261e;
+}
+
+.nsl-status-badge.is-unknown {
+    background-color: #eee;
+    color: #555;
+}
+
+.nsl-rating-badge {
+    background-color: #fff8e1;
+    /* Light yellow */
+    color: #f9a825;
+    /* Gold/Orange */
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 13px;
+}
+
+.nsl-rating-badge i {
+    margin-right: 4px;
+}
+
+.nsl-meta-text {
+    color: #555;
+    font-size: 13px;
+}
+
+.nsl-hours-text {
+    font-weight: 500;
+    color: #222;
+}
+
+.nsl-meta-sep {
+    color: #bbb;
+    font-weight: 700;
+    font-size: 10px;
+    line-height: 1;
+}
+
+.nsl-get-directions {
+    color: #FF4D6D;
+    /* Brand pink/red */
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 18px;
+    display: inline-block;
+    margin-top: 2px;
+}
+
+.nsl-get-directions:hover {
+    text-decoration: underline;
+}
+
+/* Map Column */
+.nsl-map-container {
+    flex: 1;
+    background-color: #f0f0f0;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    min-height: 400px;
+}
+
+.nsl-map-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Popup UI */
+.nsl-popup {
+    max-width: 260px;
+}
+
+.nsl-popup__store-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.nsl-popup__title {
+    margin-bottom: 6px;
+}
+
+.nsl-popup__line {
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.nsl-popup__hr {
+    margin: 10px 0;
+    border: 0;
+    border-top: 1px solid #e0e0e0;
+}
+
+.nsl-popup__product-list {
+    margin: 6px 0 0 15px;
+    padding: 0;
+}
+
+.nsl-popup__updated {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #666;
+}
+
+.nsl-popup__content {
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* Product image tooltip (image only) */
+.nsl-prod-name {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dotted #666;
+}
+
+
+/* JS-based Tooltip (appended to body) */
+.nsl-product-tooltip {
+    position: fixed;
+    z-index: 10000;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 6px;
+    pointer-events: none;
+    /* Let mouse events pass through to map */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: none;
+    /* hidden by default */
+}
+
+.nsl-product-tooltip img {
+    max-width: 250px;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+}

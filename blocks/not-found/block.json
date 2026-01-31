@@ -1,0 +1,42 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/not-found",
+  "version": "1.0.0",
+  "title": "404",
+  "category": "design",
+  "icon": "warning",
+  "description": "404 not found hero layout.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "titleNumber": {
+      "type": "string",
+      "default": "404"
+    },
+    "titleText": {
+      "type": "string",
+      "default": "Not Found"
+    },
+    "message": {
+      "type": "string",
+      "default": "This page is missing! Like a good glow-up, we're working on it. Head back to Noyona Essentials for more beauty."
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Return to Home"
+    },
+    "buttonUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "backgroundImage": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

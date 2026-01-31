@@ -1,0 +1,46 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/thank-you",
+  "version": "1.0.0",
+  "title": "Your Glow-Up is on the Way!",
+  "category": "design",
+  "icon": "warning",
+  "description": "Your Glow-Up is on the Way!",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "titleNumber": {
+      "type": "string",
+      "default": "Your"
+    },
+    "titleContinue": {
+      "type": "string",
+      "default": "is on the Way!"
+    },
+    "titleText": {
+      "type": "string",
+      "default": "Glow-Up"
+    },
+    "message": {
+      "type": "string",
+      "default": "Your order is confirmed and we’re getting your Noyona Essentials favorites ready for their new home. Thank you for supporting local, natural beauty!"
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Continue Shopping"
+    },
+    "buttonUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "backgroundImage": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

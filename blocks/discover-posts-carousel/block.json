@@ -1,0 +1,38 @@
+{
+  "apiVersion": 2,
+  "name": "noyona/discover-posts-carousel",
+  "title": "Discover Posts Carousel",
+  "description": "Horizontal card carousel of recent blog posts.",
+  "category": "widgets",
+  "icon": "slides",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "sectionTitle": {
+      "type": "string",
+      "default": "Products"
+    },
+    "viewAllLabel": {
+      "type": "string",
+      "default": "Filter by type"
+    },
+    "viewAllUrl": {
+      "type": "string",
+      "default": "#"
+    },
+    "items": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "desktopCols": {
+      "type": "number",
+      "default": 3
+    }
+  },
+  "render": "file:./render.php",
+  "style": "file:./style.css"
+}

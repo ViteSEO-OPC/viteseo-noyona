@@ -1,0 +1,66 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/faq",
+  "version": "1.0.0",
+  "title": "FAQ",
+  "category": "design",
+  "icon": "editor-help",
+  "description": "FAQ section with simple or dropdown layout.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "layout": {
+      "type": "string",
+      "default": "simple"
+    },
+    "heading": {
+      "type": "string",
+      "default": "Frequently Asked Questions"
+    },
+    "subheading": {
+      "type": "string",
+      "default": "Quick answers to your questions about shipping, returns, and how to get the most out of our products"
+    },
+    "items": {
+      "type": "array",
+      "default": [
+        {
+          "question": "Duis aute irure dolor in reprehenderit?",
+          "answer": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        },
+        {
+          "question": "How long does shipping take?",
+          "answer": "Orders typically ship within 2–3 business days, with delivery in 3–7 business days depending on location."
+        },
+        {
+          "question": "Can I return or exchange a product?",
+          "answer": "Yes. Returns are accepted within 7 days as long as the item is unused and in original packaging."
+        },
+        {
+          "question": "Do you offer shade matching help?",
+          "answer": "Send us a message with a selfie in natural light and our team will recommend the best match."
+        },
+        {
+          "question": "Are your products cruelty-free?",
+          "answer": "Yes, all Noyona products are cruelty-free and never tested on animals."
+        }
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "View FAQs"
+    },
+    "buttonUrl": {
+      "type": "string",
+      "default": "/faq/"
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

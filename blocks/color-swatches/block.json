@@ -1,0 +1,30 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/color-swatches",
+  "version": "1.0.0",
+  "title": "Color Swatches",
+  "category": "widgets",
+  "icon": "art",
+  "description": "Row of product color swatches with optional labels.",
+  "attributes": {
+    "colors": {
+      "type": "array",
+      "default": [
+        { "label": "Rose", "value": "#e06c99" },
+        { "label": "Coral", "value": "#f58a8a" },
+        { "label": "Mauve", "value": "#b54f7c" }
+      ]
+    },
+    "align": {
+      "type": "string",
+      "enum": [ "wide", "full" ]
+    }
+  },
+  "supports": {
+    "align": [ "wide", "full" ],
+    "html": false
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

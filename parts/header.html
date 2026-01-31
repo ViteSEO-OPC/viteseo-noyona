@@ -1,0 +1,78 @@
+<!-- wp:group {"layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center"}} -->
+<div class="wp-block-group site-header">
+
+    <!-- LEFT: Logo / Site title -->
+    <!-- wp:site-title {"level":0,"className":"site-logo"} /-->
+
+    <!-- CENTER: nav -->
+    <!-- wp:navigation {"overlayMenu":"mobile","layout":{"type":"flex","justifyContent":"center"},"className":"main-nav"} -->
+    <!-- wp:navigation-link {"label":"Home","type":"custom","url":"/"} /-->
+    <!-- wp:navigation-link {"label":"Shop","type":"page","url":"/shop/"} /-->
+    <!-- wp:navigation-link {"label":"Brand","type":"custom","url":"/brand/"} /-->
+    <!-- wp:navigation-link {"label":"About","type":"custom","url":"/about/"} /-->
+    <!-- /wp:navigation -->
+
+    <!-- RIGHT: Icons -->
+    <!-- wp:group {"layout":{"type":"flex","justifyContent":"right"},"className":"header-icons"} -->
+    <div class="wp-block-group header-icons">
+
+        <!-- Search icon -->
+        <!-- wp:noyona/search-expand /-->
+
+        <!-- Wishlist toggle -->
+        <!-- wp:html -->
+        <button class="header-icon header-wishlist-toggle" type="button">
+            <i class="fa-regular fa-heart"></i>
+        </button>
+        <!-- /wp:html -->
+
+        <!-- WooCommerce mini cart with drawer -->
+        <!-- wp:woocommerce/mini-cart {"hasDrawer":true,"className":"header-mini-cart"} /-->
+
+        <!-- Store Locator -->
+        <!-- wp:html -->
+        <a class="header-icon header-store-link" href="/store-location/">
+            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+        </a>
+        <!-- /wp:html -->
+
+        <!-- Account dropdown (logged-in only) -->
+        <!-- wp:html -->
+        <div class="header-account header-account--logged-in">
+            <button class="header-icon header-account-toggle" type="button" aria-haspopup="menu" aria-expanded="false"
+                aria-controls="header-account-menu">
+                <i class="fa-regular fa-user"></i>
+            </button>
+            <div class="header-account-menu" id="header-account-menu" role="menu" aria-hidden="true">
+                <a href="/my-account/" role="menuitem">Profile</a>
+                <a href="#" role="menuitem">Settings</a>
+                <a href="#" role="menuitem" class="header-account-logout">Logout</a>
+            </div>
+        </div>
+        <!-- /wp:html -->
+
+        <!-- Account icon (logged-out) -->
+        <!-- wp:html -->
+        <a class="header-icon header-account--logged-out" href="/my-account/" aria-label="Log in">
+            <i class="fa-regular fa-user"></i>
+        </a>
+        <!-- /wp:html -->
+
+    </div>
+    <!-- /wp:group -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- Wishlist right-side panel -->
+<!-- wp:html -->
+<div class="wishlist-panel" id="wishlist-panel">
+    <div class="wishlist-panel__overlay"></div>
+    <aside class="wishlist-panel__content">
+        <button class="wishlist-panel__close" type="button">&times;</button>
+        <h2>Your wishlist</h2>
+        <p>This is a placeholder wishlist panel. Later you can hook it up to a wishlist plugin or custom code to show
+            real liked products.</p>
+    </aside>
+</div>
+<!-- /wp:html -->

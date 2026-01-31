@@ -1,0 +1,19 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "noyona/inquiry",
+    "version": "1.0.0",
+    "title": "Noyona Inquiry (FAQ)",
+    "category": "widgets",
+    "icon": "editor-help",
+    "description": "Inquiry and FAQ block.",
+    "supports": {
+        "html": false,
+        "align": true
+    },
+    "textdomain": "noyona",
+    "editorScript": "file:./script.js",
+    "script": "file:./script.js",
+    "style": "file:./style.css",
+    "render": "file:./render.php"
+}

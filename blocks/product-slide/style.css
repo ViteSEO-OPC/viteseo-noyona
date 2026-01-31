@@ -1,0 +1,314 @@
+.product-slide {
+    --ps-accent: #e30b5d;
+    --ps-muted: #666;
+    --ps-card-bg: #fff;
+    --ps-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
+    --ps-media-bg: #f2a0a7;
+    padding-block: 3.5rem;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    padding-right: var(--page-gutter-right);
+    padding-left: var(--page-gutter-left);
+}
+
+.product-slide__header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+.product-slide__heading {
+    font-size: 55px;
+    font-weight: 700;
+    margin: 0 0 0.4rem;
+}
+.product-slide__heading_extend {
+    color: #E30B5D;
+}
+
+.product-slide__subheading {
+    color: var(--ps-muted);
+    font-size: 20px;
+    margin: 0;
+}
+
+.product-slide__carousel {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.product-slide__track-wrap {
+    overflow-x: hidden;
+    overflow-y: visible;
+    width: 100%;
+    height: 610px;
+}
+
+.product-slide__track {
+    display: flex;
+    transition: transform 0.35s ease;
+    width: 100%;
+}
+
+.product-slide__card {
+    flex: 0 0 calc(100% / var(--cards-visible, 3));
+    max-width: calc(100% / var(--cards-visible, 3));
+    padding: 0 12px;
+    box-sizing: border-box;
+}
+
+.ps-card {
+    background: var(--ps-card-bg);
+    border-radius: 16px;
+    box-shadow: var(--ps-shadow);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 16px 16px 28px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.ps-card__media {
+    background: var(--ps-media-bg);
+    border-radius: 16px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 4 / 3;
+    margin-bottom: 0.9rem;
+    overflow: hidden;
+}
+
+.ps-card__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.ps-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 12px;
+}
+
+.ps-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.ps-card__swatches {
+    display: flex;
+    gap: 6px;
+}
+
+.ps-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    display: inline-block;
+}
+
+.ps-card__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+    color: #111;
+}
+
+.ps-card__desc {
+    font-size: 0.88rem;
+    color: var(--ps-muted);
+    line-height: 1.45;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.6em;
+}
+
+.ps-card__meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 0.2rem;
+    flex-wrap: wrap;
+}
+
+.ps-card__price-row {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    margin: 0;
+}
+
+.ps-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #111;
+}
+
+.ps-compare-price {
+    text-decoration: line-through;
+    color: #9a9a9a;
+    font-size: 0.9rem;
+}
+
+.ps-card__rating {
+    color: #f6b400;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    justify-content: flex-end;
+}
+
+.ps-rating-count {
+    color: #888;
+    font-size: 0.78rem;
+}
+
+.ps-card__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 0.6rem;
+}
+
+.ps-btn-primary {
+    flex: 1;
+    background: var(--ps-accent);
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-align: center;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ps-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
+}
+
+.ps-btn-cart {
+    width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ps-accent);
+    color: #fff;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ps-btn-cart:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
+}
+
+.ps-nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--ps-accent);
+    font-size: 1.3rem;
+    padding: 4px;
+    box-shadow: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.ps-nav-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.ps-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.product-slide__dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 2rem;
+}
+
+.ps-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 0;
+    background: transparent;
+    background-image: url('./image/original.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.ps-dot:focus,
+.ps-dot:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+.ps-dot.active {
+    transform: scale(2);
+    background-image: url('./image/active.png');
+}
+
+.product-slide-placeholder {
+    padding: 1.5rem;
+    border: 1px dashed #ccc;
+    border-radius: 12px;
+    text-align: center;
+    color: #777;
+}
+
+@media (max-width: 900px) {
+    .product-slide__heading {
+        font-size: 2rem;
+    }
+
+    .ps-nav-btn {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 720px) {
+    .product-slide {
+        padding-inline: 1rem;
+    }
+
+    .product-slide__carousel {
+        gap: 0.6rem;
+    }
+
+    .ps-card {
+        padding: 14px;
+    }
+}

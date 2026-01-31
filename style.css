@@ -1,0 +1,631 @@
+/*
+Theme Name: noyona-childtheme
+Theme URI: 
+Author: 
+Author URI: 
+Description: 
+Requires at least: 6.9
+Tested up to: 6.9
+Requires PHP: 5.7
+Version: 
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Template: twentytwentyfive
+Text Domain: noyona-childtheme
+Tags: 
+*/
+
+/* Design tokens */
+:root {
+  /* Gutters */
+  --page-gutter-left: clamp(12px, calc(12px + 208 * ((100vw - 360px) / 1080)), 220px);
+  --page-gutter-right: clamp(12px, calc(12px + 208 * ((100vw - 360px) / 1080)), 220px);
+  --page-gutter-inline: var(--page-gutter-left) var(--page-gutter-right);
+
+  /* Content rail */
+  --content-max: 72rem;
+  /* ~1152px; tune as needed */
+
+  /* Utility */
+  --toc-top: 96px;
+
+  --section-mt: 125px;
+
+  /* Colors */
+  --footer-bg: #EBAAAC;
+  /* Approximate pink from image */
+  --footer-text: #1a1a1a;
+  --footer-btn-bg: #E30B5D;
+}
+
+/* Global reset for the top edge */
+html,
+body,
+.wp-block-group {
+  margin: 0;
+  padding: 0;
+}
+
+:where(.wp-site-blocks) > * {
+  margin-block-start: 0;
+}
+
+.wp-site-blocks > .noyona-location-page + footer.wp-block-template-part {
+  margin-block-start: 0;
+}
+
+/* Hide "My account" page title */
+body.woocommerce-account .wp-block-post-title,
+body.woocommerce-account .entry-title {
+  display: none;
+}
+
+/* Footer Styles */
+.noyona-footer {
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+  padding-bottom: 2rem;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+}
+
+.noyona-footer a {
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+
+.noyona-footer a:hover {
+  opacity: 0.7;
+}
+
+/* Values Section */
+.noyona-footer__values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  text-align: center;
+  margin: 0px auto 3rem auto;
+  max-width: 96rem;
+  padding-left: var(--page-gutter-left);
+  padding-right: var(--page-gutter-right);
+}
+
+.noyona-footer__value-item img {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto .5rem auto;
+}
+
+
+.noyona-footer__value-title {
+  font-weight: 700;
+  font-size: var(--wp--preset--font-size--h-3);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.noyona-footer__value-desc {
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+/* Main Footer Content */
+.noyona-footer__main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4rem;
+  justify-content: space-between;
+  margin: 0px auto 2rem auto;
+  max-width: 96rem;
+  padding-left: var(--page-gutter-left);
+  padding-right: var(--page-gutter-right);
+}
+
+.noyona-footer__newsletter {
+  flex: 1 1 400px;
+  max-width: 550px;
+}
+
+.noyona-footer__newsletter h2 {
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+}
+
+.noyona-footer__form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.noyona-footer__input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 0.95rem;
+  color: inherit;
+  outline: none;
+}
+
+.noyona-footer__input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.noyona-footer__btn {
+  padding: 12px 24px;
+  background: var(--footer-btn-bg);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s;
+  width: 107px;
+}
+
+.noyona-footer__btn:hover {
+  filter: brightness(1.1);
+}
+
+.noyona-footer__newsletter p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0.8;
+  width: 85%;
+}
+
+/* Links Section */
+.noyona-footer__links {
+  flex: 1 1 400px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.noyona-footer__col {
+  padding-left: 2rem;
+}
+
+.noyona-footer__col-title {
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  display: block;
+  text-transform: uppercase;
+  font-size: var(--wp--preset--font-size--body);
+  letter-spacing: 0.05em;
+}
+
+.noyona-footer__nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.noyona-footer__nav li {
+  margin-bottom: 0.75rem;
+}
+
+.noyona-footer__nav a {
+  font-size: var(--wp--preset--font-size--body);
+  font-weight: 400;
+}
+
+/* Bottom Section */
+.noyona-footer__bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  font-size: var(--wp--preset--font-size--body);
+  font-weight: 600;
+  color: #000;
+  opacity: 0.9;
+  margin: 0px auto 0px auto;
+  max-width: 96rem;
+  padding-left: var(--page-gutter-left);
+  padding-right: var(--page-gutter-right);
+}
+
+.noyona-footer__payment-icons {
+  display: flex;
+  gap: 1rem;
+  font-size: 40px;
+}
+
+
+.noyona-footer__payment-icons i {
+  color: #fff;
+}
+
+.noyona-footer__social-icons {
+  display: flex;
+  gap: 1rem;
+}
+
+.noyona-footer__social-btn {
+  width: 36px;
+  height: 36px;
+  background: black;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  transition: transform 0.2s;
+}
+
+.noyona-footer__social-btn:hover {
+  transform: translateY(-2px);
+}
+
+.noyona-footer__social-btn i {
+  color: #EBAAAC;
+}
+
+@media (max-width: 768px) {
+  .noyona-footer__main {
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .noyona-footer__links {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .noyona-footer__newsletter {
+    text-align: center;
+  }
+
+  .noyona-footer__form {
+    max-width: 400px;
+    margin: 0 auto 1.5rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .noyona-footer__btn {
+    width: 100%;
+  }
+}
+
+/* Main footer: 4 columns = 40% / 20% / 20% / 20% */
+.noyona-footer__main {
+  display: grid;
+  grid-template-columns: 40% 20% 20% 20%;
+  align-items: flex-start;
+  gap: 2rem;
+  margin: 0 auto 2rem auto;
+  max-width: 96rem;
+  padding-left: var(--page-gutter-left);
+  padding-right: var(--page-gutter-right);
+}
+
+/* Remove internal grid and let its children become grid items */
+.noyona-footer__links {
+  display: contents;
+  /* wrapper disappears for layout */
+}
+
+/* Optional: make headings line up nicely */
+.noyona-footer__newsletter h2,
+.noyona-footer__col-title {
+  margin-top: 0;
+}
+
+/* Responsive: stack on mobile */
+@media (max-width: 768px) {
+  .noyona-footer__main {
+    display: block;
+  }
+
+  .noyona-footer__links {
+    display: block;
+  }
+
+  .noyona-footer__col {
+    margin-top: 2rem;
+  }
+}
+
+/* Contact Banner */
+.contact-banner {
+  padding-top: 2rem;
+  padding-left: var(--page-gutter-left);
+  padding-right: var(--page-gutter-right);
+}
+
+/* Default: scale down to fit screen without cropping */
+.contact-banner__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100vh;
+  object-fit: contain;
+}
+
+/* Register page */
+.noyona-register {
+  display: flex;
+  justify-content: center;
+  padding: 64px 16px;
+  background: linear-gradient(135deg, #e8f1f6 0%, #f4f7fb 100%);
+}
+
+.noyona-register,
+.noyona-register * {
+  box-sizing: border-box;
+}
+
+.noyona-register-card {
+  width: min(546px, 100%);
+  background: #fff;
+  border: 1px solid #e6eaf0;
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(35, 50, 70, 0.12);
+  padding: 32px 28px;
+  text-align: center;
+  font-family: var(--wp--preset--font-family--proxima-nova, sans-serif);
+}
+
+.noyona-register-title {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2f3a45;
+}
+
+.noyona-register-message {
+  margin: 12px 0 0 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-align: left;
+  background: #f0f4ff;
+  color: #2d3b5f;
+}
+
+.noyona-register-message.is-error {
+  background: #fff1f0;
+  color: #a32a2a;
+  border: 1px solid #f4c7c3;
+}
+
+.noyona-register-message.is-success {
+  background: #eef9f1;
+  color: #245e3c;
+  border: 1px solid #ccead7;
+}
+
+.noyona-register-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.noyona-register-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.noyona-register-field {
+  position: relative;
+  min-width: 0;
+}
+
+.noyona-register-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e1e6ed;
+  border-radius: 6px;
+  background: #f8fafc;
+  font-size: 0.95rem;
+  color: #2f3a45;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.noyona-register-field input::placeholder {
+  color: #a0a8b2;
+}
+
+.noyona-register-field input:focus {
+  border-color: #8fb3f4;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(143, 179, 244, 0.25);
+}
+
+
+.noyona-register-terms {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 0.75rem;
+  color: #6b7681;
+  text-align: left;
+}
+
+.noyona-register-terms input {
+  margin-top: 2px;
+  accent-color: #7f95e6;
+}
+
+.noyona-register-terms a {
+  color: #2f3a45;
+  font-weight: 600;
+}
+
+.noyona-register-submit {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #7f95e6 0%, #66e1d8 100%);
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.2s;
+}
+
+.noyona-register-submit:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.noyona-register-submit:active {
+  transform: translateY(0);
+}
+
+.noyona-register-login {
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: #6a7580;
+}
+
+.noyona-register-login a {
+  color: #2f3a45;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .noyona-register-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.woocommerce form.woocommerce-form-login {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "username username"
+    "password password"
+    "remember remember"
+    "login register"
+    "lost lost";
+  column-gap: 16px;
+  row-gap: 16px;
+  align-items: center;
+}
+
+.woocommerce form.woocommerce-form-login>p {
+  margin: 0;
+}
+
+.woocommerce form.woocommerce-form-login>p.woocommerce-form-row:nth-of-type(1) {
+  grid-area: username;
+}
+
+.woocommerce form.woocommerce-form-login>p.woocommerce-form-row:nth-of-type(2) {
+  grid-area: password;
+}
+
+.woocommerce form.woocommerce-form-login>p.form-row:not(.woocommerce-form-row) {
+  display: contents;
+}
+
+.woocommerce form.woocommerce-form-login .woocommerce-form-login__rememberme {
+  grid-area: remember;
+  justify-self: start;
+  align-self: center;
+}
+
+.woocommerce form.woocommerce-form-login .woocommerce-form-login__submit {
+  grid-area: login;
+  justify-self: start;
+}
+
+.woocommerce form.woocommerce-form-login>.noyona-login-register-link {
+  grid-area: register;
+  text-align: right;
+  justify-self: end;
+  align-self: center;
+}
+
+.woocommerce form.woocommerce-form-login>.woocommerce-LostPassword {
+  grid-area: lost;
+}
+
+.woocommerce form.woocommerce-form-login>.noyona-login-register-link a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 0;
+  background: #1f5eff;
+  border: 1px solid #1f5eff;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1;
+  transition: filter 0.2s;
+}
+
+.woocommerce form.woocommerce-form-login>.noyona-login-register-link a:hover {
+  filter: brightness(1.05);
+}
+
+.woocommerce form.woocommerce-form-login .woocommerce-form-login__submit {
+  background: #e53935;
+  border-color: #e53935;
+  color: #fff;
+  border-radius: 0;
+  padding: 12px 24px;
+}
+
+.woocommerce form.woocommerce-form-login .woocommerce-form-login__submit:hover {
+  filter: brightness(1.05);
+}
+
+@media (max-width: 640px) {
+  .woocommerce form.woocommerce-form-login {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "username"
+      "password"
+      "remember"
+      "login"
+      "register"
+      "lost";
+  }
+
+  .woocommerce form.woocommerce-form-login>p.form-row:not(.woocommerce-form-row),
+  .woocommerce form.woocommerce-form-login>.woocommerce-LostPassword,
+  .woocommerce form.woocommerce-form-login>.noyona-login-register-link {
+    grid-column: 1 / -1;
+    text-align: left;
+    justify-self: start;
+    align-self: start;
+  }
+}
+
+.noyona-account-favorites {
+  margin-top: 24px;
+}
+
+.noyona-account-favorites-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+}
+
+.noyona-account-favorites-list li {
+  margin-bottom: 6px;
+}
+
+.noyona-account-favorites-list a {
+  text-decoration: underline;
+}

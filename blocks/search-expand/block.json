@@ -1,0 +1,16 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/search-expand",
+  "version": "1.0.0",
+  "title": "Search Expand",
+  "category": "widgets",
+  "icon": "search",
+  "description": "A search block that expands on click with live suggestions.",
+  "supports": {
+    "html": false
+  },
+  "textdomain": "noyona-childtheme",
+  "style": "file:./style.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php"
+}

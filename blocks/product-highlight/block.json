@@ -1,0 +1,38 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/product-highlight",
+  "version": "1.0.0",
+  "title": "Product Highlight",
+  "category": "design",
+  "icon": "star-filled",
+  "description": "Carousel of product cards with configurable visible count.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Our Best Seller"
+    },
+    "subheading": {
+      "type": "string",
+      "default": "Loved for skin-friendly formulas, flattering shades, and all-day wear."
+    },
+    "cardsToShow": {
+      "type": "number",
+      "default": 3
+    },
+    "items": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js",
+  "textdomain": "noyona-childtheme"
+}

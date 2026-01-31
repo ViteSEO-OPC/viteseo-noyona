@@ -1,0 +1,89 @@
+{
+  "apiVersion": 2,
+  "name": "noyona/phone-video-reviews",
+  "title": "Phone Video Reviews",
+  "category": "widgets",
+  "icon": "smartphone",
+  "description": "Row of iPhone-style frames containing YouTube videos.",
+  "supports": {
+    "align": ["wide", "full"],
+    "anchor": true,
+    "html": false
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+    "attributes": {
+    "align": {
+      "type": "string",
+      "default": "wide"
+    },
+    "heading": {
+      "type": "string",
+      "default": "Trending Reviews"
+    },
+    "subheading": {
+      "type": "string",
+      "default": ""
+    },
+
+    "carouselAutoPlay": {
+      "type": "boolean",
+      "default": false
+    },
+    "carouselAutoPlaySeconds": {
+      "type": "number",
+      "default": 5
+    },
+
+    "cards": {
+      "type": "array",
+      "default": [
+        {
+          "label": "Review 1",
+          "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        },
+        {
+          "label": "Review 2",
+          "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        },
+        {
+          "label": "Review 3",
+          "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "videoUrl": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "example": {
+    "attributes": {
+      "align": "wide",
+      "heading": "Trending Reviews",
+      "subheading": "Real users, real results.",
+      "cards": [
+        {
+          "label": "Before & After",
+          "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        },
+        {
+          "label": "Daily Routine",
+          "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        },
+        {
+          "label": "Glow Tips",
+          "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        }
+      ]
+    }
+  },
+  "textdomain": "childtheme"
+}
