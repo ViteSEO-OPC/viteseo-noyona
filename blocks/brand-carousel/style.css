@@ -83,9 +83,10 @@
 
 .review-card {
     background: #ffffff;
-    border-radius: 16px;
+    border: 1px solid #EAEAEA;
+    border-radius: 24px;
     padding: 2rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 17px 23px 8px 0 rgba(0, 0, 0, 0.00), 11px 15px 7px 0 rgba(0, 0, 0, 0.01), 6px 8px 6px 0 rgba(0, 0, 0, 0.05), 3px 4px 5px 0 rgba(0, 0, 0, 0.09), 1px 1px 3px 0 rgba(0, 0, 0, 0.10);
     width: 380px;
     flex-shrink: 0;
     display: flex;
@@ -192,7 +193,7 @@
         transform: translateX(0);
     }
     100% {
-        transform: translateX(-50%);
+        transform: translateX(-25%);
     }
 }
 

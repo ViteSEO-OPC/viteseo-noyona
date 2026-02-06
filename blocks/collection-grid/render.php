@@ -23,7 +23,18 @@ if ( empty( $items ) ) {
     
     <div class="collection-grid__header">
         <?php if ( $atts['heading'] ) : ?>
-            <h2 class="collection-grid__heading"><?php echo esc_html( $atts['heading'] ); ?></h2>
+            <?php
+                $heading = (string) $atts['heading'];
+                $heading_html = esc_html( $heading );
+                $pos = stripos( $heading, 'Collections' );
+                if ( $pos !== false ) {
+                    $before = substr( $heading, 0, $pos );
+                    $match  = substr( $heading, $pos, strlen( 'Collections' ) );
+                    $after  = substr( $heading, $pos + strlen( 'Collections' ) );
+                    $heading_html = esc_html( $before ) . '<span class="collection-grid__heading-accent">' . esc_html( $match ) . '</span>' . esc_html( $after );
+                }
+            ?>
+            <h2 class="collection-grid__heading"><?php echo $heading_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
         <?php endif; ?>
         <?php if ( $atts['description'] ) : ?>
             <p class="collection-grid__description"><?php echo esc_html( $atts['description'] ); ?></p>

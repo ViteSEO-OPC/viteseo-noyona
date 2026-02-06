@@ -1,394 +1,410 @@
 .product-slide {
-    --ps-accent: #e30b5d;
-    --ps-muted: #525252;
-    --ps-card-bg: #fff;
-    --ps-shadow: 23px 114px 33px 0 rgba(0, 0, 0, 0.00), 15px 73px 30px 0 rgba(0, 0, 0, 0.01), 8px 41px 25px 0 rgba(0, 0, 0, 0.03), 4px 18px 19px 0 rgba(0, 0, 0, 0.04), 1px 5px 10px 0 rgba(0, 0, 0, 0.05);
-    --ps-media-bg: #f2a0a7;
-    --ps-radius-card: 20px;
-    --ps-radius-media: 20px;
-    --ps-radius-cta: 16px;
-    --ps-cta-h: clamp(44px, 5vw, 56px);
-    --ps-nav-w: clamp(44px, 6vw, 60px);
-    --ps-nav-h: clamp(72px, 10vw, 120px);
-    --ps-card-w: clamp(280px, 30vw, 466px);
-    --ps-card-h: clamp(460px, 56vw, 665px);
-    --ps-media-w: clamp(240px, 26vw, 423px);
-    padding-block: clamp(2rem, 4vw, 3.5rem);
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    padding-right: var(--page-gutter-right);
-    padding-left: var(--page-gutter-left);
+  --ps-accent: #e30b5d;
+  --ps-muted: #525252;
+  --ps-card-bg: #fff;
+  --ps-shadow:
+    23px 114px 33px 0 rgba(0, 0, 0, 0), 15px 73px 30px 0 rgba(0, 0, 0, 0.01),
+    8px 41px 25px 0 rgba(0, 0, 0, 0.03), 4px 18px 19px 0 rgba(0, 0, 0, 0.04),
+    1px 5px 10px 0 rgba(0, 0, 0, 0.05);
+  --ps-media-bg: #f2a0a7;
+  --ps-radius-card: 20px;
+  --ps-radius-media: 20px;
+  --ps-radius-cta: 16px;
+  --ps-cta-h: clamp(44px, 5vw, 56px);
+  --ps-nav-w: clamp(44px, 6vw, 60px);
+  --ps-nav-h: clamp(72px, 10vw, 120px);
+  --ps-card-w: clamp(280px, 30vw, 466px);
+  --ps-card-h: clamp(460px, 56vw, 665px);
+  --ps-media-w: clamp(240px, 26vw, 423px);
+  padding-block: clamp(2rem, 4vw, 3.5rem);
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  padding-right: var(--page-gutter-right);
+  padding-left: var(--page-gutter-left);
 }
 
 .product-slide__header {
-    text-align: center;
-    margin-bottom: 2.5rem;
+  text-align: center;
+  margin-bottom: 0.8rem;
 }
 .product-slide__heading {
-    color: #000;
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    font-size: clamp(32px, 4.2vw, 55px);
-    font-style: normal;
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -2.75px;
-    margin: 0 0 0.4rem;
+  color: #000;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(32px, 4.2vw, 55px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -2.75px;
+  margin: 0 0 0.4rem;
 }
 .product-slide__heading_extend,
 .product-slide__heading-accent {
-    color: #E30B5D;
+  color: #e30b5d;
 }
 
 .product-slide__subheading {
-    color: var(--ps-muted);
-    text-align: center;
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    font-size: clamp(16px, 1.8vw, 20px);
-    font-style: normal;
-    font-weight: 400;
-    line-height: 1.3;
-    letter-spacing: -1px;
-    margin: 0;
+  color: var(--ps-muted);
+  text-align: center;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(16px, 1.8vw, 20px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: -1px;
+  margin: 0;
 }
 
 .product-slide__carousel {
-    position: relative;
-    /* Reserve space for prev/next buttons without adding padding to the clipping area */
-    padding-inline: var(--ps-nav-w);
+  position: relative;
+  /* Reserve space for prev/next buttons without adding padding to the clipping area */
+  padding-inline: var(--ps-nav-w);
 }
 
 .product-slide__track-wrap {
-    overflow-x: hidden;
-    overflow-y: visible;
-    width: 100%;
-    padding-block: clamp(14px, 2vw, 28px);
-    box-sizing: border-box;
+  overflow: hidden;
+  width: 100%;
+  padding-block: 10px 40px;
+  box-sizing: border-box;
 }
 
 .product-slide__track {
-    display: flex;
-    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform;
-    width: 100%;
-    align-items: stretch;
+  display: flex;
+  transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+  width: 100%;
+  align-items: stretch;
 }
 
 .product-slide__card {
-    flex: 0 0 calc(100% / var(--cards-visible, 3));
-    max-width: calc(100% / var(--cards-visible, 3));
-    padding: 0 14px;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
+  flex: 0 0 calc(100% / var(--cards-visible, 3));
+  max-width: calc(100% / var(--cards-visible, 3));
+  padding: 0 14px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
 }
 
 .ps-card {
-    background: var(--ps-card-bg);
-    border-radius: var(--ps-radius-card);
-    box-shadow: var(--ps-shadow);
-    border: 2px solid #f2a0a77a;
-    padding: 18px 18px 18px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    width: min(100%, var(--ps-card-w));
-    height: var(--ps-card-h);
-    transition: transform 220ms ease, box-shadow 220ms ease;
+  background: var(--ps-card-bg);
+  border-radius: var(--ps-radius-card);
+  box-shadow: var(--ps-shadow);
+  border: none;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: min(100%, var(--ps-card-w));
+  height: 100%;
+  transition: transform 220ms ease, box-shadow 220ms ease;
 }
 
 .ps-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
 }
 
 .ps-card__media {
-    background: var(--ps-media-bg);
-    border-radius: var(--ps-radius-media);
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: min(100%, var(--ps-media-w));
-    aspect-ratio: 423 / 318;
-    margin-bottom: 0.9rem;
-    overflow: hidden;
-    margin-inline: auto;
+  background: var(--ps-media-bg);
+  border-radius: var(--ps-radius-media);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 423 / 318;
+  margin-bottom: 0.8rem;
+  overflow: hidden;
+  margin-inline: auto;
 }
 
 .ps-card__badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid #fff;
-    color: #fff;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .ps-card__image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0;
 }
 
 .ps-card__body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-    flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
 }
 
 .ps-card__swatches {
-    display: flex;
-    gap: 6px;
+  display: flex;
+  gap: 6px;
 }
 
 .ps-swatch {
-    width: 22px;
-    height: 16px;
-    border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    display: inline-block;
+  width: 34px;
+  height: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  display: inline-block;
 }
 
 .ps-card__title {
-    color: #000;
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    font-size: clamp(18px, 1.8vw, 24px);
-    font-style: normal;
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -1.2px;
-    margin: 0;
+  color: #000;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(18px, 1.8vw, 24px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -1.2px;
+  margin: 0;
 }
 
 .ps-card__desc {
-    color: #525252;
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    font-size: clamp(16px, 1.7vw, 20px);
-    font-style: normal;
-    font-weight: 600;
-    line-height: 1.35;
-    letter-spacing: -1px;
-    margin: 0;
-    display: -webkit-box;
-    line-clamp: 2;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 2.6em;
+  color: #525252;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(16px, 1.7vw, 20px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -1px;
+  margin: 0;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  /* -webkit-box-orient: vertical; */
+  overflow: hidden;
+  min-height: 2.6em;
 }
 
 .ps-card__meta-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 0.2rem;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  flex-wrap: wrap;
 }
 
 .ps-card__price-row {
-    display: flex;
-    gap: 10px;
-    align-items: baseline;
-    margin: 0;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin: 0;
 }
 
 .ps-price {
-    color: #000;
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    font-size: clamp(22px, 2.6vw, 36px);
-    font-style: normal;
-    font-weight: 700;
-    line-height: 1.1;
+  color: #000;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(22px, 2.6vw, 36px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
 .ps-compare-price {
-    text-decoration: line-through;
-    color: #B1B1B1;
-    text-align: center;
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    font-size: clamp(16px, 1.8vw, 24px);
-    font-style: normal;
-    font-weight: 600;
-    line-height: 1.1;
-    letter-spacing: -1.2px;
+  text-decoration: line-through;
+  color: #b1b1b1;
+  text-align: center;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(16px, 1.8vw, 24px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -1.2px;
 }
 
 .ps-card__rating {
-    color: #f6b400;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-left: auto;
-    justify-content: flex-end;
+  color: #f6b400;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  justify-content: flex-end;
 }
 
 .ps-rating-count {
-    color: #888;
-    font-size: 0.78rem;
+  color: #888;
+  font-size: 0.78rem;
 }
 
 .ps-card__actions {
-    display: flex;
-    gap: 10px;
-    margin-top: auto;
-    padding-top: 12px;
+  display: flex;
+  gap: 10px;
+  margin-top: 0;
+  padding-top: 12px;
 }
 
 .ps-btn-primary {
-    flex: 1;
-    background: var(--ps-accent);
-    color: #fff;
-    text-decoration: none;
-    padding: 0 18px;
-    height: var(--ps-cta-h);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--ps-radius-cta);
-    font-weight: 600;
-    text-align: center;
-    font-size: clamp(13px, 1.3vw, 16px);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    transition: transform 200ms ease, box-shadow 200ms ease, filter 200ms ease;
-    outline: none;
+  flex: 1;
+  background: var(--ps-accent);
+  color: #fff;
+  text-decoration: none;
+  padding: 0 18px;
+  height: var(--ps-cta-h);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ps-radius-cta);
+  font-weight: 600;
+  text-align: center;
+  font-size: clamp(13px, 1.3vw, 16px);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    filter 200ms ease;
+  outline: none;
 }
 
 .ps-btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
 
 .ps-btn-primary:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 .ps-btn-cart {
-    width: var(--ps-cta-h);
-    height: var(--ps-cta-h);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--ps-accent);
-    color: #fff;
-    border-radius: var(--ps-radius-cta);
-    text-decoration: none;
-    transition: transform 0.2s, box-shadow 0.2s;
-    outline: none;
+  width: var(--ps-cta-h);
+  height: var(--ps-cta-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ps-accent);
+  color: #fff;
+  border-radius: var(--ps-radius-cta);
+  text-decoration: none;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  outline: none;
 }
 
 .ps-btn-cart:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
 
 .ps-nav-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: var(--ps-nav-w);
-    height: var(--ps-nav-h);
-    border-radius: 0;
-    border: none;
-    background: transparent;
-    color: var(--ps-accent);
-    font-size: clamp(18px, 2.6vw, 28px);
-    padding: 0;
-    box-shadow: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s, opacity 0.2s;
-    z-index: 2;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--ps-nav-w);
+  height: var(--ps-nav-h);
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: var(--ps-accent);
+  font-size: clamp(32px, 4vw, 56px);
+  padding: 0;
+  box-shadow: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
+  z-index: 2;
 }
 
 .ps-nav-btn:hover:not(:disabled) {
-    transform: translateY(-50%) translateY(-1px);
+  transform: translateY(-50%) translateY(-1px);
 }
 
-.ps-prev { left: -10px; }
-.ps-next { right: -10px; }
+.ps-prev {
+  left: -40px;
+}
+.ps-next {
+  right: -40px;
+}
 
 .ps-nav-btn:disabled {
-    opacity: 0.4;
-    cursor: default;
+  opacity: 0.4;
+  cursor: default;
 }
 
 .product-slide__dots {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: clamp(1rem, 2.2vw, 2rem);
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: clamp(1rem, 2.2vw, 2rem);
 }
 
 .ps-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 0;
-    background: transparent;
-    background-image: url('./image/original.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.2s;
+  width: 10px;
+  height: 10px;
+  border-radius: 0;
+  background: transparent;
+  background-image: url("./image/original.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
 }
 
 .ps-dot:focus,
 .ps-dot:focus-visible {
-    outline: none;
-    box-shadow: none;
+  outline: none;
+  box-shadow: none;
 }
 
 .ps-dot.active {
-    transform: scale(2);
-    background-image: url('./image/active.png');
+  transform: scale(2);
+  background-image: url("./image/active.png");
 }
 
 .product-slide-placeholder {
-    padding: 1.5rem;
-    border: 1px dashed #ccc;
-    border-radius: 12px;
-    text-align: center;
-    color: #777;
-}
-
-@media (max-width: 900px) {
+  padding: 1.5rem;
+  border: 1px dashed #ccc;
+  border-radius: 12px;
+  text-align: center;
+  color: #777;
 }
 
 @media (max-width: 720px) {
-    .product-slide {
-        padding-inline: 1rem;
-    }
+  .product-slide {
+    padding-inline: 1rem;
+  }
 
-    .ps-card {
-        padding: 14px;
-        height: auto;
-    }
+  .ps-card {
+    padding: 16px;
+    height: auto;
+  }
 
-    .ps-prev { left: -6px; }
-    .ps-next { right: -6px; }
+  .ps-prev {
+    left: -10px;
+  }
+  .ps-next {
+    right: -10px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .product-slide__track,
-    .ps-card,
-    .ps-btn-primary,
-    .ps-btn-cart,
-    .ps-nav-btn,
-    .ps-dot {
-        transition: none !important;
-    }
+  .product-slide__track,
+  .ps-card,
+  .ps-btn-primary,
+  .ps-btn-cart,
+  .ps-nav-btn,
+  .ps-dot {
+    transition: none !important;
+  }
 }

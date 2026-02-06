@@ -42,6 +42,11 @@
   font-weight: 700;
   color: #000;
   line-height: 1.1;
+  letter-spacing: -2.75px;
+}
+
+.discover-carousel__title-accent {
+  color: #E30B5D;
 }
 
 .discover-carousel__subtitle {
@@ -84,7 +89,10 @@
   width: 100%;
   border-radius: 24px;
   position: relative;
-  /* background: transparent; */
+  /* Make sure card stretches to full height of parent slide */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Top image block */
@@ -122,6 +130,9 @@
   margin-top: -4px;
   width: 100%;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.05)); /* Optional shadow for depth */
+  flex: 1; /* Grow to fill space */
+  display: flex;
+  flex-direction: column;
 }
 
 .product-card__body-bg {
@@ -140,6 +151,9 @@
   padding: 16px 18px 22px;
   right: 0;
   bottom: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 /* Header: title + heart */
@@ -187,6 +201,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+  margin-top: auto;
 }
 
 .product-card__pricing {
@@ -227,12 +242,12 @@
 /* Cart icon button */
 .product-card__cart {
   position: absolute;
-  right: clamp(0.5rem, 2vw, 1rem);
-  bottom: clamp(0.5rem, 2vw, 1rem);
+  right: clamp(0.5rem, 2vw, 0.8rem);
+  bottom: clamp(0.5rem, 2vw, 1.5rem);
 
-  /* responsive square button */
-  width: clamp(2.6rem, 7vw, 6rem);
-  height: clamp(2.6rem, 7vw, 6rem);
+  /* responsive square button (Base/Large Style) */
+  width: clamp(2.6rem, 7vw, 5rem);
+  height: clamp(2.6rem, 7vw, 5rem);
 
   border-radius: 15px;
   border: none;
@@ -241,7 +256,7 @@
   z-index: 2;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 
-  /* keep transform for hover but base it here */
+  /* keep transform for hover but base it here to look "detached" */
   transform: translate(20%, 20%);
   transition:
     background-color 0.25s ease,
@@ -253,8 +268,7 @@
   justify-content: center;
 }
 
-
-/* icon inside the button (FontAwesome adaptation) */
+/* icon inside the button */
 .product-card__cart-icon {
   font-size: clamp(1.2rem, 4vw, 1.9rem);
   color: #E30B5D;
@@ -271,6 +285,52 @@
 
 .product-card__cart:hover .product-card__cart-icon {
   color: #ffffff;
+}
+
+/* Below 1750px: Integrated "Plain" Look (Matches Image) */
+@media (max-width: 1749.98px) {
+  /* Normalize the card body shape to a simple box */
+  .product-card__body-bg {
+    display: none;
+  }
+
+  .product-card__body {
+    background: #ffffff;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  .product-card__body-inner {
+      padding-bottom: 24px;
+  }
+
+  /* Integrated button style */
+  .product-card__cart {
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    right: 20px; 
+    bottom: 24px; /* match inner padding */
+    padding: 0;
+  }
+
+  .product-card__cart:hover {
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .product-card__cart-icon {
+    font-size: 2.4rem; /* Make icon slightly larger/visible as standalone */
+    color: #E30B5D; /* Softer pink as seen in snapshot */
+  }
+  
+  .product-card__cart:hover .product-card__cart-icon {
+    color: #E30B5D; /* Darker pink on hover */
+  }
 }
 
 
@@ -431,11 +491,8 @@
 }
 
 .peek-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
+  width: 64px;
+  height: 64px;
   border-radius: 999px;
   border: none;
   background: #ffffff;
@@ -445,27 +502,48 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   z-index: 5;
-}
-
-.peek-arrow--prev { left: 3.5rem; }
-.peek-arrow--next { right: 3.5rem; }
-
-/* Show arrows when hovering the shell, not the scroll container */
-.peek-shell:hover .peek-arrow {
-  opacity: 1;
+  transition: all 0.2s ease;
+  /* Reset absolute positioning since they are now in header */
+  position: static; 
+  transform: none;
+  opacity: 1; /* Always visible if container is visible */
   pointer-events: auto;
+  font-size: 2rem;
 }
 
-/* Hide arrows below 1200px stays the same */
-@media (max-width: 1199.98px) {
-  .peek-arrow {
-    display: none;
-  }
+.peek-arrow:hover {
+  background: var(--slider-accent);
+  color: #fff;
 }
+
+/* Stacking filter button + arrows */
+.discover-carousel__filter-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1rem; 
+}
+
+.discover-carousel__arrows {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Hide arrows by default (mobile/tablet), show on desktop */
+.peek-arrow {
+    display: none;
+}
+
+@media (min-width: 1200px) {
+    .peek-arrow {
+        display: flex;
+    }
+}
+
+/* No longer needed as arrows are not absolute/hover-based */
+
+/* Replaced by the display:none above */
 
 .discover-carousel__cta-wrap {
   display: flex;
@@ -486,6 +564,7 @@
   text-decoration: none;
   /* box-shadow: 0 10px 26px rgba(0,0,0,0.18); */
   transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  margin: 2rem 0px;
 }
 
 .discover-carousel__cta-btn:hover {
@@ -530,6 +609,8 @@
   }
 
   .peek-slide {
-    flex-basis: 31%; /* Large Desktop: 3 items */
+    flex: 0 0 450px; /* Fixed width */
+    width: 450px;
+    height: auto; /* Let flexbox stretch determine height */
   }
 }

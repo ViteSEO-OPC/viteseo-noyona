@@ -13,10 +13,16 @@
 }
 
 .collection-grid__heading {
-    font-size: var(--wp--preset--font-size--h-1) !important;
+    font-size: var(--wp--preset--font-size--h-2) !important;
+    font-family: var(--wp--preset--font-family--proxima-nova);
     font-weight: 700;
     margin: 0 0 1rem;
     color: #000;
+    letter-spacing: -2.75px;
+}
+
+.collection-grid__heading-accent {
+    color: #E30B5D;
 }
 
 .collection-grid__description {
@@ -27,10 +33,16 @@
 }
 
 /* Grid Layout */
+/* Grid Layout (Flexbox for centering items) */
 .collection-grid__items {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 2rem;
+}
+.collection-grid__items > * {
+    flex: 1 1 280px;
+    max-width: 400px; /* Optional: prevent cards from getting too wide if few items */
 }
 
 /* Card Styling */
@@ -99,6 +111,7 @@
 }
 
 .collection-card__title {
+    font-family: var(--wp--preset--font-family--proxima-nova);
     font-weight: 600;
     font-size: 1rem;
     text-transform: capitalize;
@@ -125,6 +138,7 @@
     font-size: 0.9rem;
     font-weight: 500;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    font-family: var(--wp--preset--font-family--proxima-nova);
 }
 
 .collection-card__link {

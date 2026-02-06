@@ -21,7 +21,7 @@
   margin: 0 0 .35rem;
   font-size: 55px;
   font-weight: 700;
-  color: #E30B5D;
+  color: #000;
 }
 .phone-reviews__sub{
   margin: 0;
@@ -30,13 +30,13 @@
 }
 
 /* Grid: 3–4 phones responsive */
+/* Grid: 3–4 phones responsive (Flexbox for centering 2+1) */
 .phone-reviews__grid{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 260px));
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  column-gap: clamp(2rem, 3vw, 3rem);
-  row-gap: clamp(1.5rem, 2vw, 2rem);
-  max-width: 900px;
+  gap: clamp(2rem, 3vw, 3rem);
+  max-width: 1400px; /* Increased to fit 3x 420px cards */
   margin: 0 auto;
 }
 
@@ -69,15 +69,15 @@
 .phone-card__shell{
   position: relative;
   width: 100%;
-  max-width: 260px;
-  aspect-ratio: 9 / 19.5;
+  max-width: 420.192px;
+  aspect-ratio: 420.192 / 849.038;
   border-radius: 2.1rem;
   background: radial-gradient(circle at 20% 0%, #444 0, #111 40%, #000 100%);
   padding: .44rem;
-  box-shadow:
+  /* box-shadow:
     -14px 22px 40px rgba(0,0,0,.55),
     -3px 6px 14px rgba(0,0,0,.35),
-    0 0 0 1px rgba(255,255,255,.06);
+    0 0 0 1px rgba(255,255,255,.06); */
   display: flex;
   align-items: stretch;
   justify-content: stretch;
@@ -109,10 +109,10 @@
 /* Hover: lift + tilt */
 .phone-card__shell:hover{
   transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
-  box-shadow:
+  /* box-shadow:
     -18px 26px 50px rgba(0,0,0,.65),
     -5px 9px 18px rgba(0,0,0,.4),
-    0 0 0 1px rgba(255,255,255,.08);
+    0 0 0 1px rgba(255,255,255,.08); */
 }
 
 /* Notch */
@@ -415,4 +415,41 @@ html.phone-reviews--overlay-open{
   .phone-reviews__carousel{
     display: block;
   }
+}
+/* Accent for Header */
+.phone-reviews__title-accent {
+  color: #E30B5D;
+}
+
+/* Play/Pause Toggle Overlay */
+.phone-card__toggle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  color: #fff;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0; /* Hidden by default if playing */
+  transition: opacity 0.3s ease, transform 0.2s ease;
+  z-index: 10;
+  pointer-events: none; /* Let clicks pass through to the card handler */
+}
+
+/* Ensure button is visible when paused or hovered */
+.phone-card__toggle i {
+  margin-left: 2px; /* Visual optical adjustment for play icon */
+}
+
+.phone-card__toggle i.fa-pause {
+  margin-left: 0;
 }
