@@ -15,6 +15,11 @@
           "slug": "proxima-nova"
         },
         {
+          "fontFamily": "\"Noto Serif SemiCondensed\", \"Noto Serif\", \"Times New Roman\", serif",
+          "name": "Noto Serif SemiCondensed",
+          "slug": "noto-serif-semicondensed"
+        },
+        {
           "fontFamily": "\"Inter\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
           "name": "Inter",
           "slug": "inter"
@@ -27,10 +32,10 @@
       ],
       "fluid": true,
       "fontSizes": [
-        { "slug": "body", "name": "Body", "size": "clamp(16px, calc(16px + 2 * ((100vw - 360px) / 920)), 20px)" },
-        { "slug": "h-3", "name": "H3/H4", "size": "clamp(20px, calc(20px + 4 * ((100vw - 360px) / 920)), 20px)" },
-        { "slug": "h-2", "name": "H2", "size": "clamp(26px, calc(26px + 6 * ((100vw - 360px) / 920)), 32px)" },
-        { "slug": "h-1", "name": "H1", "size": "clamp(34px, calc(34px + 8 * ((100vw - 360px) / 920)), 48px)" }
+        { "slug": "body", "name": "Body", "size": "clamp(16px, 1.4vw, 20px)" },
+        { "slug": "h-3", "name": "H3", "size": "clamp(18px, 2vw, 24px)" },
+        { "slug": "h-2", "name": "H2", "size": "clamp(32px, 4.2vw, 55px)" },
+        { "slug": "h-1", "name": "H1", "size": "clamp(44px, 6vw, 96px)" }
       ]
     },
     "color": {
@@ -43,7 +48,7 @@
     "color": { "text": "#333333" },
     "typography": {
       "fontSize": "var(--wp--preset--font-size--body)",
-      "fontWeight": "500",
+      "fontWeight": "400",
       "fontFamily": "var(--wp--preset--font-family--proxima-nova)"
     },
     "elements": {
@@ -52,8 +57,8 @@
         "typography": {
           "fontSize": "var(--wp--preset--font-size--h-1)",
           "fontWeight": "700",
-          "lineHeight": "1.2",
-          "fontFamily": "inherit"
+          "lineHeight": "1.05",
+          "fontFamily": "var(--wp--preset--font-family--noto-serif-semicondensed)"
         }
       },
       "h2": {
@@ -61,21 +66,18 @@
         "typography": {
           "fontSize": "var(--wp--preset--font-size--h-2)",
           "fontWeight": "700",
-          "lineHeight": "1.3",
-          "fontFamily": "inherit"
+          "lineHeight": "1.1",
+          "fontFamily": "var(--wp--preset--font-family--proxima-nova)"
         }
       },
       "h3": {
         "color": { "text": "inherit" },
         "typography": {
           "fontSize": "var(--wp--preset--font-size--h-3)",
-          "fontWeight": "700",
-          "lineHeight": "1.4",
-          "fontFamily": "inherit"
+          "fontWeight": "600",
+          "lineHeight": "1.15",
+          "fontFamily": "var(--wp--preset--font-family--proxima-nova)"
         }
-      },
-      "heading": {
-        "typography": { "fontFamily": "var(--wp--preset--font-family--playfair-display)" }
       }
     }
   },

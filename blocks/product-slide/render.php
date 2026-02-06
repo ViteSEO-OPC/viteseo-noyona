@@ -26,7 +26,20 @@ $unique_id = 'ps-' . uniqid();
 <div class="wp-block-noyona-product-slide product-slide alignwide" id="<?php echo esc_attr( $unique_id ); ?>" data-cards-to-show="<?php echo esc_attr( $cards_to_show ); ?>">
     <div class="product-slide__header">
         <?php if ( $atts['heading'] ) : ?>
-            <h2 class="product-slide__heading">Our <text class="product-slide__heading_extend">Best Seller</text></h2>
+            <?php
+                $heading = (string) $atts['heading'];
+                $heading_html = esc_html( $heading );
+
+                $pos_best = stripos( $heading, 'Best' );
+                // Optional highlight: wrap "Best" in a span (matches the design).
+                if ( $pos_best !== false ) {
+                    $before = substr( $heading, 0, $pos_best );
+                    $match  = substr( $heading, $pos_best, strlen( 'Best' ) );
+                    $after  = substr( $heading, $pos_best + strlen( 'Best' ) );
+                    $heading_html = esc_html( $before ) . '<span class="product-slide__heading-accent">' . esc_html( $match ) . '</span>' . esc_html( $after );
+                }
+            ?>
+            <h2 class="product-slide__heading"><?php echo $heading_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
         <?php endif; ?>
         <?php if ( $atts['subheading'] ) : ?>
             <p class="product-slide__subheading"><?php echo esc_html( $atts['subheading'] ); ?></p>

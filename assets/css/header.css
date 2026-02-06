@@ -48,6 +48,47 @@ header.wp-block-template-part.is-sticky .header-mini-cart .wc-block-mini-cart__b
     font-size: 1.25rem;
 }
 
+/* Logo image link */
+.site-logo-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    line-height: 0;
+    border: 0;
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.site-logo-img {
+    display: block;
+    height: 60px;
+    width: 225px;
+    max-width: 225px;
+    object-fit: contain;
+    border: 0;
+}
+
+@media (max-width: 640px) {
+    .site-logo-img {
+        height: 40px;
+        max-width: 200px;
+    }
+}
+
+/* Remove the "white border" (focus/active outline) when clicking/press-holding */
+.site-logo-link:focus,
+.site-logo-link:active {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Keep an accessible keyboard focus indicator, but make it NOT white */
+.site-logo-link:focus-visible {
+    outline: 2px solid rgba(255, 111, 155, 0.75);
+    outline-offset: 4px;
+    border-radius: 12px;
+}
+
 /* center: main nav – force it to stay centered between left/right */
 .main-nav {
     flex: 1;
