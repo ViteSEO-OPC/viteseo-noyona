@@ -2,8 +2,9 @@
    Core layout
 ========================= */
 
-:root {
-  --slider-accent: #fd593c;
+/* Scope slider accent to this block only (avoid global :root leakage) */
+.carousel-block.discover-carousel {
+  --slider-accent: #E30B5D;
 }
 
 .carousel-block {
@@ -30,7 +31,7 @@
   padding-left: var(--page-gutter-left);
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
   margin-bottom: 2rem;
   flex-wrap: wrap;
   gap: 1rem;
@@ -495,8 +496,8 @@
   height: 64px;
   border-radius: 999px;
   border: none;
-  background: #ffffff;
-  color: var(--slider-accent);
+  background: var(--slider-accent);
+  color: #ffffff;
   box-shadow: 0 6px 18px rgba(0,0,0,0.18);
   display: flex;
   align-items: center;
@@ -507,38 +508,66 @@
   /* Reset absolute positioning since they are now in header */
   position: static; 
   transform: none;
-  opacity: 1; /* Always visible if container is visible */
+  opacity: 1;
   pointer-events: auto;
   font-size: 2rem;
 }
 
 .peek-arrow:hover {
-  background: var(--slider-accent);
-  color: #fff;
+  background: #fff;
+  color: var(--slider-accent);
 }
 
-/* Stacking filter button + arrows */
+/* Filter button wrapper */
 .discover-carousel__filter-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Arrows are now inside the carousel shell */
+.peek-shell .discover-carousel__arrows {
+  display: none; /* desktop hover will enable */
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  justify-content: space-between;
+  align-items: center;
+  padding-left: clamp(8px, 1.4vw, 18px);
+  padding-right: clamp(8px, 1.4vw, 18px);
+  pointer-events: none; /* allow swipe/scroll through */
+  z-index: 6;
+}
+
+.peek-shell .discover-carousel__arrows .peek-arrow {
+  pointer-events: auto; /* clickable buttons */
+}
+
+/* Desktop-only hover reveal: show arrows on hover (mouse/trackpad) */
+@media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
+  .peek-shell .discover-carousel__arrows {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 1rem; 
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(-50% - 6px));
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  }
+
+  .peek-shell:hover .discover-carousel__arrows,
+  .peek-shell:focus-within .discover-carousel__arrows {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%);
+  }
 }
 
-.discover-carousel__arrows {
-    display: flex;
-    gap: 0.75rem;
-}
-
-/* Hide arrows by default (mobile/tablet), show on desktop */
-.peek-arrow {
-    display: none;
-}
-
-@media (min-width: 1200px) {
-    .peek-arrow {
-        display: flex;
-    }
+/* Touch devices: keep arrows hidden (swipe/drag only) */
+@media (hover: none), (pointer: coarse) {
+  .peek-shell .discover-carousel__arrows {
+    display: none !important;
+  }
 }
 
 /* No longer needed as arrows are not absolute/hover-based */

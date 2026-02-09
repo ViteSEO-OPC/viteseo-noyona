@@ -54,7 +54,7 @@
     line-height: 1.05;
     display: grid;
     gap: 0.35rem;
-    font-size: 96px;
+    font-size: clamp(44px, 6vw, 96px);
     font-weight: 500;
     white-space: pre-line;
 }
@@ -74,7 +74,7 @@
 .hero-banner__body {
     margin: 0;
     color: rgba(255, 255, 255, 0.9);
-    font-size: 1rem;
+    font-size: clamp(16px, 2vw, 20px);
     max-width: 42rem;
     line-height: 1.5;
 }
@@ -127,11 +127,11 @@
     color: #3d1f1c;
     border-radius: 10px;
     font-weight: 600;
-    font-size: 24px;
+    font-size: clamp(16px, 2vw, 24px);
     text-decoration: none;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
-    width: 250px;
+    width: clamp(160px, 20vw, 250px);
 }
 
 .hero-banner__cta:hover {

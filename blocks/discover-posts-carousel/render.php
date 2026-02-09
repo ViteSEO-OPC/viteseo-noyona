@@ -206,19 +206,6 @@ ob_start();
 					<?php echo esc_html($view_all_label); ?>
 					<i class="fas fa-caret-down"></i>
 				</button>
-				<!-- Prev / Next arrows (desktop) moved here -->
-				<div class="discover-carousel__arrows">
-					<button type="button" class="peek-arrow peek-arrow--prev" aria-label="Previous products">
-						<span class="peek-arrow__icon">
-							<i class="fas fa-chevron-left" aria-hidden="true"></i>
-						</span>
-					</button>
-					<button type="button" class="peek-arrow peek-arrow--next" aria-label="Next products">
-						<span class="peek-arrow__icon">
-							<i class="fas fa-chevron-right" aria-hidden="true"></i>
-						</span>
-					</button>
-				</div>
 			</div>
 		<?php endif; ?>
 	</div>
@@ -237,6 +224,20 @@ ob_start();
 						</div>
 					<?php endforeach; ?>
 				</div>
+			</div>
+
+			<!-- Prev / Next arrows (desktop only; positioned inside carousel) -->
+			<div class="discover-carousel__arrows" aria-hidden="true">
+				<button type="button" class="peek-arrow peek-arrow--prev" aria-label="Previous products">
+					<span class="peek-arrow__icon">
+						<i class="fas fa-chevron-left" aria-hidden="true"></i>
+					</span>
+				</button>
+				<button type="button" class="peek-arrow peek-arrow--next" aria-label="Next products">
+					<span class="peek-arrow__icon">
+						<i class="fas fa-chevron-right" aria-hidden="true"></i>
+					</span>
+				</button>
 			</div>
 
 			<nav class="peek-indicators" aria-label="Carousel indicators">

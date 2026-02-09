@@ -40,6 +40,14 @@ function woocom_ct_enqueue_assets() {
         wp_get_theme()->get( 'Version' )
     );
 
+    // Footer CSS (assets/css/footer.css)
+    wp_enqueue_style(
+        'woocom-ct-footer',
+        get_stylesheet_directory_uri() . '/assets/css/footer.css',
+        array( 'woocom-ct-style' ),
+        wp_get_theme()->get( 'Version' )
+    );
+
     // Product-gatherer CSS
     wp_enqueue_style(
         'woocom-ct-product-gatherer',

@@ -1,0 +1,306 @@
+/* Footer Styles (moved out of style.css) */
+
+.noyona-footer {
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+  padding-bottom: 2rem;
+  font-family: var(--wp--preset--font-family--proxima-nova, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
+}
+
+.noyona-footer a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
+}
+
+/* Values Section */
+.noyona-footer__values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  text-align: center;
+  margin: 0 auto 3rem auto;
+  max-width: 96rem;
+  padding-left: var(--page-gutter-left);
+  padding-right: var(--page-gutter-right);
+}
+
+.noyona-footer__value-item img {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 0.5rem auto;
+}
+
+.noyona-footer__value-title {
+  font-weight: 700;
+  font-size: var(--wp--preset--font-size--h-3);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.noyona-footer__value-desc {
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+/* Main Footer Content (grid version - this overrides the earlier flex in old style.css) */
+.noyona-footer__main {
+  display: grid;
+  grid-template-columns: 40% 20% 20% 20%;
+  align-items: flex-start;
+  gap: 2rem;
+  margin: 0 auto 2rem auto;
+  max-width: 96rem;
+  padding-left: var(--page-gutter-left);
+  padding-right: var(--page-gutter-right);
+}
+
+/* Newsletter */
+.noyona-footer__newsletter {
+  min-width: 0;
+  max-width: 550px;
+}
+
+.noyona-footer__newsletter h2 {
+  font-family: var(--wp--preset--font-family--proxima-nova, sans-serif);
+  font-size: 48px;
+  font-weight: 700;
+  margin: 0 0 1.5rem;
+  line-height: 1.1;
+}
+
+.noyona-footer__form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.noyona-footer__input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 0.95rem;
+  color: inherit;
+  outline: none;
+}
+
+.noyona-footer__input::placeholder {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.noyona-footer__btn {
+  padding: 12px 24px;
+  background: var(--footer-btn-bg);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.2s;
+  width: 107px;
+}
+
+.noyona-footer__btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.noyona-footer__newsletter p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0.85;
+  width: 85%;
+  margin: 0;
+}
+
+/* Links: use contents so each column is a grid item */
+.noyona-footer__links {
+  display: contents;
+}
+
+.noyona-footer__col {
+  padding-left: 2rem;
+  min-width: 0;
+}
+
+.noyona-footer__col-title {
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  display: block;
+  text-transform: uppercase;
+  font-size: var(--wp--preset--font-size--body);
+  letter-spacing: 0.05em;
+}
+
+.noyona-footer__nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.noyona-footer__nav li {
+  margin-bottom: 0.75rem;
+}
+
+/* Better hover than "just gray": underline slide + accent color */
+.noyona-footer__nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--wp--preset--font-size--body);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  position: relative;
+  padding-bottom: 2px;
+}
+
+.noyona-footer__nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--footer-btn-bg);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.18s ease;
+  border-radius: 999px;
+}
+
+.noyona-footer__nav a:hover,
+.noyona-footer__nav a:focus-visible {
+  color: #111;
+  transform: translateX(2px);
+}
+
+.noyona-footer__nav a:hover::after,
+.noyona-footer__nav a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* ===== Bottom section (revised to match screenshot) ===== */
+.noyona-footer__bottom {
+  margin: 0 auto;
+  max-width: 96rem;
+  padding-left: var(--page-gutter-left);
+  padding-right: var(--page-gutter-right);
+  padding-top: 0.5rem;
+}
+
+.noyona-footer__bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.noyona-footer__bottom-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.5);
+  width: 100%;
+}
+
+.noyona-footer__copyright {
+  text-align: center;
+  font-size: var(--wp--preset--font-size--body);
+  font-weight: 500;
+  color: #000;
+  opacity: 0.9;
+  padding-top: 1rem;
+}
+
+/* Social buttons: dark squares + lighter icon like screenshot */
+.noyona-footer__social-icons {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.noyona-footer__social-btn {
+  width: 36px;
+  height: 36px;
+  background: #2b0b1c;
+  color: #EBAAAC !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  transition: transform 0.18s ease, filter 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+
+.noyona-footer__social-btn:hover,
+.noyona-footer__social-btn:focus-visible {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  background: #000;
+  color: #fff;
+}
+
+/* Payment icons as images */
+.noyona-footer__payment-icons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.noyona-footer__payment-icons img {
+  width: 65px;
+  height: 33px;
+  display: block;
+  filter: saturate(1.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .noyona-footer__main {
+    display: block;
+  }
+
+  .noyona-footer__links {
+    display: block;
+    margin-top: 2rem;
+  }
+
+  .noyona-footer__col {
+    padding-left: 0;
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .noyona-footer__newsletter {
+    text-align: center;
+    max-width: none;
+  }
+
+  .noyona-footer__newsletter p {
+    width: 100%;
+  }
+
+  .noyona-footer__form {
+    max-width: 420px;
+    margin: 0.75rem auto 1.25rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .noyona-footer__btn {
+    width: 100%;
+  }
+
+  .noyona-footer__bottom-row {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+
