@@ -18,6 +18,10 @@
         "icon": 0
       }
     },
+    "imagePosition": {
+      "type": "string",
+      "default": "left"
+    },
     "title": {
       "type": "string",
       "default": "About the Founder"

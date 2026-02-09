@@ -17,11 +17,11 @@
     },
     "titleLine": {
       "type": "string",
-      "default": "Radiate Natural,"
+      "default": ""
     },
     "body": {
       "type": "string",
-      "default": "Noyona celebrates beauty that feels like you elevated by nature, crafted for everyday wear, and made to last. Discover effortless formulas that care for skin while enhancing your glow."
+      "default": ""
     },
     "searchEnabled": {
       "type": "boolean",
@@ -29,7 +29,7 @@
     },
     "searchPlaceholder": {
       "type": "string",
-      "default": "Search articles"
+      "default": ""
     },
     "searchPostType": {
       "type": "string",
@@ -37,11 +37,11 @@
     },
     "buttonText": {
       "type": "string",
-      "default": "Discover Your Glow"
+      "default": ""
     },
     "buttonUrl": {
       "type": "string",
-      "default": "/shop/"
+      "default": ""
     },
     "backgroundImage": {
       "type": "string",
@@ -49,11 +49,11 @@
     },
     "backgroundSize": {
       "type": "string",
-      "default": "cover"
+      "default": ""
     },
     "backgroundPosition": {
       "type": "string",
-      "default": "center"
+      "default": ""
     }
   },
   "style": "file:./style.css",

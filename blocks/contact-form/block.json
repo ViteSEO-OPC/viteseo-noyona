@@ -13,7 +13,7 @@
   "attributes": {
     "heading": {
       "type": "string",
-      "default": "Connect with our <span class=\"contact-form__accent\">Community</span>"
+      "default": "<span class=\"contact-form__accent\">Connect</span> with our <span class=\"contact-form__accent\">Community</span>"
     },
     "subheading": {
       "type": "string",
@@ -25,15 +25,15 @@
     },
     "brandImage": {
       "type": "string",
-      "default": "/wp-content/themes/noyona-childtheme/assets/images/noyona-cosmetic-icon.png"
+      "default": "/wp-content/themes/viteseo-noyona/assets/images/contact-logo.png"
     },
     "socials": {
       "type": "array",
       "default": [
-        { "icon": "/wp-content/themes/noyona-childtheme/blocks/contact-form/assets/fb.png", "url": "https://facebook.com", "label": "Facebook" },
-        { "icon": "/wp-content/themes/noyona-childtheme/blocks/contact-form/assets/tiktok.png", "url": "https://tiktok.com", "label": "TikTok" },
-        { "icon": "/wp-content/themes/noyona-childtheme/blocks/contact-form/assets/instagram.png", "url": "https://instagram.com", "label": "Instagram" },
-        { "icon": "/wp-content/themes/noyona-childtheme/blocks/contact-form/assets/lazada.png", "url": "https://www.lazada.com.ph", "label": "Lazada" }
+        { "icon": "http://srv1300727.hstgr.cloud/wp-content/uploads/2026/01/fb_footer.png", "url": "https://facebook.com", "label": "Facebook" },
+        { "icon": "http://srv1300727.hstgr.cloud/wp-content/uploads/2026/01/titktok_footer.png", "url": "https://tiktok.com", "label": "TikTok" },
+        { "icon": "http://srv1300727.hstgr.cloud/wp-content/uploads/2026/01/instagram_footer.png", "url": "https://instagram.com", "label": "Instagram" },
+        { "icon": "http://srv1300727.hstgr.cloud/wp-content/uploads/2026/01/lazada_footer.png", "url": "https://www.lazada.com.ph", "label": "Lazada" }
       ],
       "items": {
         "type": "object"
@@ -45,11 +45,11 @@
     },
     "phone": {
       "type": "string",
-      "default": "0900 000 5555"
+      "default": "0920 510 5555 "
     },
     "email": {
       "type": "string",
-      "default": "hello@noyonacosmetics.com"
+      "default": "info@noyonaessenitals.com"
     },
     "locationLabel": {
       "type": "string",
@@ -57,7 +57,7 @@
     },
     "address": {
       "type": "string",
-      "default": "No. 24 City Hall, Bustos, Bulacan, Philippines"
+      "default": "Burgundy Corporate Tower 252 Sen. Gil Puyat Ave., Makati City, Metro Manila, Philippines"
     },
     "mapEmbedUrl": {
       "type": "string",
@@ -65,7 +65,7 @@
     },
     "mapNote": {
       "type": "string",
-      "default": "Visit our team to explore our newest launches and exclusive store-only offers."
+      "default": "View our store location to confirm address details, operating hours, and get turn-by-turn directions in one click."
     },
     "mapButtonText": {
       "type": "string",

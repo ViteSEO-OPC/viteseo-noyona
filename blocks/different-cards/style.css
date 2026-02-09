@@ -1,0 +1,101 @@
+.wp-block-noyona-different-cards.different-cards {
+  background: #ffffff;
+  color: var(--wp--preset--color--ink, #333333);
+  font-family: var(--wp--preset--font-family--proxima-nova, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
+
+  padding-top: clamp(44px, 6vw, 84px);
+  padding-bottom: clamp(44px, 6vw, 84px);
+  padding-left: var(--page-gutter-left, 16px);
+  padding-right: var(--page-gutter-right, 16px);
+}
+
+.different-cards__inner {
+  max-width: 96rem;
+  margin: 0 auto;
+}
+
+.different-cards__header {
+  text-align: center;
+  max-width: 72rem;
+  margin: 0 auto clamp(26px, 3.8vw, 44px);
+}
+
+.different-cards__title {
+  margin: 0 0 12px;
+  font-size: var(--wp--preset--font-size--h-2, clamp(32px, 4.2vw, 55px));
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.different-cards__accent {
+  color: #E30B5D;
+}
+
+.different-cards__subtitle {
+  margin: 0;
+  font-size: var(--wp--preset--font-size--body, clamp(16px, 1.4vw, 20px));
+  line-height: 1.65;
+  opacity: 0.9;
+}
+
+.different-cards__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2.6vw, 28px);
+  align-items: stretch;
+}
+
+.different-cards__card {
+  --diff-card-bg: #f7d7ea;
+  background: var(--diff-card-bg);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.different-cards__media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.different-cards__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.different-cards__body {
+  padding: clamp(14px, 2vw, 20px);
+}
+
+.different-cards__card-title {
+  margin: 0 0 10px;
+  font-size: var(--wp--preset--font-size--h-3, clamp(18px, 2vw, 24px));
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.different-cards__card-text {
+  margin: 0;
+  font-size: var(--wp--preset--font-size--body, clamp(16px, 1.4vw, 20px));
+  line-height: 1.65;
+  opacity: 0.88;
+}
+
+@media (max-width: 1024px) {
+  .different-cards__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .different-cards__card {
+    max-width: 44rem;
+    margin: 0 auto;
+  }
+}
+
+

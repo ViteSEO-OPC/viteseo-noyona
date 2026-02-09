@@ -46,6 +46,27 @@ body,
   padding: 0;
 }
 
+/* Global: remove focus outline for mouse users, keep for keyboard users */
+:where(a, button, input, select, textarea, summary, [role="button"], [tabindex]):focus {
+  outline: none;
+}
+
+:where(a, button, input, select, textarea, summary, [role="button"], [tabindex]):focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Keep keyboard focus visible (accessible) */
+:where(a, button, input, select, textarea, summary, [role="button"], [tabindex]):focus-visible {
+  outline: none;
+  /* If you want NO keyboard ring too, remove this rule and use Option B */
+}
+
+/* Remove mobile tap highlight */
+:where(a, button, summary, [role="button"]) {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Typography (h1/h2/h3/body only) */
 body {
   font-family: "Proxima Nova", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;

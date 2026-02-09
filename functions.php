@@ -337,6 +337,8 @@ add_action( 'init', 'woocom_ct_register_blocks' );
 function woocom_ct_register_blocks() {
     register_block_type( get_stylesheet_directory() . '/blocks/search-expand' );
     register_block_type( get_stylesheet_directory() . '/blocks/hero-banner' );
+    register_block_type( get_stylesheet_directory() . '/blocks/guides-pillars' );
+    register_block_type( get_stylesheet_directory() . '/blocks/different-cards' );
     register_block_type( get_stylesheet_directory() . '/blocks/brand-carousel' );
     register_block_type( get_stylesheet_directory() . '/blocks/color-swatches' );
     register_block_type( get_stylesheet_directory() . '/blocks/product-highlight' );
@@ -357,6 +359,7 @@ function woocom_ct_register_blocks() {
     register_block_type( get_stylesheet_directory() . '/blocks/terms' );
     register_block_type( get_stylesheet_directory() . '/blocks/thank-you' );
     register_block_type( get_stylesheet_directory() . '/blocks/coming-soon' );
+    register_block_type( get_stylesheet_directory() . '/blocks/find-us' );
 }
 
 // Force 404 when WP falls back to the homepage for unknown paths.

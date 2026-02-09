@@ -6,6 +6,7 @@
     gap: clamp(1.5rem, 4vw, 3rem);
     align-items: stretch; 
     padding-bottom: 20px !important;
+    padding-top: 50px !important;
 }
 
 /* Image column */
@@ -170,3 +171,30 @@
     }
 }
 
+/* Body formatting helpers */
+.noyona-founder-section__body .founder-accent{
+  color: #E30B5D;
+  font-weight: 700;
+}
+
+.noyona-founder-section__body .founder-bold{
+  font-weight: 700;
+}
+
+/* Title accent helper (optional) */
+.noyona-founder-section__title .founder-accent{
+  color: #E30B5D;
+}
+
+
+/* Default = image left (your markup already does this) */
+.noyona-founder-section--image-right{
+  flex-direction: row-reverse;
+}
+
+/* Keep your mobile stacking behavior */
+@media (max-width: 1499px){
+  .noyona-founder-section--image-right{
+    flex-direction: column;
+  }
+}

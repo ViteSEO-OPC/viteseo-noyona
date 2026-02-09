@@ -1,0 +1,52 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/different-cards",
+  "version": "1.0.0",
+  "title": "Different Cards",
+  "category": "design",
+  "icon": "grid-view",
+  "description": "Heading + subtitle + 3 image cards (About page section).",
+  "supports": {
+    "align": ["full", "wide"],
+    "anchor": true,
+    "html": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "What Makes Us <span class=\"different-cards__accent\">Different</span>"
+    },
+    "subtitle": {
+      "type": "string",
+      "default": "High-end beauty shouldn’t be exclusive. We bridge the gap between pro-performance and everyday value with ethical, inclusive products."
+    },
+    "cards": {
+      "type": "array",
+      "default": [
+        {
+          "image": "",
+          "title": "Made for You",
+          "text": "Shades and formulas designed to complement diverse skin tones.",
+          "bg": "#f7d7ea"
+        },
+        {
+          "image": "",
+          "title": "Clean Beauty",
+          "text": "No harsh chemicals, just pure, skin-loving goodness.",
+          "bg": "#d9ecfb"
+        },
+        {
+          "image": "",
+          "title": "Affordable Luxury",
+          "text": "Premium quality without the premium price tag.",
+          "bg": "#f6f2c5"
+        }
+      ]
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "viteseo-noyona"
+}
+
+

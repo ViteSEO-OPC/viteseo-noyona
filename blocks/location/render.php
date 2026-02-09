@@ -162,17 +162,20 @@ if ($store_query->have_posts()) {
 }
 ?>
 
-<div <?php echo $wrapper_attributes; ?><?php echo $data_attrs; ?>>
+<div <?php echo $wrapper_attributes; ?> <?php echo $data_attrs; ?>>
     <div class="noyona-store-locator-content">
         <div class="nsl-header">
-            <div class="nsl-breadcrumbs">Home / <span class="active">Find a Store</span></div>
-            <h1 class="nsl-title">Store Locator</h1>
-            <p class="nsl-description">Visit us to see our products in person.</p>
+            <div class="nsl-breadcrumbs"><a class="nsl-breadcrumb-link" href="<?php echo home_url(); ?>">Home</a> /
+                <span class="active">Find a Store</span>
+            </div>
+            <h1 class="nsl-title">Find a <span>Store</span></h1>
+            <p class="nsl-description">Visit us in-store at leading supermarkets and pharmacies nationwide or shop
+                online via our official platforms.</p>
         </div>
 
         <div class="nsl-search-box">
             <div class="nsl-input-wrapper">
-                <input type="text" placeholder="Search location..." class="nsl-input">
+                <input type="text" placeholder="Enter a location" class="nsl-input">
                 <span class="nsl-search-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -193,7 +196,7 @@ if ($store_query->have_posts()) {
         </div>
 
         <div class="nsl-tabs" role="tablist">
-            <button class="nsl-tab active" type="button" role="tab" aria-selected="true">Near Me</button>
+            <button class="nsl-tab active" type="button" role="tab" aria-selected="true">Nearby</button>
             <?php if ($is_logged_in): ?>
                 <button class="nsl-tab" type="button" role="tab" aria-selected="false">Favorites</button>
             <?php endif; ?>
@@ -208,8 +211,8 @@ if ($store_query->have_posts()) {
                         data-lat="<?php echo esc_attr($store['lat']); ?>" data-lng="<?php echo esc_attr($store['lng']); ?>">
                         <?php if (!empty($store['image'])): ?>
                             <div class="nsl-store-image">
-                                <img src="<?php echo esc_url($store['image']); ?>"
-                                    alt="<?php echo esc_attr($store['title']); ?>" loading="lazy">
+                                <img src="<?php echo esc_url($store['image']); ?>" alt="<?php echo esc_attr($store['title']); ?>"
+                                    loading="lazy">
                             </div>
                         <?php endif; ?>
                         <div class="nsl-store-content">
@@ -229,11 +232,15 @@ if ($store_query->have_posts()) {
                                 <?php endif; ?>
                             </div>
                             <div class="nsl-store-header">
-                                <h3 class="nsl-store-name"><?php echo esc_html($store['title']); ?></h3>
+                                <h3 class="nsl-store-name">
+                                    <?php echo esc_html($store['title']); ?>
+                                </h3>
                             </div>
 
                             <?php if (!empty($store['content'])): ?>
-                                <div class="nsl-store-address"><?php echo wp_kses_post($store['content']); ?></div>
+                                <div class="nsl-store-address">
+                                    <?php echo wp_kses_post($store['content']); ?>
+                                </div>
                             <?php endif; ?>
 
                             <div class="nsl-store-meta">
@@ -241,7 +248,9 @@ if ($store_query->have_posts()) {
                                     <span class="nsl-rating-badge"><i class="fa-solid fa-star"></i> 4.5</span>
                                     <?php if (!empty($store['hours'])): ?>
                                         <span class="nsl-meta-sep">&bull;</span>
-                                        <span class="nsl-meta-text nsl-hours-text"><?php echo esc_html($store['hours']); ?></span>
+                                        <span class="nsl-meta-text nsl-hours-text">
+                                            <?php echo esc_html($store['hours']); ?>
+                                        </span>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -256,10 +265,14 @@ if ($store_query->have_posts()) {
                             aria-label="View catalog for <?php echo esc_attr($store['title']); ?>">
                             <span class="nsl-store-cta__text">
                                 <span class="nsl-store-cta__label">View catalog</span>
-                                <span class="nsl-store-cta__name"><?php echo esc_html($store['title']); ?></span>
+                                <span class="nsl-store-cta__name">
+                                    <?php echo esc_html($store['title']); ?>
+                                </span>
                             </span>
                             <span class="nsl-store-cta__actions">
-                                <span class="nsl-store-cta__count"><?php echo esc_html($product_count); ?></span>
+                                <span class="nsl-store-cta__count">
+                                    <?php echo esc_html($product_count); ?>
+                                </span>
                                 <span class="nsl-store-cta__open" aria-hidden="true">
                                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">

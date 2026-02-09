@@ -1,26 +1,26 @@
-<?php
+<!-- <?php
 /**
  * Render template for Noyona Store Locator Block
  */
 $is_logged_in = is_user_logged_in();
 $favorites = [];
-if ( $is_logged_in ) {
-    $favorites = get_user_meta( get_current_user_id(), 'noyona_store_favorites', true );
-    if ( ! is_array( $favorites ) ) {
+if ($is_logged_in) {
+    $favorites = get_user_meta(get_current_user_id(), 'noyona_store_favorites', true);
+    if (!is_array($favorites)) {
         $favorites = [];
     }
 }
-$favorites = array_values( array_filter( array_map( 'absint', $favorites ) ) );
+$favorites = array_values(array_filter(array_map('absint', $favorites)));
 
 $wrapper_attributes = get_block_wrapper_attributes([
     'class' => 'noyona-store-locator-wrapper',
 ]);
 $data_attrs = sprintf(
     ' data-nsl-logged-in="%s" data-nsl-favorites="%s" data-nsl-ajax-url="%s" data-nsl-ajax-nonce="%s"',
-    esc_attr( $is_logged_in ? '1' : '0' ),
-    esc_attr( $is_logged_in ? implode( ',', $favorites ) : '' ),
-    esc_attr( admin_url( 'admin-ajax.php' ) ),
-    esc_attr( $is_logged_in ? wp_create_nonce( 'noyona_favorites' ) : '' )
+    esc_attr($is_logged_in ? '1' : '0'),
+    esc_attr($is_logged_in ? implode(',', $favorites) : ''),
+    esc_attr(admin_url('admin-ajax.php')),
+    esc_attr($is_logged_in ? wp_create_nonce('noyona_favorites') : '')
 );
 
 // Unique ids per block instance
@@ -189,68 +189,67 @@ if ($store_query->have_posts()) {
         <div class="nsl-tabs" role="tablist">
             <button class="nsl-tab active" type="button" role="tab" aria-selected="true">Nearby</button>
             <?php if ($is_logged_in): ?>
-                <button class="nsl-tab" type="button" role="tab" aria-selected="false">Favorites</button>
+<button class="nsl-tab" type="button" role="tab" aria-selected="false">Favorites</button>
+<?php endif; ?>
+</div>
+
+<div class="nsl-results-list">
+    <?php if (!empty($stores_data)): ?>
+    <?php foreach ($stores_data as $store): ?>
+    <div class="nsl-store-item" data-store-id="<?php echo esc_attr($store['id']); ?>"
+        data-store-post-id="<?php echo esc_attr($store['post_id']); ?>"
+        data-lat="<?php echo esc_attr($store['lat']); ?>" data-lng="<?php echo esc_attr($store['lng']); ?>">
+        <div class="nsl-store-header">
+            <h3 class="nsl-store-name"><?php echo esc_html($store['title']); ?></h3>
+            <?php if ($is_logged_in): ?>
+            <button type="button" class="nsl-card-bookmark" aria-label="Save store">
+                <svg width="14" height="18" viewBox="0 0 14 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1H13V17L7 13L1 17V1Z" stroke="#333" stroke-width="1.5" fill="none" />
+                </svg>
+            </button>
             <?php endif; ?>
         </div>
 
-        <div class="nsl-results-list">
-            <?php if (!empty($stores_data)): ?>
-                <?php foreach ($stores_data as $store): ?>
-                    <div class="nsl-store-item" data-store-id="<?php echo esc_attr($store['id']); ?>"
-                        data-store-post-id="<?php echo esc_attr($store['post_id']); ?>"
-                        data-lat="<?php echo esc_attr($store['lat']); ?>" data-lng="<?php echo esc_attr($store['lng']); ?>">
-                        <div class="nsl-store-header">
-                            <h3 class="nsl-store-name"><?php echo esc_html($store['title']); ?></h3>
-                            <?php if ($is_logged_in): ?>
-                                <button type="button" class="nsl-card-bookmark" aria-label="Save store">
-                                    <svg width="14" height="18" viewBox="0 0 14 18" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M1 1H13V17L7 13L1 17V1Z" stroke="#333" stroke-width="1.5" fill="none" />
-                                    </svg>
-                                </button>
-                            <?php endif; ?>
-                        </div>
+        <?php if (!empty($store['content'])): ?>
+        <div class="nsl-store-address"><?php echo wp_kses_post($store['content']); ?></div>
+        <?php endif; ?>
 
-                        <?php if (!empty($store['content'])): ?>
-                            <div class="nsl-store-address"><?php echo wp_kses_post($store['content']); ?></div>
-                        <?php endif; ?>
-
-                        <div class="nsl-store-meta">
-                            <div class="nsl-store-meta-row nsl-store-meta-row--status">
-                                <span class="nsl-status-badge <?php echo esc_attr($store['status_class']); ?>">
-                                    <?php echo esc_html($store['status_label']); ?>
-                                </span>
-                                <span class="nsl-meta-sep">&bull;</span>
-                                <span class="nsl-meta-text">0.5 km away</span>
-                            </div>
-                            <div class="nsl-store-meta-row nsl-store-meta-row--details">
-                                <span class="nsl-rating-badge"><i class="fa-solid fa-star"></i> 4.5</span>
-                                <?php if (!empty($store['hours'])): ?>
-                                    <span class="nsl-meta-sep">&bull;</span>
-                                    <span class="nsl-meta-text nsl-hours-text"><?php echo esc_html($store['hours']); ?></span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <?php if (!empty($store['lat']) && !empty($store['lng'])): ?>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr($store['lat'] . ',' . $store['lng']); ?>"
-                                target="_blank" rel="noopener" class="nsl-get-directions">Get directions ></a>
-                        <?php endif; ?>
-
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>No store information available.</p>
-            <?php endif; ?>
+        <div class="nsl-store-meta">
+            <div class="nsl-store-meta-row nsl-store-meta-row--status">
+                <span class="nsl-status-badge <?php echo esc_attr($store['status_class']); ?>">
+                    <?php echo esc_html($store['status_label']); ?>
+                </span>
+                <span class="nsl-meta-sep">&bull;</span>
+                <span class="nsl-meta-text">0.5 km away</span>
+            </div>
+            <div class="nsl-store-meta-row nsl-store-meta-row--details">
+                <span class="nsl-rating-badge"><i class="fa-solid fa-star"></i> 4.5</span>
+                <?php if (!empty($store['hours'])): ?>
+                <span class="nsl-meta-sep">&bull;</span>
+                <span class="nsl-meta-text nsl-hours-text"><?php echo esc_html($store['hours']); ?></span>
+                <?php endif; ?>
+            </div>
         </div>
+
+        <?php if (!empty($store['lat']) && !empty($store['lng'])): ?>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr($store['lat'] . ',' . $store['lng']); ?>"
+            target="_blank" rel="noopener" class="nsl-get-directions">Get directions ></a>
+        <?php endif; ?>
+
     </div>
+    <?php endforeach; ?>
+    <?php else: ?>
+    <p>No store information available.</p>
+    <?php endif; ?>
+</div>
+</div>
 
-    <div class="nsl-map-container">
-        <div id="<?php echo esc_attr($map_id); ?>" class="nsl-map-placeholder"
-            data-json-id="<?php echo esc_attr($json_id); ?>"></div>
+<div class="nsl-map-container">
+    <div id="<?php echo esc_attr($map_id); ?>" class="nsl-map-placeholder"
+        data-json-id="<?php echo esc_attr($json_id); ?>"></div>
 
-        <script type="application/json" id="<?php echo esc_attr($json_id); ?>">
+    <script type="application/json" id="<?php echo esc_attr($json_id); ?>">
             <?php echo wp_json_encode($stores_data); ?>
         </script>
-    </div>
 </div>
+</div> -->

@@ -1,0 +1,49 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/guides-pillars",
+  "version": "1.0.0",
+  "title": "Guiding Pillars",
+  "category": "design",
+  "icon": "lightbulb",
+  "description": "Full-width guiding pillars section with title, subtitle, and 3 icon items.",
+  "supports": {
+    "align": ["full", "wide"],
+    "anchor": true,
+    "html": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "What <span class=\"guides-pillars__accent\">Guides Everything</span> We Do"
+    },
+    "subtitle": {
+      "type": "string",
+      "default": "We move with purpose in every step, creating beauty products that are intentional, responsible, and designed to support real lifestyles."
+    },
+    "items": {
+      "type": "array",
+      "default": [
+        {
+          "icon": "purpose",
+          "title": "Purposeful Creation",
+          "text": "Carefully formulated with a focus on quality, safety, and intention."
+        },
+        {
+          "icon": "choices",
+          "title": "Conscious Choices",
+          "text": "Mindful practices that support ethical standards and sustainability."
+        },
+        {
+          "icon": "everyday",
+          "title": "Beauty for Everyday Life",
+          "text": "Simple, effective products designed for everyday confidence."
+        }
+      ]
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "viteseo-noyona"
+}
+
+
