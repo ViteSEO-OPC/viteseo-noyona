@@ -26,7 +26,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         termBlocks.forEach(function (block) {
-            block.style.setProperty('--terms-scroll-offset', Math.ceil(offset) + 'px');
+            var val = Math.ceil(offset);
+            block.style.setProperty('--terms-scroll-offset', val + 'px');
+            block.style.setProperty('--toc-top', (val + 20) + 'px');
         });
     };
 
@@ -165,6 +167,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     setActiveTab(button.dataset.tab, true);
+                    
+                    // Prevent 'snap' by scrolling to top of block when changing tabs
+                    var blockTop = block.getBoundingClientRect().top + window.pageYOffset;
+                    var offset = parseInt(getComputedStyle(block).getPropertyValue('--terms-scroll-offset')) || 0;
+                    window.scrollTo({
+                        top: blockTop - offset - 20,
+                        behavior: scrollBehavior
+                    });
                 });
             });
         }
