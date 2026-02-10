@@ -49,7 +49,8 @@ $unique_id = 'ps-' . uniqid();
             }
             ?>
             <h2 class="product-slide__heading">
-                <?php echo $heading_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></h2>
+                <?php echo $heading_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            </h2>
         <?php endif; ?>
         <?php if ($atts['subheading']): ?>
             <p class="product-slide__subheading"><?php echo esc_html($atts['subheading']); ?></p>
@@ -141,7 +142,7 @@ $unique_id = 'ps-' . uniqid();
                                         <?php echo esc_html($primary_text); ?>
                                     </a>
                                     <?php if ($cart_enabled): ?>
-                                        <a href="<?php echo esc_url($cart_url); ?>" class="ps-btn-cart"
+                                        <a href="/coming-soon" class="ps-btn-cart"
                                             style="background-color: <?php echo esc_attr($cart_bg); ?>;">
                                             <i class="fa-solid fa-cart-shopping"></i>
                                         </a>
