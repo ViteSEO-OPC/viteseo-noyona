@@ -3,107 +3,73 @@
  * FAQ List Block Template.
  */
 
-$defaults = array(
-    'heading' => 'How can we <span class="faq-list__accent">help you?</span>',
-    'searchPlaceholder' => 'Search here',
-    'searchButtonLabel' => 'Search',
-    'title' => 'Frequently Asked Questions',
-    'subtitle' => 'Quick answers to your questions about shipping, returns, and how to get the most out of our products',
-    'categories' => array(),
-    'items' => array(),
-    'disclaimers' => array(),
-    'emptyMessage' => 'No questions found.',
-    'showCommunityCta' => false,
-    'communityHeading' => '<span class="faq-community__accent">Connect</span> with our <span class="faq-community__accent">Community</span>',
-    'communityText' => 'Stay updated on product drops, ingredient deep-dives, application tips, and behind-the-scenes content from our team.',
-    'communityButtonText' => 'Get in Touch',
-    'communityButtonUrl' => '/contact/',
-);
+if (!defined('ABSPATH')) {
+    exit;
+}
 
-$atts = wp_parse_args($attributes, $defaults);
-$items = isset($atts['items']) && is_array($atts['items']) ? $atts['items'] : array();
-$raw_categories = isset($atts['categories']) && is_array($atts['categories']) ? $atts['categories'] : array();
-$disclaimers = isset($atts['disclaimers']) && is_array($atts['disclaimers']) ? $atts['disclaimers'] : array();
-$block_id = 'faq-list-' . wp_rand(1000, 9999);
+$align_class = isset($attributes['align']) ? 'align' . $attributes['align'] : '';
+$heading = isset($attributes['heading']) ? trim((string) $attributes['heading']) : '';
+$searchPlaceholder = isset($attributes['searchPlaceholder']) ? trim((string) $attributes['searchPlaceholder']) : '';
+$searchButtonLabel = isset($attributes['searchButtonLabel']) ? trim((string) $attributes['searchButtonLabel']) : '';
+$title = isset($attributes['title']) ? trim((string) $attributes['title']) : '';
+$subtitle = isset($attributes['subtitle']) ? trim((string) $attributes['subtitle']) : '';
+$categories = isset($attributes['categories']) && is_array($attributes['categories']) ? $attributes['categories'] : array();
+$items = isset($attributes['items']) && is_array($attributes['items']) ? $attributes['items'] : array();
+$disclaimers = isset($attributes['disclaimers']) && is_array($attributes['disclaimers']) ? $attributes['disclaimers'] : array();
+$emptyMessage = isset($attributes['emptyMessage']) ? trim((string) $attributes['emptyMessage']) : '';
+$showCommunityCta = isset($attributes['showCommunityCta']) ? (bool) $attributes['showCommunityCta'] : false;
+$communityHeading = isset($attributes['communityHeading']) ? trim((string) $attributes['communityHeading']) : '';
+$communityText = isset($attributes['communityText']) ? trim((string) $attributes['communityText']) : '';
+$communityButtonText = isset($attributes['communityButtonText']) ? trim((string) $attributes['communityButtonText']) : '';
+$communityButtonUrl = isset($attributes['communityButtonUrl']) ? trim((string) $attributes['communityButtonUrl']) : '';
+$section_classes = trim('wp-block-noyona-faq-list faq-list ' . $align_class);
 
-$category_list = array();
-$category_id_map = array();
-$category_label_map = array();
-
-$add_category = function ($label, $id = '') use (&$category_list, &$category_id_map, &$category_label_map) {
-    $label = trim((string) $label);
-    if ('' === $label) {
-        return;
+$normalize_category = function ($value) {
+    if (!is_string($value)) {
+        return '';
     }
 
-    $base_id = $id ? sanitize_title($id) : sanitize_title($label);
-    if ('' === $base_id) {
-        $base_id = 'category-' . (count($category_list) + 1);
+    $value = trim($value);
+    if ('' === $value) {
+        return '';
     }
 
-    $unique_id = $base_id;
-    $suffix = 2;
-    while (isset($category_id_map[$unique_id])) {
-        $unique_id = $base_id . '-' . $suffix;
-        $suffix++;
-    }
-
-    $category_id_map[$unique_id] = $label;
-    $category_label_map[sanitize_title($label)] = $unique_id;
-    $category_list[] = array(
-        'id' => $unique_id,
-        'label' => $label,
-    );
+    return sanitize_title($value);
 };
 
-if (!empty($raw_categories)) {
-    foreach ($raw_categories as $category) {
-        if (is_string($category)) {
-            $add_category($category);
-            continue;
-        }
+$category_map = array();
+if (!empty($categories)) {
+    foreach ($categories as $category) {
+        $label = isset($category['label']) ? (string) $category['label'] : '';
+        $id = isset($category['id']) ? (string) $category['id'] : '';
+        $key_source = '' !== trim($id) ? $id : $label;
+        $normalized_key = $normalize_category($key_source);
+        $label_key = $normalize_category($label);
 
-        if (is_array($category)) {
-            $label = isset($category['label']) ? $category['label'] : (isset($category['title']) ? $category['title'] : '');
-            $id = isset($category['id']) ? $category['id'] : '';
-            $add_category($label, $id);
+        if ('' !== $label_key && '' !== $normalized_key) {
+            $category_map[$label_key] = $normalized_key;
         }
     }
 }
 
-if (empty($category_list)) {
-    foreach ($items as $item) {
-        if (!is_array($item)) {
-            continue;
-        }
-        $item_category = isset($item['category']) ? $item['category'] : '';
-        if ('' !== trim($item_category)) {
-            $add_category($item_category);
-        }
-    }
-}
-
-if (empty($category_list)) {
-    $add_category('General');
-}
 ?>
-<section class="wp-block-noyona-faq-list faq-list alignfull">
+<section class="<?php echo esc_attr($section_classes); ?>">
     <div class="faq-list__inner">
         <div class="faq-list__hero">
-            <?php if (!empty($atts['heading'])): ?>
+            <?php if (!empty($heading)): ?>
                 <h1 class="faq-list__heading">
-                    <?php echo wp_kses_post($atts['heading']); ?>
+                    <?php echo wp_kses_post($heading); ?>
                 </h1>
             <?php endif; ?>
 
             <div class="faq-list__search" role="search">
-                <label class="screen-reader-text" for="<?php echo esc_attr($block_id); ?>">Search FAQs</label>
+                <label class="screen-reader-text" for="faq-list-search">Search FAQs</label>
                 <div class="faq-list__search-field">
-                    <input id="<?php echo esc_attr($block_id); ?>" class="faq-list__search-input" type="search"
-                        placeholder="<?php echo esc_attr($atts['searchPlaceholder']); ?>" data-faq-search />
-                    <?php if (!empty($atts['searchButtonLabel'])): ?>
+                    <input id="faq-list-search" class="faq-list__search-input" type="search"
+                        placeholder="<?php echo esc_attr($searchPlaceholder); ?>" data-faq-search />
+                    <?php if (!empty($searchButtonLabel)): ?>
                         <button class="faq-list__search-button" type="button" data-faq-search-button>
-                            <?php echo esc_html($atts['searchButtonLabel']); ?>
+                            <?php echo esc_html($searchButtonLabel); ?>
                         </button>
                     <?php endif; ?>
                 </div>
@@ -112,14 +78,20 @@ if (empty($category_list)) {
 
         <div class="faq-list__grid">
             <aside class="faq-list__sidebar">
-                <?php if (!empty($category_list)): ?>
+                <?php if (!empty($categories)): ?>
                     <div class="faq-list__categories" role="tablist">
-                        <?php foreach ($category_list as $index => $category): ?>
+                        <?php foreach ($categories as $index => $category): ?>
+                            <?php
+                            $category_label = isset($category['label']) ? (string) $category['label'] : '';
+                            $category_id = isset($category['id']) ? (string) $category['id'] : '';
+                            $category_key_source = '' !== trim($category_id) ? $category_id : $category_label;
+                            $category_key = $normalize_category($category_key_source);
+                            ?>
                             <button class="faq-list__category<?php echo 0 === $index ? ' is-active' : ''; ?>" type="button"
-                                data-faq-category-button="<?php echo esc_attr($category['id']); ?>"
+                                data-faq-category-button="<?php echo esc_attr($category_key); ?>"
                                 aria-pressed="<?php echo 0 === $index ? 'true' : 'false'; ?>">
                                 <span class="faq-list__category-label">
-                                    <?php echo esc_html($category['label']); ?>
+                                    <?php echo esc_html($category_label); ?>
                                 </span>
                                 <span class="faq-list__category-icon" aria-hidden="true">></span>
                             </button>
@@ -138,14 +110,14 @@ if (empty($category_list)) {
                             }
                             ?>
                             <div class="faq-list__disclaimer">
-                                <?php if ('' !== trim($title)): ?>
+                                <?php if ('' !== trim($disclaimer['title'] ?? '')): ?>
                                     <h3 class="faq-list__disclaimer-title">
-                                        <?php echo esc_html($title); ?>
+                                        <?php echo esc_html($disclaimer['title'] ?? ''); ?>
                                     </h3>
                                 <?php endif; ?>
-                                <?php if ('' !== trim($body)): ?>
+                                <?php if ('' !== trim($disclaimer['body'] ?? '')): ?>
                                     <div class="faq-list__disclaimer-body">
-                                        <?php echo wp_kses_post(wpautop($body)); ?>
+                                        <?php echo wp_kses_post(wpautop($disclaimer['body'] ?? '')); ?>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -155,15 +127,15 @@ if (empty($category_list)) {
             </aside>
 
             <div class="faq-list__content">
-                <?php if (!empty($atts['title'])): ?>
+                <?php if (!empty($title)): ?>
                     <h2 class="faq-list__title">
-                        <?php echo esc_html($atts['title']); ?>
+                        <?php echo esc_html($title); ?>
                     </h2>
                 <?php endif; ?>
 
-                <?php if (!empty($atts['subtitle'])): ?>
+                <?php if (!empty($subtitle)): ?>
                     <p class="faq-list__subtitle">
-                        <?php echo esc_html($atts['subtitle']); ?>
+                        <?php echo esc_html($subtitle); ?>
                     </p>
                 <?php endif; ?>
 
@@ -176,29 +148,14 @@ if (empty($category_list)) {
                     <?php else: ?>
                         <?php foreach ($items as $item): ?>
                             <?php
-                            $question = isset($item['question']) ? $item['question'] : '';
-                            $answer = isset($item['answer']) ? $item['answer'] : '';
-                            $answer_text = trim($answer);
-                            if ('' === $answer_text) {
-                                $answer_text = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+                            $question = isset($item['question']) ? (string) $item['question'] : '';
+                            $answer = isset($item['answer']) ? (string) $item['answer'] : '';
+                            $category = isset($item['category']) ? (string) $item['category'] : '';
+                            $category_key = $normalize_category($category);
+                            if ('' !== $category_key && isset($category_map[$category_key])) {
+                                $category_key = $category_map[$category_key];
                             }
-                            $raw_category = isset($item['category']) ? $item['category'] : (isset($item['categoryId']) ? $item['categoryId'] : '');
-                            $category_key = '';
-                            if ('' !== trim($raw_category)) {
-                                $normalized = sanitize_title($raw_category);
-                                if (isset($category_id_map[$normalized])) {
-                                    $category_key = $normalized;
-                                } elseif (isset($category_label_map[$normalized])) {
-                                    $category_key = $category_label_map[$normalized];
-                                } else {
-                                    $category_key = $normalized;
-                                }
-                            }
-                            if ('' === $category_key && !empty($category_list)) {
-                                $category_key = $category_list[0]['id'];
-                            }
-
-                            $search_text = strtolower(wp_strip_all_tags($question . ' ' . $answer));
+                            $search_text = strtolower(trim(wp_strip_all_tags($question . ' ' . $answer . ' ' . $category)));
                             ?>
                             <details class="faq-list__item" name="<?php echo esc_attr($accordion_id); ?>" data-faq-item
                                 data-faq-category="<?php echo esc_attr($category_key); ?>"
@@ -211,7 +168,7 @@ if (empty($category_list)) {
                                 </summary>
                                 <div class="faq-list__answer">
                                     <p>
-                                        <?php echo esc_html($answer_text); ?>
+                                        <?php echo esc_html($answer); ?>
                                     </p>
                                 </div>
                             </details>
@@ -220,29 +177,29 @@ if (empty($category_list)) {
                 </div>
 
                 <p class="faq-list__empty" hidden>
-                    <?php echo esc_html($atts['emptyMessage']); ?>
+                    <?php echo esc_html($emptyMessage); ?>
                 </p>
             </div>
         </div>
     </div>
-    <?php if (!empty($atts['showCommunityCta'])): ?>
+    <?php if (!empty($showCommunityCta)): ?>
         <div class="faq-community">
             <div class="faq-community__inner">
-                <?php if (!empty($atts['communityHeading'])): ?>
+                <?php if (!empty($communityHeading)): ?>
                     <h2 class="faq-community__title">
-                        <?php echo wp_kses_post($atts['communityHeading']); ?>
+                        <?php echo wp_kses_post($communityHeading); ?>
                     </h2>
                 <?php endif; ?>
 
-                <?php if (!empty($atts['communityText'])): ?>
+                <?php if (!empty($communityText)): ?>
                     <p class="faq-community__text">
-                        <?php echo esc_html($atts['communityText']); ?>
+                        <?php echo esc_html($communityText); ?>
                     </p>
                 <?php endif; ?>
 
-                <?php if (!empty($atts['communityButtonText']) && !empty($atts['communityButtonUrl'])): ?>
-                    <a class="faq-community__button" href="<?php echo esc_url($atts['communityButtonUrl']); ?>">
-                        <?php echo esc_html($atts['communityButtonText']); ?>
+                <?php if (!empty($communityButtonText) && !empty($communityButtonUrl)): ?>
+                    <a class="faq-community__button" href="<?php echo esc_url($communityButtonUrl); ?>">
+                        <?php echo esc_html($communityButtonText); ?>
                     </a>
                 <?php endif; ?>
             </div>

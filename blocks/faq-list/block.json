@@ -13,31 +13,31 @@
   "attributes": {
     "heading": {
       "type": "string",
-      "default": "How can we <span class=\"faq-list__accent\">help you?</span>"
+      "default": ""
     },
     "searchPlaceholder": {
       "type": "string",
-      "default": "Search here"
+      "default": ""
     },
     "searchButtonLabel": {
       "type": "string",
-      "default": "Search"
+      "default": ""
     },
     "title": {
       "type": "string",
-      "default": "Frequently Asked Questions"
+      "default": ""
     },
     "subtitle": {
       "type": "string",
-      "default": "Quick answers to your questions about shipping, returns, and how to get the most out of our products"
+      "default": ""
     },
     "categories": {
       "type": "array",
       "default": [
-        { "label": "Product Information" },
-        { "label": "About the Company" },
-        { "label": "Distributors & Reseller Inquiries" },
-        { "label": "Customer Support" }
+        { "label": "" },
+        { "label": "" },
+        { "label": "" },
+        { "label": "" }
       ],
       "items": {
         "type": "object"
@@ -47,14 +47,14 @@
       "type": "array",
       "default": [
         {
-          "question": "What products are offered under Noyona Cosmetics?",
+          "question": "",
           "answer": "",
-          "category": "Product Information"
+          "category": ""
         },
         {
-          "question": "What products are offered under Lovial?",
+          "question": "",
           "answer": "",
-          "category": "Product Information"
+          "category": ""
         }
       ],
       "items": {
@@ -65,12 +65,12 @@
       "type": "array",
       "default": [
         {
-          "title": "Disclaimer",
-          "body": "Product information provided on this website is for general informational purposes only. Individual results may vary. Products are not intended to diagnose, treat, cure, or prevent any disease. Always follow usage instructions on the product label. For individuals with sensitive skin, scalp conditions, or medical concerns, please consult a healthcare professional before use."
+          "title": "",
+          "body": ""
         },
         {
-          "title": "Hair Color Disclaimer",
-          "body": "Hair color results may vary depending on hair type, condition, and previous treatments. A patch test is strongly recommended prior to full application."
+          "title": "",
+          "body": ""
         }
       ],
       "items": {
@@ -79,19 +79,19 @@
     },
     "emptyMessage": {
       "type": "string",
-      "default": "No questions found."
+      "default": ""
     },
     "showCommunityCta": { "type": "boolean", "default": false },
     "communityHeading": {
       "type": "string",
-      "default": "<span class=\"faq-community__accent\">Connect</span> with our <span class=\"faq-community__accent\">Community</span>"
+      "default": ""
     },
     "communityText": {
       "type": "string",
-      "default": "Stay updated on product drops, ingredient deep-dives, application tips, and behind-the-scenes content from our team."
+      "default": ""
     },
-    "communityButtonText": { "type": "string", "default": "Get in Touch" },
-    "communityButtonUrl": { "type": "string", "default": "/contact/" }
+    "communityButtonText": { "type": "string", "default": "" },
+    "communityButtonUrl": { "type": "string", "default": "" }
 
   },
   "style": "file:./style.css",
