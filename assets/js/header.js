@@ -2,7 +2,7 @@
  * Header behavior: add sticky/scroll classes and wire wishlist drawer.
  */
 (function () {
-    const STICKY_AT = 120; // px from top before switching to dark pink
+    const STICKY_AT = 15; // px from top before switching to dark pink
 
     function toggleScrollState() {
         const y = window.scrollY || window.pageYOffset || 0;

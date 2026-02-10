@@ -29,18 +29,46 @@
   color: #666;
 }
 
-/* Grid: 3–4 phones responsive */
-/* Grid: 3–4 phones responsive (Flexbox for centering 2+1) */
+/* Grid: 3–4 phones responsive (Flexbox Desktop, Snap Carousel Mobile) */
 .phone-reviews__grid{
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: clamp(2rem, 3vw, 3rem);
-  max-width: 1400px; /* Increased to fit 3x 420px cards */
+  gap: clamp(1.5rem, 3vw, 3rem);
+  max-width: 1400px; 
   margin: 0 auto;
+  transition: all 0.3s ease;
 }
 
-/* Phone card wrapper (perspective + floor shadow) */
+@media (max-width: 991px) {
+  .phone-reviews__grid {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 1.5rem 12% 3rem; /* padding creates the 'peek' space */
+    gap: 1.5rem;
+    scrollbar-width: none; /* Hide scrollbar */
+    -ms-overflow-style: none;
+  }
+  
+  .phone-reviews__grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .phone-card {
+    flex: 0 0 100%; 
+    max-width: none;
+    scroll-snap-align: center;
+  }
+
+  .phone-card__shell {
+    max-width: 300px; 
+    margin: 0 auto;
+  }
+}
+
+/* Phone card wrapper */
 .phone-card{
   position: relative;
   display: flex;
@@ -48,44 +76,42 @@
   align-items: center;
   perspective: 1200px;
   cursor: pointer;
+  width: 100%;
+  max-width: 420px;
 }
 
-/* Ground / floor shadow */
-.phone-card::before{
-  content: "";
-  position: absolute;
-  bottom: -0.4rem;
-  left: 50%;
-  transform: translateX(-40%);
-  width: 80%;
-  height: 1.2rem;
-  filter: blur(4px);
-  opacity: .9;
-  z-index: 0;
-  pointer-events: none;
+/* Landscape Mode for sideways phone */
+.phone-card[data-aspect="landscape"] {
+  max-width: 600px;
+}
+
+.phone-card[data-aspect="landscape"] .phone-card__shell {
+  aspect-ratio: 16 / 9;
+}
+
+.phone-card[data-aspect="landscape"] .phone-card__shell::before {
+  /* Move notch to the side if landscape */
+  top: 50%;
+  left: .42rem;
+  transform: translateY(-50%);
+  width: .4rem;
+  height: 20%;
 }
 
 /* Phone shell – 3D look */
 .phone-card__shell{
   position: relative;
   width: 100%;
-  max-width: 420.192px;
-  aspect-ratio: 420.192 / 849.038;
+  aspect-ratio: 11 / 19.5;
   border-radius: 2.1rem;
   background: radial-gradient(circle at 20% 0%, #444 0, #111 40%, #000 100%);
   padding: .44rem;
-  /* box-shadow:
-    -14px 22px 40px rgba(0,0,0,.55),
-    -3px 6px 14px rgba(0,0,0,.35),
-    0 0 0 1px rgba(255,255,255,.06); */
   display: flex;
   align-items: stretch;
   justify-content: stretch;
   overflow: hidden;
   transform-style: preserve-3d;
-  transition:
-    transform 260ms ease-out,
-    box-shadow 260ms ease-out;
+  transition: transform 260ms ease-out, box-shadow 260ms ease-out;
 }
 
 /* subtle side highlight */
@@ -109,10 +135,6 @@
 /* Hover: lift + tilt */
 .phone-card__shell:hover{
   transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
-  /* box-shadow:
-    -18px 26px 50px rgba(0,0,0,.65),
-    -5px 9px 18px rgba(0,0,0,.4),
-    0 0 0 1px rgba(255,255,255,.08); */
 }
 
 /* Notch */
@@ -175,17 +197,7 @@
 }
 
 
-/* Narrow screens: stack phones */
-@media (max-width: 768px){
-  .phone-reviews__grid{
-    grid-template-columns: minmax(220px, 1fr);
-    max-width: 360px;
-  }
 
-  .phone-card__shell{
-    max-width: 240px;
-  }
-}
 
 /* ===========================
    Cinematic overlay
@@ -211,11 +223,9 @@
   backdrop-filter: blur(3px);
 }
 
-/* Horizontal phone shell in overlay */
+/* Cinematic overlay */
 .phone-reviews__overlay-shell{
   position: relative;
-  width: min(90vw, 960px);
-  aspect-ratio: 19.5 / 9;
   border-radius: 2rem;
   background: radial-gradient(circle at 20% 0%, #444 0, #111 40%, #000 100%);
   padding: .6rem;
@@ -224,8 +234,27 @@
     0 0 0 1px rgba(255,255,255,.08);
   overflow: hidden;
   transform-origin: center center;
-  transform: rotate(90deg) scale(.55);
   transition: transform 380ms cubic-bezier(.22,.61,.36,1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Portrait Overlay (Reels/Tiktok) */
+.phone-reviews__overlay-shell[data-aspect="portrait"] {
+  width: min(90vw, 370px);
+  aspect-ratio: 11 / 19.5;
+  transform: rotate(90deg) scale(0.5); /* Starting rotation/scale */
+}
+
+/* Landscape Overlay (Standard Video) */
+.phone-reviews__overlay-shell[data-aspect="landscape"] {
+  width: min(90vw, 960px);
+  aspect-ratio: 19.5 / 9;
+  transform: rotate(-90deg) scale(0.5); /* Different rotation for wide */
+}
+
+.phone-reviews__overlay.is-open .phone-reviews__overlay-shell {
+  transform: rotate(0deg) scale(1);
 }
 
 .phone-reviews__overlay-screen{
@@ -234,9 +263,6 @@
   border-radius: 1.5rem;
   overflow: hidden;
   background: #000;
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.08),
-    inset 0 0 40px rgba(0,0,0,.9);
 }
 
 .phone-reviews__overlay-screen iframe{
@@ -406,15 +432,9 @@ html.phone-reviews--overlay-open{
   color: #ffffffc5;
 }
 
-/* Breakpoint: tablet and below → hide phones, show tablet carousel */
-@media (max-width: 1024px){
-  .phone-reviews__grid{
-    display: none;
-  }
-
-  .phone-reviews__carousel{
-    display: block;
-  }
+/* Ensure grid is visible on all screens, carousel markup removed in render.php */
+.phone-reviews__carousel{
+  display: none;
 }
 /* Accent for Header */
 .phone-reviews__title-accent {

@@ -98,7 +98,9 @@ $print_card = function (array $card) {
 				<!-- stroke="red" stroke-width="2" -->
 			</svg>
 
-			<div class="product-card__body-inner">
+			<div class="product-card__body-inner" data-type="<?php echo esc_attr($card['type'] ?? 'face'); ?>"
+				data-price="<?php echo (float) preg_replace('/[^0-9.]/', '', $price); ?>"
+				data-rating="<?php echo (float) $rating; ?>">
 				<header class="product-card__header">
 					<h3 class="product-card__title">
 						<a href="<?php echo esc_url($url); ?>" style="text-decoration:none;color:inherit;">
@@ -133,11 +135,11 @@ $print_card = function (array $card) {
 				</div>
 			</div>
 
-			<button class="product-card__cart" type="button" aria-label="Add to cart">
+			<a class="product-card__cart" href="<?php echo esc_url($url); ?>" aria-label="Add to cart">
 				<span class="product-card__cart-icon">
 					<i class="fas fa-shopping-cart"></i>
 				</span>
-			</button>
+			</a>
 		</div>
 	</article>
 	<?php
@@ -202,10 +204,48 @@ ob_start();
 
 		<?php if ($view_all_label): ?>
 			<div class="discover-carousel__filter-wrap">
-				<button class="discover-carousel__filter-btn">
-					<?php echo esc_html($view_all_label); ?>
-					<i class="fas fa-caret-down"></i>
-				</button>
+				<div class="discover-carousel__filter-dropdown">
+					<button class="discover-carousel__filter-btn" type="button" aria-expanded="false">
+						<span><?php echo esc_html($view_all_label); ?></span>
+						<i class="fas fa-caret-down"></i>
+					</button>
+					<div class="discover-carousel__filter-menu">
+						<button type="button" class="filter-item is-active" data-filter="all">All Products</button>
+
+						<div class="filter-divider">Type</div>
+						<div class="filter-group--types">
+							<button type="button" class="filter-item" data-filter="type" data-value="eyes">Eyes</button>
+							<button type="button" class="filter-item" data-filter="type" data-value="lips">Lips</button>
+							<button type="button" class="filter-item" data-filter="type" data-value="face">Face</button>
+							<button type="button" class="filter-item" data-filter="type" data-value="body">Body</button>
+							<button type="button" class="filter-item" data-filter="type" data-value="hair">Hair</button>
+						</div>
+
+						<div class="filter-divider">Max Price</div>
+						<div class="filter-range-group">
+							<div class="range-labels">
+								<span>₱0</span>
+								<span id="price-val">₱1000</span>
+							</div>
+							<input type="range" class="filter-range" id="price-slider" min="0" max="1000" step="10"
+								value="1000" data-filter="price-range">
+						</div>
+
+						<div class="filter-divider">Min Rating</div>
+						<div class="filter-range-group">
+							<div class="range-labels">
+								<span id="rating-val">0★</span>
+								<span>5★</span>
+							</div>
+							<input type="range" class="filter-range" id="rating-slider" min="0" max="5" step="0.1" value="0"
+								data-filter="rating-range">
+						</div>
+
+						<div class="filter-footer">
+							<button type="button" class="filter-reset-btn">Reset Filters</button>
+						</div>
+					</div>
+				</div>
 			</div>
 		<?php endif; ?>
 	</div>
@@ -215,6 +255,16 @@ ob_start();
 
 		<!-- ===== Peek slider (all screens) ===== -->
 		<div class="peek-shell" role="region" aria-roledescription="carousel" aria-label="<?php echo $ariaLabel_esc; ?>">
+
+			<!-- Empty State Message -->
+			<div class="discover-carousel__empty-state" style="display: none;">
+				<div class="empty-state-inner">
+					<i class="fas fa-search"></i>
+					<h3>No products found</h3>
+					<p>Try adjusting your filters or search for something else.</p>
+					<!-- <button type="button" class="filter-reset-btn">Clear all filters</button> -->
+				</div>
+			</div>
 
 			<div class="peek-slider">
 				<div class="peek-track">
@@ -366,5 +416,169 @@ ob_start();
 
 		// Initial state
 		setActiveByCenter();
+
+		// Filtering State
+		let currentType = 'all';
+		let currentPrice = 1000;
+		let currentRating = 0;
+
+		const filterBtn = scope.querySelector('.discover-carousel__filter-btn');
+		const filterBtnTextIcon = filterBtn ? filterBtn.querySelector('span') : null;
+		const typeButtons = scope.querySelectorAll('.filter-item');
+		const priceSlider = scope.querySelector('#price-slider');
+		const ratingSlider = scope.querySelector('#rating-slider');
+		const priceVal = scope.querySelector('#price-val');
+		const ratingVal = scope.querySelector('#rating-val');
+		const resetBtn = scope.querySelector('.filter-reset-btn');
+		const arrowsWrap = scope.querySelector('.discover-carousel__arrows');
+		const indicatorsWrap = scope.querySelector('.peek-indicators');
+		const emptyState = scope.querySelector('.discover-carousel__empty-state');
+		const sliderArea = scope.querySelector('.peek-slider');
+
+		function updateFilters() {
+			let visibleCount = 0;
+
+			slides.forEach(slide => {
+				const cardInner = slide.querySelector('.product-card__body-inner');
+				if (!cardInner) return;
+
+				const type = cardInner.dataset.type;
+				const price = parseFloat(cardInner.dataset.price);
+				const rating = parseFloat(cardInner.dataset.rating);
+
+				const matchesType = (currentType === 'all' || type === currentType);
+				const matchesPrice = (price <= currentPrice);
+				const matchesRating = (rating >= currentRating);
+
+				if (matchesType && matchesPrice && matchesRating) {
+					slide.style.display = 'flex';
+					slide.classList.add('peek-slide--visible');
+					visibleCount++;
+				} else {
+					slide.style.display = 'none';
+					slide.classList.remove('peek-slide--visible');
+				}
+			});
+
+			// Toggle Empty State Message
+			if (visibleCount === 0) {
+				if (emptyState) emptyState.style.display = 'block';
+				if (sliderArea) sliderArea.style.display = 'none';
+				if (arrowsWrap) arrowsWrap.style.display = 'none';
+				if (indicatorsWrap) indicatorsWrap.style.display = 'none';
+			} else {
+				if (emptyState) emptyState.style.display = 'none';
+				if (sliderArea) sliderArea.style.display = 'block';
+
+				if (track) {
+					const containerWidth = container.clientWidth;
+					const slideSample = slides.find(s => s.style.display !== 'none');
+					const slideWidth = slideSample ? slideSample.offsetWidth : 450;
+					const gap = 24;
+					const totalWidth = (visibleCount * slideWidth) + ((visibleCount - 1) * gap);
+
+					if (totalWidth <= containerWidth) {
+						track.classList.add('is-centered');
+						if (arrowsWrap) arrowsWrap.style.display = 'none';
+						if (indicatorsWrap) indicatorsWrap.style.display = 'none';
+					} else {
+						track.classList.remove('is-centered');
+						if (arrowsWrap) arrowsWrap.style.display = '';
+						if (indicatorsWrap) indicatorsWrap.style.display = '';
+					}
+				}
+			}
+
+			dots.forEach((dot, idx) => {
+				dot.style.display = slides[idx].style.display === 'none' ? 'none' : 'inline-block';
+			});
+
+			typeButtons.forEach(btn => {
+				if (btn.dataset.filter === 'all' || btn.classList.contains('filter-reset-btn')) return;
+				const filterVal = btn.dataset.value;
+				const hasProducts = slides.some(s => {
+					const ci = s.querySelector('.product-card__body-inner');
+					return ci && ci.dataset.type === filterVal;
+				});
+				btn.disabled = !hasProducts;
+			});
+
+			container.scrollTo({ left: 0, behavior: 'auto' });
+			setActiveByCenter();
+		}
+
+		typeButtons.forEach(btn => {
+			btn.addEventListener('click', function () {
+				if (this.dataset.filter !== 'type' && this.dataset.filter !== 'all') return;
+
+				if (this.dataset.filter === 'all') {
+					currentPrice = 1000;
+					currentRating = 0;
+					if (priceSlider) priceSlider.value = 1000;
+					if (ratingSlider) ratingSlider.value = 0;
+					if (priceVal) priceVal.textContent = '₱1000';
+					if (ratingVal) ratingVal.textContent = '0★';
+				}
+
+				currentType = this.dataset.value || 'all';
+				typeButtons.forEach(b => b.classList.remove('is-active'));
+				this.classList.add('is-active');
+
+				if (filterBtnTextIcon) filterBtnTextIcon.textContent = this.textContent;
+				updateFilters();
+			});
+		});
+
+		priceSlider?.addEventListener('input', function () {
+			currentPrice = parseFloat(this.value);
+			if (priceVal) priceVal.textContent = `₱${currentPrice}`;
+			updateFilters();
+		});
+
+		ratingSlider?.addEventListener('input', function () {
+			currentRating = parseFloat(this.value);
+			if (ratingVal) ratingVal.textContent = `${currentRating}★`;
+			updateFilters();
+		});
+
+		const allResetButtons = scope.querySelectorAll('.filter-reset-btn');
+		allResetButtons.forEach(btn => {
+			btn.addEventListener('click', function () {
+				currentType = 'all';
+				currentPrice = 1000;
+				currentRating = 0;
+				typeButtons.forEach(b => b.classList.remove('is-active'));
+				const allBtn = Array.from(typeButtons).find(b => b.dataset.filter === 'all');
+				if (allBtn) allBtn.classList.add('is-active');
+				if (priceSlider) priceSlider.value = 1000;
+				if (ratingSlider) ratingSlider.value = 0;
+				if (priceVal) priceVal.textContent = '₱1000';
+				if (ratingVal) ratingVal.textContent = '0★';
+				if (filterBtnTextIcon) filterBtnTextIcon.textContent = 'All Products';
+				updateFilters();
+			});
+		});
+
+		// Favorite button toggle
+		const favoriteButtons = scope.querySelectorAll('.product-card__favorite');
+		favoriteButtons.forEach(btn => {
+			btn.addEventListener('click', function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+				this.classList.toggle('is-active');
+				const icon = this.querySelector('i');
+				if (this.classList.contains('is-active')) {
+					icon.classList.remove('far');
+					icon.classList.add('fas');
+				} else {
+					icon.classList.remove('fas');
+					icon.classList.add('far');
+				}
+			});
+		});
+
+		// Initialize
+		slides.forEach(s => s.classList.add('peek-slide--visible'));
+		updateFilters();
 	})();
 </script>

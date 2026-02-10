@@ -25,7 +25,7 @@ header.wp-block-template-part {
     padding-right: var(--page-gutter-right, 1rem);
     padding-top: 1rem;
     padding-bottom: 1rem;
-    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* When header is sticky (scrolled) – dark pink */
