@@ -11,7 +11,7 @@
 }
 
 .faq-block__inner {
-    max-width: 960px;
+    /* max-width: 960px; */
     margin: 0 auto;
     text-align: center;
 }
@@ -41,11 +41,12 @@
     color: #fff;
     text-decoration: none;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: clamp(16px, 1.2vw, 18px);
     box-shadow: 0 4px 10px rgba(227, 11, 93, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     margin-top: 1.5rem;
     border-radius: 12px;
+    font-family: var(--wp--preset--font-family--proxima-nova);
 }
 
 .faq-block__button:hover {
@@ -58,7 +59,7 @@
     flex-direction: column;
     gap: 1rem;
     margin: 0 auto;
-    max-width: 720px;
+    /* max-width: 720px; */
     text-align: left;
 }
 

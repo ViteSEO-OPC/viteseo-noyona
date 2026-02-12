@@ -1,190 +1,78 @@
 <?php
 /**
- * Terms Block Template.
+ * Terms Policy Block Template.
  */
 
 $defaults = array(
-    'heading'      => 'Terms & Policy',
-    'subheading'   => 'At Noyona Cosmetics and Skin Care Products OPC, we prioritize transparency and trust by providing clear guidelines on how we handle your orders, protect your rights, and ensure a seamless shopping experience.',
-    'tocTitle'     => 'Terms of Service',
-    'tocItems'     => array(),
-    'contentTitle' => 'Terms of Service',
-    'intro'        => array(),
-    'sections'     => array(),
-    'policies'     => array(),
-    'tabs'         => array(),
+    'heading'             => 'Terms & Policy',
+    'subheading'          => 'At Noyona Cosmetics and Skin Care Products OPC, we prioritize transparency and trust by providing clear guidelines on how we handle your orders, protect your rights, and ensure a seamless shopping experience.',
+    'breadcrumbRootLabel' => 'Terms & Policy',
+    'breadcrumbRootUrl'   => '/terms/',
+    'breadcrumbCurrent'   => '',
+    'tocTitle'            => '',
+    'tocItems'            => array(),
+    'contentTitle'        => 'Terms of Service',
+    'intro'               => array(),
+    'sections'            => array(),
 );
 
 $atts = wp_parse_args( $attributes, $defaults );
+
+$sections  = is_array( $atts['sections'] ) ? $atts['sections'] : array();
 $toc_items = is_array( $atts['tocItems'] ) ? $atts['tocItems'] : array();
-$sections = is_array( $atts['sections'] ) ? $atts['sections'] : array();
-$intro = is_array( $atts['intro'] ) ? $atts['intro'] : array();
-$policies = is_array( $atts['policies'] ) ? $atts['policies'] : array();
-$tabs = is_array( $atts['tabs'] ) ? $atts['tabs'] : array();
+$intro     = is_array( $atts['intro'] ) ? $atts['intro'] : array();
+$allowed_inline_html = array(
+    'a'      => array(
+        'href'   => array(),
+        'title'  => array(),
+        'target' => array(),
+        'rel'    => array(),
+    ),
+    'strong' => array(),
+    'em'     => array(),
+    'br'     => array(),
+);
 
-$has_tabs = ! empty( $tabs );
-$tab_panels = array();
+$used_ids = array();
+$computed_toc = array();
 
-if ( $has_tabs ) {
-    $tab_entries = array();
-    $base_label = $atts['tocTitle'] ? $atts['tocTitle'] : ( $atts['contentTitle'] ? $atts['contentTitle'] : 'Terms' );
-    $base_id = sanitize_title( $base_label );
-    if ( '' === $base_id ) {
-        $base_id = 'terms';
-    }
+if ( ! empty( $sections ) ) {
+    foreach ( $sections as $index => $section ) {
+        $label   = isset( $section['title'] ) ? $section['title'] : '';
+        $raw_id  = isset( $section['id'] ) ? $section['id'] : '';
+        $base_id = $raw_id ? sanitize_title( $raw_id ) : sanitize_title( $label );
 
-    $tab_entries[] = array(
-        'id'           => $base_id,
-        'label'        => $base_label,
-        'tocTitle'     => $atts['tocTitle'],
-        'contentTitle' => $atts['contentTitle'],
-        'tocItems'     => $toc_items,
-        'intro'        => $intro,
-        'sections'     => $sections,
-    );
-
-    foreach ( $tabs as $index => $tab ) {
-        if ( ! is_array( $tab ) ) {
-            continue;
+        if ( '' === $base_id ) {
+            $base_id = 'section-' . ( $index + 1 );
         }
 
-        $tab_label = isset( $tab['label'] ) ? $tab['label'] : '';
-        $fallback_label = $tab_label;
-        if ( '' === $fallback_label && isset( $tab['tocTitle'] ) ) {
-            $fallback_label = $tab['tocTitle'];
-        }
-        if ( '' === $fallback_label && isset( $tab['contentTitle'] ) ) {
-            $fallback_label = $tab['contentTitle'];
-        }
-        if ( '' === $fallback_label ) {
-            $fallback_label = 'Tab ' . ( $index + 1 );
+        $resolved_id = $base_id;
+        $suffix = 2;
+        while ( in_array( $resolved_id, $used_ids, true ) ) {
+            $resolved_id = $base_id . '-' . $suffix;
+            $suffix++;
         }
 
-        $tab_id = isset( $tab['id'] ) ? sanitize_title( $tab['id'] ) : '';
-        if ( '' === $tab_id ) {
-            $tab_id = sanitize_title( $fallback_label );
-        }
-        if ( '' === $tab_id ) {
-            $tab_id = 'tab-' . ( $index + 1 );
-        }
+        $used_ids[] = $resolved_id;
+        $sections[ $index ]['resolvedId'] = $resolved_id;
 
-        $tab_entries[] = array(
-            'id'           => $tab_id,
-            'label'        => $fallback_label,
-            'tocTitle'     => isset( $tab['tocTitle'] ) ? $tab['tocTitle'] : '',
-            'contentTitle' => isset( $tab['contentTitle'] ) ? $tab['contentTitle'] : '',
-            'tocItems'     => isset( $tab['tocItems'] ) ? $tab['tocItems'] : array(),
-            'intro'        => isset( $tab['intro'] ) ? $tab['intro'] : array(),
-            'sections'     => isset( $tab['sections'] ) ? $tab['sections'] : array(),
+        $computed_toc[] = array(
+            'id'    => $resolved_id,
+            'label' => $label ? $label : 'Section ' . ( $index + 1 ),
         );
-    }
-
-    $prefix_ids = count( $tab_entries ) > 1;
-    $used_ids = array();
-
-    foreach ( $tab_entries as $tab_entry ) {
-        $tab_id = $tab_entry['id'];
-        $tab_label = $tab_entry['label'];
-        $tab_toc_items = is_array( $tab_entry['tocItems'] ) ? $tab_entry['tocItems'] : array();
-        $tab_sections = is_array( $tab_entry['sections'] ) ? $tab_entry['sections'] : array();
-        $tab_intro = is_array( $tab_entry['intro'] ) ? $tab_entry['intro'] : array();
-
-        if ( $prefix_ids && ! empty( $tab_toc_items ) ) {
-            foreach ( $tab_toc_items as $item_index => $item ) {
-                $item_id = isset( $item['id'] ) ? $item['id'] : '';
-                if ( '' === $item_id ) {
-                    continue;
-                }
-                $base_id = sanitize_title( $item_id );
-                if ( '' === $base_id ) {
-                    continue;
-                }
-                $tab_toc_items[ $item_index ]['id'] = $tab_id . '-' . $base_id;
-            }
-        }
-
-        $computed_toc = array();
-
-        if ( ! empty( $tab_sections ) ) {
-            foreach ( $tab_sections as $section_index => $section ) {
-                $section_label = isset( $section['title'] ) ? $section['title'] : '';
-                $raw_id = isset( $section['id'] ) ? $section['id'] : '';
-                $base_id = $raw_id ? sanitize_title( $raw_id ) : sanitize_title( $section_label );
-                if ( '' === $base_id ) {
-                    $base_id = 'section-' . ( $section_index + 1 );
-                }
-                if ( $prefix_ids ) {
-                    $base_id = $tab_id . '-' . $base_id;
-                }
-
-                $resolved_id = $base_id;
-                $suffix = 2;
-                while ( in_array( $resolved_id, $used_ids, true ) ) {
-                    $resolved_id = $base_id . '-' . $suffix;
-                    $suffix++;
-                }
-
-                $used_ids[] = $resolved_id;
-                $tab_sections[ $section_index ]['resolvedId'] = $resolved_id;
-
-                $toc_label = $section_label ? $section_label : 'Section ' . ( $section_index + 1 );
-                $computed_toc[] = array(
-                    'id'    => $resolved_id,
-                    'label' => $toc_label,
-                );
-            }
-        }
-
-        if ( empty( $tab_toc_items ) && ! empty( $computed_toc ) ) {
-            $tab_toc_items = $computed_toc;
-        }
-
-        $tab_panels[] = array(
-            'id'           => $tab_id,
-            'label'        => $tab_label,
-            'tocTitle'     => $tab_entry['tocTitle'],
-            'contentTitle' => $tab_entry['contentTitle'],
-            'tocItems'     => $tab_toc_items,
-            'intro'        => $tab_intro,
-            'sections'     => $tab_sections,
-        );
-    }
-} else {
-    $used_ids = array();
-    $computed_toc = array();
-
-    if ( ! empty( $sections ) ) {
-        foreach ( $sections as $index => $section ) {
-            $label = isset( $section['title'] ) ? $section['title'] : '';
-            $raw_id = isset( $section['id'] ) ? $section['id'] : '';
-            $base_id = $raw_id ? sanitize_title( $raw_id ) : sanitize_title( $label );
-            if ( '' === $base_id ) {
-                $base_id = 'section-' . ( $index + 1 );
-            }
-
-            $id = $base_id;
-            $suffix = 2;
-            while ( in_array( $id, $used_ids, true ) ) {
-                $id = $base_id . '-' . $suffix;
-                $suffix++;
-            }
-
-            $used_ids[] = $id;
-            $sections[ $index ]['resolvedId'] = $id;
-
-            $toc_label = $label ? $label : 'Section ' . ( $index + 1 );
-            $computed_toc[] = array(
-                'id'    => $id,
-                'label' => $toc_label,
-            );
-        }
-    }
-
-    if ( empty( $toc_items ) && ! empty( $computed_toc ) ) {
-        $toc_items = $computed_toc;
     }
 }
+
+if ( empty( $toc_items ) && ! empty( $computed_toc ) ) {
+    $toc_items = $computed_toc;
+}
+
+$breadcrumb_current = trim( (string) $atts['breadcrumbCurrent'] );
+if ( '' === $breadcrumb_current ) {
+    $breadcrumb_current = $atts['contentTitle'];
+}
 ?>
+
 <section class="wp-block-noyona-terms terms alignfull">
     <div class="terms__hero">
         <div class="terms__hero-inner">
@@ -198,183 +86,122 @@ if ( $has_tabs ) {
     </div>
 
     <div class="terms__body">
+        <nav class="terms__breadcrumbs" aria-label="Breadcrumb">
+            <a class="terms__crumb-link" href="/">Home</a>
+            <span class="terms__crumb-sep" aria-hidden="true">&gt;</span>
+            <?php if ( ! empty( $atts['breadcrumbRootLabel'] ) ) : ?>
+                <a class="terms__crumb-link" href="<?php echo esc_url( $atts['breadcrumbRootUrl'] ); ?>">
+                    <?php echo esc_html( $atts['breadcrumbRootLabel'] ); ?>
+                </a>
+            <?php endif; ?>
+            <span class="terms__crumb-sep" aria-hidden="true">&gt;</span>
+            <span class="terms__crumb-current"><?php echo esc_html( $breadcrumb_current ); ?></span>
+        </nav>
+
         <div class="terms__layout">
             <aside class="terms__toc" aria-label="Table of contents">
-                <?php if ( $has_tabs ) : ?>
-                    <?php foreach ( $tab_panels as $index => $tab ) : ?>
-                        <button
-                            class="terms__toc-button terms__tab-button<?php echo 0 === $index ? ' is-active' : ''; ?>"
-                            type="button"
-                            data-tab="<?php echo esc_attr( $tab['id'] ); ?>"
-                            aria-selected="<?php echo 0 === $index ? 'true' : 'false'; ?>"
-                            aria-expanded="<?php echo 0 === $index ? 'true' : 'false'; ?>"
-                        >
-                            <?php echo esc_html( $tab['label'] ); ?>
-                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
-                        </button>
-                        <div
-                            class="terms__toc-panel<?php echo 0 === $index ? ' is-active' : ''; ?>"
-                            data-tab="<?php echo esc_attr( $tab['id'] ); ?>"
-                            <?php echo 0 === $index ? '' : 'hidden="hidden"'; ?>
-                        >
-                            <div class="terms__toc-card">
-                                <?php if ( ! empty( $tab['tocItems'] ) ) : ?>
-                                    <ul class="terms__toc-list">
-                                        <?php foreach ( $tab['tocItems'] as $item ) : ?>
-                                            <?php
-                                            $label = isset( $item['label'] ) ? $item['label'] : '';
-                                            $id = isset( $item['id'] ) ? $item['id'] : '';
-                                            if ( '' === $label || '' === $id ) {
-                                                continue;
-                                            }
-                                            ?>
-                                            <li class="terms__toc-item">
-                                                <a class="terms__toc-link" href="#<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $label ); ?></a>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                <?php else : ?>
-                                    <p class="terms__toc-empty">Add sections to build the table of contents.</p>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else : ?>
-                    <?php if ( ! empty( $atts['tocTitle'] ) ) : ?>
-                        <span class="terms__toc-pill"><?php echo esc_html( $atts['tocTitle'] ); ?></span>
-                    <?php endif; ?>
+                <?php if ( ! empty( $atts['tocTitle'] ) ) : ?>
+                    <span class="terms__toc-pill"><?php echo esc_html( $atts['tocTitle'] ); ?></span>
+                <?php endif; ?>
 
-                    <div class="terms__toc-card">
-                        <?php if ( ! empty( $toc_items ) ) : ?>
-                            <ul class="terms__toc-list">
-                                <?php foreach ( $toc_items as $item ) : ?>
-                                    <?php
-                                    $label = isset( $item['label'] ) ? $item['label'] : '';
-                                    $id = isset( $item['id'] ) ? $item['id'] : '';
-                                    if ( '' === $label || '' === $id ) {
-                                        continue;
-                                    }
-                                    ?>
-                                    <li class="terms__toc-item">
-                                        <a class="terms__toc-link" href="#<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $label ); ?></a>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        <?php else : ?>
-                            <p class="terms__toc-empty">Add sections to build the table of contents.</p>
-                        <?php endif; ?>
-                    </div>
-
-                    <?php if ( ! empty( $policies ) ) : ?>
-                        <div class="terms__toc-actions">
-                            <?php foreach ( $policies as $policy ) : ?>
+                <div class="terms__toc-card">
+                    <?php if ( ! empty( $toc_items ) ) : ?>
+                        <ul class="terms__toc-list">
+                            <?php foreach ( $toc_items as $item ) : ?>
                                 <?php
-                                $policy_label = isset( $policy['label'] ) ? $policy['label'] : '';
-                                $policy_url = isset( $policy['url'] ) ? $policy['url'] : '#';
-                                if ( '' === $policy_label ) {
+                                $label = isset( $item['label'] ) ? $item['label'] : '';
+                                $id    = isset( $item['id'] ) ? $item['id'] : '';
+                                if ( '' === $label || '' === $id ) {
                                     continue;
                                 }
                                 ?>
-                                <a class="terms__toc-button" href="<?php echo esc_url( $policy_url ); ?>">
-                                    <?php echo esc_html( $policy_label ); ?>
-                                    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
-                                </a>
+                                <li class="terms__toc-item">
+                                    <a class="terms__toc-link" href="#<?php echo esc_attr( $id ); ?>">
+                                        <?php echo esc_html( $label ); ?>
+                                    </a>
+                                </li>
                             <?php endforeach; ?>
-                        </div>
+                        </ul>
+                    <?php else : ?>
+                        <p class="terms__toc-empty">Add sections to build the table of contents.</p>
                     <?php endif; ?>
-                <?php endif; ?>
+                </div>
             </aside>
 
             <div class="terms__content">
-                <?php if ( $has_tabs ) : ?>
-                    <?php foreach ( $tab_panels as $index => $tab ) : ?>
-                        <div
-                            class="terms__content-panel<?php echo 0 === $index ? ' is-active' : ''; ?>"
-                            data-tab="<?php echo esc_attr( $tab['id'] ); ?>"
-                            role="tabpanel"
-                            <?php echo 0 === $index ? '' : 'hidden="hidden"'; ?>
-                        >
-                            <?php if ( ! empty( $tab['contentTitle'] ) ) : ?>
-                                <h2 class="terms__content-title"><?php echo esc_html( $tab['contentTitle'] ); ?></h2>
-                            <?php endif; ?>
+                <?php if ( ! empty( $atts['contentTitle'] ) ) : ?>
+                    <h2 class="terms__content-title"><?php echo esc_html( $atts['contentTitle'] ); ?></h2>
+                <?php endif; ?>
 
-                            <?php if ( ! empty( $tab['intro'] ) ) : ?>
-                                <div class="terms__intro">
-                                    <?php foreach ( $tab['intro'] as $paragraph ) : ?>
-                                        <?php if ( '' !== trim( $paragraph ) ) : ?>
-                                            <p><?php echo esc_html( $paragraph ); ?></p>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
-                                </div>
+                <?php if ( ! empty( $intro ) ) : ?>
+                    <div class="terms__intro">
+                        <?php foreach ( $intro as $paragraph ) : ?>
+                            <?php if ( '' !== trim( $paragraph ) ) : ?>
+                                <p><?php echo esc_html( $paragraph ); ?></p>
                             <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
 
-                            <?php if ( ! empty( $tab['sections'] ) ) : ?>
-                                <div class="terms__sections">
-                                    <?php foreach ( $tab['sections'] as $section ) : ?>
-                                        <?php
-                                        $section_title = isset( $section['title'] ) ? $section['title'] : '';
-                                        $section_id = isset( $section['resolvedId'] ) ? $section['resolvedId'] : '';
-                                        $paragraphs = isset( $section['paragraphs'] ) && is_array( $section['paragraphs'] ) ? $section['paragraphs'] : array();
-                                        if ( '' === $section_title && empty( $paragraphs ) ) {
-                                            continue;
-                                        }
-                                        ?>
-                                        <section class="terms__section" id="<?php echo esc_attr( $section_id ); ?>">
-                                            <?php if ( $section_title ) : ?>
-                                                <h3 class="terms__section-title"><?php echo esc_html( $section_title ); ?></h3>
-                                            <?php endif; ?>
-                                            <?php foreach ( $paragraphs as $paragraph ) : ?>
-                                                <?php if ( '' !== trim( $paragraph ) ) : ?>
-                                                    <p><?php echo esc_html( $paragraph ); ?></p>
-                                                <?php endif; ?>
-                                            <?php endforeach; ?>
-                                        </section>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else : ?>
-                    <?php if ( ! empty( $atts['contentTitle'] ) ) : ?>
-                        <h2 class="terms__content-title"><?php echo esc_html( $atts['contentTitle'] ); ?></h2>
-                    <?php endif; ?>
+                <?php if ( ! empty( $sections ) ) : ?>
+                    <div class="terms__sections">
+                        <?php foreach ( $sections as $section ) : ?>
+                            <?php
+                            $section_title = isset( $section['title'] ) ? $section['title'] : '';
+                            $section_id    = isset( $section['resolvedId'] ) ? $section['resolvedId'] : '';
+                            $paragraphs    = isset( $section['paragraphs'] ) && is_array( $section['paragraphs'] ) ? $section['paragraphs'] : array();
+                            $list_items    = isset( $section['listItems'] ) && is_array( $section['listItems'] ) ? $section['listItems'] : array();
+                            $footer_text   = isset( $section['footerText'] ) ? trim( (string) $section['footerText'] ) : '';
 
-                    <?php if ( ! empty( $intro ) ) : ?>
-                        <div class="terms__intro">
-                            <?php foreach ( $intro as $paragraph ) : ?>
-                                <?php if ( '' !== trim( $paragraph ) ) : ?>
-                                    <p><?php echo esc_html( $paragraph ); ?></p>
+                            if ( '' === $section_title && empty( $paragraphs ) && empty( $list_items ) && '' === $footer_text ) {
+                                continue;
+                            }
+                            ?>
+                            <section class="terms__section" id="<?php echo esc_attr( $section_id ); ?>">
+                                <?php if ( $section_title ) : ?>
+                                    <h3 class="terms__section-title"><?php echo esc_html( $section_title ); ?></h3>
                                 <?php endif; ?>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
 
-                    <?php if ( ! empty( $sections ) ) : ?>
-                        <div class="terms__sections">
-                            <?php foreach ( $sections as $section ) : ?>
-                                <?php
-                                $section_title = isset( $section['title'] ) ? $section['title'] : '';
-                                $section_id = isset( $section['resolvedId'] ) ? $section['resolvedId'] : '';
-                                $paragraphs = isset( $section['paragraphs'] ) && is_array( $section['paragraphs'] ) ? $section['paragraphs'] : array();
-                                if ( '' === $section_title && empty( $paragraphs ) ) {
-                                    continue;
-                                }
-                                ?>
-                                <section class="terms__section" id="<?php echo esc_attr( $section_id ); ?>">
-                                    <?php if ( $section_title ) : ?>
-                                        <h3 class="terms__section-title"><?php echo esc_html( $section_title ); ?></h3>
+                                <?php foreach ( $paragraphs as $paragraph ) : ?>
+                                    <?php if ( '' !== trim( $paragraph ) ) : ?>
+                                    <?php
+                                        // Normalize real newlines
+                                        $paragraph = str_replace( array( "\r\n", "\r" ), "\n", $paragraph );
+                                        // If your JSON contains literal \n (backslash+n), also normalize those:
+                                        $paragraph = str_replace( array("\\r\\n", "\\n", "\\r"), "\n", $paragraph );
+                                    ?>
+                                    <p><?php echo wp_kses( $paragraph, $allowed_inline_html ); ?></p>
                                     <?php endif; ?>
-                                    <?php foreach ( $paragraphs as $paragraph ) : ?>
-                                        <?php if ( '' !== trim( $paragraph ) ) : ?>
-                                            <p><?php echo esc_html( $paragraph ); ?></p>
+                                <?php endforeach; ?>
+
+                                <?php if ( ! empty( $list_items ) ) : ?>
+                                    <ul class="terms__section-list">
+                                    <?php foreach ( $list_items as $item ) : ?>
+                                        <?php if ( '' !== trim( (string) $item ) ) : ?>
+                                        <?php
+                                            $item = (string) $item;
+                                            $item = str_replace( array( "\r\n", "\r" ), "\n", $item );
+                                            $item = str_replace( array("\\r\\n", "\\n", "\\r"), "\n", $item );
+                                        ?>
+                                        <li><?php echo wp_kses( $item, $allowed_inline_html ); ?></li>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
-                                </section>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+                                    </ul>
+                                <?php endif; ?>
+
+                                <?php if ( '' !== $footer_text ) : ?>
+                                    <?php
+                                    $footer_text = str_replace( array( "\r\n", "\r" ), "\n", $footer_text );
+                                    $footer_text = str_replace( array("\\r\\n", "\\n", "\\r"), "\n", $footer_text );
+                                    ?>
+                                    <p class="terms__section-footer"><?php echo wp_kses( $footer_text, $allowed_inline_html ); ?></p>
+                                <?php endif; ?>
+                            </section>
+                        <?php endforeach; ?>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
     </div>
 </section>
+

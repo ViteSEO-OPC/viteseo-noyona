@@ -1,0 +1,138 @@
+.term-overview {
+    background: #f7f4f5;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    color: #222;
+}
+
+.term-overview__hero {
+    background: linear-gradient(180deg, #d58e92 0%, #e3a2a5 70%);
+    padding: clamp(2.5rem, 5vw, 4rem) var(--page-gutter-right) clamp(2rem, 5vw, 3rem) var(--page-gutter-left);
+    color: #fff;
+    min-height: 30vh;
+    display: flex;
+    align-items: center;
+}
+
+.term-overview__hero-inner {
+    max-width: 960px;
+    width: 100%;
+}
+
+.term-overview__hero-title {
+    margin: 0 0 0.6rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+}
+
+.term-overview__hero-subtitle {
+    margin: 0;
+    font-size: clamp(0.9rem, 1.6vw, 1rem);
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 760px;
+}
+
+.term-overview__body {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(2rem, 5vw, 4rem) var(--page-gutter-right) clamp(3rem, 6vw, 5rem) var(--page-gutter-left);
+}
+
+.term-overview__section-title {
+    margin: 0 0 0.75rem;
+    text-align: center;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 700;
+}
+
+.term-overview__section-title em,
+.term-overview__section-title .term-overview__highlight {
+    color: #d01558;
+    font-style: normal;
+}
+
+.term-overview__section-intro {
+    margin: 0 auto clamp(1.6rem, 3vw, 2.2rem);
+    max-width: 860px;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #5b5b5b;
+}
+
+.term-overview__grid {
+    display: grid;
+    gap: 1.2rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.term-overview__card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+}
+
+.term-overview__card-link {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+}
+
+.term-overview__card-media {
+    min-height: 130px;
+    background: linear-gradient(180deg, #d58e92, #be5f71);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    padding: 1rem;
+}
+
+.term-overview__card-title {
+    margin: 0;
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.term-overview__card-content {
+    padding: 1rem 1rem 1.1rem;
+}
+
+.term-overview__card-description {
+    margin: 0 0 1rem;
+    line-height: 1.7;
+    color: #4f4f4f;
+    font-size: 0.98rem;
+    min-height: 84px;
+}
+
+.term-overview__card-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    width: 90%;
+    min-height: 38px;
+    padding: 0.45rem 0.95rem;
+    border-radius: 8px;
+    background: #f9edf1;
+    color: #d01558;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 700;
+}
+
+.term-overview__card-button i {
+    font-size: 0.7rem;
+}
+
+@media (max-width: 980px) {
+    .term-overview__grid {
+        grid-template-columns: 1fr;
+    }
+}
+

@@ -52,11 +52,11 @@
 /* Typography driven via CSS variables from block attributes */
 .brand-carousel__text {
     font-family: var(--wp--preset--font-family--proxima-nova);
-    font-weight: var(--brand-font-weight, 600);
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--brand-font-color, #4b2f1e);
-    font-size: var(--brand-font-size, clamp(0.9rem, 1.4vw, 1.1rem));
+    font-size: clamp(16px, 1.4vw, 20px);
     white-space: nowrap;
 }
 
@@ -107,7 +107,8 @@
 }
 
 .review-card__text {
-    font-size: 0.95rem;
+    font-size: clamp(16px, 1.4vw, 20px);
+    font-family: var(--wp--preset--font-family--proxima-nova);
     line-height: 1.6;
     color: #333;
     margin: 0;
@@ -122,7 +123,8 @@
 .review-card__rating {
     display: flex;
     gap: 0.25rem;
-    font-size: 1rem;
+    font-size: clamp(16px, 1.4vw, 20px);
+    font-family: var(--wp--preset--font-family--proxima-nova);
     color: #ffc107;
 }
 
@@ -169,7 +171,8 @@
 
 .review-card__author {
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: clamp(16px, 1.4vw, 20px);
+    font-family: var(--wp--preset--font-family--proxima-nova);
     color: #2d2d2d;
     white-space: nowrap;
     overflow: hidden;
@@ -177,7 +180,8 @@
 }
 
 .review-card__product {
-    font-size: 0.85rem;
+    font-size: clamp(16px, 1.4vw, 20px);
+    font-family: var(--wp--preset--font-family--proxima-nova);
     color: #888;
     white-space: nowrap;
     overflow: hidden;

@@ -4,6 +4,20 @@
   const $ = (s, scope = document) => scope.querySelector(s);
   const $$ = (s, scope = document) => Array.from(scope.querySelectorAll(s));
 
+  function updateHeaderOffsets() {
+    const root = document.documentElement;
+    const headerPart = $('header.wp-block-template-part');
+    const adminBar = $('#wpadminbar');
+
+    const headerHeight = headerPart ? Math.ceil(headerPart.getBoundingClientRect().height) : 72;
+    const adminBarHeight = adminBar ? Math.ceil(adminBar.getBoundingClientRect().height) : 0;
+    const totalOffset = headerHeight + adminBarHeight;
+
+    root.style.setProperty('--noyona-header-height', headerHeight + 'px');
+    root.style.setProperty('--noyona-adminbar-height', adminBarHeight + 'px');
+    root.style.setProperty('--noyona-header-total-offset', totalOffset + 'px');
+  }
+
   function toggleScrollState() {
     const y = window.scrollY || 0;
     const headerPart = $('header.wp-block-template-part');
@@ -15,6 +29,8 @@
       document.body.classList.remove('has-scrolled-header');
       if (headerPart) headerPart.classList.remove('is-sticky');
     }
+
+    updateHeaderOffsets();
   }
 
   function initWishlist() {
@@ -175,8 +191,10 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    updateHeaderOffsets();
     toggleScrollState();
     window.addEventListener('scroll', toggleScrollState, { passive: true });
+    window.addEventListener('resize', updateHeaderOffsets);
 
     initWishlist();
     initAccountDropdown();

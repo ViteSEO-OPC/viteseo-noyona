@@ -2,37 +2,41 @@
 .hero-banner {
     position: relative;
     isolation: isolate;
-    color: #ffffff;
-    /* Reduced gradient opacity to let image show through clearly */
-    background: linear-gradient(135deg, rgba(255, 201, 209, 0.4) 0%, rgba(223, 142, 156, 0.3) 40%, rgba(185, 102, 121, 0.2) 100%), var(--hero-banner-bg, none);
+    color: #fff;
+
+    background-image: var(--hero-banner-bg, none);
     background-size: var(--hero-banner-bg-size, cover);
     background-position: var(--hero-banner-bg-position, center);
     background-repeat: no-repeat;
-    /* Removed border-radius for full screen look */
-    border-radius: 0 !important;
-    overflow: hidden;
-    /* Full screen height */
+
     min-height: 90vh;
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    /* Add padding to prevent content touching edges */
     padding-inline: max(2rem, 5vw);
+    overflow: hidden;
 }
 
-.hero-banner::after {
+/* overlay */
+.hero-banner::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: none;
     z-index: 1;
+    pointer-events: none;
+
+    /* tweak these alpha values */
+    background: linear-gradient(
+        135deg,
+        rgba(255, 201, 209, 0.25) 0%,
+        rgba(223, 142, 156, 0.18) 40%,
+        rgba(185, 102, 121, 0.10) 100%
+    );
 }
 
 .hero-banner__inner {
     position: relative;
     z-index: 2;
-    /* max-width: 720px; */
-    padding-block: clamp(2.5rem, 4vw, 4rem);
 }
 
 .hero-banner__content {
@@ -137,6 +141,9 @@
 .hero-banner__cta:hover {
     transform: translateY(-1px);
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
+    color: #fff;
+    background: #ff2b7b;
+
 }
 
 @media (max-width: 900px) {

@@ -1,0 +1,64 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/term",
+  "version": "1.0.0",
+  "title": "Term Overview",
+  "category": "design",
+  "icon": "index-card",
+  "description": "Hero + policy cards linking to policy landing pages.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Terms & Policy"
+    },
+    "subheading": {
+      "type": "string",
+      "default": "At Noyona Cosmetics and Skin Care Products OPC, we prioritize transparency and trust by providing clear guidelines on how we handle your orders, protect your rights, and ensure a seamless shopping experience."
+    },
+    "sectionTitle": {
+      "type": "string",
+      "default": "Our Commitment to Transparency & Trust"
+    },
+    "sectionIntro": {
+      "type": "string",
+      "default": "Welcome to Noyona Essentials and Skin Care Products OPC. We value transparency and customer trust, so we have organized our policies into three clear sections: Terms of Service, Shipping Policy and Refund Policy."
+    },
+    "cards": {
+      "type": "array",
+      "default": [
+        {
+          "title": "Terms of Service",
+          "description": "Shop Noyona Essentials-fair rules, personal use only, and policies designed to protect your shopping experience.",
+          "url": "/terms-of-service/",
+          "buttonLabel": "Read Full Terms",
+          "imageUrl": ""
+        },
+        {
+          "title": "Shipping Policy",
+          "description": "Reliable delivery with clear updates; shipping risks transfer at carrier pickup, but we are here to support you.",
+          "url": "/shipping-policy/",
+          "buttonLabel": "Read Full Policy",
+          "imageUrl": ""
+        },
+        {
+          "title": "Refund Policy",
+          "description": "Your satisfaction matters-refunds and exchanges follow strict guidelines to keep shopping safe and worry-free.",
+          "url": "/refund-policy/",
+          "buttonLabel": "Read Full Policy",
+          "imageUrl": ""
+        }
+      ],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}
+

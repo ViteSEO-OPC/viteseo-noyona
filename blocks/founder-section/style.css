@@ -84,7 +84,9 @@
 .noyona-founder-section__body p {
     margin: 0 0 0.75rem;
     line-height: 1.6;
-    font-size: clamp(16px, 1.5vw, 18px);
+    font-size: clamp(16px, 1.5vw, 20px);
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-weight: 400;
 }
 
 /* CTA button */
@@ -98,7 +100,7 @@
     padding: 10px 20px;
     border-radius: 16px;
     text-decoration: none;
-    font-size: var(--wp--preset--font-size--body);
+    font-size: clamp(18px, 1.4vw, 24px);
     background: #E30B5D; /* brand pink */
     color: #ffffff;
     transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;

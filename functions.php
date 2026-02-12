@@ -364,6 +364,7 @@ function woocom_ct_register_blocks() {
     register_block_type( get_stylesheet_directory() . '/blocks/blog-list' );
     register_block_type( get_stylesheet_directory() . '/blocks/blog-slide' );
     register_block_type( get_stylesheet_directory() . '/blocks/blogs-view' );
+    register_block_type( get_stylesheet_directory() . '/blocks/term' );
     register_block_type( get_stylesheet_directory() . '/blocks/terms' );
     register_block_type( get_stylesheet_directory() . '/blocks/thank-you' );
     register_block_type( get_stylesheet_directory() . '/blocks/coming-soon' );
@@ -766,3 +767,8 @@ function woocom_ct_remove_customer_account_block( $block_content, $block ) {
 
     return $block_content;
 }
+
+/* =================================================
+ * UX / MISC
+ * ================================================= */
+add_filter('show_admin_bar', '__return_false');

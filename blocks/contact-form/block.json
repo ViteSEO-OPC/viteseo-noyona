@@ -30,10 +30,11 @@
     "socials": {
       "type": "array",
       "default": [
-        { "icon": "http://srv1300727.hstgr.cloud/wp-content/uploads/2026/01/fb_footer.png", "url": "https://facebook.com", "label": "Facebook" },
-        { "icon": "http://srv1300727.hstgr.cloud/wp-content/uploads/2026/01/titktok_footer.png", "url": "https://tiktok.com", "label": "TikTok" },
-        { "icon": "http://srv1300727.hstgr.cloud/wp-content/uploads/2026/01/instagram_footer.png", "url": "https://instagram.com", "label": "Instagram" },
-        { "icon": "http://srv1300727.hstgr.cloud/wp-content/uploads/2026/01/lazada_footer.png", "url": "https://www.lazada.com.ph", "label": "Lazada" }
+        { "icon": "/wp-content/themes/viteseo-noyona/blocks/contact-form/assets/fb.png", "url": "https://facebook.com", "label": "Facebook" },
+        { "icon": "/wp-content/themes/viteseo-noyona/blocks/contact-form/assets/tiktok.png", "url": "https://tiktok.com", "label": "TikTok" },
+        { "icon": "/wp-content/themes/viteseo-noyona/blocks/contact-form/assets/instagram.png", "url": "https://instagram.com", "label": "Instagram" },
+        { "icon": "/wp-content/themes/viteseo-noyona/blocks/contact-form/assets/lazada.png", "url": "https://www.lazada.com.ph", "label": "Lazada" },
+        { "icon": "/wp-content/themes/viteseo-noyona/blocks/contact-form/assets/shopee.png", "url": "https://shopee.ph", "label": "Shopee" }
       ],
       "items": {
         "type": "object"

@@ -4,7 +4,7 @@ Template: parent-theme-folder
 */
 
 /* =========================================================
-   HEADER (Desktop + Mobile Drawer Right)
+   HEADER (Desktop + Mobile Drawer Right + Search Panel Fix)
 ========================================================= */
 
 /* Sticky wrapper for FSE header */
@@ -17,19 +17,19 @@ header.wp-block-template-part {
 
 /* Avoid admin bar overlap when logged in */
 .admin-bar header.wp-block-template-part {
-  top: 32px;
+  top: var(--noyona-adminbar-height, 32px);
 }
 @media (max-width: 782px) {
   .admin-bar header.wp-block-template-part {
-    top: 46px;
+    top: var(--noyona-adminbar-height, 46px);
   }
 }
 
 /* Header base */
 .site-header {
-  display: flex; /* important */
-  background: #ffffff;
+  display: flex;
   align-items: center;
+  background: #ffffff;
   padding-left: var(--page-gutter-left, 1rem);
   padding-right: var(--page-gutter-right, 1rem);
   padding-top: 1rem;
@@ -44,7 +44,7 @@ body.has-scrolled-header .site-header {
   box-shadow: 0 4px 16px rgba(144, 30, 88, 0.15);
 }
 
-/* Maintain brand color and improve contrast for sticky header */
+/* Maintain brand color & contrast when sticky */
 header.wp-block-template-part.is-sticky .site-logo,
 header.wp-block-template-part.is-sticky .nav-link,
 header.wp-block-template-part.is-sticky .header-icon,
@@ -52,13 +52,12 @@ header.wp-block-template-part.is-sticky .mobile-menu-toggle,
 header.wp-block-template-part.is-sticky
   .header-mini-cart
   .wc-block-mini-cart__button {
-  color: #901e58; /* Deep berry contrasts beautifully with soft pink */
+  color: #901e58;
 }
 
-/* Ensure active/hover state remains visible and balanced */
 header.wp-block-template-part.is-sticky .nav-link:hover,
 header.wp-block-template-part.is-sticky .nav-link.is-active {
-  color: #ffffff; /* White pops against berry/pink when active */
+  color: #ffffff;
   border-bottom-color: #ffffff;
 }
 
@@ -66,6 +65,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
 .site-logo {
   font-weight: 700;
   font-size: 1.25rem;
+  flex: 0 0 auto;
 }
 
 .site-logo-link {
@@ -111,7 +111,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
 ========================================================= */
 
 .main-nav {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -128,6 +128,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
 
 .nav-item {
   position: relative;
+  width: auto;
 }
 
 .nav-link-wrapper {
@@ -141,7 +142,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
   font-size: clamp(16px, 2vw, 20px);
   font-weight: 600;
   text-decoration: none;
-  color: #333;
+  color: #000;
   padding: 0.5rem 0;
   display: flex;
   align-items: center;
@@ -176,7 +177,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
   display: inline-block;
 }
 
-/* Submenu toggle hidden on desktop (mobile only) */
+/* Submenu toggle hidden on desktop */
 .submenu-toggle {
   display: none;
 }
@@ -234,7 +235,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
   background: #f9f9f9;
 }
 
-/* Parent active state when child is active (fixed selector for your HTML) */
+/* Parent active when child is active */
 .nav-item.has-active-child > .nav-link-wrapper > .nav-link {
   color: #901e58;
   border-bottom-color: #901e58;
@@ -245,6 +246,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
 ========================================================= */
 
 .header-icons {
+  flex: 0 0 auto;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -274,7 +276,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
   line-height: 1;
 }
 
-/* Make all header icons #901E58 */
+/* Icon color */
 .header-icons,
 .header-icon,
 .header-mini-cart .wc-block-mini-cart__button,
@@ -363,7 +365,7 @@ body:not(.logged-in) .header-account--logged-out {
   display: inline-flex;
 }
 
-/* Mini cart in header */
+/* Mini cart */
 .header-mini-cart {
   display: inline-flex;
   align-items: center;
@@ -455,9 +457,10 @@ body:not(.logged-in) .header-account--logged-out {
 
 /* =========================================================
    MOBILE (<=1260px)
-   - Logo left edge
-   - Icons + hamburger right edge
-   - Drawer from RIGHT
+   - Logo left
+   - Icons right
+   - Hamburger after icons
+   - Drawer opens from RIGHT
 ========================================================= */
 
 @media (max-width: 1260px) {
@@ -466,7 +469,8 @@ body:not(.logged-in) .header-account--logged-out {
     content: "";
   }
 
-  /* Make header stretch edge-to-edge */
+  /* Make header stretch edge-to-edge (WP groups can be constrained) */
+  header.wp-block-template-part .site-header,
   .site-header.wp-block-group {
     max-width: none !important;
     width: 100% !important;
@@ -474,33 +478,33 @@ body:not(.logged-in) .header-account--logged-out {
     margin-right: 0 !important;
     padding-left: 1.25rem !important;
     padding-right: 1.25rem !important;
-    display: flex !important;
   }
 
+  /* Layout */
   .site-header {
-    justify-content: space-between !important; /* Logo left, Icons/Burger right */
-    gap: 0;
+    justify-content: space-between !important;
+    gap: 0.5rem;
   }
 
+  /* Logo stays left */
   .site-logo {
     order: 1;
-    margin-left: 0;
-    flex: 0 0 auto;
   }
 
+  /* Icons cluster stays right */
   .header-icons {
     order: 2;
-    margin-left: auto !important; /* Group them to the right */
-    gap: 1.25rem; /* More space between icons as requested */
-    display: flex !important;
+    margin-left: auto !important;
+    gap: 1.25rem;
   }
 
+  /* Hamburger after icons */
   .main-nav {
     order: 3;
     flex: 0 0 auto;
-    display: flex !important;
+    display: flex;
     align-items: center;
-    margin-left: 0.75rem; /* Small space after icons before burger */
+    justify-content: flex-end;
   }
 
   .mobile-menu-toggle {
@@ -514,11 +518,11 @@ body:not(.logged-in) .header-account--logged-out {
     display: none !important;
   }
 
-  /* Drawer (nav-list) from RIGHT */
+  /* Drawer from RIGHT */
   .nav-list {
     position: fixed;
     top: 0;
-    right: 0;           /* <-- right side */
+    right: 0;
     left: auto;
     width: 100%;
     max-width: 320px;
@@ -528,10 +532,10 @@ body:not(.logged-in) .header-account--logged-out {
     align-items: flex-start;
     padding: 5rem 2rem 2rem;
     gap: 1rem;
-    transform: translateX(100%); /* hidden off the right */
+    transform: translateX(100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1001;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1); /* shadow on left edge */
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
   }
 
@@ -539,7 +543,7 @@ body:not(.logged-in) .header-account--logged-out {
     transform: translateX(0);
   }
 
-  /* Backdrop overlay */
+  /* Backdrop */
   body.is-menu-open::before {
     content: "";
     position: fixed;
@@ -604,7 +608,7 @@ body:not(.logged-in) .header-account--logged-out {
     font-size: 1rem;
   }
 
-  /* Prevent desktop hover opening in mobile */
+  /* Prevent hover opening on mobile */
   .nav-item:hover .dropdown-menu {
     max-height: 0;
   }
@@ -663,6 +667,47 @@ body:not(.logged-in) .only-logged-in {
 }
 
 /* =========================================================
+   SEARCH EXPAND FIX (mobile)
+   - keeps panel inside viewport
+   - prevents "ghost" after close
+========================================================= */
+@media (max-width: 1260px) {
+  /* keep icon in normal header flow */
+  .wp-block-noyona-search-expand {
+    position: static;
+    z-index: auto;
+  }
+
+  /* Target ONLY the real panel container (NOT generic .is-open / aria-hidden=false) */
+  .wp-block-noyona-search-expand .search-expand__panel,
+  .wp-block-noyona-search-expand .search-expand-panel,
+  .wp-block-noyona-search-expand .search-expand__dropdown,
+  .wp-block-noyona-search-expand [role="dialog"] {
+    position: fixed !important;
+    top: calc(var(--noyona-adminbar-height, 0px) + var(--noyona-header-height, 72px) + 8px) !important;
+    left: 12px !important;
+    right: 12px !important;
+
+    width: auto !important;
+    max-width: min(760px, calc(100vw - 24px)) !important;
+    margin: 0 auto !important;
+
+    box-sizing: border-box !important;
+    transform: none !important;
+    z-index: 2100 !important;
+    overflow: hidden;
+  }
+
+  /* When the panel is closed, hard-hide it to prevent the "ghost" */
+  .wp-block-noyona-search-expand .search-expand__panel[aria-hidden="true"],
+  .wp-block-noyona-search-expand .search-expand-panel[aria-hidden="true"],
+  .wp-block-noyona-search-expand .search-expand__dropdown[aria-hidden="true"],
+  .wp-block-noyona-search-expand [role="dialog"][aria-hidden="true"] {
+    display: none !important;
+  }
+}
+
+/* =========================================================
    SMALL SCREEN POLISH
 ========================================================= */
 
@@ -680,20 +725,12 @@ body:not(.logged-in) .only-logged-in {
 @media (max-width: 782px) {
   header.wp-block-template-part {
     position: fixed;
-    top: 0;
+    top: var(--noyona-adminbar-height, 0px);
     left: 0;
     right: 0;
   }
 
-  .admin-bar header.wp-block-template-part {
-    top: 46px;
-  }
-
   .wp-site-blocks {
-    padding-top: 72px;
-  }
-
-  .admin-bar .wp-site-blocks {
-    padding-top: 118px;
+    padding-top: var(--noyona-header-total-offset, 72px);
   }
 }

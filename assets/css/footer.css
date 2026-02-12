@@ -16,13 +16,17 @@
 /* Values Section */
 .noyona-footer__values {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1.2rem, 2.2vw, 2rem);
   text-align: center;
   margin: 0 auto 3rem auto;
   max-width: 96rem;
   padding-left: var(--page-gutter-left);
   padding-right: var(--page-gutter-right);
+}
+
+.noyona-footer__value-item {
+  min-width: 0;
 }
 
 .noyona-footer__value-item img {
@@ -48,9 +52,9 @@
 /* Main Footer Content (grid version - this overrides the earlier flex in old style.css) */
 .noyona-footer__main {
   display: grid;
-  grid-template-columns: 40% 20% 20% 20%;
-  align-items: flex-start;
-  gap: 2rem;
+  grid-template-columns: minmax(320px, 40%) 1fr; /* left newsletter, right links */
+  align-items: start;
+  gap: clamp(1.5rem, 3vw, 3rem);
   margin: 0 auto 2rem auto;
   max-width: 96rem;
   padding-left: var(--page-gutter-left);
@@ -75,15 +79,19 @@
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.25rem;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .noyona-footer__input {
   flex: 1;
+  min-width: 0;
   padding: 12px 16px;
   border: 1px solid rgba(0, 0, 0, 0.18);
   border-radius: 50px;
   background: rgba(255, 255, 255, 0.22);
-  font-size: 0.95rem;
+  font-size: clamp(16px, 1.2vw, 18px);
+  font-family: var(--wp--preset--font-family--proxima-nova);
   color: inherit;
   outline: none;
 }
@@ -100,6 +108,8 @@
   border: none;
   border-radius: 16px;
   font-weight: 600;
+  font-size: clamp(16px, 1.2vw, 18px);
+  font-family: var(--wp--preset--font-family--proxima-nova);
   cursor: pointer;
   transition: filter 0.2s, transform 0.2s;
   width: 107px;
@@ -112,20 +122,25 @@
 }
 
 .noyona-footer__newsletter p {
-  font-size: 0.95rem;
+  font-size: clamp(16px, 1.2vw, 18px);
+  font-family: var(--wp--preset--font-family--proxima-nova);
   line-height: 1.5;
   opacity: 0.85;
-  width: 85%;
+  width: 100%;
   margin: 0;
 }
 
 /* Links: use contents so each column is a grid item */
 .noyona-footer__links {
-  display: contents;
+  display: grid; /* IMPORTANT: not contents */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2.5vw, 3rem);
+  align-items: start;
 }
 
+/* remove this padding so columns don't look "indented" weirdly */
 .noyona-footer__col {
-  padding-left: 2rem;
+  padding-left: 0;
   min-width: 0;
 }
 
@@ -321,21 +336,24 @@
   filter: saturate(1.05);
 }
 
+@media (max-width: 1215px) {
+  .noyona-footer__newsletter p {
+    width: 180%;
+  }
+}
+
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
+  .noyona-footer__values {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.2rem 1rem;
+  }
+}
+
+/* Collapse footer main at <=900px */
+@media (max-width: 900px) {
   .noyona-footer__main {
-    display: block;
-  }
-
-  .noyona-footer__links {
-    display: block;
-    margin-top: 2rem;
-  }
-
-  .noyona-footer__col {
-    padding-left: 0;
-    margin-top: 1.5rem;
-    text-align: center;
+    grid-template-columns: 1fr; /* stack */
   }
 
   .noyona-footer__newsletter {
@@ -343,8 +361,45 @@
     max-width: none;
   }
 
+  /* Links go UNDER newsletter, keep them 3 columns */
+  .noyona-footer__links {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-top: 2rem;
+    align-items: start;
+    text-align: center;
+  }
+
+  /* Make sure the newsletter text doesn't exceed */
   .noyona-footer__newsletter p {
-    width: 100%;
+    width: 100% !important;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .noyona-footer__main {
+    display: block; /* newsletter on top, links below */
+  }
+
+  /* KEEP 3 columns on mobile/tablet */
+  .noyona-footer__links {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* gap: 1.25rem; */
+    margin-top: 2rem;
+    text-align: center; /* looks cleaner in columns */
+  }
+
+  .noyona-footer__col {
+    margin-top: 0;
+    text-align: center;
+  }
+
+  .noyona-footer__newsletter {
+    text-align: center;
+    max-width: none;
   }
 
   .noyona-footer__form {
@@ -359,9 +414,43 @@
   }
 
   .noyona-footer__bottom-row {
+    display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
+  }
+
+  /* Payment goes first */
+  .noyona-footer__payment-icons { order: 1; }
+
+  /* Social goes second */
+  .noyona-footer__social-icons { order: 2; }
+}
+
+@media (max-width: 768px) {
+  .noyona-footer__nav li {
+    margin-bottom: 0.55rem;
   }
 }
+
+@media (max-width: 520px) {
+  .noyona-footer__links {
+    grid-template-columns: 1fr; /* now stack */
+    text-align: center;
+  }
+
+  .noyona-footer__col {
+    text-align: center;
+  }
+}
+
+@media (max-width: 500px) {
+  .noyona-footer__values {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
 
 

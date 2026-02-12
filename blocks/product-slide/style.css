@@ -125,7 +125,8 @@
   color: #fff;
   padding: 5px 12px;
   border-radius: 50px;
-  font-size: 0.75rem;
+  font-size: clamp(16px, 1.4vw, 20px);
+  font-family: var(--wp--preset--font-family--proxima-nova);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -258,7 +259,8 @@
   border-radius: var(--ps-radius-cta);
   font-weight: 600;
   text-align: center;
-  font-size: clamp(13px, 1.3vw, 16px);
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(18px, 1.4vw, 24px);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   transition:
@@ -309,6 +311,7 @@
   background: transparent;
   color: var(--ps-accent);
   font-size: clamp(32px, 4vw, 56px);
+  font-family: var(--wp--preset--font-family--proxima-nova);
   padding: 0;
   box-shadow: none;
   cursor: pointer;

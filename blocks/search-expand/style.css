@@ -11,42 +11,67 @@
     justify-content: center;
 }
 
-/* Overlay — sits under the header and reveals the bar */
+/* Overlay — full-screen click-catcher + (optional) backdrop */
 .search-expand-overlay {
     position: fixed;
     inset: 0;
-    top: 0;
-    width: 100%;
-    height: auto;
-    padding-top: 96px;
-    padding-inline: 16px;
+    height: 100dvh;
+  
+    /* Optional: add a soft backdrop to avoid “floating white box” look */
+    background: rgba(0, 0, 0, 0.10);
+  
+    /* Use padding only for horizontal safe space */
+    padding-inline: clamp(8px, 2.5vw, 16px);
+  
     display: flex;
     justify-content: center;
     align-items: flex-start;
+  
+    /* IMPORTANT: avoid ghost/glitch by using visibility too */
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.2s ease;
+  
+    transition: opacity 0.2s ease, visibility 0s linear 0.2s;
     z-index: 9999;
-}
-
-.search-expand-overlay.is-open {
+  }
+  
+  .search-expand-overlay.is-open {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
-}
-
-/* Container */
-.search-expand-container {
-    width: min(960px, 100%);
+    transition: opacity 0.2s ease;
+  }
+  
+  /* Container */
+  .search-expand-container {
+    /* Put the spacing HERE (not as overlay padding-top) */
+    margin-top: calc(var(--noyona-header-total-offset, 96px) + 8px);
+  
+    width: min(960px, calc(100vw - 24px));
+    max-height: calc(100dvh - (var(--noyona-header-total-offset, 96px) + 24px));
+  
     background: #fff;
     border-radius: 18px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
     border: 1px solid #f0f0f0;
+  
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
     padding: 1rem 1.5rem 1.25rem;
-    margin-top: 10px;
-}
+  
+    overflow: auto;
+    overscroll-behavior: contain;
+  
+    /* Smooth pop-in */
+    transform: translateY(-6px);
+    transition: transform 0.2s ease;
+  }
+  
+  .search-expand-overlay.is-open .search-expand-container {
+    transform: translateY(0);
+  }
 
 /* Input Wrapper */
 .search-input-wrapper {
@@ -173,14 +198,13 @@
 
 /* Header pushes down slightly when search is open */
 .search-expand-open header.wp-block-template-part {
-    margin-bottom: 18px;
-    transition: margin-bottom 0.2s ease;
     z-index: 12000;
 }
 
 /* Responsive */
 @media (max-width: 800px) {
     .search-expand-container {
+        margin-top: 0px;
         width: min(720px, 100%);
     }
 
@@ -189,13 +213,14 @@
     }
 
     .search-expand-overlay {
-        padding-top: 72px;
+        padding-top: calc(var(--noyona-header-total-offset, 72px) + 6px);
     }
 }
 
 @media (max-width: 540px) {
     .search-expand-container {
         padding: 0.9rem 1rem 1rem;
+        border-radius: 14px;
     }
 
     .search-input-wrapper {
