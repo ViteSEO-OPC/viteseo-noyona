@@ -1,485 +1,699 @@
-/* ===== Header layout ===== */
+/*
+Theme Name: Your Child Theme
+Template: parent-theme-folder
+*/
 
-/* === Sticky wrapper for FSE header === */
+/* =========================================================
+   HEADER (Desktop + Mobile Drawer Right)
+========================================================= */
+
+/* Sticky wrapper for FSE header */
 header.wp-block-template-part {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: transparent;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: transparent;
 }
 
 /* Avoid admin bar overlap when logged in */
 .admin-bar header.wp-block-template-part {
-    top: 32px;
+  top: 32px;
 }
 @media (max-width: 782px) {
-    .admin-bar header.wp-block-template-part {
-        top: 46px;
-    }
+  .admin-bar header.wp-block-template-part {
+    top: 46px;
+  }
 }
 
+/* Header base */
 .site-header {
-    background: #ffddddad; /* light pink */
-    align-items: center;
-    padding-left: var(--page-gutter-left, 1rem);
-    padding-right: var(--page-gutter-right, 1rem);
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; /* important */
+  background: #ffffff;
+  align-items: center;
+  padding-left: var(--page-gutter-left, 1rem);
+  padding-right: var(--page-gutter-right, 1rem);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* When header is sticky (scrolled) – dark pink */
+/* Sticky background on scroll */
 body.has-scrolled-header .site-header {
-    background: #e5989b;            /* dark pink */
-    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  background: #e7999c;
+  box-shadow: 0 4px 16px rgba(144, 30, 88, 0.15);
 }
 
-/* Optional: make text/icons white on dark pink for contrast */
+/* Maintain brand color and improve contrast for sticky header */
 header.wp-block-template-part.is-sticky .site-logo,
-header.wp-block-template-part.is-sticky .wp-block-navigation a,
+header.wp-block-template-part.is-sticky .nav-link,
 header.wp-block-template-part.is-sticky .header-icon,
-header.wp-block-template-part.is-sticky .header-mini-cart .wc-block-mini-cart__button {
-    color: #ffffff;
+header.wp-block-template-part.is-sticky .mobile-menu-toggle,
+header.wp-block-template-part.is-sticky
+  .header-mini-cart
+  .wc-block-mini-cart__button {
+  color: #901e58; /* Deep berry contrasts beautifully with soft pink */
 }
 
-/* left: logo */
+/* Ensure active/hover state remains visible and balanced */
+header.wp-block-template-part.is-sticky .nav-link:hover,
+header.wp-block-template-part.is-sticky .nav-link.is-active {
+  color: #ffffff; /* White pops against berry/pink when active */
+  border-bottom-color: #ffffff;
+}
+
+/* Logo */
 .site-logo {
-    font-weight: 700;
-    font-size: 1.25rem;
+  font-weight: 700;
+  font-size: 1.25rem;
 }
 
-/* Logo image link */
 .site-logo-link {
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    line-height: 0;
-    border: 0;
-    background: transparent;
-    -webkit-tap-highlight-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  line-height: 0;
+  border: 0;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .site-logo-img {
-    display: block;
-    height: 60px;
-    width: 225px;
-    max-width: 225px;
-    object-fit: contain;
-    border: 0;
+  display: block;
+  height: 60px;
+  width: 225px;
+  max-width: 225px;
+  object-fit: contain;
+  border: 0;
 }
 
 @media (max-width: 640px) {
-    .site-logo-img {
-        height: 40px;
-        max-width: 200px;
-    }
+  .site-logo-img {
+    height: 40px;
+    max-width: 200px;
+  }
 }
 
-/* Remove the "white border" (focus/active outline) when clicking/press-holding */
+/* Accessible focus */
 .site-logo-link:focus,
 .site-logo-link:active {
-    outline: none;
-    box-shadow: none;
+  outline: none;
+  box-shadow: none;
 }
-
-/* Keep an accessible keyboard focus indicator, but make it NOT white */
 .site-logo-link:focus-visible {
-    outline: 2px solid rgba(255, 111, 155, 0.75);
-    outline-offset: 4px;
-    border-radius: 12px;
+  outline: 2px solid rgba(255, 111, 155, 0.75);
+  outline-offset: 4px;
+  border-radius: 12px;
 }
 
-/* center: main nav – force it to stay centered between left/right */
+/* =========================================================
+   NAV (Desktop)
+========================================================= */
+
 .main-nav {
-    flex: 1;
-    display: flex;
-    justify-content: center;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.main-nav .wp-block-navigation__container {
-    gap: 1.5rem;
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
 }
 
-/* right: icons */
+.nav-item {
+  position: relative;
+}
+
+.nav-link-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-link {
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 600;
+  text-decoration: none;
+  color: #333;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 2px solid transparent;
+}
+
+.nav-link:hover,
+.nav-link.is-active {
+  color: #901e58;
+}
+
+.nav-link.is-active {
+  border-bottom-color: #901e58;
+  pointer-events: none;
+}
+
+/* Ensure sub-links in dropdown don't have underline */
+.dropdown-menu a.is-active {
+  border-bottom: none !important;
+  text-decoration: none !important;
+}
+
+/* Desktop dropdown caret indicator */
+.nav-item.has-dropdown > .nav-link-wrapper > .nav-link::after {
+  content: "▾";
+  font-size: 0.75rem;
+  margin-left: 0.35rem;
+  line-height: 1;
+  transform: translateY(-1px);
+  display: inline-block;
+}
+
+/* Submenu toggle hidden on desktop (mobile only) */
+.submenu-toggle {
+  display: none;
+}
+
+/* Burger hidden on desktop */
+.mobile-menu-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #901e58;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1002;
+}
+
+/* Dropdown Menu (desktop hover + focus-within) */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem 0;
+  list-style: none;
+  min-width: 180px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.nav-item:hover .dropdown-menu,
+.nav-item:focus-within .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(5px);
+}
+
+.dropdown-menu li a {
+  display: block;
+  padding: 0.6rem 1.25rem;
+  color: #333;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-menu li a:hover,
+.dropdown-menu li a.is-active {
+  color: #901e58;
+  background: #f9f9f9;
+}
+
+/* Parent active state when child is active (fixed selector for your HTML) */
+.nav-item.has-active-child > .nav-link-wrapper > .nav-link {
+  color: #901e58;
+  border-bottom-color: #901e58;
+}
+
+/* =========================================================
+   RIGHT ICONS
+========================================================= */
+
 .header-icons {
-    min-width: 0;             
-    justify-content: flex-end;
-    gap: 0.4rem;               
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
 }
 
 .header-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
-    text-decoration: none;
-    color: inherit;
-    margin-left: 0;            
-}
-
-.header-account {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-}
-
-.header-account-toggle {
-    border: none;
-    background: transparent;
-    padding: 0;
-    cursor: pointer;
-    position: relative;
-}
-
-.header-account-toggle,
-.header-account--logged-out {
-    font-size: 18px;
-}
-
-.header-account--logged-in .header-account-toggle::after {
-    content: '';
-    position: absolute;
-    right: -1px;
-    bottom: -1px;
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: #21c45a;
-    border: 2px solid #ffddddad;
-}
-
-.header-account-menu {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 8px);
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    min-width: 160px;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-    padding: 6px 0;
-    display: none;
-    z-index: 1001;
-}
-
-.header-account-menu a {
-    display: block;
-    padding: 8px 12px;
-    color: #222;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.header-account-menu a:hover {
-    background: #f7f7f7;
-}
-
-.header-account.is-open .header-account-menu {
-    display: block;
-}
-
-.header-account--logged-in,
-.header-account--logged-out {
-    display: none;
-}
-
-body.logged-in .header-account--logged-in {
-    display: inline-flex;
-}
-
-body.logged-in .header-account--logged-out {
-    display: none;
-}
-
-body:not(.logged-in) .header-account--logged-in {
-    display: none;
-}
-
-body:not(.logged-in) .header-account--logged-out {
-    display: inline-flex;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: inherit;
 }
 
 .header-store-link {
-    width: auto;
-    padding: 0 10px;
-    gap: 6px;
-    white-space: nowrap;
+  width: auto;
+  padding: 0 10px;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .header-store-text {
-    line-height: 1;
+  line-height: 1;
 }
 
-/* make all header icons pink */
+/* Make all header icons #901E58 */
 .header-icons,
 .header-icon,
 .header-mini-cart .wc-block-mini-cart__button,
 .search-icon {
-    color: #ff6f9b;
+  color: #901e58;
 }
 
 .header-icon:hover,
 .header-mini-cart .wc-block-mini-cart__button:hover,
 .search-icon:hover {
-    background: rgba(255, 111, 155, 0.12);
+  background: rgba(144, 30, 88, 0.08);
 }
 
-@media (max-width: 782px) {
-    header.wp-block-template-part {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-    }
-
-    .admin-bar header.wp-block-template-part {
-        top: 46px;
-    }
-
-    .wp-site-blocks {
-        padding-top: 72px;
-    }
-
-    .admin-bar .wp-site-blocks {
-        padding-top: 118px;
-    }
+/* Account dropdown */
+.header-account {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
-@media (max-width: 959px) {
-    header.wp-block-template-part.is-sticky
-        .wp-block-navigation__responsive-container.is-menu-open {
-        background: #fff;
-    }
-
-    header.wp-block-template-part.is-sticky
-        .wp-block-navigation__responsive-container.is-menu-open a,
-    header.wp-block-template-part.is-sticky
-        .wp-block-navigation__responsive-container.is-menu-open
-        .wp-block-navigation-item__content {
-        color: #222;
-    }
-
-    header.wp-block-template-part.is-sticky
-        .wp-block-navigation__responsive-container.is-menu-open
-        .wp-block-navigation__responsive-container-close {
-        color: #222;
-    }
-
-    .site-header {
-        flex-wrap: nowrap;
-    }
-
-    .site-logo {
-        order: 1;
-    }
-
-    .header-icons {
-        order: 2;
-        margin-left: auto;
-    }
-
-    .main-nav {
-        order: 3;
-        flex: 0 0 auto;
-        margin-left: 0;
-        justify-content: flex-end;
-        gap: 0.35rem;
-    }
-
-    .main-nav .wp-block-navigation__responsive-container-open {
-        display: inline-flex !important;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 999px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        background: rgba(255, 255, 255, 0.9);
-        color: #ff6f9b;
-        padding: 0;
-        cursor: pointer;
-    }
-
-    .main-nav .wp-block-navigation__responsive-container-open:hover {
-        background: rgba(255, 111, 155, 0.12);
-    }
-
-    .main-nav .wp-block-navigation__responsive-container-open svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    .main-nav .wp-block-navigation__responsive-container:not(.is-menu-open) {
-        display: none !important;
-    }
-
-    .main-nav .wp-block-navigation__responsive-container-content {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .main-nav .wp-block-navigation__responsive-container-content > .wp-block-navigation__container,
-    .main-nav .wp-block-navigation__responsive-container-content > .wp-block-page-list {
-        order: 1;
-    }
-
-    .main-nav .wp-block-navigation__responsive-container-content > .mobile-nav-icons {
-        order: 2;
-    }
-
-    body.noyona-mobile-nav-icons-ready .header-icons > :not(.header-mini-cart):not(.header-store-link):not(.wp-block-noyona-search-expand) {
-        display: none;
-    }
-
-    .main-nav .wp-block-navigation__responsive-container-content .mobile-nav-icons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid #eee;
-    }
-
-    .mobile-nav-icons .header-icon,
-    .mobile-nav-icons .header-account-toggle,
-    .mobile-nav-icons .header-account--logged-out {
-        width: 40px;
-        height: 40px;
-        border-radius: 999px;
-        background: rgba(0, 0, 0, 0.04);
-    }
-
-    .mobile-nav-icons .header-account {
-        display: inline-flex;
-    }
-
-    .mobile-nav-icons .header-icon {
-        margin-left: 0;
-    }
+.header-account-toggle {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
 }
 
-@media (max-width: 640px) {
-    .header-store-link {
-        width: 32px;
-        padding: 0;
-    }
-
-    .header-store-text {
-        display: none;
-    }
+.header-account-toggle,
+.header-account--logged-out {
+  font-size: 18px;
 }
 
-/* mini-cart in header: reuse header-icon look */
+.header-account--logged-in .header-account-toggle::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #21c45a;
+  border: 2px solid #fff;
+}
+
+.header-account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  min-width: 160px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px 0;
+  display: none;
+  z-index: 1001;
+}
+
+.header-account-menu a {
+  display: block;
+  padding: 8px 12px;
+  color: #222;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.header-account-menu a:hover {
+  background: rgba(144, 30, 88, 0.05);
+  color: #901e58;
+}
+
+.header-account.is-open .header-account-menu {
+  display: block;
+}
+
+/* Logged-in / logged-out switching */
+.header-account--logged-in,
+.header-account--logged-out {
+  display: none;
+}
+body.logged-in .header-account--logged-in {
+  display: inline-flex;
+}
+body:not(.logged-in) .header-account--logged-out {
+  display: inline-flex;
+}
+
+/* Mini cart in header */
 .header-mini-cart {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* strip default button styling from Woo block */
 .header-mini-cart .wc-block-mini-cart__button {
-    background: transparent;
-    border: none;
-    padding: 0;
-    box-shadow: none;
-    border-radius: 999px;
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* badge styling */
 .header-mini-cart .wc-block-mini-cart__badge {
-    font-size: 0.7rem;
-    min-width: 16px;
-    height: 16px;
-    line-height: 16px;
+  font-size: 0.7rem;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
 }
 
-/* hide any OTHER mini-cart blocks outside the header */
 .wp-block-woocommerce-mini-cart:not(.header-mini-cart) {
-    display: none !important;
+  display: none !important;
 }
 
-/* badge styling */
-.header-mini-cart .wc-block-mini-cart__badge {
-    font-size: 0.7rem;
-    min-width: 16px;
-    height: 16px;
-    line-height: 16px;
-}
-
-/* hover effect consistent with other icons */
-.header-mini-cart .wc-block-mini-cart__button:hover {
-    background: #f3f3f3;
-}
-
-/* hide any OTHER mini-cart blocks outside the header */
-.wp-block-woocommerce-mini-cart:not(.header-mini-cart) {
-    display: none !important;
-}
-
-/* wishlist */
+/* Wishlist button */
 .header-wishlist-toggle {
-    border: none;
-    background: transparent;
-    font-size: 20px;
+  border: none;
+  background: transparent;
+  font-size: 20px;
 }
 
-/* Wishlist panel drawer */
+/* =========================================================
+   WISHLIST DRAWER (RIGHT)
+========================================================= */
 
 .wishlist-panel {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9999;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
 }
 
 .wishlist-panel__overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.35);
-    opacity: 0;
-    transition: opacity 0.2s ease;
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .wishlist-panel__content {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: min(360px, 90vw);
-    height: 100%;
-    background: #fff;
-    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
-    transform: translateX(100%);
-    transition: transform 0.25s ease;
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(360px, 90vw);
+  height: 100%;
+  background: #fff;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .wishlist-panel__close {
-    border: none;
-    background: transparent;
-    font-size: 1.5rem;
-    align-self: flex-end;
-    cursor: pointer;
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  align-self: flex-end;
+  cursor: pointer;
 }
-
-/* open state */
 
 .wishlist-panel.is-open {
-    pointer-events: auto;
+  pointer-events: auto;
 }
-
 .wishlist-panel.is-open .wishlist-panel__overlay {
-    opacity: 1;
+  opacity: 1;
+}
+.wishlist-panel.is-open .wishlist-panel__content {
+  transform: translateX(0);
 }
 
-.wishlist-panel.is-open .wishlist-panel__content {
+/* =========================================================
+   MOBILE (<=1260px)
+   - Logo left edge
+   - Icons + hamburger right edge
+   - Drawer from RIGHT
+========================================================= */
+
+@media (max-width: 1260px) {
+  /* Remove desktop caret (mobile uses +/-) */
+  .nav-item.has-dropdown > .nav-link-wrapper > .nav-link::after {
+    content: "";
+  }
+
+  /* Make header stretch edge-to-edge */
+  .site-header.wp-block-group {
+    max-width: none !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+    display: flex !important;
+  }
+
+  .site-header {
+    justify-content: space-between !important; /* Logo left, Icons/Burger right */
+    gap: 0;
+  }
+
+  .site-logo {
+    order: 1;
+    margin-left: 0;
+    flex: 0 0 auto;
+  }
+
+  .header-icons {
+    order: 2;
+    margin-left: auto !important; /* Group them to the right */
+    gap: 1.25rem; /* More space between icons as requested */
+    display: flex !important;
+  }
+
+  .main-nav {
+    order: 3;
+    flex: 0 0 auto;
+    display: flex !important;
+    align-items: center;
+    margin-left: 0.75rem; /* Small space after icons before burger */
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+    margin-left: 0;
+  }
+
+  /* Hide topbar account icon on mobile (account is in drawer) */
+  .header-account--logged-in,
+  .header-account--logged-out {
+    display: none !important;
+  }
+
+  /* Drawer (nav-list) from RIGHT */
+  .nav-list {
+    position: fixed;
+    top: 0;
+    right: 0;           /* <-- right side */
+    left: auto;
+    width: 100%;
+    max-width: 320px;
+    height: 100vh;
+    background: #fff;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 5rem 2rem 2rem;
+    gap: 1rem;
+    transform: translateX(100%); /* hidden off the right */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1001;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1); /* shadow on left edge */
+    overflow-y: auto;
+  }
+
+  body.is-menu-open .nav-list {
     transform: translateX(0);
+  }
+
+  /* Backdrop overlay */
+  body.is-menu-open::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+  }
+
+  .nav-item {
+    width: 100%;
+  }
+
+  .nav-link-wrapper {
+    justify-content: space-between;
+    width: 100%;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .nav-link {
+    font-size: 1.1rem;
+    padding: 0.75rem 0;
+    flex: 1;
+    border-bottom: none;
+  }
+
+  /* Show +/- button on mobile */
+  .submenu-toggle {
+    display: flex;
+    background: transparent;
+    border: none;
+    color: #901e58;
+    font-size: 1rem;
+    padding: 0.75rem;
+    cursor: pointer;
+    transform: none;
+  }
+
+  /* Accordion submenu */
+  .dropdown-menu {
+    position: static;
+    transform: none !important;
+    opacity: 1;
+    visibility: visible;
+    box-shadow: none;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease-out;
+    width: 100%;
+    background: #f9f9f9;
+    border-radius: 0;
+  }
+
+  .nav-item.is-open .dropdown-menu {
+    max-height: 520px;
+    padding: 0.5rem 0;
+  }
+
+  .dropdown-menu li a {
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+  }
+
+  /* Prevent desktop hover opening in mobile */
+  .nav-item:hover .dropdown-menu {
+    max-height: 0;
+  }
+  .nav-item.is-open:hover .dropdown-menu {
+    max-height: 520px;
+  }
+}
+
+/* Drawer account section: mobile-only */
+.mobile-drawer-account {
+  display: none;
+}
+@media (max-width: 1260px) {
+  .mobile-drawer-account {
+    display: block;
+  }
+}
+
+.mobile-drawer-section {
+  width: 100%;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.drawer-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #777;
+}
+
+.mobile-drawer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.mobile-drawer-links a {
+  display: block;
+  padding: 0.75rem 0;
+  text-decoration: none;
+  color: #333;
+  font-size: 1.05rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Show/hide based on login state */
+body.logged-in .only-logged-out {
+  display: none;
+}
+body:not(.logged-in) .only-logged-in {
+  display: none;
+}
+
+/* =========================================================
+   SMALL SCREEN POLISH
+========================================================= */
+
+@media (max-width: 640px) {
+  .header-store-link {
+    width: 32px;
+    padding: 0;
+  }
+  .header-store-text {
+    display: none;
+  }
+}
+
+/* Optional: if you use fixed header on very small screens */
+@media (max-width: 782px) {
+  header.wp-block-template-part {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .admin-bar header.wp-block-template-part {
+    top: 46px;
+  }
+
+  .wp-site-blocks {
+    padding-top: 72px;
+  }
+
+  .admin-bar .wp-site-blocks {
+    padding-top: 118px;
+  }
 }

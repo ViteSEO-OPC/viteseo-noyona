@@ -1,238 +1,188 @@
-/**
- * Header behavior: add sticky/scroll classes and wire wishlist drawer.
- */
 (function () {
-    const STICKY_AT = 15; // px from top before switching to dark pink
+  const STICKY_AT = 15;
 
-    function toggleScrollState() {
-        const y = window.scrollY || window.pageYOffset || 0;
-        const headerPart = document.querySelector('header.wp-block-template-part');
+  const $ = (s, scope = document) => scope.querySelector(s);
+  const $$ = (s, scope = document) => Array.from(scope.querySelectorAll(s));
 
-        if (y > STICKY_AT) {
-            document.body.classList.add('has-scrolled-header');
-            if (headerPart) headerPart.classList.add('is-sticky');
-        } else {
-            document.body.classList.remove('has-scrolled-header');
-            if (headerPart) headerPart.classList.remove('is-sticky');
-        }
+  function toggleScrollState() {
+    const y = window.scrollY || 0;
+    const headerPart = $('header.wp-block-template-part');
+
+    if (y > STICKY_AT) {
+      document.body.classList.add('has-scrolled-header');
+      if (headerPart) headerPart.classList.add('is-sticky');
+    } else {
+      document.body.classList.remove('has-scrolled-header');
+      if (headerPart) headerPart.classList.remove('is-sticky');
     }
+  }
 
-    function initWishlist() {
-        const toggleBtn = document.querySelector('.header-wishlist-toggle');
-        const panel = document.getElementById('wishlist-panel');
-        if (!toggleBtn || !panel) return;
+  function initWishlist() {
+    const panel = $('#wishlist-panel');
+    if (!panel) return;
 
-        const overlay = panel.querySelector('.wishlist-panel__overlay');
-        const closeBtn = panel.querySelector('.wishlist-panel__close');
+    const overlay = panel.querySelector('.wishlist-panel__overlay');
+    const closeBtn = panel.querySelector('.wishlist-panel__close');
 
-        function closePanel() {
-            panel.classList.remove('is-open');
-        }
+    const closePanel = () => panel.classList.remove('is-open');
+    const openPanel = () => panel.classList.add('is-open');
 
-        toggleBtn.addEventListener('click', function () {
-            panel.classList.add('is-open');
-        });
-
-        if (overlay) overlay.addEventListener('click', closePanel);
-        if (closeBtn) closeBtn.addEventListener('click', closePanel);
-        document.addEventListener('keydown', function (evt) {
-            if (evt.key === 'Escape' && panel.classList.contains('is-open')) {
-                closePanel();
-            }
-        });
-    }
-
-    function initAccountDropdown() {
-        document.querySelectorAll('.header-account').forEach((wrapper) => {
-            if (wrapper.dataset.accountReady === '1') return;
-            wrapper.dataset.accountReady = '1';
-
-            const toggle = wrapper.querySelector('.header-account-toggle');
-            const menu = wrapper.querySelector('.header-account-menu');
-            if (!toggle || !menu) return;
-
-            function closeMenu() {
-                wrapper.classList.remove('is-open');
-                toggle.setAttribute('aria-expanded', 'false');
-                menu.setAttribute('aria-hidden', 'true');
-            }
-
-            function openMenu() {
-                wrapper.classList.add('is-open');
-                toggle.setAttribute('aria-expanded', 'true');
-                menu.setAttribute('aria-hidden', 'false');
-            }
-
-            toggle.addEventListener('click', function (evt) {
-                evt.preventDefault();
-                evt.stopPropagation();
-                if (wrapper.classList.contains('is-open')) {
-                    closeMenu();
-                } else {
-                    openMenu();
-                }
-            });
-
-            document.addEventListener('click', function (evt) {
-                if (!wrapper.contains(evt.target)) {
-                    closeMenu();
-                }
-            });
-
-            document.addEventListener('keydown', function (evt) {
-                if (evt.key === 'Escape') {
-                    closeMenu();
-                }
-            });
-        });
-    }
-
-    function initLogoutLink() {
-        const logoutUrl = window.noyonaHeader && window.noyonaHeader.logoutUrl ? window.noyonaHeader.logoutUrl : '';
-        if (!logoutUrl) return;
-        document.querySelectorAll('.header-account-logout').forEach((link) => {
-            link.setAttribute('href', logoutUrl);
-        });
-    }
-
-    function initMobileNavIcons() {
-        const headerIcons = document.querySelector('.header-icons');
-        const navRoot = document.querySelector('.main-nav');
-        if (!headerIcons || !navRoot) return;
-
-        const originalOrder = Array.from(headerIcons.children);
-        if (!originalOrder.length) return;
-
-        const miniCart = headerIcons.querySelector('.header-mini-cart');
-        const storeLink = headerIcons.querySelector('.header-store-link');
-        const searchBlock = headerIcons.querySelector('.wp-block-noyona-search-expand');
-        const mobileQuery = window.matchMedia('(max-width: 959px)');
-
-        const openBtn = navRoot.querySelector('.wp-block-navigation__responsive-container-open');
-        const controlsId = openBtn ? openBtn.getAttribute('aria-controls') : '';
-
-        function getNavContent() {
-            if (controlsId) {
-                const contentById = document.getElementById(`${controlsId}-content`);
-                if (contentById) return contentById;
-
-                const responsiveContainer = document.getElementById(controlsId);
-                const content = responsiveContainer
-                    ? responsiveContainer.querySelector('.wp-block-navigation__responsive-container-content')
-                    : null;
-                if (content) return content;
-            }
-
-            return navRoot.querySelector('.wp-block-navigation__responsive-container-content');
-        }
-
-        function ensureIconContainer() {
-            const navContent = getNavContent();
-            const scope = navContent || navRoot;
-            const navList = scope.querySelector('.wp-block-navigation__container, .wp-block-page-list');
-            if (!navList) return null;
-
-            let iconContainer = scope.querySelector('.mobile-nav-icons');
-            if (!iconContainer) {
-                iconContainer = document.createElement('div');
-                iconContainer.className = 'mobile-nav-icons';
-            }
-
-            navList.insertAdjacentElement('afterend', iconContainer);
-
-            return iconContainer;
-        }
-
-        function moveIconsToMenu() {
-            const iconContainer = ensureIconContainer();
-            if (!iconContainer) return false;
-
-            originalOrder.forEach((node) => {
-                if (node !== miniCart && node !== storeLink && node !== searchBlock) {
-                    iconContainer.appendChild(node);
-                }
-            });
-
-            const outsideIcons = [miniCart, storeLink, searchBlock].filter(Boolean);
-            outsideIcons.forEach((node) => {
-                if (openBtn && navRoot.contains(openBtn)) {
-                    navRoot.insertBefore(node, openBtn);
-                } else {
-                    navRoot.appendChild(node);
-                }
-            });
-
-            document.body.classList.add('noyona-mobile-nav-icons-ready');
-            return true;
-        }
-
-        function restoreHeaderIcons() {
-            originalOrder.forEach((node) => {
-                headerIcons.appendChild(node);
-            });
-            document.body.classList.remove('noyona-mobile-nav-icons-ready');
-        }
-
-        function handleChange() {
-            if (mobileQuery.matches) {
-                if (!moveIconsToMenu()) {
-                    document.body.classList.remove('noyona-mobile-nav-icons-ready');
-                }
-            } else {
-                restoreHeaderIcons();
-            }
-        }
-
-        function scheduleMenuSync() {
-            let attempts = 0;
-            const maxAttempts = 12;
-            const delay = 80;
-
-            function trySync() {
-                attempts += 1;
-                if (getNavContent()) {
-                    handleChange();
-                } else if (attempts < maxAttempts) {
-                    setTimeout(trySync, delay);
-                }
-            }
-
-            trySync();
-        }
-
-        handleChange();
-        if (mobileQuery.matches) {
-            scheduleMenuSync();
-        }
-
-        if (typeof mobileQuery.addEventListener === 'function') {
-            mobileQuery.addEventListener('change', handleChange);
-        } else if (typeof mobileQuery.addListener === 'function') {
-            mobileQuery.addListener(handleChange);
-        }
-
-        if (!getNavContent() && 'MutationObserver' in window) {
-            const observer = new MutationObserver(() => {
-                if (getNavContent()) {
-                    handleChange();
-                    observer.disconnect();
-                }
-            });
-            const watchRoot = controlsId ? document.body : navRoot;
-            observer.observe(watchRoot, { childList: true, subtree: true });
-        }
-
-        if (openBtn) {
-            openBtn.addEventListener('click', scheduleMenuSync);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        toggleScrollState();
-        window.addEventListener('scroll', toggleScrollState, { passive: true });
-        initWishlist();
-        initAccountDropdown();
-        initLogoutLink();
-        initMobileNavIcons();
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.header-wishlist-toggle')) openPanel();
     });
+
+    if (overlay) overlay.addEventListener('click', closePanel);
+    if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePanel();
+    });
+  }
+
+  function initAccountDropdown() {
+    $$('.header-account').forEach((wrapper) => {
+      const toggle = wrapper.querySelector('.header-account-toggle');
+      const menu = wrapper.querySelector('.header-account-menu');
+      if (!toggle || !menu) return;
+
+      const closeMenu = () => {
+        wrapper.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        menu.setAttribute('aria-hidden', 'true');
+      };
+
+      toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const open = wrapper.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        menu.setAttribute('aria-hidden', open ? 'false' : 'true');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!wrapper.contains(e.target)) closeMenu();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeMenu();
+      });
+    });
+  }
+
+  function initLogoutLinks() {
+    const logoutUrl = (window.noyonaHeader && window.noyonaHeader.logoutUrl) ? window.noyonaHeader.logoutUrl : '';
+    if (!logoutUrl) return;
+
+    $$('.header-account-logout, .mobile-logout').forEach((a) => {
+      a.setAttribute('href', logoutUrl);
+    });
+  }
+
+  function initMobileMenu() {
+    const burger = $('.mobile-menu-toggle');
+    const navList = $('.nav-list');
+    if (!burger || !navList) return;
+
+    const icon = burger.querySelector('i');
+
+    const closeMenu = () => {
+      document.body.classList.remove('is-menu-open');
+      burger.setAttribute('aria-expanded', 'false');
+      if (icon) {
+        icon.classList.add('fa-bars');
+        icon.classList.remove('fa-xmark');
+      }
+    };
+
+    const openMenu = () => {
+      document.body.classList.add('is-menu-open');
+      burger.setAttribute('aria-expanded', 'true');
+      if (icon) {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-xmark');
+      }
+    };
+
+    burger.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.body.classList.contains('is-menu-open') ? closeMenu() : openMenu();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!document.body.classList.contains('is-menu-open')) return;
+      if (navList.contains(e.target) || burger.contains(e.target)) return;
+      closeMenu();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
+    });
+  }
+
+  function initMobileSubmenus() {
+    $$('.submenu-toggle').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const navItem = btn.closest('.nav-item');
+        const icon = btn.querySelector('i');
+        if (!navItem) return;
+
+        const isOpen = navItem.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+        if (icon) {
+          icon.classList.toggle('fa-plus', !isOpen);
+          icon.classList.toggle('fa-minus', isOpen);
+        }
+      });
+    });
+  }
+
+  function initActiveNavLinks() {
+    const currentPath = window.location.pathname;
+    const navLinks = $$('.nav-link, .dropdown-menu a, .mobile-drawer-links a');
+
+    navLinks.forEach((link) => {
+      const linkPath = new URL(link.href, window.location.origin).pathname;
+
+      if (currentPath === linkPath) {
+        link.classList.add('is-active');
+
+        // Handle dropdown logic
+        const dropdown = link.closest('.dropdown-menu');
+        if (dropdown) {
+          const navItem = dropdown.closest('.nav-item');
+          if (navItem) {
+            navItem.classList.add('has-active-child');
+            // Also mark parent Link as active to trigger its underline
+            const parentLink = navItem.querySelector('.nav-link');
+            if (parentLink) parentLink.classList.add('is-active');
+          }
+        }
+      }
+    });
+
+    // Prevent click on active
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('.is-active');
+      if (link && link.href) {
+        const linkPath = new URL(link.href, window.location.origin).pathname;
+        if (currentPath === linkPath) e.preventDefault();
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    toggleScrollState();
+    window.addEventListener('scroll', toggleScrollState, { passive: true });
+
+    initWishlist();
+    initAccountDropdown();
+    initLogoutLinks();
+    initMobileMenu();
+    initMobileSubmenus();
+    initActiveNavLinks();
+  });
 })();
