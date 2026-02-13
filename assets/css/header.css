@@ -666,6 +666,19 @@ body:not(.logged-in) .only-logged-in {
   display: none;
 }
 
+.site-logo-img--mobile { display: none; }
+
+@media (max-width: 480px){
+  .site-logo-img--desktop { display: none; }
+  .site-logo-img--mobile { 
+    display: inline-block; 
+    height: 55px;
+    border-radius: 10px;
+    max-width: 55px;
+  }
+}
+
+
 /* =========================================================
    SEARCH EXPAND FIX (mobile)
    - keeps panel inside viewport
