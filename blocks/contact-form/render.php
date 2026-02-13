@@ -135,15 +135,28 @@ $allowed_heading = array(
                             <p class="contact-form__info-title"><?php echo esc_html($atts['contactLabel']); ?></p>
                         <?php endif; ?>
                         <?php if (!empty($atts['phone'])): ?>
+                            <?php
+                                $phone_display = $atts['phone'];
+                                // Keep only digits and leading + for tel link
+                                $phone_href = preg_replace('/(?!^\+)[^\d]/', '', trim($atts['phone']));
+                            ?>
                             <p class="contact-form__info-item">
                                 <i class="fa-solid fa-phone"></i>
-                                <span><?php echo esc_html($atts['phone']); ?></span>
+                                <a href="tel:<?php echo esc_attr($phone_href); ?>" class="contact-form__info-link">
+                                    <?php echo esc_html($phone_display); ?>
+                                </a>
                             </p>
                         <?php endif; ?>
+
                         <?php if (!empty($atts['email'])): ?>
+                            <?php
+                                $email = sanitize_email($atts['email']);
+                            ?>
                             <p class="contact-form__info-item">
                                 <i class="fa-regular fa-envelope"></i>
-                                <span><?php echo esc_html($atts['email']); ?></span>
+                                <a href="mailto:<?php echo esc_attr($email); ?>" class="contact-form__info-link">
+                                    <?php echo esc_html($email); ?>
+                                </a>
                             </p>
                         <?php endif; ?>
                     </div>
@@ -193,33 +206,113 @@ $allowed_heading = array(
             <?php endif; ?>
         </div>
 
-        <form class="contact-form__form" action="<?php echo esc_url($form_action); ?>" method="post">
+        <?php $form_id = wp_unique_id('noyona-contact-form-'); ?>
+        <form id="<?php echo esc_attr($form_id); ?>" class="contact-form__form" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="post" novalidate>
+            <?php wp_nonce_field( 'noyona_contact_form', 'noyona_contact_form_nonce' ); ?>
+            <input type="hidden" name="action" value="noyona_contact_form_submit">
+
+            <!-- Honeypot (bots fill this, humans won't) -->
+            <div style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+                <label>Leave this field empty</label>
+                <input type="text" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
             <div class="contact-form__fields">
-                <label class="contact-form__field contact-form__field--full">
-                    <span>First Name *</span>
-                    <input type="text" name="first_name" placeholder="" required />
+            <label class="contact-form__field contact-form__field--full">
+                <span>First Name *</span>
+                <input
+                    id="<?php echo esc_attr($form_id); ?>-first"
+                    type="text"
+                    name="first_name"
+                    required
+                    autocomplete="given-name"
+                    maxlength="60"
+                    pattern="^[A-Za-zÀ-ÿ]+(?:[ '\-][A-Za-zÀ-ÿ]+)*$"
+                    title="Letters only. Spaces, hyphen (-), apostrophe (') allowed."
+                    aria-describedby="<?php echo esc_attr($form_id); ?>-first-error"
+                    placeholder="Juan"
+                />
+                <small class="contact-form__error" id="<?php echo esc_attr($form_id); ?>-first-error" aria-live="polite"></small>
                 </label>
+
                 <label class="contact-form__field contact-form__field--full">
-                    <span>Last Name *</span>
-                    <input type="text" name="last_name" placeholder="" required />
+                <span>Last Name *</span>
+                <input
+                    id="<?php echo esc_attr($form_id); ?>-last"
+                    type="text"
+                    name="last_name"
+                    required
+                    autocomplete="family-name"
+                    maxlength="60"
+                    pattern="^[A-Za-zÀ-ÿ]+(?:[ '\-][A-Za-zÀ-ÿ]+)*$"
+                    title="Letters only. Spaces, hyphen (-), apostrophe (') allowed."
+                    aria-describedby="<?php echo esc_attr($form_id); ?>-last-error"
+                    placeholder="Dela Cruz"
+                />
+                <small class="contact-form__error" id="<?php echo esc_attr($form_id); ?>-last-error" aria-live="polite"></small>
                 </label>
+
                 <label class="contact-form__field contact-form__field--full">
-                    <span>Email *</span>
-                    <input type="email" name="email" placeholder="" required />
+                <span>Email *</span>
+                <input
+                    id="<?php echo esc_attr($form_id); ?>-email"
+                    type="email"
+                    name="email"
+                    required
+                    autocomplete="email"
+                    maxlength="120"
+                    aria-describedby="<?php echo esc_attr($form_id); ?>-email-error"
+                    placeholder="juan.delacruz@example.com"
+                />
+                <small class="contact-form__error" id="<?php echo esc_attr($form_id); ?>-email-error" aria-live="polite"></small>
                 </label>
+
                 <label class="contact-form__field contact-form__field--full">
-                    <span>Contact Number *</span>
-                    <input type="tel" name="contact_number" placeholder="" required />
+                <span>Contact Number *</span>
+                <input
+                    id="<?php echo esc_attr($form_id); ?>-phone"
+                    type="tel"
+                    name="contact_number"
+                    required
+                    autocomplete="tel"
+                    inputmode="tel"
+                    maxlength="25"
+                    pattern="^\+?[0-9\s\-\(\)]{7,25}$"
+                    title="Use numbers only. You may include +, spaces, -, or parentheses."
+                    aria-describedby="<?php echo esc_attr($form_id); ?>-phone-error"
+                    placeholder="+63 920 510 5555"
+                />
+                <small class="contact-form__error" id="<?php echo esc_attr($form_id); ?>-phone-error" aria-live="polite"></small>
                 </label>
+
                 <label class="contact-form__field contact-form__field--full">
-                    <span>Subject *</span>
-                    <input type="text" name="subject" placeholder="Order Support (Status, Returns, Issues)" required />
+                <span>Subject *</span>
+                <input
+                    id="<?php echo esc_attr($form_id); ?>-subject"
+                    type="text"
+                    name="subject"
+                    required
+                    minlength="3"
+                    maxlength="120"
+                    aria-describedby="<?php echo esc_attr($form_id); ?>-subject-error"
+                    placeholder="How can we help you?"
+                />
+                <small class="contact-form__error" id="<?php echo esc_attr($form_id); ?>-subject-error" aria-live="polite"></small>
                 </label>
+
                 <label class="contact-form__field contact-form__field--full">
-                    <span>Message *</span>
-                    <textarea name="message" rows="5"
-                        placeholder="Please include relevant details (order number, product name, or platform used) so we can assist you faster."
-                        required></textarea>
+                <span>Message *</span>
+                <textarea
+                    id="<?php echo esc_attr($form_id); ?>-message"
+                    name="message"
+                    rows="5"
+                    required
+                    minlength="10"
+                    maxlength="2000"
+                    placeholder="Please include relevant details..."
+                    aria-describedby="<?php echo esc_attr($form_id); ?>-message-error"
+                ></textarea>
+                <small class="contact-form__error" id="<?php echo esc_attr($form_id); ?>-message-error" aria-live="polite"></small>
                 </label>
             </div>
 
@@ -231,5 +324,91 @@ $allowed_heading = array(
                 </button>
             </div>
         </form>
+
+        <?php
+            static $noyona_cf_script_printed = false;
+            if (!$noyona_cf_script_printed) :
+            $noyona_cf_script_printed = true;
+            ?>
+            <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+            function getMessage(el) {
+                const v = el.validity;
+                if (v.valueMissing) return 'This field is required.';
+                if (v.typeMismatch && el.type === 'email') return 'Please enter a valid email address.';
+                if (v.patternMismatch) return el.getAttribute('title') || 'Invalid format.';
+                if (v.tooShort) return `Please enter at least ${el.minLength} characters.`;
+                if (v.tooLong) return `Please use ${el.maxLength} characters or less.`;
+                return 'Please check this field.';
+            }
+
+            function validateField(el, show) {
+                const wrap = el.closest('.contact-form__field');
+                if (!wrap) return true;
+
+                const error = wrap.querySelector('.contact-form__error');
+                const valid = el.checkValidity();
+
+                // Don’t show errors on untouched empty fields
+                const empty = !el.value || el.value.trim() === '';
+                if (!show && empty) {
+                wrap.classList.remove('is-invalid', 'is-valid');
+                el.removeAttribute('aria-invalid');
+                if (error) error.textContent = '';
+                return true;
+                }
+
+                if (valid) {
+                wrap.classList.remove('is-invalid');
+                wrap.classList.add('is-valid');
+                el.removeAttribute('aria-invalid');
+                if (error) error.textContent = '';
+                return true;
+                } else {
+                wrap.classList.add('is-invalid');
+                wrap.classList.remove('is-valid');
+                el.setAttribute('aria-invalid', 'true');
+                if (error) error.textContent = getMessage(el);
+                return false;
+                }
+            }
+
+            // Apply to all contact forms on the page
+            document.querySelectorAll('.contact-form__form').forEach(function(form) {
+                const fields = form.querySelectorAll('input, textarea');
+
+                fields.forEach(function(el){
+                // show after blur (touched)
+                el.addEventListener('blur', function(){
+                    el.dataset.touched = '1';
+                    validateField(el, true);
+                });
+
+                // live update after touched
+                el.addEventListener('input', function(){
+                    if (el.dataset.touched === '1') validateField(el, true);
+                });
+                });
+
+                // block submit + show all errors
+                form.addEventListener('submit', function(e){
+                let firstInvalid = null;
+                fields.forEach(function(el){
+                    const ok = validateField(el, true);
+                    if (!ok && !firstInvalid) firstInvalid = el;
+                });
+
+                if (firstInvalid) {
+                    e.preventDefault();
+                    firstInvalid.focus({ preventScroll: false });
+                }
+                });
+            });
+
+            });
+            </script>
+            <?php endif; ?>
+
     </div>
 </section>

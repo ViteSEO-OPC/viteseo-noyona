@@ -4,7 +4,7 @@
     display: flex;
     flex-wrap: nowrap;
     gap: clamp(1.5rem, 4vw, 3rem);
-    align-items: stretch; 
+    align-items: center;
     padding-bottom: 20px !important;
     padding-top: 50px !important;
 }
@@ -16,20 +16,19 @@
     flex: 1 1 50%;
     min-width: 260px;
     display: flex;
-    align-items: stretch; 
+    align-items: center;
+    justify-content: center;
 }
 
 .noyona-founder-section__image-main {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: relative;
+    width: min(588px, 100%);
+    aspect-ratio: 588 / 602;
     margin: 0;
     background: #E5989B !important;
     border-radius: 24px;
     overflow: hidden; 
-    display: flex;           
+    display: block;
 }
 
 .noyona-founder-section__image-main img {
@@ -43,9 +42,9 @@
 
 .noyona-founder-section__image-icon {
     position: absolute;
-    top: 0px;
-    left: 85%;
-    transform: translateX(-50%);
+    top: clamp(-18px, -2vw, -8px);
+    right: clamp(8px, 2vw, 24px);
+    transform: translate(35%, -35%);
     background: transparent;
     width: clamp(120px, 20vw, 220px); /* Fluid width */
     z-index: 2;
@@ -66,7 +65,7 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-self: stretch;          
+    align-self: stretch;
     padding-top: clamp(60px, 10vw, 120px);
     padding-bottom: clamp(60px, 10vw, 120px);
     padding-right: clamp(20px, 5vw, 60px);
@@ -87,6 +86,7 @@
     font-size: clamp(16px, 1.5vw, 20px);
     font-family: var(--wp--preset--font-family--proxima-nova);
     font-weight: 400;
+    text-align: left;
 }
 
 /* CTA button */
@@ -120,13 +120,16 @@
 /* Responsive */
 @media (max-width: 1499px) {
     .noyona-founder-section {
-        flex-direction: column;   
-        gap: 2rem;               
+        flex-direction: column;
+        gap: 2rem;
+        align-items: center;
+        text-align: center;
     }
 
     .noyona-founder-section__image-column,
     .noyona-founder-section__content-column {
-        max-width: 100%;
+        width: 100%;
+        max-width: min(720px, 100%);
         flex: auto;
     }
 
@@ -136,40 +139,46 @@
     }
 
     .noyona-founder-section__content-column {
-        padding-top: 0;
-        padding-bottom: 0;
+        align-self: auto;
+        padding-top: clamp(28px, 6vw, 60px);
+        padding-bottom: clamp(24px, 6vw, 60px);
     }
 
     .noyona-founder-section__image-main {
-        position: relative;     
-        height: auto;
-        aspect-ratio: 4 / 3;
+        /* Keep the intended 588x602 ratio on smaller screens too */
+        aspect-ratio: 588 / 602;
+    }
+
+    .noyona-founder-section__button {
+        /* margin-left: auto;
+        margin-right: auto; */
     }
 }
 
 
 @media (max-width: 960px) {
     .noyona-founder-section {
-        gap: 0;
+        gap: 1rem;
     }
 
     .noyona-founder-section__image-column {
         order: -1;           /* image on top */
-        margin-bottom: -40px; /* overlap effect */
+        margin-bottom: 0;
         z-index: 1;
     }
 
     .noyona-founder-section__image-icon {
-        top: -20px;
-        left: 80%;
+        top: clamp(-14px, -2vw, -6px);
+        right: clamp(6px, 2vw, 18px);
+        left: auto;
     }
 
     .noyona-founder-section__content-column {
-        padding-top: 60px;
-        padding-bottom: 40px;
-        padding-left: 20px;
-        padding-right: 20px;
-        background: transparent;
+        padding-top: 22px;
+        padding-bottom: 18px;
+        padding-left: 16px;
+        padding-right: 16px;
+        background: #ffffff;
     }
 }
 

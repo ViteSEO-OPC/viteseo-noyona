@@ -10,21 +10,28 @@
 
 @media (min-width: 960px) {
     .noyona-store-locator-wrapper {
-        flex-direction: row;
-        height: 840px;
+        display: grid;
+        grid-template-columns: minmax(320px, 1fr) minmax(560px, 783px);
+        align-items: start;
+        height: auto;
+        min-height: 1042px;
         gap: 32px;
     }
 
-    /* 40% column */
     .noyona-store-locator-content {
-        flex: 0 0 calc(40% - 16px);
-        max-width: calc(40% - 16px);
+        flex: none;
+        max-width: none;
+        min-height: 1042px;
+        overflow: hidden;
     }
 
-    /* 60% column */
     .nsl-map-container {
-        flex: 0 0 calc(60% - 16px);
-        max-width: calc(60% - 16px);
+        flex: none;
+        width: 100%;
+        max-width: 783px;
+        height: 1042px;
+        min-height: 1042px;
+        border-radius: 12px;
     }
 
     .nsl-store-status {
@@ -51,6 +58,25 @@
         order: 5;
     }
 }
+
+@media (max-width: 1400px) and (min-width: 960px) {
+    .noyona-store-locator-wrapper {
+        grid-template-columns: minmax(300px, 1fr) minmax(480px, 56vw);
+        min-height: 0;
+    }
+
+    .noyona-store-locator-content {
+        min-height: min(1000px, 72vh);
+    }
+
+    .nsl-map-container {
+        max-width: none;
+        width: 100%;
+        height: min(1000px, 72vh);
+        min-height: 620px;
+        border-radius: 12px;
+    }
+}
 @media (max-width: 959px) {
     .nsl-store-item {
         background-color: #fff !important;
@@ -72,13 +98,13 @@
 .nsl-breadcrumbs {
     font-family: var(--wp--preset--font-family--proxima-nova);
     font-size: clamp(20px, 2vw, 24px);
-    color: #666;
+    color: #525252;
     font-weight: 700;
     margin-bottom: clamp(6px, 1.2vw, 10px);
 }
 
 .nsl-breadcrumb-link {
-    color: #666;
+    color: #525252;
     text-decoration: none;
 }
 
@@ -87,7 +113,7 @@
 }
 
 .nsl-breadcrumbs .active {
-    color: #FF4D6D;
+    color: #E30B5D;
     font-weight: 700;
 }
 
@@ -99,7 +125,7 @@
     line-height: 1.2;
 }
 .nsl-title span {
-    color: #FF4D6D;
+    color: #E30B5D;
 }
 
 .nsl-description {
@@ -138,7 +164,7 @@
 .nsl-use-location {
     background: none;
     border: none;
-    color: #FF4D6D;
+    color: #E30B5D;
     font-weight: 600;
     font-size: 16px;
     display: flex;
@@ -187,6 +213,8 @@
     overflow-y: auto;
     padding-right: 4px;
     /* Avoid scrollbar covering content */
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 /* Scrollbar styling */
@@ -204,10 +232,6 @@
     padding: 20px 0;
 }
 
-
-.nsl-store-list {
-    /* Container styles */
-}
 
 /* Store Item Card */
 .nsl-store-item {
@@ -405,7 +429,7 @@
 .nsl-map-container {
     flex: 1;
     background-color: #f0f0f0;
-    border-radius: 20px;
+    border-radius: 12px;
     overflow: hidden;
     position: relative;
     min-height: 400px;
@@ -417,6 +441,43 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Leaflet zoom controls: bottom-right and larger */
+.leaflet-bar {
+    border: 0 !important;
+}
+
+.nsl-map-container .leaflet-top {
+    top: auto;
+    bottom: 25px;
+}
+
+.nsl-map-container .leaflet-left {
+    left: auto;
+    right: 18px;
+}
+
+.nsl-map-container .leaflet-control-zoom {
+    margin: 0;
+    /* border: 1px solid rgba(0, 0, 0, 0.18); */
+    border-radius: 12px;
+    overflow: hidden;
+    /* box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16); */
+}
+
+.nsl-map-container .leaflet-control-zoom .leaflet-control-zoom-in, .nsl-map-container .leaflet-control-zoom .leaflet-control-zoom-out {
+    width: 48px;
+    height: 48px;
+    line-height: 46px;
+    font-size: 30px;
+    font-weight: 600;
+    color: #fff;
+    background: #E30B5D;
+}
+
+.nsl-map-container .leaflet-control-zoom .leaflet-control-zoom-in:hover, .nsl-map-container .leaflet-control-zoom .leaflet-control-zoom-out:hover {
+    background: #fff;
 }
 
 /* Popup UI */
@@ -1212,7 +1273,4 @@
         color: #666;
     }
 
-    .leaflet-control{
-        display:none !important;
-    }
 }

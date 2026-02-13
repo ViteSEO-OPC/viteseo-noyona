@@ -41,7 +41,7 @@
     color: #fff;
     text-decoration: none;
     font-weight: 700;
-    font-size: clamp(16px, 1.2vw, 18px);
+    font-size: clamp(18px, 2vw, 24px);
     box-shadow: 0 4px 10px rgba(227, 11, 93, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     margin-top: 1.5rem;
@@ -51,7 +51,12 @@
 
 .faq-block__button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(227, 11, 93, 0.35);
+    box-shadow:
+        0 14px 26px rgba(0, 0, 0, 0.18),         /* softer lift shadow */
+        0 0 18px rgba(227, 11, 93, 0.18),        /* small glow */
+        0 0 40px rgba(227, 11, 93, 0.22),        /* medium glow */
+        0 18px 48px rgba(227, 11, 93, 0.16);     /* colored depth */
+
 }
 
 .faq-block__accordion {
@@ -112,8 +117,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
-    font-weight: 400;
+    font-size: clamp(22px, 1.8vw, 28px);
+    font-weight: 700;
     color: #333;
     transition: transform 0.3s ease, color 0.2s ease;
     line-height: 1;
@@ -143,6 +148,40 @@
     color: #555;
     font-size: 0.95rem;
     line-height: 1.6;
+}
+
+/* Links inside answers (e.g. mailto:) */
+.faq-accordion__answer a {
+    color: #E30B5D;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 2px;
+    transition: color 0.18s ease, text-decoration-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    border-radius: 6px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .faq-accordion__answer a:hover {
+        color: #ff2b7b;
+        text-decoration-color: rgba(255, 43, 123, 0.65);
+        background-color: rgba(227, 11, 93, 0.08);
+        box-shadow: 0 0 0 6px rgba(227, 11, 93, 0.10);
+    }
+}
+
+.faq-accordion__answer a:focus-visible {
+    outline: none;
+    color: #ff2b7b;
+    text-decoration-color: rgba(255, 43, 123, 0.8);
+    background-color: rgba(227, 11, 93, 0.10);
+    box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.9),
+        0 0 0 7px rgba(227, 11, 93, 0.35);
+}
+
+.faq-accordion__answer a:visited {
+    color: #B60E4B;
 }
 
 /* Active answer text color - making it slightly tinted or just clear dark */

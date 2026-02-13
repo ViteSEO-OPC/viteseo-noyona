@@ -74,6 +74,17 @@ if (!empty($categories)) {
                     <?php endif; ?>
                 </div>
             </div>
+            <?php if (!empty($title)): ?>
+                <h2 class="faq-list__title">
+                    <?php echo esc_html($title); ?>
+                </h2>
+            <?php endif; ?>
+
+            <?php if (!empty($subtitle)): ?>
+                <p class="faq-list__subtitle">
+                    <?php echo esc_html($subtitle); ?>
+                </p>
+            <?php endif; ?>
         </div>
 
         <div class="faq-list__grid">
@@ -89,56 +100,79 @@ if (!empty($categories)) {
                             ?>
                             <button class="faq-list__category<?php echo 0 === $index ? ' is-active' : ''; ?>" type="button"
                                 data-faq-category-button="<?php echo esc_attr($category_key); ?>"
-                                aria-pressed="<?php echo 0 === $index ? 'true' : 'false'; ?>">
+                                aria-pressed="<?php echo 0 === $index ? 'true' : 'false'; ?>"> 
                                 <span class="faq-list__category-label">
                                     <?php echo esc_html($category_label); ?>
                                 </span>
-                                <span class="faq-list__category-icon" aria-hidden="true">></span>
+                                <span class="faq-list__category-icon" aria-hidden="true"></span>
                             </button>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
 
-                <?php if (!empty($disclaimers)): ?>
-                    <div class="faq-list__disclaimers">
-                        <?php foreach ($disclaimers as $disclaimer): ?>
-                            <?php
-                            $title = isset($disclaimer['title']) ? $disclaimer['title'] : '';
-                            $body = isset($disclaimer['body']) ? $disclaimer['body'] : '';
-                            if ('' === trim($title) && '' === trim($body)) {
-                                continue;
-                            }
-                            ?>
-                            <div class="faq-list__disclaimer">
-                                <?php if ('' !== trim($disclaimer['title'] ?? '')): ?>
-                                    <h3 class="faq-list__disclaimer-title">
-                                        <?php echo esc_html($disclaimer['title'] ?? ''); ?>
-                                    </h3>
-                                <?php endif; ?>
-                                <?php if ('' !== trim($disclaimer['body'] ?? '')): ?>
-                                    <div class="faq-list__disclaimer-body">
-                                        <?php echo wp_kses_post(wpautop($disclaimer['body'] ?? '')); ?>
-                                    </div>
+                <?php if (!empty($showCommunityCta)): ?>
+                    <div class="faq-community faq-community--sidebar">
+                        <div class="faq-community__inner">
+                            <div class="faq-community__icon" aria-hidden="true">
+                                <i class="fa-regular fa-envelope"></i>
+                            </div>
+
+                            <?php if (!empty($communityHeading)): ?>
+                                <h2 class="faq-community__title">
+                                    <?php echo wp_kses_post($communityHeading); ?>
+                                </h2>
+                            <?php endif; ?>
+
+                            <?php if (!empty($communityText)): ?>
+                                <p class="faq-community__text">
+                                    <?php echo esc_html($communityText); ?>
+                                </p>
+                            <?php endif; ?>
+
+                            <div class="faq-community__form" aria-label="Community signup">
+                                <input class="faq-community__input" type="email" placeholder="Your email address" />
+                                <?php if (!empty($communityButtonText) && !empty($communityButtonUrl)): ?>
+                                    <a class="faq-community__submit" href="<?php echo esc_url($communityButtonUrl); ?>">
+                                        <?php echo esc_html($communityButtonText); ?>
+                                    </a>
+                                <?php else: ?>
+                                    <button class="faq-community__submit" type="button">Subscribe</button>
                                 <?php endif; ?>
                             </div>
-                        <?php endforeach; ?>
+
+                            <p class="faq-community__fineprint">No spam, unsubscribe anytime.</p>
+                        </div>
                     </div>
                 <?php endif; ?>
+
+                <?php if (!empty($disclaimers)): ?>
+                <div class="faq-list__disclaimers faq-list__disclaimers-panel">
+                    <?php foreach ($disclaimers as $disclaimer): ?>
+                        <?php
+                        $title = isset($disclaimer['title']) ? $disclaimer['title'] : '';
+                        $body = isset($disclaimer['body']) ? $disclaimer['body'] : '';
+                        if ('' === trim($title) && '' === trim($body)) {
+                            continue;
+                        }
+                        ?>
+                        <div class="faq-list__disclaimer">
+                            <?php if ('' !== trim($disclaimer['title'] ?? '')): ?>
+                                <h3 class="faq-list__disclaimer-title">
+                                    <?php echo esc_html($disclaimer['title'] ?? ''); ?>
+                                </h3>
+                            <?php endif; ?>
+                            <?php if ('' !== trim($disclaimer['body'] ?? '')): ?>
+                                <div class="faq-list__disclaimer-body">
+                                    <?php echo wp_kses_post(wpautop($disclaimer['body'] ?? '')); ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
             </aside>
 
             <div class="faq-list__content">
-                <?php if (!empty($title)): ?>
-                    <h2 class="faq-list__title">
-                        <?php echo esc_html($title); ?>
-                    </h2>
-                <?php endif; ?>
-
-                <?php if (!empty($subtitle)): ?>
-                    <p class="faq-list__subtitle">
-                        <?php echo esc_html($subtitle); ?>
-                    </p>
-                <?php endif; ?>
-
                 <?php $accordion_id = uniqid('faq-list-accordion-'); ?>
                 <div class="faq-list__items">
                     <?php if (empty($items)): ?>
@@ -180,31 +214,10 @@ if (!empty($categories)) {
                     <?php echo esc_html($emptyMessage); ?>
                 </p>
             </div>
+
+           
         </div>
     </div>
-    <?php if (!empty($showCommunityCta)): ?>
-        <div class="faq-community">
-            <div class="faq-community__inner">
-                <?php if (!empty($communityHeading)): ?>
-                    <h2 class="faq-community__title">
-                        <?php echo wp_kses_post($communityHeading); ?>
-                    </h2>
-                <?php endif; ?>
-
-                <?php if (!empty($communityText)): ?>
-                    <p class="faq-community__text">
-                        <?php echo esc_html($communityText); ?>
-                    </p>
-                <?php endif; ?>
-
-                <?php if (!empty($communityButtonText) && !empty($communityButtonUrl)): ?>
-                    <a class="faq-community__button" href="<?php echo esc_url($communityButtonUrl); ?>">
-                        <?php echo esc_html($communityButtonText); ?>
-                    </a>
-                <?php endif; ?>
-            </div>
-        </div>
-    <?php endif; ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

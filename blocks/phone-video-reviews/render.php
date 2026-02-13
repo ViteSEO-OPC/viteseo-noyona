@@ -148,14 +148,19 @@ $wrapper = get_block_wrapper_attributes([
           data-aspect="<?= esc_attr($aspect_ratio); ?>">
           <div class="phone-card__shell">
             <div class="phone-card__screen">
-              <iframe src="<?= esc_url($embed_src_muted); ?>" data-embed-muted="<?= esc_attr($embed_src_muted); ?>"
-                data-embed-sound="<?= esc_attr($embed_src_sound); ?>" title="<?= esc_attr($label ?: 'Video review'); ?>"
-                loading="lazy" allowfullscreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                style="<?= $is_youtube ? 'pointer-events: none;' : ''; ?>"></iframe>
+            <iframe
+              src="<?= esc_url($embed_src_muted); ?>"
+              data-embed-muted="<?= esc_attr($embed_src_muted); ?>"
+              data-embed-sound="<?= esc_attr($embed_src_sound); ?>"
+              title="<?= esc_attr($label ?: 'Video review'); ?>"
+              loading="lazy"
+              allowfullscreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              style="pointer-events: none;"
+            ></iframe>
               <?php if ($is_youtube): ?>
                 <button class="phone-card__toggle" aria-label="Pause video">
-                  <i class="fas fa-play"></i>
+                  <i class="fas fa-pause"></i>
                 </button>
               <?php endif; ?>
             </div>
@@ -186,130 +191,3 @@ $wrapper = get_block_wrapper_attributes([
     </div>
   </div>
 </div>
-
-<script>
-  (function () {
-    function initPhoneReviews(block) {
-      /* 1. Grid Logic (Desktop & Mobile) */
-      const cards = block.querySelectorAll('.phone-card');
-      const overlay = block.querySelector('.phone-reviews__overlay');
-
-      // Overlay elements
-      let frame, titleEl, backdrop, closeBtn;
-
-      if (overlay) {
-        frame = overlay.querySelector('iframe');
-        titleEl = overlay.querySelector('[data-phone-overlay-title]');
-        backdrop = overlay.querySelector('.phone-reviews__overlay-backdrop');
-        closeBtn = overlay.querySelector('.phone-reviews__overlay-close');
-      }
-
-      function openOverlay(card) {
-        if (!overlay || !frame) return;
-
-        const aspect = card.dataset.aspect || 'portrait';
-        const shell = overlay.querySelector('.phone-reviews__overlay-shell');
-        if (shell) shell.dataset.aspect = aspect;
-
-        const cardIframe = card.querySelector('iframe');
-        const src = cardIframe ? (cardIframe.dataset.embedSound || '') : '';
-        if (!src) return;
-        frame.src = src;
-
-        const label = card.querySelector('.phone-card__label') ? card.querySelector('.phone-card__label').textContent : '';
-        if (titleEl) titleEl.textContent = label;
-
-        overlay.classList.add('is-open');
-        document.documentElement.classList.add('phone-reviews--overlay-open');
-      }
-
-      function closeOverlay() {
-        if (!overlay) return;
-        overlay.classList.remove('is-open');
-        if (frame) frame.src = ''; // Stop video
-        document.documentElement.classList.remove('phone-reviews--overlay-open');
-      }
-
-      cards.forEach(card => {
-        const iframe = card.querySelector('iframe');
-        const toggleBtn = card.querySelector('.phone-card__toggle');
-        const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
-        const videoType = card.dataset.videoType || 'youtube';
-
-        if (!iframe) return;
-
-        // Initial state
-        card.dataset.videoState = 'playing';
-
-        card.addEventListener('click', function (e) {
-          // If User clicked the Toggle Button (Play/Pause)
-          if (toggleBtn && e.target.closest('.phone-card__toggle')) {
-            e.preventDefault();
-            e.stopPropagation(); 
-
-            if (videoType === 'youtube') {
-              const isPlaying = card.dataset.videoState === 'playing';
-              if (isPlaying) {
-                iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-                card.dataset.videoState = 'paused';
-                if (icon) icon.className = 'fas fa-play';
-                toggleBtn.style.opacity = '1';
-              } else {
-                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                card.dataset.videoState = 'playing';
-                if (icon) icon.className = 'fas fa-pause';
-                toggleBtn.style.opacity = '0';
-              }
-            }
-            return;
-          }
-
-          // Otherwise, Open Modal
-          if (e.target.closest('a, button')) return;
-
-          e.preventDefault();
-          openOverlay(card);
-        });
-
-        // Hover effect for Pause icon (YouTube only or if toggle exists)
-        if (toggleBtn) {
-          card.addEventListener('mouseenter', function () {
-            if (card.dataset.videoState === 'playing') {
-              if (icon) icon.className = 'fas fa-pause';
-              toggleBtn.style.opacity = '1';
-            }
-          });
-
-          card.addEventListener('mouseleave', function () {
-            if (card.dataset.videoState === 'playing') {
-              toggleBtn.style.opacity = '0';
-            }
-          });
-        }
-      });
-
-      // Overlay Listeners
-      if (backdrop) {
-        backdrop.addEventListener('click', function (e) {
-          e.preventDefault();
-          closeOverlay();
-        });
-      }
-      if (closeBtn) {
-        closeBtn.addEventListener('click', function (e) {
-          e.preventDefault();
-          closeOverlay();
-        });
-      }
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && overlay && overlay.classList.contains('is-open')) {
-          closeOverlay();
-        }
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('.phone-reviews').forEach(initPhoneReviews);
-    });
-  })();
-</script>

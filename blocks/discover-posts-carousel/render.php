@@ -210,39 +210,45 @@ ob_start();
 						<i class="fas fa-caret-down"></i>
 					</button>
 					<div class="discover-carousel__filter-menu">
-						<button type="button" class="filter-item is-active" data-filter="all">All Products</button>
+						<div class="filter-menu-grid" role="group" aria-label="Product filters">
+							<div class="filter-menu-col filter-menu-col--types">
+								<button type="button" class="filter-item is-active" data-filter="all">All Products</button>
 
-						<div class="filter-divider">Type</div>
-						<div class="filter-group--types">
-							<button type="button" class="filter-item" data-filter="type" data-value="eyes">Eyes</button>
-							<button type="button" class="filter-item" data-filter="type" data-value="lips">Lips</button>
-							<button type="button" class="filter-item" data-filter="type" data-value="face">Face</button>
-							<button type="button" class="filter-item" data-filter="type" data-value="body">Body</button>
-							<button type="button" class="filter-item" data-filter="type" data-value="hair">Hair</button>
-						</div>
-
-						<div class="filter-divider">Max Price</div>
-						<div class="filter-range-group">
-							<div class="range-labels">
-								<span>₱0</span>
-								<span id="price-val">₱1000</span>
+								<div class="filter-divider">Type</div>
+								<div class="filter-group--types">
+									<button type="button" class="filter-item" data-filter="type" data-value="eyes">Eyes</button>
+									<button type="button" class="filter-item" data-filter="type" data-value="lips">Lips</button>
+									<button type="button" class="filter-item" data-filter="type" data-value="face">Face</button>
+									<button type="button" class="filter-item" data-filter="type" data-value="body">Body</button>
+									<button type="button" class="filter-item" data-filter="type" data-value="hair">Hair</button>
+								</div>
 							</div>
-							<input type="range" class="filter-range" id="price-slider" min="0" max="1000" step="10"
-								value="1000" data-filter="price-range">
-						</div>
 
-						<div class="filter-divider">Min Rating</div>
-						<div class="filter-range-group">
-							<div class="range-labels">
-								<span id="rating-val">0★</span>
-								<span>5★</span>
+							<div class="filter-menu-col filter-menu-col--controls">
+								<div class="filter-divider">Max Price</div>
+								<div class="filter-range-group">
+									<div class="range-labels">
+										<span>₱0</span>
+										<span id="price-val">₱1000</span>
+									</div>
+									<input type="range" class="filter-range" id="price-slider" min="0" max="1000" step="10"
+										value="1000" data-filter="price-range">
+								</div>
+
+								<div class="filter-divider">Min Rating</div>
+								<div class="filter-range-group">
+									<div class="range-labels">
+										<span id="rating-val">0★</span>
+										<span>5★</span>
+									</div>
+									<input type="range" class="filter-range" id="rating-slider" min="0" max="5" step="0.1" value="0"
+										data-filter="rating-range">
+								</div>
+
+								<div class="filter-footer">
+									<button type="button" class="filter-reset-btn">Reset Filters</button>
+								</div>
 							</div>
-							<input type="range" class="filter-range" id="rating-slider" min="0" max="5" step="0.1" value="0"
-								data-filter="rating-range">
-						</div>
-
-						<div class="filter-footer">
-							<button type="button" class="filter-reset-btn">Reset Filters</button>
 						</div>
 					</div>
 				</div>

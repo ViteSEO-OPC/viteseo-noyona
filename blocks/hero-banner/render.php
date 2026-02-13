@@ -2,8 +2,6 @@
 /**
  * Hero Banner block render.
  *
- * Provides a left-text, right-image hero layout with a gentle gradient overlay.
- *
  * @param array $attributes Block attributes.
  */
 
@@ -16,28 +14,54 @@ $defaults = array(
     'searchPostType'  => '',
     'buttonText'      => 'Discover Your Glow',
     'buttonUrl'       => '/shop/',
+
     'backgroundImage' => '',
     'backgroundSize'  => 'cover',
-    'backgroundPosition' => 'center',
+    // ✅ default focal point to the right so the subject on the right won’t get chopped
+    'backgroundPosition' => 'right center',
+
+    // ✅ mobile-specific (optional)
+    'backgroundImageMobile' => '',
+    // Default mobile behavior: fill the hero (no pink bars). Override per-block if you need "contain".
+    'backgroundSizeMobile' => 'cover',
+    'backgroundPositionMobile' => 'right center',
+
+    // ✅ prevents white gaps when using "contain"
+    'backgroundColor' => '#f7d0d8',
 );
 
 $atts = wp_parse_args( $attributes, $defaults );
-if ( empty( $atts['titleLine'] ) && ( ! empty( $atts['titleLine1'] ) || ! empty( $atts['titleLine2'] ) ) ) {
-    $atts['titleLine'] = trim( $atts['titleLine1'] . ' ' . $atts['titleLine2'] );
-}
 
-$bg_image = $atts['backgroundImage'];
+$bg_image = ! empty( $atts['backgroundImage'] )
+    ? $atts['backgroundImage']
+    : get_stylesheet_directory_uri() . '/assets/images/makeup.jpg';
 
-if ( empty( $bg_image ) ) {
-    $bg_image = get_stylesheet_directory_uri() . '/assets/images/makeup.jpg';
-}
+$bg_image_mobile = ! empty( $atts['backgroundImageMobile'] )
+    ? $atts['backgroundImageMobile']
+    : $bg_image;
 
-    $bg_size = isset( $atts['backgroundSize'] ) ? $atts['backgroundSize'] : 'cover';
-    $bg_position = isset( $atts['backgroundPosition'] ) ? $atts['backgroundPosition'] : 'center';
+$bg_size = $atts['backgroundSize'] ?: 'cover';
+$bg_position = $atts['backgroundPosition'] ?: 'right center';
+
+$bg_size_mobile = $atts['backgroundSizeMobile'] ?: 'cover';
+$bg_position_mobile = $atts['backgroundPositionMobile'] ?: 'right center';
+
+$bg_color = $atts['backgroundColor'] ?: '#f7d0d8';
 ?>
 <section
     class="wp-block-noyona-hero-banner hero-banner alignfull"
-    style="--hero-banner-bg: url('<?php echo esc_url( $bg_image ); ?>'); --hero-banner-bg-size: <?php echo esc_attr( $bg_size ); ?>; --hero-banner-bg-position: <?php echo esc_attr( $bg_position ); ?>;"
+    style="
+        --hero-banner-bg: url('<?php echo esc_url( $bg_image ); ?>');
+        --hero-banner-bg-mobile: url('<?php echo esc_url( $bg_image_mobile ); ?>');
+
+        --hero-banner-bg-size: <?php echo esc_attr( $bg_size ); ?>;
+        --hero-banner-bg-position: <?php echo esc_attr( $bg_position ); ?>;
+
+        --hero-banner-bg-size-mobile: <?php echo esc_attr( $bg_size_mobile ); ?>;
+        --hero-banner-bg-position-mobile: <?php echo esc_attr( $bg_position_mobile ); ?>;
+
+        --hero-banner-bg-color: <?php echo esc_attr( $bg_color ); ?>;
+    "
 >
     <div class="hero-banner__inner">
         <div class="hero-banner__content">
@@ -51,10 +75,8 @@ if ( empty( $bg_image ) ) {
                     echo wp_kses(
                         $atts['titleLine'],
                         array(
-                            'span' => array(
-                                'class' => array(),
-                            ),
-                            'em'   => array(),
+                            'span' => array( 'class' => array() ),
+                            'em' => array(),
                             'strong' => array(),
                         )
                     );
@@ -62,31 +84,7 @@ if ( empty( $bg_image ) ) {
                 </span>
             </h1>
 
-            <p class="hero-banner__body">
-                <?php echo esc_html( $atts['body'] ); ?>
-            </p>
-
-            <?php if ( ! empty( $atts['searchEnabled'] ) ) : ?>
-                <?php $search_id = wp_unique_id( 'hero-search-' ); ?>
-                <form class="hero-banner__search" role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-                    <label class="screen-reader-text" for="<?php echo esc_attr( $search_id ); ?>">
-                        <?php esc_html_e( 'Search', 'noyona-childtheme' ); ?>
-                    </label>
-                    <input
-                        id="<?php echo esc_attr( $search_id ); ?>"
-                        class="hero-banner__search-input"
-                        type="search"
-                        name="s"
-                        placeholder="<?php echo esc_attr( $atts['searchPlaceholder'] ); ?>"
-                    />
-                    <?php if ( ! empty( $atts['searchPostType'] ) ) : ?>
-                        <input type="hidden" name="post_type" value="<?php echo esc_attr( $atts['searchPostType'] ); ?>" />
-                    <?php endif; ?>
-                    <button class="hero-banner__search-btn" type="submit" aria-label="<?php esc_attr_e( 'Search', 'noyona-childtheme' ); ?>">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </form>
-            <?php endif; ?>
+            <p class="hero-banner__body"><?php echo esc_html( $atts['body'] ); ?></p>
 
             <?php if ( ! empty( $atts['buttonText'] ) && ! empty( $atts['buttonUrl'] ) ) : ?>
                 <a class="hero-banner__cta" href="<?php echo esc_url( $atts['buttonUrl'] ); ?>">

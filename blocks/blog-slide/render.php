@@ -13,39 +13,6 @@ $atts = wp_parse_args( $attributes, $defaults );
 $items = is_array( $atts['items'] ) ? $atts['items'] : array();
 $cards_to_show = max( 1, intval( $atts['cardsToShow'] ) );
 
-$view_page_url = '';
-$view_page_id = 0;
-$template_candidates = array( 'page-blogs-view.html', 'page-blogs-view', 'templates/page-blogs-view.html' );
-foreach ( $template_candidates as $template_candidate ) {
-    $template_pages = get_posts(
-        array(
-            'post_type'      => 'page',
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-            'meta_key'       => '_wp_page_template',
-            'meta_value'     => $template_candidate,
-        )
-    );
-    if ( ! empty( $template_pages ) ) {
-        $view_page_id = (int) $template_pages[0];
-        break;
-    }
-}
-
-if ( ! $view_page_id ) {
-    $template_page = get_page_by_path( 'blogs-view' );
-    if ( $template_page ) {
-        $view_page_id = (int) $template_page->ID;
-    }
-}
-
-if ( $view_page_id ) {
-    $view_page_url = get_permalink( $view_page_id );
-}
-if ( ! $view_page_url ) {
-    $view_page_url = home_url( '/blogs-view/' );
-}
-
 $cards = array();
 $posts_query = new WP_Query(
     array(
@@ -66,9 +33,7 @@ if ( $posts_query->have_posts() ) {
         $author_id = (int) get_the_author_meta( 'ID' );
         $author_avatar = $author_id ? get_avatar_url( $author_id, array( 'size' => 48 ) ) : '';
         $post_permalink = get_permalink( $post_id );
-        $read_more_url = $view_page_url
-            ? add_query_arg( 'post_id', $post_id, $view_page_url )
-            : $post_permalink;
+        $read_more_url = $post_permalink;
 
         $cards[] = array(
             'tag'          => $tag,

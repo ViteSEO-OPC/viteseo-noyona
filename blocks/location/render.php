@@ -165,7 +165,7 @@ if ($store_query->have_posts()) {
 <div <?php echo $wrapper_attributes; ?> <?php echo $data_attrs; ?>>
     <div class="noyona-store-locator-content">
         <div class="nsl-header">
-            <div class="nsl-breadcrumbs"><a class="nsl-breadcrumb-link" href="<?php echo home_url(); ?>">Home</a> /
+            <div class="nsl-breadcrumbs"><a class="nsl-breadcrumb-link" href="<?php echo home_url(); ?>">Home</a> >
                 <span class="active">Find a Store</span>
             </div>
             <h1 class="nsl-title">Find a <span>Store</span></h1>

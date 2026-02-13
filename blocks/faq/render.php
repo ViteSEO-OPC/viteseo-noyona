@@ -50,7 +50,7 @@ $wrapper_class = 'wp-block-noyona-faq faq-block alignfull faq-block--' . $layout
                             </summary>
                             <?php if ('' !== $answer): ?>
                                 <div class="faq-accordion__answer">
-                                    <p><?php echo esc_html($answer); ?></p>
+                                    <?php echo wp_kses_post( wpautop( $answer ) ); ?>
                                 </div>
                             <?php endif; ?>
                         </details>

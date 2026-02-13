@@ -171,20 +171,14 @@
 }
 
 .ps-card__desc {
-  color: #525252;
-  font-family: var(--wp--preset--font-family--proxima-nova);
   font-size: clamp(16px, 1.7vw, 20px);
+  color: #525252;
   font-style: normal;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: normal;
   letter-spacing: -1px;
-  margin: 0;
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  /* -webkit-box-orient: vertical; */
-  overflow: hidden;
-  min-height: 2.6em;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  
 }
 
 .ps-card__meta-row {

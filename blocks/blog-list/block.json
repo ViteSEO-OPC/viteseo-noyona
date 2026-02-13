@@ -53,40 +53,16 @@
       "type": "array",
       "default": [
         {
-          "tag": "Noyona Insights",
-          "title": "The Future of Hybrid Beauty",
-          "excerpt": "Skincare and makeup are merging. In this Noyona Insights, we explore the latest formulas that blur the line between glow and coverage.",
-          "image": "/wp-content/themes/noyona-childtheme/assets/images/hero-banner.png",
-          "dateDay": "6",
-          "dateLabel": "Jan 2024",
-          "author": "Noyona Essentials",
+          "tag": "",
+          "title": "",
+          "excerpt": "",
+          "image": "",
+          "dateDay": "",
+          "dateLabel": "",
+          "author": "",
           "authorAvatar": "",
-          "shareUrl": "#",
-          "readMoreUrl": "/blog/"
-        },
-        {
-          "tag": "Noyona Insights",
-          "title": "The Future of Hybrid Beauty",
-          "excerpt": "Skincare and makeup are merging. In this Noyona Insights, we explore the latest formulas that blur the line between glow and coverage.",
-          "image": "/wp-content/themes/noyona-childtheme/assets/images/hero-banner.png",
-          "dateDay": "6",
-          "dateLabel": "Jan 2024",
-          "author": "Noyona Essentials",
-          "authorAvatar": "",
-          "shareUrl": "#",
-          "readMoreUrl": "/blog/"
-        },
-        {
-          "tag": "Noyona Insights",
-          "title": "The Future of Hybrid Beauty",
-          "excerpt": "Skincare and makeup are merging. In this Noyona Insights, we explore the latest formulas that blur the line between glow and coverage.",
-          "image": "/wp-content/themes/noyona-childtheme/assets/images/hero-banner.png",
-          "dateDay": "6",
-          "dateLabel": "Jan 2024",
-          "author": "Noyona Essentials",
-          "authorAvatar": "",
-          "shareUrl": "#",
-          "readMoreUrl": "/blog/"
+          "shareUrl": "",
+          "readMoreUrl": ""
         }
       ],
       "items": {

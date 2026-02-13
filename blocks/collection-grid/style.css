@@ -148,3 +148,54 @@
     inset: 0;
     z-index: 10;
 }
+
+/* =========================================================
+   Mobile: swipeable "carousel" (scroll-snap) instead of 1-by-1 stack
+========================================================= */
+@media (max-width: 768px) {
+    .collection-grid__header {
+        margin-bottom: 1.75rem;
+    }
+
+    .collection-grid__items {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        /* Allow first/last card to truly center */
+        padding-inline: calc((100% - min(82%, 360px)) / 2);
+        scroll-padding-inline: calc((100% - min(82%, 360px)) / 2);
+        padding-bottom: 0.25rem;
+        gap: 1rem;
+
+        /* Hide the horizontal scrollbar/indicator (keep swipe scrolling) */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge legacy */
+    }
+
+    .collection-grid__items > * {
+        flex: 0 0 min(82%, 360px);
+        max-width: min(82%, 360px);
+        scroll-snap-align: center;
+    }
+
+    .collection-grid__items::-webkit-scrollbar {
+        display: none; /* Chrome/Safari/iOS */
+        width: 0;
+        height: 0;
+    }
+}
+
+@media (max-width: 420px) {
+    .collection-grid__items > * {
+        flex-basis: 88%;
+        max-width: 88%;
+    }
+
+    .collection-grid__items {
+        padding-inline: calc((100% - 88%) / 2);
+        scroll-padding-inline: calc((100% - 88%) / 2);
+    }
+}

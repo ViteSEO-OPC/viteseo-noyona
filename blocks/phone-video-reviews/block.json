@@ -11,6 +11,7 @@
     "html": false
   },
   "style": "file:./style.css",
+  "viewScript": "file:./view.js",
   "render": "file:./render.php",
     "attributes": {
     "align": {

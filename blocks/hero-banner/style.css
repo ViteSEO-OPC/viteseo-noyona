@@ -4,16 +4,24 @@
     isolation: isolate;
     color: #fff;
 
+    /* ✅ fallback fill color (prevents white gaps when using contain) */
+    background-color: var(--hero-banner-bg-color, #f7d0d8);
+
     background-image: var(--hero-banner-bg, none);
     background-size: var(--hero-banner-bg-size, cover);
-    background-position: var(--hero-banner-bg-position, center);
+    background-position: var(--hero-banner-bg-position, right center);
     background-repeat: no-repeat;
 
+    /* keep the big hero on desktop */
     min-height: 90vh;
+
     display: flex;
     align-items: center;
     justify-content: flex-start;
+
     padding-inline: max(2rem, 5vw);
+    padding-block: clamp(3rem, 8vh, 7rem);
+
     overflow: hidden;
 }
 
@@ -24,8 +32,6 @@
     inset: 0;
     z-index: 1;
     pointer-events: none;
-
-    /* tweak these alpha values */
     background: linear-gradient(
         135deg,
         rgba(255, 201, 209, 0.25) 0%,
@@ -61,6 +67,8 @@
     font-size: clamp(44px, 6vw, 96px);
     font-weight: 500;
     white-space: pre-line;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    letter-spacing: -5%;
 }
 
 .hero-banner__title-line--accent {
@@ -70,24 +78,28 @@
 
 .hero-banner__title-line span,
 .hero-banner__title .hero-banner__accent {
-    font-family: "Noto Serif SemiCondensed", "Playfair Display", serif;
+    font-family: var(--wp--preset--font-family--noto-serif-semicondensed);
     font-style: italic;
-    font-weight: 600;
+    font-weight: 400;
 }
 
 .hero-banner__body {
     margin: 0;
     color: rgba(255, 255, 255, 0.9);
     font-size: clamp(16px, 2vw, 20px);
-    max-width: 42rem;
+    width: 100%;
+    max-width: 733px;
     line-height: 1.5;
+    letter-spacing: -5%;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-weight: 400;
 }
 
 .hero-banner__search {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    max-width: 520px;
+    /* max-width: 520px; */
     width: 100%;
     background: #ffffff;
     border-radius: 999px;
@@ -148,8 +160,17 @@
 
 @media (max-width: 900px) {
     .hero-banner {
-        min-height: 440px;
-        background-position: center;
+        /* ✅ use mobile background variables (or desktop fallback) */
+        background-image: var(--hero-banner-bg-mobile, var(--hero-banner-bg, none));
+        /* Default: fill the hero (no letterboxing/pink bars). You can override with block vars if needed. */
+        background-size: var(--hero-banner-bg-size-mobile, cover);
+        background-position: var(--hero-banner-bg-position-mobile, right center);
+
+        /* Keep a healthy hero height even if the page has no text (e.g. Contact page) */
+        min-height: clamp(360px, 55vh, 560px);
+
+        padding-inline: clamp(16px, 4vw, 28px);
+        padding-block: clamp(2.5rem, 7vh, 4.5rem);
     }
 
     .hero-banner__inner {
@@ -157,17 +178,19 @@
     }
 }
 
-@media (max-width: 640px) {
+/* If the viewport is short/landscape, reduce padding/height a bit so the hero doesn't feel cramped. */
+@media (max-width: 900px) and (max-height: 580px) {
     .hero-banner {
-        border-radius: 14px;
-        min-height: 380px;
-    }
-
-    .hero-banner__inner {
-        max-width: 100%;
-    }
-
-    .hero-banner__title {
-        font-size: clamp(2rem, 5vw, 2.6rem);
+        min-height: clamp(300px, 70vh, 440px);
+        padding-block: clamp(1.75rem, 6vh, 3rem);
     }
 }
+
+@media (max-width: 640px) {
+    .hero-banner {
+        /* optional: if alignfull, border-radius can show page background at corners */
+        border-radius: 0;
+        padding-block: clamp(2.25rem, 6vh, 4rem);
+    }
+}
+

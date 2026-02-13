@@ -170,7 +170,7 @@ if ( empty( $title ) && empty( $content ) ) {
         <nav class="blogs-view__breadcrumbs" aria-label="Breadcrumb">
             <a href="<?php echo esc_url( $home_url ); ?>">Home</a>
             <span class="blogs-view__crumb-sep">&gt;</span>
-            <a href="/blogs"><?php echo esc_html( $blogs_label ); ?></a>
+            <a href="<?php echo esc_url( $blogs_url ); ?>"><?php echo esc_html( $blogs_label ); ?></a>
             <span class="blogs-view__crumb-sep">&gt;</span>
             <span class="blogs-view__crumb-current"><?php echo esc_html( $title ); ?></span>
         </nav>
@@ -239,15 +239,48 @@ if ( empty( $title ) && empty( $content ) ) {
                 </div>
 
                 <div class="blogs-view__toc-actions">
-                    <a class="blogs-view__pill blogs-view__pill--share" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>">
+                    <button class="blogs-view__pill blogs-view__pill--share" type="button" data-share-url="<?php echo esc_url( get_permalink( $post_id ) ); ?>" aria-haspopup="dialog">
                         <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
                         Share
-                    </a>
+                    </button>
                     <a class="blogs-view__pill blogs-view__pill--icon" href="#blogs-view-top" aria-label="Back to top">
                         <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
                     </a>
                 </div>
             </aside>
+        </div>
+    </div>
+
+    <div class="blog-share-modal" hidden>
+        <div class="blog-share-modal__backdrop" data-share-close></div>
+        <div class="blog-share-modal__dialog" role="dialog" aria-modal="true" aria-label="Share this post">
+            <button class="blog-share-modal__close" type="button" aria-label="Close share dialog" data-share-close>
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="blog-share-modal__title">Share</h3>
+            <div class="blog-share-modal__grid">
+                <a class="blog-share-modal__item" data-share-platform="facebook" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-facebook-f"></i>
+                    <span>Facebook</span>
+                </a>
+                <button class="blog-share-modal__item" type="button" data-share-platform="instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                    <span>Instagram</span>
+                </button>
+                <a class="blog-share-modal__item" data-share-platform="x" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-x-twitter"></i>
+                    <span>X</span>
+                </a>
+                <a class="blog-share-modal__item" data-share-platform="linkedin" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-linkedin-in"></i>
+                    <span>LinkedIn</span>
+                </a>
+                <button class="blog-share-modal__item" type="button" data-share-platform="copy">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>Copy link</span>
+                </button>
+            </div>
+            <p class="blog-share-modal__hint" aria-live="polite"></p>
         </div>
     </div>
 </section>

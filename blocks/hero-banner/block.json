@@ -11,50 +11,26 @@
     "html": false
   },
   "attributes": {
-    "eyebrow": {
-      "type": "string",
-      "default": ""
-    },
-    "titleLine": {
-      "type": "string",
-      "default": ""
-    },
-    "body": {
-      "type": "string",
-      "default": ""
-    },
-    "searchEnabled": {
-      "type": "boolean",
-      "default": false
-    },
-    "searchPlaceholder": {
-      "type": "string",
-      "default": ""
-    },
-    "searchPostType": {
-      "type": "string",
-      "default": ""
-    },
-    "buttonText": {
-      "type": "string",
-      "default": ""
-    },
-    "buttonUrl": {
-      "type": "string",
-      "default": ""
-    },
-    "backgroundImage": {
-      "type": "string",
-      "default": ""
-    },
-    "backgroundSize": {
-      "type": "string",
-      "default": ""
-    },
-    "backgroundPosition": {
-      "type": "string",
-      "default": ""
-    }
+    "eyebrow": { "type": "string", "default": "" },
+    "titleLine": { "type": "string", "default": "" },
+    "body": { "type": "string", "default": "" },
+
+    "searchEnabled": { "type": "boolean", "default": false },
+    "searchPlaceholder": { "type": "string", "default": "" },
+    "searchPostType": { "type": "string", "default": "" },
+
+    "buttonText": { "type": "string", "default": "" },
+    "buttonUrl": { "type": "string", "default": "" },
+
+    "backgroundImage": { "type": "string", "default": "" },
+    "backgroundSize": { "type": "string", "default": "" },
+    "backgroundPosition": { "type": "string", "default": "" },
+
+    "backgroundImageMobile": { "type": "string", "default": "" },
+    "backgroundSizeMobile": { "type": "string", "default": "" },
+    "backgroundPositionMobile": { "type": "string", "default": "" },
+
+    "backgroundColor": { "type": "string", "default": "" }
   },
   "style": "file:./style.css",
   "render": "file:./render.php",

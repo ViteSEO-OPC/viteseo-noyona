@@ -46,6 +46,24 @@ body,
   padding: 0;
 }
 
+/* Global: prevent horizontal page scroll (common cause: carousels/dropdowns overflowing) */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}
+
+.wp-site-blocks {
+  overflow-x: clip;
+}
+
 /* Global: remove focus outline for mouse users, keep for keyboard users */
 :where(a, button, input, select, textarea, summary, [role="button"], [tabindex]):focus {
   outline: none;

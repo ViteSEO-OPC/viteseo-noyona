@@ -67,3 +67,59 @@ if (empty($items)) {
         <?php endforeach; ?>
     </div>
 </div>
+
+<script>
+    (function () {
+        function initCollectionGrid(block) {
+            var track = block.querySelector('.collection-grid__items');
+            if (!track) return;
+
+            var cards = Array.prototype.slice.call(track.children || []);
+            if (cards.length < 2) return;
+
+            var mq = window.matchMedia ? window.matchMedia('(max-width: 768px)') : null;
+            if (!mq) return;
+
+            function centerToMiddle(force) {
+                if (!mq.matches) return;
+                if (!force && track.dataset.centeredForCarousel === '1') return;
+
+                // Prefer the "left-middle" card for even counts (feels more natural)
+                var idx = Math.floor((cards.length - 1) / 2);
+                var target = cards[idx];
+                if (!target) return;
+
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        var left = target.offsetLeft - (track.clientWidth / 2) + (target.clientWidth / 2);
+                        track.scrollTo({ left: Math.max(0, left), behavior: 'auto' });
+                        track.dataset.centeredForCarousel = '1';
+                    });
+                });
+            }
+
+            // If we load already in carousel mode, start centered
+            centerToMiddle(false);
+
+            // When entering carousel mode, center once
+            if (mq.addEventListener) {
+                mq.addEventListener('change', function (e) {
+                    track.dataset.centeredForCarousel = '0';
+                    if (e.matches) {
+                        centerToMiddle(true);
+                    }
+                });
+            }
+        }
+
+        function boot() {
+            document.querySelectorAll('.wp-block-noyona-collection-grid').forEach(initCollectionGrid);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', boot);
+        } else {
+            boot();
+        }
+    })();
+</script>
