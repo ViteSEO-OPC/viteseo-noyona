@@ -174,7 +174,7 @@
   font-size: clamp(16px, 1.7vw, 20px);
   color: #525252;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 400;
   line-height: normal;
   letter-spacing: -1px;
   font-family: var(--wp--preset--font-family--proxima-nova);
