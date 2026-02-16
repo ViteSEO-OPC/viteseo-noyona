@@ -14,8 +14,9 @@
     --pr-gap: clamp(1rem, 2.5vw, 3rem);
   
     /* Card sizing (fluid, replaces multiple breakpoints) */
-    --pr-card-w: clamp(260px, 22vw, 360px);
-    --pr-card-w-land: clamp(360px, 38vw, 600px);
+    /* Increase max sizes so cards don't look "short" on large screens */
+    --pr-card-w: clamp(260px, 22vw, 440px);
+    --pr-card-w-land: clamp(360px, 38vw, 760px);
   
     /* Shell details */
     --pr-shell-radius: clamp(1.6rem, 2.2vw, 2.1rem);
@@ -408,13 +409,17 @@
   
   /* Aspect sizing */
   .phone-reviews__overlay-shell[data-aspect="portrait"]{
-    width: min(62vw, 380px);
-    aspect-ratio: 10 / 19.5;
+    /* Scale with viewport HEIGHT so it doesn't look tiny on large screens */
+    height: min(86vh, 900px);
+    width: auto;
+    max-width: min(62vw, 520px);
+    /* Match the in-grid phone ratio (11/19.5) to avoid player letterboxing */
+    aspect-ratio: 11 / 19.5;
     max-height: 86vh;
   }
   
   .phone-reviews__overlay-shell[data-aspect="landscape"]{
-    width: min(92vw, 980px);
+    width: min(92vw, 1100px);
     aspect-ratio: 19.5 / 9;
     max-height: 86vh;
   }
@@ -425,13 +430,17 @@
   
   .phone-reviews__overlay-screen{
     width: 100%;
-    height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
     border-radius: 1.5rem;
     overflow: hidden;
     background: #000;
+    position: relative;
   }
   
   .phone-reviews__overlay-screen iframe{
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     border: 0;
@@ -452,11 +461,12 @@
   
   /* Close button */
   .phone-reviews__overlay-close{
+    /* Desktop: keep it on the phone frame */
     position: absolute;
     top: .75rem;
     right: .9rem;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: 999px;
     border: none;
     background: rgba(0,0,0,.7);
@@ -464,9 +474,23 @@
     font-size: 1.4rem;
     line-height: 1;
     cursor: pointer;
-    z-index: 2;
+    z-index: 2147483647;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   
+  /* Tablet/Mobile: fixed keeps it clickable above iframes */
+  @media (max-width: 1024px){
+    .phone-reviews__overlay-close{
+      position: fixed;
+      top: 12px;
+      right: 12px;
+    }
+  }
+
   .phone-reviews__overlay-close:focus-visible{
     outline: 3px solid rgba(255,255,255,.85);
     outline-offset: 3px;
@@ -478,6 +502,56 @@
   }
   
   /* Mobile overlay: full bleed */
+  /* Tablet + Mobile overlay: full bleed (prevents "small phone at top" issue) */
+  @media (max-width: 1024px){
+    /* Stretch container so the shell can truly fill the viewport */
+    .phone-reviews__overlay{
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    .phone-reviews__overlay-backdrop{
+      background: #000;
+      backdrop-filter: none;
+    }
+
+    .phone-reviews__overlay-shell{
+      position: fixed;
+      inset: 0;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      max-height: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      background: #000;
+      box-shadow: none;
+    }
+
+    /* Override aspect sizing rules */
+    .phone-reviews__overlay-shell[data-aspect="portrait"],
+    .phone-reviews__overlay-shell[data-aspect="landscape"]{
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      max-height: none !important;
+      aspect-ratio: auto !important;
+      max-width: none !important;
+    }
+
+    .phone-reviews__overlay-screen{
+      border-radius: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Fullscreen player feel: hide label */
+    .phone-reviews__overlay-label{
+      display: none;
+    }
+  }
+
+  /* Small phones: keep safe-area offsets for the fixed close button */
   @media (max-width: 768px){
     .phone-reviews__overlay-backdrop{
       background: #000;
@@ -487,6 +561,7 @@
     .phone-reviews__overlay-shell{
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       max-height: none;
       border-radius: 0;
       padding: 0;
@@ -499,6 +574,7 @@
     .phone-reviews__overlay-shell[data-aspect="landscape"]{
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       max-height: none;
       aspect-ratio: auto;
     }
@@ -516,8 +592,8 @@
 
     /* Respect safe-areas (iOS notch) */
     .phone-reviews__overlay-close{
-      top: calc(.75rem + env(safe-area-inset-top, 0px));
-      right: calc(.9rem + env(safe-area-inset-right, 0px));
+      top: calc(12px + env(safe-area-inset-top, 0px));
+      right: calc(12px + env(safe-area-inset-right, 0px));
     }
   }
   

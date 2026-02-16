@@ -170,7 +170,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
 /* Desktop dropdown caret indicator */
 .nav-item.has-dropdown > .nav-link-wrapper > .nav-link::after {
   content: "▾";
-  font-size: 0.75rem;
+  font-size: 18px;
   margin-left: 0.35rem;
   line-height: 1;
   transform: translateY(-1px);
@@ -614,6 +614,56 @@ body:not(.logged-in) .header-account--logged-out {
   }
   .nav-item.is-open:hover .dropdown-menu {
     max-height: 520px;
+  }
+}
+
+/* =========================================================
+   MOBILE DRAWER + STICKY (scroll)
+   Fix: when header turns pink on scroll, keep the hamburger drawer
+   in the same color system so active/hover text doesn't disappear.
+========================================================= */
+@media (max-width: 1260px) {
+  /* Drawer background follows sticky header */
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list {
+    background: #e7999c;
+  }
+
+  /* Base text colors inside drawer on sticky */
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .nav-link,
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .dropdown-menu li a,
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .mobile-drawer-links a,
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .drawer-title {
+    color: #ffffff;
+  }
+
+  /* Borders/dividers should be visible on pink */
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .nav-link-wrapper {
+    border-bottom-color: rgba(255, 255, 255, 0.22);
+  }
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .mobile-drawer-links a,
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .mobile-drawer-section {
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+
+  /* +/- button */
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .submenu-toggle {
+    color: #ffffff;
+  }
+
+  /* Submenu panel */
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .dropdown-menu {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  /* Hover/active states stay high-contrast */
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .nav-link:hover,
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .nav-link.is-active,
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .dropdown-menu li a:hover,
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .dropdown-menu li a.is-active,
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .mobile-drawer-links a:hover,
+  body.has-scrolled-header header.wp-block-template-part.is-sticky .nav-list .mobile-drawer-links a.is-active {
+    color: #901e58;
+    background: transparent !important;
   }
 }
 
