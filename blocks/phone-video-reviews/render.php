@@ -181,9 +181,10 @@ $wrapper = get_block_wrapper_attributes([
     <div class="phone-reviews__overlay-shell">
       <button class="phone-reviews__overlay-close" type="button"
         aria-label="<?php esc_attr_e('Close video', 'childtheme'); ?>">
-        ×
+        Close
       </button>
       <div class="phone-reviews__overlay-screen">
+        <div class="phone-reviews__overlay-tapcatcher" aria-hidden="true"></div>
         <iframe src="about:blank" title="" loading="lazy" allowfullscreen
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
       </div>
