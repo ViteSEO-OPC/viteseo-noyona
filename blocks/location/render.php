@@ -1,302 +1,392 @@
 <?php
 /**
- * Render template for Noyona Store Locator Block
+ * Render template for Noyona Store Locator Block (v2 UI).
  */
-$is_logged_in = is_user_logged_in();
-$favorites = [];
-if ($is_logged_in) {
-    $favorites = get_user_meta(get_current_user_id(), 'noyona_store_favorites', true);
-    if (!is_array($favorites)) {
-        $favorites = [];
-    }
-}
-$favorites = array_values(array_filter(array_map('absint', $favorites)));
 
-$maybe_enqueue = true;
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 if (function_exists('wp_enqueue_style') && function_exists('wp_enqueue_script')) {
     wp_enqueue_style('leaflet-css');
     wp_enqueue_script('leaflet-js');
 }
 
-$wrapper_attributes = get_block_wrapper_attributes([
+if (!function_exists('nsl_v2_save_comment_rating')) {
+    /**
+     * Persist optional star rating from frontend store review form.
+     *
+     * @param int $comment_id Comment ID.
+     * @return void
+     */
+    function nsl_v2_save_comment_rating($comment_id)
+    {
+        if (!isset($_POST['nsl_comment_rating'])) {
+            return;
+        }
+        $rating = (int) wp_unslash($_POST['nsl_comment_rating']);
+        $rating = max(1, min(5, $rating));
+        update_comment_meta($comment_id, 'rating', $rating);
+    }
+}
+add_action('comment_post', 'nsl_v2_save_comment_rating');
+
+$wrapper_attributes = get_block_wrapper_attributes(array(
     'class' => 'noyona-store-locator-wrapper',
-]);
-$data_attrs = sprintf(
-    ' data-nsl-logged-in="%s" data-nsl-favorites="%s" data-nsl-ajax-url="%s" data-nsl-ajax-nonce="%s"',
-    esc_attr($is_logged_in ? '1' : '0'),
-    esc_attr($is_logged_in ? implode(',', $favorites) : ''),
-    esc_attr(admin_url('admin-ajax.php')),
-    esc_attr($is_logged_in ? wp_create_nonce('noyona_favorites') : '')
-);
+));
+$default_store_image = trailingslashit(get_stylesheet_directory_uri()) . 'assets/images/logo_contact.webp';
 
-// Unique ids per block instance
-$uid = wp_unique_id('nsl_');
-$map_id = 'nsl-map-frame-' . $uid;
-$json_id = 'nsl-stores-json-' . $uid;
-
-if (!function_exists('nsl_time_to_minutes')) {
-    function nsl_time_to_minutes($time_value)
+if (!function_exists('nsl_v2_time_to_minutes')) {
+    function nsl_v2_time_to_minutes($time_value)
     {
         if (!is_string($time_value) || $time_value === '') {
             return null;
         }
-
-        $time_value = trim($time_value);
-
-        if (preg_match('/^([01]?\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?$/', $time_value, $matches)) {
-            return ((int) $matches[1] * 60) + (int) $matches[2];
+        if (!preg_match('/^([01]?\d|2[0-3]):([0-5]\d)$/', trim($time_value), $m)) {
+            return null;
         }
-
-        if (preg_match('/^([1-9]|1[0-2]):([0-5]\d)\s*([ap]m)$/i', $time_value, $matches)) {
-            $hour = (int) $matches[1];
-            $minute = (int) $matches[2];
-            $period = strtolower($matches[3]);
-
-            if ('pm' === $period && $hour < 12) {
-                $hour += 12;
-            } elseif ('am' === $period && 12 === $hour) {
-                $hour = 0;
-            }
-
-            return ($hour * 60) + $minute;
-        }
-
-        return null;
+        return ((int) $m[1] * 60) + (int) $m[2];
     }
 }
 
-// Query Store CPT
-$args = array(
+if (!function_exists('nsl_v2_guess_island_group')) {
+    function nsl_v2_guess_island_group($address)
+    {
+        $address = strtolower((string) $address);
+        if ($address === '') {
+            return 'Luzon';
+        }
+
+        $visayas_tokens = array('cebu', 'iloilo', 'bacolod', 'bohol', 'leyte', 'samar', 'dumaguete', 'roxas', 'aklan', 'antique', 'siquijor');
+        foreach ($visayas_tokens as $token) {
+            if (strpos($address, $token) !== false) {
+                return 'Visayas';
+            }
+        }
+
+        $mindanao_tokens = array('davao', 'cagayan de oro', 'zamboanga', 'butuan', 'surigao', 'cotabato', 'general santos', 'iligan', 'dipolog');
+        foreach ($mindanao_tokens as $token) {
+            if (strpos($address, $token) !== false) {
+                return 'Mindanao';
+            }
+        }
+
+        return 'Luzon';
+    }
+}
+
+if (!function_exists('nsl_v2_guess_region')) {
+    function nsl_v2_guess_region($address, $island_group)
+    {
+        $address = strtolower((string) $address);
+        if ($address === '') {
+            return 'Uncategorized';
+        }
+
+        $region_map = array(
+            'NCR' => array('manila', 'quezon city', 'makati', 'pasig', 'taguig', 'pasay', 'mandaluyong', 'marikina', 'caloocan', 'muntinlupa', 'paranaque', 'las pinas', 'san juan', 'malabon', 'navotas', 'valenzuela', 'pateros'),
+            'Central Luzon' => array('bulacan', 'pampanga', 'tarlac', 'zambales', 'nueva ecija', 'aurora', 'bataan'),
+            'CALABARZON' => array('laguna', 'cavite', 'batangas', 'rizal', 'quezon province'),
+            'Ilocos' => array('ilocos', 'la union', 'pangasinan'),
+            'Bicol' => array('albay', 'camarines', 'catanduanes', 'masbate', 'sorsogon'),
+            'Western Visayas' => array('iloilo', 'bacolod', 'negros occidental', 'aklan', 'antique', 'capiz', 'guimaras'),
+            'Central Visayas' => array('cebu', 'bohol', 'negros oriental', 'siquijor'),
+            'Eastern Visayas' => array('leyte', 'samar', 'biliran', 'ormoc', 'tacloban'),
+            'Davao Region' => array('davao'),
+            'Northern Mindanao' => array('cagayan de oro', 'misamis', 'bukidnon', 'camiguin', 'lanao'),
+            'SOCCSKSARGEN' => array('general santos', 'south cotabato', 'sultan kudarat', 'sarangani', 'cotabato'),
+            'Zamboanga Peninsula' => array('zamboanga', 'dipolog', 'pagadian'),
+            'Caraga' => array('butuan', 'surigao', 'agusan'),
+        );
+
+        foreach ($region_map as $region => $tokens) {
+            foreach ($tokens as $token) {
+                if (strpos($address, $token) !== false) {
+                    return $region;
+                }
+            }
+        }
+
+        if ($island_group === 'Visayas') {
+            return 'Visayas Other';
+        }
+        if ($island_group === 'Mindanao') {
+            return 'Mindanao Other';
+        }
+        return 'Luzon Other';
+    }
+}
+
+$store_query = new WP_Query(array(
     'post_type' => 'store',
     'posts_per_page' => -1,
     'post_status' => 'publish',
-);
-$store_query = new WP_Query($args);
+));
 
-$stores_data = [];
+$stores_data = array();
+$uid = wp_unique_id('nsl_v2_');
+$map_id = 'nsl-map-' . $uid;
+$json_id = 'nsl-data-' . $uid;
 
 if ($store_query->have_posts()) {
     while ($store_query->have_posts()) {
         $store_query->the_post();
-        $id = get_the_ID();
+        $post_id = get_the_ID();
 
-        // Location
-        $lat = get_post_meta($id, '_store_lat', true);
-        $lng = get_post_meta($id, '_store_lng', true);
+        $lat = get_post_meta($post_id, '_nsl_lat', true);
+        $lng = get_post_meta($post_id, '_nsl_lng', true);
+        if ($lat === '') {
+            $lat = get_post_meta($post_id, '_store_lat', true);
+        }
+        if ($lng === '') {
+            $lng = get_post_meta($post_id, '_store_lng', true);
+        }
 
-        // Skip if no location
-        if (!$lat || !$lng) {
+        if ($lat === '' || $lng === '') {
             continue;
         }
 
-        // Store Hours
-        $open_time = get_post_meta($id, '_store_open_time', true);
-        $close_time = get_post_meta($id, '_store_close_time', true);
+        $address = get_post_meta($post_id, '_nsl_store_address', true);
+        $description = get_post_meta($post_id, '_nsl_store_description', true);
+        if ($description === '') {
+            $description = get_the_content(null, false, $post_id);
+        }
 
-        $open_minutes = nsl_time_to_minutes($open_time);
-        $close_minutes = nsl_time_to_minutes($close_time);
+        $tel = get_post_meta($post_id, '_nsl_tel_phone', true);
+        $phone = get_post_meta($post_id, '_nsl_phone_number', true);
+        $email = get_post_meta($post_id, '_nsl_email', true);
+
+        $open_time = get_post_meta($post_id, '_nsl_store_open_time', true);
+        $close_time = get_post_meta($post_id, '_nsl_store_close_time', true);
+        if ($open_time === '') {
+            $open_time = get_post_meta($post_id, '_store_open_time', true);
+        }
+        if ($close_time === '') {
+            $close_time = get_post_meta($post_id, '_store_close_time', true);
+        }
+
+        $open_minutes = nsl_v2_time_to_minutes($open_time);
+        $close_minutes = nsl_v2_time_to_minutes($close_time);
         $now_minutes = ((int) current_time('H')) * 60 + ((int) current_time('i'));
 
         $is_open = false;
-        if (null !== $open_minutes && null !== $close_minutes) {
-            if ($open_minutes < $close_minutes) {
+        if ($open_minutes !== null && $close_minutes !== null) {
+            if ($open_minutes <= $close_minutes) {
                 $is_open = ($now_minutes >= $open_minutes && $now_minutes <= $close_minutes);
-            } elseif ($open_minutes > $close_minutes) {
+            } else {
                 $is_open = ($now_minutes >= $open_minutes || $now_minutes <= $close_minutes);
             }
         }
 
-        $hours_display = '';
-        if ($open_time && $close_time) {
-            $open_display = date_i18n('g:i A', strtotime($open_time));
-            $close_display = date_i18n('g:i A', strtotime($close_time));
-            $hours_display = trim($open_display) . ' - ' . trim($close_display);
+        $hours = '';
+        if ($open_time !== '' && $close_time !== '') {
+            $hours = date_i18n('g:i A', strtotime($open_time)) . ' - ' . date_i18n('g:i A', strtotime($close_time));
         }
 
-        $status_label = $is_open ? 'Open Now' : 'Close Now';
-        $status_class = $is_open ? 'is-open' : 'is-closed';
+        $image = get_the_post_thumbnail_url($post_id, 'large');
+        $gallery_urls = array();
+        if ($image) {
+            $gallery_urls[] = (string) $image;
+        }
 
-        // Products (Repeater)
-        $products_meta = get_post_meta($id, '_store_products', true);
-        $products_out = [];
-
-        if (is_array($products_meta)) {
-            foreach ($products_meta as $prod) {
-                $products_out[] = [
-                    'name' => isset($prod['name']) ? $prod['name'] : '',
-                    'category' => isset($prod['category']) ? $prod['category'] : '',
-                    'description' => isset($prod['description']) ? $prod['description'] : '',
-                    'qty' => isset($prod['qty']) ? $prod['qty'] : 0,
-                    'image' => isset($prod['image']) ? $prod['image'] : '', // Full URL
-                ];
+        $gallery_ids = get_post_meta($post_id, '_nsl_gallery_ids', true);
+        if (is_array($gallery_ids)) {
+            foreach ($gallery_ids as $gallery_id) {
+                $gallery_url = wp_get_attachment_image_url((int) $gallery_id, 'large');
+                if ($gallery_url) {
+                    $gallery_urls[] = (string) $gallery_url;
+                }
             }
         }
 
-        // Store Image
-        $store_img = get_the_post_thumbnail_url($id, 'large');
+        if (!$image) {
+            if (!empty($gallery_urls[0])) {
+                $image = $gallery_urls[0];
+            }
+        }
+        if (!$image) {
+            $image = $default_store_image;
+        }
+        if (empty($gallery_urls)) {
+            $gallery_urls[] = (string) $image;
+        }
+        $gallery_urls = array_values(array_unique(array_filter($gallery_urls)));
 
-        $stores_data[] = [
-            'id' => 'store-' . $id,
-            'post_id' => $id,
-            'title' => get_the_title(),
-            'lat' => $lat,
-            'lng' => $lng,
-            'content' => wpautop(get_the_content()), // Details
-            'image' => $store_img, // Can be used by JS
-            'products' => $products_out,
-            'hours' => $hours_display,
-            'open_time' => $open_time,
-            'close_time' => $close_time,
-            'is_open' => $is_open,
-            'status_label' => $status_label,
-            'status_class' => $status_class,
-            'updated_at' => get_the_modified_time('M j, Y g:i A'),
-            'email' => '', // Not in requirements
-            'phone' => '', // Not in requirements
-            'address' => '', // Not in requirements but could be added
-        ];
+        $island_group = get_post_meta($post_id, '_nsl_island_group', true);
+        if ($island_group === '') {
+            $island_group = nsl_v2_guess_island_group($address);
+        }
+        $island_group = ucwords(strtolower((string) $island_group));
+
+        $region = get_post_meta($post_id, '_nsl_region', true);
+        if ($region === '') {
+            $region = nsl_v2_guess_region($address, $island_group);
+        }
+
+        $allow_public_reviews = ('open' === get_post_field('comment_status', $post_id));
+        $review_items = array();
+
+        $manual_reviews = get_post_meta($post_id, '_nsl_manual_reviews', true);
+        if (is_array($manual_reviews)) {
+            foreach ($manual_reviews as $manual_review) {
+                if (!is_array($manual_review)) {
+                    continue;
+                }
+                $manual_name = isset($manual_review['name']) ? sanitize_text_field((string) $manual_review['name']) : '';
+                $manual_text = isset($manual_review['text']) ? sanitize_textarea_field((string) $manual_review['text']) : '';
+                $manual_date = isset($manual_review['date']) ? sanitize_text_field((string) $manual_review['date']) : '';
+                $manual_rating = isset($manual_review['rating']) ? (int) $manual_review['rating'] : 5;
+                $manual_rating = max(1, min(5, $manual_rating));
+                if ($manual_name === '' && $manual_text === '') {
+                    continue;
+                }
+                $review_items[] = array(
+                    'name' => $manual_name !== '' ? $manual_name : __('Anonymous', 'noyona'),
+                    'text' => $manual_text,
+                    'date' => $manual_date,
+                    'rating' => $manual_rating,
+                    'source' => 'manual',
+                );
+            }
+        }
+
+        $public_comments = get_comments(array(
+            'post_id' => $post_id,
+            'status' => 'approve',
+            'type' => 'comment',
+            'orderby' => 'comment_date_gmt',
+            'order' => 'DESC',
+        ));
+
+        foreach ($public_comments as $comment) {
+            $comment_rating = (int) get_comment_meta($comment->comment_ID, 'rating', true);
+            if ($comment_rating < 1 || $comment_rating > 5) {
+                $comment_rating = 5;
+            }
+            $review_items[] = array(
+                'name' => (string) $comment->comment_author,
+                'text' => wp_strip_all_tags((string) $comment->comment_content),
+                'date' => get_comment_date('M j, Y', $comment),
+                'rating' => $comment_rating,
+                'source' => 'public',
+            );
+        }
+
+        $stores_data[] = array(
+            'id' => (string) $post_id,
+            'title' => html_entity_decode((string) get_the_title($post_id), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'address' => (string) $address,
+            'description' => wp_kses_post(wpautop((string) $description)),
+            'lat' => (float) $lat,
+            'lng' => (float) $lng,
+            'image' => (string) $image,
+            'gallery' => $gallery_urls,
+            'tel' => (string) $tel,
+            'phone' => (string) $phone,
+            'email' => (string) $email,
+            'open_time' => (string) $open_time,
+            'close_time' => (string) $close_time,
+            'hours' => (string) $hours,
+            'is_open' => (bool) $is_open,
+            'status_label' => $is_open ? 'Open Now' : 'Closed',
+            'rating' => (float) get_post_meta($post_id, '_nsl_rating', true) ?: 4.5,
+            'island_group' => $island_group !== '' ? $island_group : 'Luzon',
+            'region' => (string) $region,
+            'allow_public_reviews' => (bool) $allow_public_reviews,
+            'reviews' => $review_items,
+        );
     }
     wp_reset_postdata();
-} else {
-    // Fallback or empty state?
 }
 ?>
 
-<div <?php echo $wrapper_attributes; ?> <?php echo $data_attrs; ?>>
-    <div class="noyona-store-locator-content">
-        <div class="nsl-header">
-            <div class="nsl-breadcrumbs"><a class="nsl-breadcrumb-link" href="<?php echo home_url(); ?>">Home</a> >
-                <span class="active">Find a Store</span>
-            </div>
-            <h1 class="nsl-title">Find a <span>Store</span></h1>
-            <p class="nsl-description">Visit us in-store at leading supermarkets and pharmacies nationwide or shop
-                online via our official platforms.</p>
-        </div>
-
-        <div class="nsl-search-box">
-            <div class="nsl-input-wrapper">
-                <input type="text" placeholder="Enter a location" class="nsl-input">
-                <span class="nsl-search-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"
-                            fill="#333" />
-                    </svg>
-                </span>
-            </div>
-            <button type="button" class="nsl-use-location" aria-label="Use my current location">
-                <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M7 15C7 15 12 10.5 12 6.5C12 3.18629 9.53771 0.5 7 0.5C4.46229 0.5 2 3.18629 2 6.5C2 10.5 7 15 7 15Z"
-                        stroke="currentColor" stroke-width="1.3" />
-                    <circle cx="7" cy="6.5" r="2.2" stroke="currentColor" stroke-width="1.3" />
-                </svg>
-                Use my current location
-            </button>
-        </div>
-
-        <div class="nsl-tabs" role="tablist">
-            <button class="nsl-tab active" type="button" role="tab" aria-selected="true">Nearby</button>
-            <?php if ($is_logged_in): ?>
-                <button class="nsl-tab" type="button" role="tab" aria-selected="false">Favorites</button>
-            <?php endif; ?>
-        </div>
-
-        <div class="nsl-results-list">
-            <?php if (!empty($stores_data)): ?>
-                <?php foreach ($stores_data as $store): ?>
-                    <?php $product_count = (!empty($store['products']) && is_array($store['products'])) ? count($store['products']) : 0; ?>
-                    <div class="nsl-store-item" data-store-id="<?php echo esc_attr($store['id']); ?>"
-                        data-store-post-id="<?php echo esc_attr($store['post_id']); ?>"
-                        data-lat="<?php echo esc_attr($store['lat']); ?>" data-lng="<?php echo esc_attr($store['lng']); ?>">
-                        <?php if (!empty($store['image'])): ?>
-                            <div class="nsl-store-image">
-                                <img src="<?php echo esc_url($store['image']); ?>" alt="<?php echo esc_attr($store['title']); ?>"
-                                    loading="lazy">
-                            </div>
-                        <?php endif; ?>
-                        <div class="nsl-store-content">
-                            <div class="nsl-store-status">
-                                <span class="nsl-status-badge <?php echo esc_attr($store['status_class']); ?>">
-                                    <?php echo esc_html($store['status_label']); ?>
-                                </span>
-                                <span class="nsl-meta-sep">&bull;</span>
-                                <span class="nsl-meta-text">0.5 km away</span>
-                                <?php if ($is_logged_in): ?>
-                                    <button type="button" class="nsl-card-bookmark" aria-label="Save store">
-                                        <svg width="14" height="18" viewBox="0 0 14 18" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M1 1H13V17L7 13L1 17V1Z" stroke="#333" stroke-width="1.5" fill="none" />
-                                        </svg>
-                                    </button>
-                                <?php endif; ?>
-                            </div>
-                            <div class="nsl-store-header">
-                                <h3 class="nsl-store-name">
-                                    <?php echo esc_html($store['title']); ?>
-                                </h3>
-                            </div>
-
-                            <?php if (!empty($store['content'])): ?>
-                                <div class="nsl-store-address">
-                                    <?php echo wp_kses_post($store['content']); ?>
-                                </div>
-                            <?php endif; ?>
-
-                            <div class="nsl-store-meta">
-                                <div class="nsl-store-meta-row nsl-store-meta-row--details">
-                                    <span class="nsl-rating-badge"><i class="fa-solid fa-star"></i> 4.5</span>
-                                    <?php if (!empty($store['hours'])): ?>
-                                        <span class="nsl-meta-sep">&bull;</span>
-                                        <span class="nsl-meta-text nsl-hours-text">
-                                            <?php echo esc_html($store['hours']); ?>
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                            <?php if (!empty($store['lat']) && !empty($store['lng'])): ?>
-                                <a href="https://www.google.com/maps/dir/?api=1&destination=<?php echo esc_attr($store['lat'] . ',' . $store['lng']); ?>"
-                                    target="_blank" rel="noopener" class="nsl-get-directions">Get directions ></a>
-                            <?php endif; ?>
-                        </div>
-
-                        <button type="button" class="nsl-store-cta"
-                            aria-label="View catalog for <?php echo esc_attr($store['title']); ?>">
-                            <span class="nsl-store-cta__text">
-                                <span class="nsl-store-cta__label">View catalog</span>
-                                <span class="nsl-store-cta__name">
-                                    <?php echo esc_html($store['title']); ?>
-                                </span>
-                            </span>
-                            <span class="nsl-store-cta__actions">
-                                <span class="nsl-store-cta__count">
-                                    <?php echo esc_html($product_count); ?>
-                                </span>
-                                <span class="nsl-store-cta__open" aria-hidden="true">
-                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M2 6h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                                        <path d="M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                            </span>
-                        </button>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>No store information available.</p>
-            <?php endif; ?>
-        </div>
+<div <?php echo $wrapper_attributes; ?>>
+    <div class="nsl-v2-header">
+        <h2 class="nsl-v2-title">Find a Store</h2>
+        <p class="nsl-v2-subtitle">Search by store name or address and explore branches by region.</p>
     </div>
 
-    <div class="nsl-map-container">
-        <div id="<?php echo esc_attr($map_id); ?>" class="nsl-map-placeholder"
-            data-json-id="<?php echo esc_attr($json_id); ?>"></div>
+    <section class="nsl-v2-top">
+        <div class="nsl-v2-map-shell">
+            <div class="nsl-v2-map" id="<?php echo esc_attr($map_id); ?>"></div>
+            <aside class="nsl-v2-overlay-panel">
+                <div class="nsl-v2-overlay-top">
+                    <div class="nsl-v2-search-wrap">
+                        <div class="nsl-v2-search-row">
+                            <input type="text" class="nsl-v2-search-input" placeholder="Search location or store name">
+                            <button type="button" class="nsl-v2-use-location">Use My Location</button>
+                        </div>
+                        <div class="nsl-v2-suggestions" hidden></div>
+                    </div>
 
-        <script type="application/json" id="<?php echo esc_attr($json_id); ?>">
-            <?php echo wp_json_encode($stores_data); ?>
-        </script>
+                    <div class="nsl-v2-route-mode">
+                        <button type="button" class="nsl-v2-route-mode-btn is-active" data-route-mode="driving">Drive</button>
+                        <button type="button" class="nsl-v2-route-mode-btn" data-route-mode="walking">Walk</button>
+                    </div>
+                </div>
+
+                <div class="nsl-v2-selected-panel">
+                    <div class="nsl-v2-selected-empty">Select a store from suggestions or the list to view full details.</div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <section class="nsl-v2-bottom">
+        <div class="nsl-v2-bottom-top">
+            <div class="nsl-v2-parent-filter-list"></div>
+        </div>
+        <div class="nsl-v2-bottom-row">
+            <aside class="nsl-v2-filter-panel">
+                <h3 class="nsl-v2-bottom-title">Region Filter</h3>
+                <div class="nsl-v2-child-filter-list"></div>
+                <h3 class="nsl-v2-bottom-title nsl-v2-bottom-title--sub">Quick Filters</h3>
+                <div class="nsl-v2-extra-filter-list"></div>
+            </aside>
+            <div class="nsl-v2-store-panel">
+                <div class="nsl-v2-store-count"></div>
+                <div class="nsl-v2-store-grid"></div>
+            </div>
+        </div>
+    </section>
+
+    <script type="application/json" id="<?php echo esc_attr($json_id); ?>"><?php echo wp_json_encode($stores_data); ?></script>
+
+    <div class="nsl-v2-review-modal" id="nsl-v2-review-modal" hidden>
+        <div class="nsl-v2-review-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="nsl-v2-review-modal-title">
+            <button type="button" class="nsl-v2-review-modal__close" aria-label="<?php esc_attr_e('Close', 'noyona'); ?>">×</button>
+            <h3 id="nsl-v2-review-modal-title"><?php esc_html_e('Add Your Review', 'noyona'); ?></h3>
+            <form method="post" action="<?php echo esc_url(site_url('/wp-comments-post.php')); ?>" class="nsl-v2-review-form">
+                <input type="hidden" name="comment_post_ID" id="nsl-v2-comment-post-id" value="">
+                <input type="hidden" name="comment_parent" value="0">
+                <input type="hidden" name="redirect_to" value="<?php echo esc_url(get_permalink()); ?>">
+                <p>
+                    <label for="nsl-v2-review-author"><?php esc_html_e('Name', 'noyona'); ?></label>
+                    <input type="text" id="nsl-v2-review-author" name="author" required>
+                </p>
+                <p>
+                    <label for="nsl-v2-review-email"><?php esc_html_e('Email', 'noyona'); ?></label>
+                    <input type="email" id="nsl-v2-review-email" name="email" required>
+                </p>
+                <p>
+                    <label for="nsl-v2-review-rating"><?php esc_html_e('Rating', 'noyona'); ?></label>
+                    <select id="nsl-v2-review-rating" name="nsl_comment_rating">
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                </p>
+                <p>
+                    <label for="nsl-v2-review-comment"><?php esc_html_e('Review', 'noyona'); ?></label>
+                    <textarea id="nsl-v2-review-comment" name="comment" rows="4" required></textarea>
+                </p>
+                <p>
+                    <button type="submit" class="nsl-v2-review-submit"><?php esc_html_e('Submit Review', 'noyona'); ?></button>
+                </p>
+            </form>
+        </div>
     </div>
 </div>
+

@@ -1,934 +1,886 @@
 (function () {
-  function escHtml(str) {
-    return String(str || "").replace(/[&<>"']/g, function (m) {
+  function getEmptySelectedMarkup(showMessage) {
+    if (!showMessage) {
+      return '<div class="nsl-v2-selected-empty nsl-v2-selected-empty--blank"></div>';
+    }
+    return '<div class="nsl-v2-selected-empty">Select a store from suggestions, map markers, or store cards.</div>';
+  }
+
+  function escHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, function (m) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
     });
   }
 
-  function getFavoritesSet(wrapper) {
-    const raw = wrapper && wrapper.dataset ? wrapper.dataset.nslFavorites : "";
-    if (!raw) return new Set();
-    return new Set(
-      raw
-        .split(",")
-        .map((id) => parseInt(id, 10))
-        .filter((id) => Number.isFinite(id) && id > 0)
+  function buildDirectionsUrl(store) {
+    return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(store.lat + "," + store.lng);
+  }
+
+  function renderStars(rating) {
+    var r = Math.max(1, Math.min(5, parseInt(rating || 0, 10) || 0));
+    var out = "";
+    for (var i = 1; i <= 5; i += 1) {
+      out += i <= r ? "★" : "☆";
+    }
+    return out;
+  }
+
+  function parseTimeToMinutes(value) {
+    var raw = String(value || "").trim();
+    var match = raw.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+    if (!match) return null;
+    return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+  }
+
+  function computeOpenState(store) {
+    var open = parseTimeToMinutes(store.open_time);
+    var close = parseTimeToMinutes(store.close_time);
+    if (open === null || close === null) {
+      return { isOpen: false, label: "Closed" };
+    }
+    var now = new Date();
+    var nowMinutes = now.getHours() * 60 + now.getMinutes();
+    var isOpen;
+    if (open <= close) {
+      isOpen = nowMinutes >= open && nowMinutes <= close;
+    } else {
+      isOpen = nowMinutes >= open || nowMinutes <= close;
+    }
+    return { isOpen: isOpen, label: isOpen ? "Open" : "Closed" };
+  }
+
+  function distanceKm(aLat, aLng, bLat, bLng) {
+    var toRad = function (v) {
+      return (v * Math.PI) / 180;
+    };
+    var R = 6371;
+    var dLat = toRad(bLat - aLat);
+    var dLng = toRad(bLng - aLng);
+    var s1 = Math.sin(dLat / 2);
+    var s2 = Math.sin(dLng / 2);
+    var aa =
+      s1 * s1 +
+      Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * s2 * s2;
+    return R * (2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa)));
+  }
+
+  function formatStoreCard(store) {
+    return (
+      '<article class="nsl-v2-store-card" data-store-id="' +
+      escHtml(store.id) +
+      '">' +
+      // (store.image ? '<div class="nsl-v2-store-card__image"><img src="' + escHtml(store.image) + '" alt="' + escHtml(store.title) + '" loading="lazy"></div>' : "") +
+      '<div class="nsl-v2-store-card__body">' +
+      '<div class="nsl-v2-store-card__headline">' +
+      '<h4 class="nsl-v2-store-card__title">' +
+      escHtml(store.title) +
+      "</h4>" +
+      '<span class="nsl-v2-status ' +
+      (store._isOpen ? "is-open" : "is-closed") +
+      '">' +
+      escHtml(store._statusLabel || "Closed") +
+      "</span></div>" +
+      // '<p class="nsl-v2-store-card__address">' +
+      // escHtml(store.address || "") +
+      // "</p>" +
+      // '<p class="nsl-v2-store-card__region">' +
+      // escHtml(store.island_group) +
+      // " / " +
+      // escHtml(store.region || "Uncategorized") +
+      // "</p>" +
+      // '<p class="nsl-v2-store-card__rating">Rating: ' +
+      // escHtml(Number(store._rating || 0).toFixed(1)) +
+      // "</p>" +
+      (store.hours ? '<p class="nsl-v2-store-card__hours">' + escHtml(store.hours) + "</p>" : "") +
+      "</div></article>"
     );
   }
 
-  function getStorePostId(item) {
-    if (!item) return 0;
-    const raw = item.getAttribute("data-store-post-id");
-    const id = parseInt(raw, 10);
-    if (Number.isFinite(id) && id > 0) return id;
-    const fallback = item.getAttribute("data-store-id") || "";
-    const fallbackId = parseInt(fallback.replace(/\D+/g, ""), 10);
-    return Number.isFinite(fallbackId) ? fallbackId : 0;
-  }
-
-  function updateBookmarkUI(btn, isActive) {
-    if (!btn) return;
-    btn.classList.toggle("active", isActive);
-    const icon = btn.querySelector("svg");
-    const paths = btn.querySelectorAll("svg path");
-    if (icon) {
-      icon.style.fill = isActive ? "currentColor" : "none";
-      icon.style.stroke = "currentColor";
+  function formatSelectedDetail(store) {
+    if (!store) {
+      return getEmptySelectedMarkup(true);
     }
-    if (paths.length) {
-      paths.forEach((path) => {
-        path.setAttribute("fill", isActive ? "currentColor" : "none");
-        path.setAttribute("stroke", "currentColor");
-      });
-    }
-  }
-
-  function applyFavoritesFilter(wrapper, favorites, allowFavorites) {
-    const activeTab = wrapper.querySelector(".nsl-tab.active");
-    const showFavorites =
-      allowFavorites &&
-      activeTab &&
-      activeTab.textContent &&
-      activeTab.textContent.trim().toLowerCase() === "favorites";
-
-    let anyVisible = false;
-    wrapper.querySelectorAll(".nsl-store-item").forEach((item) => {
-      if (!showFavorites) {
-        item.style.display = "";
-        anyVisible = true;
-        return;
-      }
-
-      const id = getStorePostId(item);
-      const visible = favorites.has(id);
-      item.style.display = visible ? "" : "none";
-      if (visible) anyVisible = true;
-    });
-
-    const emptyEl = wrapper.querySelector(".nsl-favorites-empty");
-    if (showFavorites) {
-      if (!emptyEl) {
-        const list = wrapper.querySelector(".nsl-results-list");
-        if (list) {
-          const msg = document.createElement("div");
-          msg.className = "nsl-favorites-empty";
-          msg.textContent = "No favorites saved yet.";
-          list.appendChild(msg);
-        }
-      } else {
-        emptyEl.style.display = anyVisible ? "none" : "";
-      }
-    } else if (emptyEl) {
-      emptyEl.style.display = "none";
-    }
-  }
-
-  function ensureTooltip() {
-    let tip = document.getElementById("nsl-product-tip");
-    if (!tip) {
-      tip = document.createElement("div");
-      tip.id = "nsl-product-tip";
-      tip.className = "nsl-product-tooltip";
-      tip.style.display = "none";
-      document.body.appendChild(tip);
-    }
-    return tip;
-  }
-
-  function bindTooltipEvents(wrapper) {
-    const tip = ensureTooltip();
-
-    function positionTip(x, y) {
-      const rect = tip.getBoundingClientRect();
-      const width = rect.width || tip.offsetWidth || 0;
-      const height = rect.height || tip.offsetHeight || 0;
-      const padding = 8;
-      let left = x - width - 12;
-      let top = y - height / 2;
-
-      if (left < padding) {
-        left = x + 12;
-      }
-
-      if (left + width + padding > window.innerWidth) {
-        left = Math.max(padding, window.innerWidth - width - padding);
-      }
-
-      if (top < padding) {
-        top = padding;
-      }
-
-      if (top + height + padding > window.innerHeight) {
-        top = Math.max(padding, window.innerHeight - height - padding);
-      }
-
-      tip.style.left = left + "px";
-      tip.style.top = top + "px";
-    }
-
-    function show(imgUrl, x, y) {
-      if (!imgUrl) return;
-      tip.innerHTML = `<img src="${imgUrl}" alt="" />`;
-      tip.style.display = "block";
-      positionTip(x, y);
-    }
-
-    function hide() {
-      tip.style.display = "none";
-    }
-
-    // Use delegation on the wrapper (map or list)
-    wrapper.addEventListener("mousemove", (e) => {
-      // Move tooltip if visible
-      if (tip.style.display === "block") {
-        positionTip(e.clientX, e.clientY);
-      }
-
-      // Check for hover target
-      const item = e.target.closest ? e.target.closest(".nsl-popup__product") : null;
-      if (item) {
-        const img = item.getAttribute("data-img");
-        if (img) {
-          // Only show if not already showing (optional optimization, but simple reset is fine)
-          // If we just move, show() updates position too.
-          show(img, e.clientX, e.clientY);
-        } else {
-          hide();
-        }
-      } else {
-        // If we moved out of an item but are still in wrapper
-        // However, `mouseout` handles the exit better usually.
-        // But valid pointer-events: none on tooltip helps.
-      }
-    });
-
-    wrapper.addEventListener("mouseout", (e) => {
-      const item = e.target.closest ? e.target.closest(".nsl-popup__product") : null;
-      if (item) {
-        hide();
-      }
-    });
-
-    // Safety: click hides it
-    wrapper.addEventListener("click", hide);
-  }
-
-  function buildPopup(store) {
-    let html = `<div class="nsl-popup">`;
-
-    if (store.image) {
-      html += `
-          <div class="nsl-popup__store-image">
-            <img src="${escHtml(store.image)}" alt="" />
-          </div>
-        `;
-    }
-
-    html += `<div class="nsl-popup__title"><b>${escHtml(store.title || "")}</b></div>`;
-    if (store.address) html += `<div class="nsl-popup__line">${escHtml(store.address)}</div>`;
-    if (store.phone) html += `<div class="nsl-popup__line">${escHtml(store.phone)}</div>`;
-    if (store.hours) html += `<div class="nsl-popup__line">Hours: ${escHtml(store.hours)}</div>`;
-
-    // store.content is HTML from WP (optional)
-    if (store.content) {
-      html += `<div class="nsl-popup__content">${store.content}</div>`;
-    }
-
-    if (store.products && store.products.length) {
-      html += `<hr class="nsl-popup__hr">`;
-      html += `<div class="nsl-popup__products"><strong>Available Products:</strong>`;
-      html += `<ul class="nsl-popup__product-list">`;
-
-      store.products.forEach((prod) => {
-        const name = escHtml(prod.name || "");
-        const qty = prod.qty !== undefined && prod.qty !== null ? escHtml(prod.qty) : "";
-        const img = prod.image ? escHtml(prod.image) : "";
-
-        html += `
-            <li class="nsl-popup__product" ${img ? `data-img="${img}"` : ""}>
-              <span class="nsl-prod-name">${name}</span>
-              <span class="nsl-prod-qty">: ${qty}</span>
-            </li>
-          `;
-      });
-
-      html += `</ul></div>`;
-    }
-
-    if (store.updated_at) {
-      html += `<div class="nsl-popup__updated">Last updated: ${escHtml(store.updated_at)}</div>`;
-    }
-
-    html += `</div>`;
-    return html;
-  }
-
-  function ensureProductDrawer(wrapper) {
-    if (!wrapper) return null;
-    let overlay = wrapper.querySelector(".nsl-product-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.className = "nsl-product-overlay";
-      wrapper.appendChild(overlay);
-    }
-
-    let drawer = wrapper.querySelector(".nsl-product-drawer");
-    if (!drawer) {
-      drawer = document.createElement("aside");
-      drawer.className = "nsl-product-drawer";
-      drawer.innerHTML = `
-        <div class="nsl-product-drawer__header">
-          <div class="nsl-product-drawer__title">Catalog</div>
-          <button type="button" class="nsl-product-drawer__close" aria-label="Close catalog">
-            <span class="nsl-product-drawer__close-icon" aria-hidden="true">&larr;</span>
-            <span class="nsl-product-drawer__close-label">Back</span>
-          </button>
-        </div>
-        <div class="nsl-product-drawer__body"></div>
-      `;
-      wrapper.appendChild(drawer);
-    }
-
-    return { overlay, drawer };
-  }
-
-  function renderProductDrawer(drawer, store) {
-    if (!drawer || !store) return;
-    const body = drawer.querySelector(".nsl-product-drawer__body");
-    const title = drawer.querySelector(".nsl-product-drawer__title");
-    if (!body) return;
-
-    const products = Array.isArray(store.products) ? store.products : [];
-    const count = products.length;
-    if (title) {
-      title.textContent = `Catalog (${count})`;
-    }
-
-    let html = '';
-
-    if (count) {
-      html += `<ul class="nsl-product-drawer__list">`;
-      products.forEach((prod, index) => {
-        const name = escHtml(prod.name || "");
-        const category = escHtml(prod.category || "");
-        const img = prod.image ? escHtml(prod.image) : "";
-        const qtyRaw = prod.qty;
-        const qtyNum = Number(qtyRaw);
-        const hasQty =
-          qtyRaw !== undefined && qtyRaw !== null && qtyRaw !== "" && Number.isFinite(qtyNum);
-        let statusLabel = "In stock";
-        let statusClass = "is-in-stock";
-        if (hasQty && qtyNum <= 0) {
-          statusLabel = "Out of stock";
-          statusClass = "is-out";
-        } else if (hasQty && qtyNum <= 3) {
-          statusLabel = "Limited stock";
-          statusClass = "is-low";
-        }
-        const qty = hasQty ? `${qtyNum}${qtyNum >= 5 ? "+" : ""} available` : "";
-
-        html += `
-          <li class="nsl-product-drawer__item" data-product-index="${index}">
-            <span class="nsl-product-drawer__thumb${img ? "" : " nsl-product-drawer__thumb--empty"}">
-              ${img ? `<img src="${img}" alt="${name}" loading="lazy">` : ""}
-            </span>
-            <span class="nsl-product-drawer__meta">
-              ${category ? `<span class="nsl-product-drawer__category">${category}</span>` : ""}
-              <span class="nsl-product-drawer__name">${name}</span>
-              <span class="nsl-product-drawer__status ${statusClass}">${statusLabel}</span>
-              ${qty ? `<span class="nsl-product-drawer__qty">${qty}</span>` : ""}
-              <button type="button" class="nsl-product-drawer__view" data-product-index="${index}">
-                View <span aria-hidden="true">&rarr;</span>
-              </button>
-            </span>
-          </li>
-        `;
-      });
-      html += `</ul>`;
-    } else {
-      html += `<div class="nsl-product-drawer__empty">No products listed for this store.</div>`;
-    }
-
-    body.innerHTML = `
-      <div class="nsl-product-drawer__view nsl-product-drawer__view--list">${html}</div>
-      <div class="nsl-product-drawer__view nsl-product-drawer__view--detail"></div>
-    `;
-
-    drawer.classList.remove("is-detail");
-    drawer._nslStore = store;
-  }
-
-  function renderProductDetail(drawer, store, product) {
-    if (!drawer || !store || !product) return;
-    const detail = drawer.querySelector(".nsl-product-drawer__view--detail");
-    const body = drawer.querySelector(".nsl-product-drawer__body");
-    if (!detail) return;
-
-    const name = escHtml(product.name || "");
-    const category = escHtml(product.category || "");
-    const img = product.image ? escHtml(product.image) : "";
-    const desc = product.description ? escHtml(product.description) : "";
-    const qtyRaw = product.qty;
-    const qtyNum = Number(qtyRaw);
-    const hasQty =
-      qtyRaw !== undefined && qtyRaw !== null && qtyRaw !== "" && Number.isFinite(qtyNum);
-    const unitLabel = qtyNum === 1 ? "unit" : "units";
-    const stockText = hasQty ? `Stock available: ${qtyNum} ${unitLabel}` : "";
-
-    const storeName = escHtml(store.title || "");
-    const storeContent = store.content || "";
-    const hoursText = store.hours ? escHtml(store.hours) : "";
-    const statusLabel = store.status_label || (store.is_open ? "Open Now" : "Close Now");
-    const statusText = statusLabel ? escHtml(statusLabel) : "";
-
-    const lat = store.lat;
-    const lng = store.lng;
-    const directionsUrl =
-      lat && lng
-        ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${lat},${lng}`)}`
-        : "";
-    const phone = store.phone ? escHtml(store.phone) : "";
-
-    const actions = [];
-    if (phone) {
-      actions.push(`<a class="nsl-product-detail__call" href="tel:${phone}">Call Store</a>`);
-    }
-    if (directionsUrl) {
-      actions.push(
-        `<a class="nsl-product-detail__directions" href="${directionsUrl}" target="_blank" rel="noopener">Get Directions</a>`
-      );
-    }
-
-    const actionsMarkup = actions.length
-      ? `<div class="nsl-product-detail__actions${actions.length === 1 ? " nsl-product-detail__actions--single" : ""}">
-          ${actions.join("")}
-        </div>`
-      : "";
-
-    detail.innerHTML = `
-      <div class="nsl-product-detail">
-        ${
-          img
-            ? `<div class="nsl-product-detail__hero">
-                <img src="${img}" alt="${name}" loading="lazy">
-                <div class="nsl-product-detail__dots" aria-hidden="true">
-                  <span class="nsl-product-detail__dot is-active"></span>
-                  <span class="nsl-product-detail__dot"></span>
-                  <span class="nsl-product-detail__dot"></span>
-                </div>
-              </div>`
-            : ""
-        }
-        <div class="nsl-product-detail__body">
-          ${category ? `<div class="nsl-product-detail__category">${category}</div>` : ""}
-          <h3 class="nsl-product-detail__name">${name}</h3>
-          ${desc ? `<p class="nsl-product-detail__desc">${desc}</p>` : ""}
-          ${stockText ? `<div class="nsl-product-detail__stock">${stockText}</div>` : ""}
-          <div class="nsl-product-detail__section">
-            <div class="nsl-product-detail__section-label">Available at</div>
-            <div class="nsl-product-detail__section-title">${storeName}</div>
-            ${storeContent ? `<div class="nsl-product-detail__section-text">${storeContent}</div>` : ""}
-            ${hoursText ? `<div class="nsl-product-detail__section-meta">Open: ${hoursText}</div>` : ""}
-            ${!hoursText && statusText ? `<div class="nsl-product-detail__section-meta">${statusText}</div>` : ""}
-          </div>
-          ${actionsMarkup}
-        </div>
-      </div>
-    `;
-
-    drawer.classList.add("is-detail");
-    if (body) body.scrollTop = 0;
-  }
-
-  function showProductList(drawer) {
-    if (!drawer) return;
-    const detail = drawer.querySelector(".nsl-product-drawer__view--detail");
-    if (detail) detail.innerHTML = "";
-    drawer.classList.remove("is-detail");
-  }
-
-  function openProductDrawer(wrapper, store) {
-    if (!wrapper || !store) return;
-    const parts = ensureProductDrawer(wrapper);
-    if (!parts) return;
-    const { overlay, drawer } = parts;
-    renderProductDrawer(drawer, store);
-    drawer.classList.add("is-open");
-    overlay.classList.add("is-open");
-    wrapper.classList.add("nsl-drawer-open");
-  }
-
-  function closeProductDrawer(wrapper) {
-    if (!wrapper) return;
-    const overlay = wrapper.querySelector(".nsl-product-overlay");
-    const drawer = wrapper.querySelector(".nsl-product-drawer");
-    if (drawer) drawer.classList.remove("is-open");
-    if (overlay) overlay.classList.remove("is-open");
-    wrapper.classList.remove("nsl-drawer-open");
-  }
-
-  function setSelectedStoreItem(wrapper, item) {
-    if (!wrapper || !item) return;
-    wrapper.querySelectorAll(".nsl-store-item.is-selected").forEach((el) => {
-      if (el !== item) el.classList.remove("is-selected");
-    });
-    item.classList.add("is-selected");
-  }
-
-  function bindMobileCatalogUI(wrapper, storeById) {
-    if (!wrapper || !storeById) return;
-    const media = window.matchMedia ? window.matchMedia("(max-width: 959px)") : null;
-    const parts = ensureProductDrawer(wrapper);
-    if (!parts) return;
-
-    const { overlay, drawer } = parts;
-    const close = () => closeProductDrawer(wrapper);
-
-    if (overlay && overlay.dataset.nslBound !== "1") {
-      overlay.addEventListener("click", close);
-      overlay.dataset.nslBound = "1";
-    }
-
-    if (drawer) {
-      const closeBtn = drawer.querySelector(".nsl-product-drawer__close");
-      if (closeBtn && closeBtn.dataset.nslBound !== "1") {
-        closeBtn.addEventListener("click", (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          if (drawer.classList.contains("is-detail")) {
-            showProductList(drawer);
-            return;
-          }
-          close();
-        });
-        closeBtn.dataset.nslBound = "1";
-      }
-      if (drawer.dataset.nslDetailBound !== "1") {
-        drawer.addEventListener("click", (event) => {
-          const item = event.target.closest(".nsl-product-drawer__item");
-          if (!item) return;
-          const index = parseInt(item.getAttribute("data-product-index"), 10);
-          if (!Number.isFinite(index)) return;
-          const store = drawer._nslStore;
-          const products = store && Array.isArray(store.products) ? store.products : [];
-          const product = products[index];
-          if (!product) return;
-          renderProductDetail(drawer, store, product);
-        });
-        drawer.dataset.nslDetailBound = "1";
-      }
-    }
-
-    wrapper.querySelectorAll(".nsl-store-item").forEach((item) => {
-      item.addEventListener("click", (event) => {
-        if (media && !media.matches) return;
-        const isCta = event.target.closest(".nsl-store-cta");
-        if (isCta) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-
-        setSelectedStoreItem(wrapper, item);
-
-        if (isCta) {
-          const storeId = item.getAttribute("data-store-id");
-          const store = storeById[String(storeId)];
-          if (store) {
-            openProductDrawer(wrapper, store);
-          }
-        } else {
-          closeProductDrawer(wrapper);
-        }
-      });
-    });
-  }
-
-  function renderStoreList(stores, wrapper) {
-    const container = wrapper.querySelector(".store-list") || wrapper.querySelector(".nsl-results-list");
-    if (!container) return;
-    const allowFavorites = wrapper && wrapper.dataset && wrapper.dataset.nslLoggedIn === "1";
-
-    if (!stores.length) {
-      container.innerHTML = '<div class="nsl-no-results">No stores found.</div>';
-      return;
-    }
-
-    let html = '';
-    stores.forEach(store => {
-      // Directions URL: Google Maps link using destination lat/lng
-      const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${store.lat},${store.lng}`;
-
-      const statusLabel = store.status_label || (store.is_open ? "Open Now" : "Close Now");
-      const statusClass = store.status_class || (store.is_open ? "is-open" : "is-closed");
-      const distanceText = store.distance_text || "0.5 km away";
-      const ratingValue =
-        store.rating !== undefined && store.rating !== null && store.rating !== "" ? store.rating : "4.5";
-      const ratingText = typeof ratingValue === "number" ? ratingValue.toFixed(1) : String(ratingValue);
-      const hoursText = store.hours ? String(store.hours) : "";
-
-      const productCount = Array.isArray(store.products) ? store.products.length : 0;
-
-      html += `<div class="nsl-store-item" data-store-id="${escHtml(store.id)}" data-store-post-id="${escHtml(store.post_id || "")}" data-lat="${escHtml(store.lat || "")}" data-lng="${escHtml(store.lng || "")}">`;
-
-      if (store.image) {
-        html += `<div class="nsl-store-image"><img src="${escHtml(store.image)}" alt="${escHtml(store.title || "")}" loading="lazy"></div>`;
-      }
-
-      html += `<div class="nsl-store-content">`;
-      html += `<div class="nsl-store-status">`;
-      html += `<span class="nsl-status-badge ${escHtml(statusClass)}">${escHtml(statusLabel)}</span>`;
-      html += `<span class="nsl-meta-sep">&bull;</span>`;
-      html += `<span class="nsl-meta-text">${escHtml(distanceText)}</span>`;
-      if (allowFavorites) {
-        html += `<button class="nsl-card-bookmark">
-                   <svg width="14" height="18" viewBox="0 0 14 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                     <path d="M1 1H13V17L7 13L1 17V1Z" stroke="#333" stroke-width="1.5" fill="none"/>
-                   </svg>
-                 </button>`;
-      }
-      html += `</div>`;
-      // Header: Title + Bookmark Icon
-      html += `<div class="nsl-store-header">`;
-      html += `<h3 class="nsl-store-name">${escHtml(store.title || "")}</h3>`;
-      html += `</div>`;
-
-      // Content/Address
-      if (store.content) {
-        html += `<div class="nsl-store-address">${store.content}</div>`;
-      }
-
-      html += `<div class="nsl-store-meta">`;
-      html += `<div class="nsl-store-meta-row nsl-store-meta-row--details">`;
-      html += `<span class="nsl-rating-badge"><i class="fa-solid fa-star"></i> ${escHtml(ratingText)}</span>`;
-      if (hoursText) {
-        html += `<span class="nsl-meta-sep">&bull;</span>`;
-        html += `<span class="nsl-meta-text nsl-hours-text">${escHtml(hoursText)}</span>`;
-      }
-      html += `</div>`;
-      html += `</div>`;
-
-      /* 
-         Products removed from sidebar list as per user request. 
-         They remain in the Map Popup (buildPopup function).
-      */
-
-
-      // Footer: Get Directions
-      html += `<a href="${directionsUrl}" target="_blank" class="nsl-get-directions">Get directions ></a>`;
-      html += `</div>`;
-
-      html += `
-        <button type="button" class="nsl-store-cta" aria-label="View catalog for ${escHtml(store.title || "")}">
-          <span class="nsl-store-cta__text">
-            <span class="nsl-store-cta__label">View catalog</span>
-            <span class="nsl-store-cta__name">${escHtml(store.title || "")}</span>
-          </span>
-          <span class="nsl-store-cta__actions">
-            <span class="nsl-store-cta__count">${escHtml(productCount)}</span>
-            <span class="nsl-store-cta__open" aria-hidden="true">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2 6h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                <path d="M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-          </span>
-        </button>
-      `;
-
-      html += `</div>`; // .nsl-store-item
-    });
-
-    container.innerHTML = html;
+    var phone = store.phone || store.tel || "";
+
+    var reviews = Array.isArray(store.reviews) ? store.reviews : [];
+    var totalRating = reviews.reduce(function (sum, review) {
+      return sum + (parseInt(review.rating || 0, 10) || 0);
+    }, 0);
+    var averageRating = reviews.length ? (totalRating / reviews.length).toFixed(1) : "0.0";
+    var reviewsHtml = reviews.length
+      ? reviews
+          .map(function (review) {
+            var reviewName = escHtml(review.name || "Anonymous");
+            var reviewDate = escHtml(review.date || "");
+            var reviewText = escHtml(review.text || "");
+            var reviewStars = escHtml(renderStars(review.rating));
+            var sourceLabel = review.source === "manual" ? "Admin" : "Customer";
+            return (
+              '<article class="nsl-v2-review-item">' +
+              '<div class="nsl-v2-review-item__head">' +
+              '<strong class="nsl-v2-review-item__name">' +
+              reviewName +
+              '</strong><span class="nsl-v2-review-item__stars">' +
+              reviewStars +
+              '</span></div><p class="nsl-v2-review-item__meta">' +
+              escHtml(sourceLabel) +
+              (reviewDate ? " - " + reviewDate : "") +
+              "</p>" +
+              (reviewText ? '<p class="nsl-v2-review-item__text">' + reviewText + "</p>" : "") +
+              "</article>"
+            );
+          })
+          .join("")
+      : '<p class="nsl-v2-review-empty">No reviews yet.</p>';
+
+    return (
+      '<div class="nsl-v2-detail" data-store-id="' +
+      escHtml(store.id) +
+      '">' +
+      '<div class="nsl-v2-detail-tabs">' +
+      '<button type="button" class="nsl-v2-detail-tab is-active" data-detail-tab="overview">Overview</button>' +
+      '<button type="button" class="nsl-v2-detail-tab" data-detail-tab="reviews">Reviews (' +
+      escHtml(reviews.length) +
+      ")</button>" +
+      "</div>" +
+      '<div class="nsl-v2-detail-pane is-active" data-detail-pane="overview">' +
+      '<div class="nsl-v2-detail__headline">' +
+      '<h3 class="nsl-v2-detail__title">' +
+      escHtml(store.title) +
+      "</h3>" +
+      '<span class="nsl-v2-status ' +
+      (store._isOpen ? "is-open" : "is-closed") +
+      '">' +
+      escHtml(store._statusLabel || "Closed") +
+      "</span></div>" +
+      '<p class="nsl-v2-detail__address is-clamped" data-address-expanded="0">' +
+      escHtml(store.address || "") +
+      "</p>" +
+      '<button type="button" class="nsl-v2-address-toggle">See more</button>' +
+      (store.description ? '<div class="nsl-v2-detail__desc">' + store.description + "</div>" : "") +
+      '<ul class="nsl-v2-detail__list">' +
+      (store.hours ? "<li><strong>Hours:</strong> " + escHtml(store.hours) + "</li>" : "") +
+      (phone ? "<li><strong>Phone:</strong> " + escHtml(phone) + "</li>" : "") +
+      (store.email ? "<li><strong>Email:</strong> " + escHtml(store.email) + "</li>" : "") +
+      "<li><strong>Rating:</strong> " +
+      escHtml(Number(store._rating || 0).toFixed(1)) +
+      "</li>" +
+      '<li><strong>Region:</strong> ' +
+      escHtml(store.island_group) +
+      " / " +
+      escHtml(store.region || "Uncategorized") +
+      "</li>" +
+      "</ul>" +
+      '<div class="nsl-v2-detail__actions">' +
+      '<button type="button" class="nsl-v2-route-btn nsl-v2-get-route">Get Route From My Location</button>' +
+      '<a class="nsl-v2-directions" href="' +
+      escHtml(buildDirectionsUrl(store)) +
+      '" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>' +
+      "</div>" +
+      "</div>" +
+      '<div class="nsl-v2-detail-pane" data-detail-pane="reviews">' +
+      '<div class="nsl-v2-review-summary">' +
+      '<div class="nsl-v2-review-summary__score">' +
+      escHtml(averageRating) +
+      "</div>" +
+      '<div class="nsl-v2-review-summary__meta">' +
+      '<div class="nsl-v2-review-summary__stars">' +
+      escHtml(renderStars(Math.round(parseFloat(averageRating) || 0))) +
+      "</div>" +
+      '<div class="nsl-v2-review-summary__count">' +
+      escHtml(reviews.length) +
+      " review(s)</div>" +
+      "</div>" +
+      "</div>" +
+      '<div class="nsl-v2-detail__reviews"><h4>All Reviews</h4>' +
+      reviewsHtml +
+      (store.allow_public_reviews
+        ? '<button type="button" class="nsl-v2-open-review-modal" data-store-id="' +
+          escHtml(store.id) +
+          '">Add Review</button>'
+        : "") +
+      "</div>" +
+      "</div>"
+    );
   }
 
   function initStoreLocator(wrapper) {
-    // Tabs + bookmarks (scoped per block)
-    const tabs = wrapper.querySelectorAll(".nsl-tab");
-    const allowFavorites = wrapper && wrapper.dataset && wrapper.dataset.nslLoggedIn === "1";
-    const favorites = getFavoritesSet(wrapper);
-    const ajaxUrl = wrapper && wrapper.dataset ? wrapper.dataset.nslAjaxUrl : "";
-    const ajaxNonce = wrapper && wrapper.dataset ? wrapper.dataset.nslAjaxNonce : "";
-    let stores = [];
+    var jsonEl = wrapper.querySelector('script[type="application/json"]');
+    var mapEl = wrapper.querySelector(".nsl-v2-map");
+    var searchInput = wrapper.querySelector(".nsl-v2-search-input");
+    var suggestionsEl = wrapper.querySelector(".nsl-v2-suggestions");
+    var selectedPanel = wrapper.querySelector(".nsl-v2-selected-panel");
+    var parentFilterList = wrapper.querySelector(".nsl-v2-parent-filter-list");
+    var childFilterList = wrapper.querySelector(".nsl-v2-child-filter-list");
+    var extraFilterList = wrapper.querySelector(".nsl-v2-extra-filter-list");
+    var storeGrid = wrapper.querySelector(".nsl-v2-store-grid");
+    var storeCount = wrapper.querySelector(".nsl-v2-store-count");
+    var useLocationBtn = wrapper.querySelector(".nsl-v2-use-location");
+    var reviewModal = document.getElementById("nsl-v2-review-modal");
+    var reviewModalPostId = document.getElementById("nsl-v2-comment-post-id");
+    if (!jsonEl || !mapEl || typeof L === "undefined") return;
 
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", function () {
-        tabs.forEach((t) => t.classList.remove("active"));
-        this.classList.add("active");
-        applyFavoritesFilter(wrapper, favorites, allowFavorites);
-      });
+    var stores = [];
+    try {
+      stores = JSON.parse(jsonEl.textContent || "[]");
+    } catch (e) {
+      stores = [];
+    }
+
+    stores = stores.map(function (store) {
+      var computed = computeOpenState(store);
+      store._isOpen = computed.isOpen;
+      store._statusLabel = computed.label;
+      var ratingNum = parseFloat(store.rating);
+      store._rating = Number.isFinite(ratingNum) ? ratingNum : 4.5;
+      return store;
     });
 
-    function bindFavoriteButtons() {
-      if (!allowFavorites) return;
+    var query = "";
+    var activeIsland = "Luzon";
+    var activeRegion = "all";
+    var activeQuickFilter = "all";
+    var selectedStoreId = null;
+    var routeMode = "driving";
+    var userLocation = null;
+    var userMarker = null;
+    var routeLine = null;
+    var storeMarkerIcon = L.divIcon({
+      className: "nsl-v2-marker-wrap",
+      html: '<span class="nsl-v2-marker-pin"><span class="nsl-v2-marker-core"></span></span>',
+      iconSize: [28, 40],
+      iconAnchor: [14, 40],
+      popupAnchor: [0, -36],
+    });
 
-      wrapper.querySelectorAll(".nsl-card-bookmark").forEach((btn) => {
-        if (btn.dataset && btn.dataset.nslBound === "1") return;
-        if (btn.dataset) btn.dataset.nslBound = "1";
+    var map = L.map(mapEl, { zoomControl: false }).setView([14.5547, 121.0244], 11);
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
 
-        const item = btn.closest(".nsl-store-item");
-        const storeId = getStorePostId(item);
-        updateBookmarkUI(btn, favorites.has(storeId));
+    var markers = {};
+    var markerLayer = L.layerGroup().addTo(map);
 
-        btn.addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          if (!storeId || !ajaxUrl || !ajaxNonce) return;
-          const isActive = favorites.has(storeId);
-          const mode = isActive ? "remove" : "add";
-
-          btn.disabled = true;
-
-          const body = new URLSearchParams();
-          body.append("action", "noyona_toggle_favorite");
-          body.append("store_id", String(storeId));
-          body.append("mode", mode);
-          body.append("nonce", ajaxNonce);
-
-          fetch(ajaxUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-            body: body.toString(),
-            credentials: "same-origin",
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (!data || !data.success) {
-                updateBookmarkUI(btn, isActive);
-                return;
-              }
-
-              if (mode === "add") {
-                favorites.add(storeId);
-              } else {
-                favorites.delete(storeId);
-              }
-
-              if (wrapper && wrapper.dataset) {
-                wrapper.dataset.nslFavorites = Array.from(favorites).join(",");
-              }
-
-              updateBookmarkUI(btn, favorites.has(storeId));
-              applyFavoritesFilter(wrapper, favorites, allowFavorites);
-            })
-            .catch(() => {
-              updateBookmarkUI(btn, isActive);
-            })
-            .finally(() => {
-              btn.disabled = false;
-            });
-        });
+    function setActiveMarker(storeId) {
+      Object.keys(markers).forEach(function (id) {
+        var marker = markers[id];
+        if (!marker) return;
+        var el = marker.getElement ? marker.getElement() : null;
+        if (!el) return;
+        var pin = el.querySelector(".nsl-v2-marker-pin");
+        if (!pin) return;
+        pin.classList.toggle("is-active", String(id) === String(storeId));
       });
     }
 
-    // Read JSON
-    const jsonEl = wrapper.querySelector("#store-locator-data") || wrapper.querySelector('script[type="application/json"]');
-    if (jsonEl) {
-      try {
-        stores = JSON.parse(jsonEl.textContent || "[]");
-      } catch (e) {
-        console.error("Error parsing stores JSON:", e);
+    stores.forEach(function (store) {
+      var marker = L.marker([store.lat, store.lng], { icon: storeMarkerIcon });
+      marker.on("click", function () {
+        selectStoreById(store.id, true);
+      });
+      markers[String(store.id)] = marker;
+    });
+
+    function getSearchFilteredStores() {
+      if (!query) return stores.slice();
+      var q = query.toLowerCase();
+      return stores.filter(function (store) {
+        var haystack = [store.title, store.address, store.region, store.island_group].join(" ").toLowerCase();
+        return haystack.indexOf(q) !== -1;
+      });
+    }
+
+    function getFullyFilteredStores() {
+      var filtered = getSearchFilteredStores().filter(function (store) {
+        if (activeIsland !== "all" && store.island_group !== activeIsland) return false;
+        if (activeRegion !== "all" && store.region !== activeRegion) return false;
+        if (activeQuickFilter === "open" && !store._isOpen) return false;
+        if (activeQuickFilter === "top" && store._rating < 4.5) return false;
+        if (activeQuickFilter === "near") {
+          if (!userLocation) return false;
+          if (distanceKm(userLocation.lat, userLocation.lng, store.lat, store.lng) > 12) return false;
+        }
+        return true;
+      });
+      if (activeQuickFilter === "top") {
+        filtered.sort(function (a, b) {
+          return b._rating - a._rating;
+        });
+      }
+      return filtered;
+    }
+
+    function getSelectedStore() {
+      if (!selectedStoreId) return null;
+      return stores.find(function (s) {
+        return String(s.id) === String(selectedStoreId);
+      }) || null;
+    }
+
+    function clearRoute() {
+      if (routeLine) {
+        map.removeLayer(routeLine);
+        routeLine = null;
       }
     }
 
-    const storeById = {};
-    stores.forEach((store) => {
-      storeById[String(store.id)] = store;
-    });
-
-    // Render Sidebar List
-    renderStoreList(stores, wrapper); // RENDER THE LIST
-    bindFavoriteButtons();
-    applyFavoritesFilter(wrapper, favorites, allowFavorites);
-    bindMobileCatalogUI(wrapper, storeById);
-
-    // Map
-    const mapContainer = wrapper.querySelector("#store-map") || wrapper.querySelector(".nsl-map-placeholder");
-    if (!mapContainer) return;
-
-    function startMap() {
-      if (wrapper.dataset && wrapper.dataset.nslMapReady === "1") return;
-      if (typeof L === "undefined") return;
-      if (wrapper.dataset) wrapper.dataset.nslMapReady = "1";
-
-      // Default center
-      let centerCoords = [14.5547, 121.0244];
-      if (stores.length && stores[0].lat && stores[0].lng) {
-        const lat0 = parseFloat(stores[0].lat);
-        const lng0 = parseFloat(stores[0].lng);
-        if (!isNaN(lat0) && !isNaN(lng0)) centerCoords = [lat0, lng0];
-      }
-
-      const map = L.map(mapContainer).setView(centerCoords, 12);
-
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap contributors",
-      }).addTo(map);
-
-      let userLocation = null;
-      let userMarker = null;
-      let routeLine = null;
-      const routeStyle = { color: "#ff6f9b", weight: 4, opacity: 0.85 };
-
-      function clearRoute() {
-        if (routeLine) {
-          map.removeLayer(routeLine);
-          routeLine = null;
-        }
-      }
-
-      function setUserLocation(lat, lng) {
-        userLocation = { lat, lng };
-        if (userMarker) {
-          userMarker.setLatLng([lat, lng]);
-        } else {
-          userMarker = L.circleMarker([lat, lng], {
-            radius: 7,
-            color: "#ff6f9b",
-            weight: 2,
-            fillColor: "#ff6f9b",
-            fillOpacity: 0.85,
-          }).addTo(map);
-          userMarker.bindPopup("You are here");
-        }
-        clearRoute();
-      }
-
-      function drawRoute(start, end) {
-        if (!start || !end) return;
-
-        const url =
-          "https://router.project-osrm.org/route/v1/driving/" +
-          `${start.lng},${start.lat};${end.lng},${end.lat}` +
-          "?overview=full&geometries=geojson";
-
-        fetch(url)
-          .then((res) => (res.ok ? res.json() : null))
-          .then((data) => {
-            if (
-              data &&
-              data.routes &&
-              data.routes[0] &&
-              data.routes[0].geometry &&
-              Array.isArray(data.routes[0].geometry.coordinates)
-            ) {
-              const coords = data.routes[0].geometry.coordinates.map((pair) => [pair[1], pair[0]]);
-              clearRoute();
-              routeLine = L.polyline(coords, routeStyle).addTo(map);
-              map.fitBounds(routeLine.getBounds().pad(0.15));
-              return;
-            }
-
-            clearRoute();
-            routeLine = L.polyline(
-              [
-                [start.lat, start.lng],
-                [end.lat, end.lng],
-              ],
-              { ...routeStyle, dashArray: "6 8" }
-            ).addTo(map);
-            map.fitBounds(routeLine.getBounds().pad(0.2));
-          })
-          .catch(() => {
-            clearRoute();
-            routeLine = L.polyline(
-              [
-                [start.lat, start.lng],
-                [end.lat, end.lng],
-              ],
-              { ...routeStyle, dashArray: "6 8" }
-            ).addTo(map);
-            map.fitBounds(routeLine.getBounds().pad(0.2));
-          });
-      }
-
-      // Bind Tooltip to Map
-      bindTooltipEvents(mapContainer);
-
-      // Bind Tooltip to Sidebar List (New!)
-      const listContainer = wrapper.querySelector(".store-list") || wrapper.querySelector(".nsl-results-list");
-      if (listContainer) {
-        bindTooltipEvents(listContainer);
-      }
-
-      const markers = [];
-      const markerById = {};
-
-      stores.forEach((store) => {
-        if (!store.lat || !store.lng) return;
-        const lat = parseFloat(store.lat);
-        const lng = parseFloat(store.lng);
-        if (isNaN(lat) || isNaN(lng)) return;
-
-        const marker = L.marker([lat, lng]).addTo(map);
-        marker.bindPopup(buildPopup(store), { maxWidth: 360 });
-
-        markerById[String(store.id)] = marker;
-        markers.push(marker);
-
-        marker.on("click", () => {
-          const item = wrapper.querySelector(`.nsl-store-item[data-store-id="${String(store.id)}"]`);
-          if (item) {
-            setSelectedStoreItem(wrapper, item);
-          }
-        });
-      });
-
-      if (markers.length) {
-        const group = new L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.1));
+    function setUserMarker(lat, lng) {
+      userLocation = { lat: lat, lng: lng };
+      if (userMarker) {
+        userMarker.setLatLng([lat, lng]);
       } else {
-        L.marker(centerCoords).addTo(map).bindPopup("No stores found.").openPopup();
+        userMarker = L.circleMarker([lat, lng], {
+          radius: 7,
+          color: "#0a84ff",
+          weight: 2,
+          fillColor: "#0a84ff",
+          fillOpacity: 0.85,
+        }).addTo(map);
       }
+    }
 
-      // Click store item -> pan + open popup
-      // Re-query .nsl-store-item because we just added them to DOM
-      wrapper.querySelectorAll(".nsl-store-item").forEach((item) => {
-        item.addEventListener("click", (event) => {
-          if (event.target.closest(".nsl-store-cta") || event.target.closest(".nsl-card-bookmark")) {
+    function drawRouteToStore(store) {
+      if (!store || !userLocation) return;
+      clearRoute();
+
+      var profile = routeMode === "walking" ? "foot" : "driving";
+      var routeUrl =
+        "https://router.project-osrm.org/route/v1/" +
+        profile +
+        "/" +
+        encodeURIComponent(userLocation.lng + "," + userLocation.lat) +
+        ";" +
+        encodeURIComponent(store.lng + "," + store.lat) +
+        "?overview=full&geometries=geojson";
+
+      fetch(routeUrl)
+        .then(function (res) {
+          if (!res.ok) return null;
+          return res.json();
+        })
+        .then(function (data) {
+          if (
+            data &&
+            data.routes &&
+            data.routes[0] &&
+            data.routes[0].geometry &&
+            Array.isArray(data.routes[0].geometry.coordinates)
+          ) {
+            var coords = data.routes[0].geometry.coordinates.map(function (pair) {
+              return [pair[1], pair[0]];
+            });
+            routeLine = L.polyline(coords, {
+              color: routeMode === "walking" ? "#22a06b" : "#0a84ff",
+              weight: 5,
+              opacity: 0.9,
+            }).addTo(map);
+            map.fitBounds(routeLine.getBounds().pad(0.15));
             return;
           }
-          const id = item.getAttribute("data-store-id");
-          const marker = markerById[String(id)];
-          if (!marker) return;
 
-          const ll = marker.getLatLng();
-          const currentZoom = map.getZoom();
-          const targetZoom = Math.max(12, Math.min(currentZoom - 1, 13));
-          map.flyTo([ll.lat, ll.lng], targetZoom, {
-            animate: true,
-            duration: 1.6,
-            easeLinearity: 0.22,
-          });
-          const popup = marker.getPopup();
-          if (popup) {
-            const prevAutoPan = popup.options.autoPan;
-            popup.options.autoPan = false;
-            marker.openPopup();
-            popup.options.autoPan = prevAutoPan;
-          } else {
-            marker.openPopup();
-          }
-
-          if (userLocation) {
-            drawRoute(userLocation, { lat: ll.lat, lng: ll.lng });
-          }
+          routeLine = L.polyline(
+            [
+              [userLocation.lat, userLocation.lng],
+              [store.lat, store.lng],
+            ],
+            { color: "#0a84ff", weight: 4, opacity: 0.65, dashArray: "7 8" }
+          ).addTo(map);
+          map.fitBounds(routeLine.getBounds().pad(0.2));
+        })
+        .catch(function () {
+          routeLine = L.polyline(
+            [
+              [userLocation.lat, userLocation.lng],
+              [store.lat, store.lng],
+            ],
+            { color: "#0a84ff", weight: 4, opacity: 0.65, dashArray: "7 8" }
+          ).addTo(map);
+          map.fitBounds(routeLine.getBounds().pad(0.2));
         });
+    }
+
+    function requestUserLocationAndRoute(store) {
+      if (!store) return;
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          setUserMarker(pos.coords.latitude, pos.coords.longitude);
+          drawRouteToStore(store);
+        },
+        function () {
+          alert("Unable to access location. Please allow location permission in your browser.");
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    function zoomToStore(store) {
+      if (!store) return;
+      map.stop();
+      var target = L.latLng(store.lat, store.lng);
+      var currentCenter = map.getCenter();
+      var distance = map.distance(currentCenter, target);
+      var currentZoom = map.getZoom();
+
+      // Nearby stores: pan only to avoid zoom "vibration" effect.
+      if (distance < 1500) {
+        map.panTo(target, { animate: true, duration: 0.45 });
+        if (currentZoom < 14) {
+          map.setZoom(14, { animate: true });
+        }
+        return;
+      }
+
+      // Far stores: smooth fly animation.
+      map.flyTo(target, Math.max(currentZoom, 14), { duration: 0.95, easeLinearity: 0.22 });
+    }
+
+    function renderSuggestions() {
+      if (!query) {
+        suggestionsEl.hidden = true;
+        suggestionsEl.innerHTML = "";
+        return;
+      }
+      var candidates = getSearchFilteredStores().slice(0, 10);
+      if (!candidates.length) {
+        suggestionsEl.hidden = false;
+        suggestionsEl.innerHTML = '<div class="nsl-v2-suggestion-empty">No matching stores found.</div>';
+        return;
+      }
+      suggestionsEl.hidden = false;
+      suggestionsEl.innerHTML = candidates
+        .map(function (store) {
+          return (
+            '<button type="button" class="nsl-v2-suggestion-item" data-store-id="' +
+            escHtml(store.id) +
+            '">' +
+            '<span class="nsl-v2-suggestion-title">' +
+            escHtml(store.title) +
+            "</span>" +
+            '<span class="nsl-v2-suggestion-meta">' +
+            escHtml(store.address || "") +
+            "</span>" +
+            "</button>"
+          );
+        })
+        .join("");
+    }
+
+    function getFilterTreeBySearch() {
+      var bySearch = getSearchFilteredStores();
+      var tree = {};
+      bySearch.forEach(function (store) {
+        var island = store.island_group || "Luzon";
+        var region = store.region || "Uncategorized";
+        if (!tree[island]) tree[island] = { count: 0, regions: {} };
+        tree[island].count += 1;
+        tree[island].regions[region] = (tree[island].regions[region] || 0) + 1;
+      });
+      return { bySearch: bySearch, tree: tree };
+    }
+
+    function renderFilters() {
+      if (!parentFilterList || !childFilterList) return;
+      var data = getFilterTreeBySearch();
+      var tree = data.tree;
+      var bySearch = data.bySearch;
+      var parentOrder = ["Luzon", "Visayas", "Mindanao"];
+
+      if (activeIsland !== "all" && !tree[activeIsland]) {
+        activeIsland = parentOrder.find(function (name) {
+          return !!tree[name];
+        }) || "all";
+        activeRegion = "all";
+      }
+
+      var parentHtml =
+        '<button type="button" class="nsl-v2-filter-parent nsl-v2-filter-parent--all' +
+        (activeIsland === "all" ? " is-active" : "") +
+        '" data-island="all" data-region="all">All (' +
+        bySearch.length +
+        ")</button>";
+
+      parentOrder.forEach(function (island) {
+        var count = tree[island] ? tree[island].count : 0;
+        parentHtml +=
+          '<button type="button" class="nsl-v2-filter-parent' +
+          (activeIsland === island ? " is-active" : "") +
+          '" data-island="' +
+          escHtml(island) +
+          '" data-region="all">(' +
+          count +
+          ") " +
+          escHtml(island) +
+          "</button>";
+      });
+      parentFilterList.innerHTML = parentHtml;
+
+      if (activeIsland === "all") {
+        childFilterList.innerHTML = '<div class="nsl-v2-filter-hint">Select Luzon, Visayas, or Mindanao to see child regions.</div>';
+        return;
+      }
+
+      var islandTree = tree[activeIsland];
+      if (!islandTree || !islandTree.regions || !Object.keys(islandTree.regions).length) {
+        childFilterList.innerHTML = '<div class="nsl-v2-filter-hint">No regions found for this island group.</div>';
+        return;
+      }
+
+      var childHtml =
+        '<button type="button" class="nsl-v2-filter-child' +
+        (activeRegion === "all" ? " is-active" : "") +
+        '" data-island="' +
+        escHtml(activeIsland) +
+        '" data-region="all">All ' +
+        escHtml(activeIsland) +
+        " (" +
+        islandTree.count +
+        ")</button>";
+
+      Object.keys(islandTree.regions)
+        .sort()
+        .forEach(function (region) {
+          childHtml +=
+            '<button type="button" class="nsl-v2-filter-child' +
+            (activeRegion === region ? " is-active" : "") +
+            '" data-island="' +
+            escHtml(activeIsland) +
+            '" data-region="' +
+            escHtml(region) +
+            '">(' +
+            islandTree.regions[region] +
+            ") " +
+            escHtml(region) +
+            "</button>";
+        });
+      childFilterList.innerHTML = childHtml;
+    }
+
+    function renderExtraFilters() {
+      if (!extraFilterList) return;
+      var options = [
+        { key: "all", label: "All Stores" },
+        { key: "open", label: "Open Now" },
+        { key: "near", label: userLocation ? "Near Me (12km)" : "Near Me" },
+        // { key: "top", label: "Top Rated (4.5+)" },
+      ];
+      extraFilterList.innerHTML = options
+        .map(function (item) {
+          return (
+            '<button type="button" class="nsl-v2-filter-extra' +
+            (activeQuickFilter === item.key ? " is-active" : "") +
+            '" data-extra-filter="' +
+            escHtml(item.key) +
+            '">' +
+            escHtml(item.label) +
+            "</button>"
+          );
+        })
+        .join("");
+    }
+
+    function renderStoresAndMap() {
+      var filtered = getFullyFilteredStores();
+      storeCount.textContent = filtered.length + " store(s) found";
+      storeGrid.innerHTML = filtered.length ? filtered.map(formatStoreCard).join("") : '<div class="nsl-v2-empty">No stores match your filters.</div>';
+
+      markerLayer.clearLayers();
+      filtered.forEach(function (store) {
+        var marker = markers[String(store.id)];
+        if (marker) markerLayer.addLayer(marker);
       });
 
-      // Use current location (if exists in markup)
-      const locationBtn = wrapper.querySelector(".nsl-use-location");
-      if (locationBtn) {
-        locationBtn.addEventListener("click", function () {
+      if (filtered.length) {
+        var group = L.featureGroup(
+          filtered
+            .map(function (store) {
+              return markers[String(store.id)];
+            })
+            .filter(Boolean)
+        );
+        if (group.getLayers().length) {
+          map.fitBounds(group.getBounds().pad(0.15));
+        }
+      }
+
+      var selected = getSelectedStore();
+      if (!selected || filtered.every(function (s) { return String(s.id) !== String(selected.id); })) {
+        selectedStoreId = null;
+        selectedPanel.innerHTML = query ? getEmptySelectedMarkup(false) : getEmptySelectedMarkup(true);
+        selectedPanel.classList.toggle("is-collapsed", !!query);
+        setActiveMarker(null);
+        clearRoute();
+      } else {
+        selectedPanel.classList.remove("is-collapsed");
+        selectedPanel.innerHTML = formatSelectedDetail(selected);
+        setActiveMarker(selected.id);
+        syncAddressToggleVisibility();
+      }
+    }
+
+    function selectStoreById(id, shouldFly) {
+      var store = stores.find(function (s) {
+        return String(s.id) === String(id);
+      });
+      if (!store) return;
+      selectedStoreId = String(store.id);
+      selectedPanel.innerHTML = formatSelectedDetail(store);
+      setActiveMarker(store.id);
+      syncAddressToggleVisibility();
+      if (shouldFly && !userLocation) {
+        zoomToStore(store);
+      }
+      if (userLocation) {
+        drawRouteToStore(store);
+      }
+    }
+
+    function closeReviewModal() {
+      if (!reviewModal) return;
+      reviewModal.hidden = true;
+      document.body.classList.remove("nsl-v2-review-modal-open");
+    }
+
+    function syncAddressToggleVisibility() {
+      var addressEl = selectedPanel.querySelector(".nsl-v2-detail__address");
+      var toggleEl = selectedPanel.querySelector(".nsl-v2-address-toggle");
+      if (!addressEl || !toggleEl) return;
+      var shouldShow = addressEl.scrollHeight > addressEl.clientHeight + 2;
+      toggleEl.hidden = !shouldShow;
+    }
+
+    renderFilters();
+    renderExtraFilters();
+    renderStoresAndMap();
+
+    wrapper.addEventListener("input", function (event) {
+      if (!event.target.classList.contains("nsl-v2-search-input")) return;
+      query = event.target.value.trim();
+      if (!query) {
+        // Clearing search also clears selected store detail state.
+        selectedStoreId = null;
+        clearRoute();
+      }
+      renderSuggestions();
+      renderFilters();
+      renderExtraFilters();
+      renderStoresAndMap();
+    });
+
+    wrapper.addEventListener("click", function (event) {
+      var suggestion = event.target.closest(".nsl-v2-suggestion-item");
+      if (suggestion) {
+        var sid = suggestion.getAttribute("data-store-id");
+        selectStoreById(sid, true);
+        var found = stores.find(function (s) {
+          return String(s.id) === String(sid);
+        });
+        if (found) {
+          searchInput.value = found.title;
+          query = found.title;
+          renderFilters();
+          renderExtraFilters();
+          renderStoresAndMap();
+          renderSuggestions();
+          suggestionsEl.hidden = true;
+        }
+        return;
+      }
+
+      var filterBtn = event.target.closest(".nsl-v2-filter-parent, .nsl-v2-filter-child");
+      if (filterBtn) {
+        activeIsland = filterBtn.getAttribute("data-island") || "all";
+        activeRegion = filterBtn.getAttribute("data-region") || "all";
+        renderFilters();
+        renderExtraFilters();
+        renderStoresAndMap();
+        return;
+      }
+
+      var extraBtn = event.target.closest(".nsl-v2-filter-extra");
+      if (extraBtn) {
+        var nextQuickFilter = extraBtn.getAttribute("data-extra-filter") || "all";
+        if (nextQuickFilter === "near" && !userLocation) {
           if (!navigator.geolocation) {
             alert("Geolocation is not supported by your browser.");
             return;
           }
           navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              const userLat = pos.coords.latitude;
-              const userLng = pos.coords.longitude;
-              map.setView([userLat, userLng], 14, { animate: true });
-              setUserLocation(userLat, userLng);
-              if (userMarker) {
-                userMarker.openPopup();
-              }
+            function (pos) {
+              setUserMarker(pos.coords.latitude, pos.coords.longitude);
+              map.flyTo([pos.coords.latitude, pos.coords.longitude], 14, { duration: 1 });
+              activeQuickFilter = "near";
+              renderExtraFilters();
+              renderStoresAndMap();
             },
-            () => alert("Could not get your location. Please allow location access."),
-            { enableHighAccuracy: true, timeout: 8000 }
+            function () {
+              alert("Unable to access location. Please allow location permission in your browser.");
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
           );
-        });
+          return;
+        }
+        activeQuickFilter = nextQuickFilter;
+        renderExtraFilters();
+        renderStoresAndMap();
+        return;
       }
 
-      setTimeout(() => map.invalidateSize(), 100);
-    }
-
-    if (typeof L === "undefined") {
-      let attempts = 0;
-      const timer = setInterval(() => {
-        if (typeof L !== "undefined") {
-          clearInterval(timer);
-          startMap();
-        } else if (attempts >= 50) {
-          clearInterval(timer);
+      var card = event.target.closest(".nsl-v2-store-card");
+      if (card) {
+        selectStoreById(card.getAttribute("data-store-id"), true);
+        var mapShell = wrapper.querySelector(".nsl-v2-map-shell");
+        if (mapShell) {
+          mapShell.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-        attempts += 1;
-      }, 100);
-      return;
+        return;
+      }
+
+      if (event.target.closest(".nsl-v2-route-mode-btn")) {
+        var modeBtn = event.target.closest(".nsl-v2-route-mode-btn");
+        routeMode = modeBtn.getAttribute("data-route-mode") || "driving";
+        wrapper.querySelectorAll(".nsl-v2-route-mode-btn").forEach(function (btn) {
+          btn.classList.toggle("is-active", btn === modeBtn);
+        });
+        var current = getSelectedStore();
+        if (userLocation && current) {
+          drawRouteToStore(current);
+        }
+        return;
+      }
+
+      if (event.target.closest(".nsl-v2-get-route")) {
+        var selected = getSelectedStore();
+        if (selected) {
+          requestUserLocationAndRoute(selected);
+        }
+        return;
+      }
+
+      var thumb = event.target.closest(".nsl-v2-detail__thumb");
+      if (thumb) {
+        var detail = thumb.closest(".nsl-v2-detail");
+        if (!detail) return;
+        var hero = detail.querySelector(".nsl-v2-detail__image");
+        var src = thumb.getAttribute("data-gallery-src");
+        if (!hero || !src) return;
+        hero.src = src;
+        detail.querySelectorAll(".nsl-v2-detail__thumb").forEach(function (el) {
+          el.classList.toggle("is-active", el === thumb);
+        });
+        return;
+      }
+
+      var addressToggle = event.target.closest(".nsl-v2-address-toggle");
+      if (addressToggle) {
+        var detailWrap = addressToggle.closest(".nsl-v2-detail");
+        if (!detailWrap) return;
+        var addressEl = detailWrap.querySelector(".nsl-v2-detail__address");
+        if (!addressEl) return;
+        var expanded = addressEl.getAttribute("data-address-expanded") === "1";
+        if (expanded) {
+          addressEl.classList.add("is-clamped");
+          addressEl.setAttribute("data-address-expanded", "0");
+          addressToggle.textContent = "See more";
+        } else {
+          addressEl.classList.remove("is-clamped");
+          addressEl.setAttribute("data-address-expanded", "1");
+          addressToggle.textContent = "See less";
+        }
+        return;
+      }
+
+      var openReviewModalBtn = event.target.closest(".nsl-v2-open-review-modal");
+      if (openReviewModalBtn && reviewModal) {
+        var storeIdForReview = openReviewModalBtn.getAttribute("data-store-id") || "";
+        if (reviewModalPostId) {
+          reviewModalPostId.value = storeIdForReview;
+        }
+        reviewModal.hidden = false;
+        document.body.classList.add("nsl-v2-review-modal-open");
+        return;
+      }
+
+      var detailTabBtn = event.target.closest(".nsl-v2-detail-tab");
+      if (detailTabBtn) {
+        var detailWrap = detailTabBtn.closest(".nsl-v2-detail");
+        if (!detailWrap) return;
+        var targetTab = detailTabBtn.getAttribute("data-detail-tab");
+        if (!targetTab) return;
+
+        detailWrap.querySelectorAll(".nsl-v2-detail-tab").forEach(function (tab) {
+          tab.classList.toggle("is-active", tab === detailTabBtn);
+        });
+        detailWrap.querySelectorAll(".nsl-v2-detail-pane").forEach(function (pane) {
+          pane.classList.toggle("is-active", pane.getAttribute("data-detail-pane") === targetTab);
+        });
+
+        if (targetTab === "overview") {
+          syncAddressToggleVisibility();
+        }
+        return;
+      }
+
+      if (event.target.closest(".nsl-v2-review-modal__close")) {
+        closeReviewModal();
+        return;
+      }
+
+      if (reviewModal && !reviewModal.hidden && event.target === reviewModal) {
+        closeReviewModal();
+        return;
+      }
+
+      if (!event.target.closest(".nsl-v2-search-wrap")) {
+        suggestionsEl.hidden = true;
+      }
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeReviewModal();
+      }
+    });
+
+    if (useLocationBtn) {
+      useLocationBtn.addEventListener("click", function () {
+        if (!navigator.geolocation) {
+          alert("Geolocation is not supported by your browser.");
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            setUserMarker(pos.coords.latitude, pos.coords.longitude);
+            map.flyTo([pos.coords.latitude, pos.coords.longitude], 14, { duration: 1 });
+            var current = getSelectedStore();
+            if (current) {
+              drawRouteToStore(current);
+            }
+            renderExtraFilters();
+            renderStoresAndMap();
+          },
+          function () {
+            alert("Unable to access location. Please allow location permission in your browser.");
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      });
     }
-
-    startMap();
-
   }
 
-  function runStoreLocatorInit() {
+  function runInit() {
     document.querySelectorAll(".noyona-store-locator-wrapper").forEach(initStoreLocator);
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", runStoreLocatorInit);
+    document.addEventListener("DOMContentLoaded", runInit);
   } else {
-    runStoreLocatorInit();
+    runInit();
   }
 })();
+
