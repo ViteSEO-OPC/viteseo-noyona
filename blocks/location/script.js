@@ -101,6 +101,31 @@
       return getEmptySelectedMarkup(true);
     }
     var phone = store.phone || store.tel || "";
+    var gallery = Array.isArray(store.gallery) ? store.gallery : (store.image ? [store.image] : []);
+    var galleryHtml = "";
+    if (gallery.length) {
+      galleryHtml =
+        '<div class="nsl-v2-detail__gallery">' +
+        gallery
+          .slice(0, 5)
+          .map(function (img, index) {
+            return (
+              '<button type="button" class="nsl-v2-detail__thumb' +
+              (index === 0 ? " is-active" : "") +
+              '" data-gallery-src="' +
+              escHtml(img) +
+              '">' +
+              '<img src="' +
+              escHtml(img) +
+              '" alt="' +
+              escHtml(store.title) +
+              '" loading="lazy">' +
+              "</button>"
+            );
+          })
+          .join("") +
+        "</div>";
+    }
 
     var reviews = Array.isArray(store.reviews) ? store.reviews : [];
     var totalRating = reviews.reduce(function (sum, review) {
@@ -144,6 +169,8 @@
       ")</button>" +
       "</div>" +
       '<div class="nsl-v2-detail-pane is-active" data-detail-pane="overview">' +
+      (store.image ? '<img class="nsl-v2-detail__image" src="' + escHtml(store.image) + '" alt="' + escHtml(store.title) + '" loading="lazy">' : "") +
+      galleryHtml +
       '<div class="nsl-v2-detail__headline">' +
       '<h3 class="nsl-v2-detail__title">' +
       escHtml(store.title) +
@@ -512,9 +539,10 @@
           (activeIsland === island ? " is-active" : "") +
           '" data-island="' +
           escHtml(island) +
-          '" data-region="all">(' +
-          count +
-          ") " +
+          // '" data-region="all">(' +
+          // count +
+          // ") " +
+          '">' +
           escHtml(island) +
           "</button>";
       });
@@ -538,9 +566,10 @@
         escHtml(activeIsland) +
         '" data-region="all">All ' +
         escHtml(activeIsland) +
-        " (" +
-        islandTree.count +
-        ")</button>";
+        // " (" +
+        // islandTree.count +
+        // ")</button>";
+        "</button>";
 
       Object.keys(islandTree.regions)
         .sort()
