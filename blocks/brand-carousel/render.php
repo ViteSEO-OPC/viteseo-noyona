@@ -9,6 +9,7 @@ $defaults = array(
     'items'          => array(),
     'speed'          => 40,
     'heading'        => '',
+    'description'    => '',
     'mode'           => 'reviews', // "reviews" or "brands"
     'minRating'      => 0,
 
@@ -24,8 +25,18 @@ $defaults = array(
 $atts = wp_parse_args( $attributes, $defaults );
 $items = $atts['items'];
 $heading = $atts['heading'];
+$description = $atts['description'];
 $mode = $atts['mode'];
 $minRating = (float) $atts['minRating'];
+
+$social_icon_map = array(
+    'facebook'  => 'fa-brands fa-facebook-f',
+    'tiktok'    => 'fa-brands fa-tiktok',
+    'instagram' => 'fa-brands fa-instagram',
+    'shopee'    => 'fa-solid fa-bag-shopping',
+    'lazada'    => 'fa-solid fa-store',
+    'other'     => 'fa-solid fa-globe',
+);
 
 // Early exit if no items
 if ( empty( $items ) ) {
@@ -88,11 +99,18 @@ $style_attr = $style_rules
 ?>
 <div class="wp-block-noyona-brand-carousel brand-carousel alignfull"<?php echo $style_attr; ?>>
 
-    <?php if ( $heading ) : ?>
+    <?php if ( $heading || $description ) : ?>
         <div class="brand-carousel__header">
-            <h2 class="brand-carousel__heading">
-                <?php echo esc_html( $heading ); ?>
-            </h2>
+            <?php if ( $heading ) : ?>
+                <h2 class="brand-carousel__heading">
+                    <?php echo esc_html( $heading ); ?>
+                </h2>
+            <?php endif; ?>
+            <?php if ( $description ) : ?>
+                <p class="brand-carousel__description">
+                    <?php echo esc_html( $description ); ?>
+                </p>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 
@@ -103,7 +121,10 @@ $style_attr = $style_rules
             $author    = isset( $item['author'] )  ? $item['author']  : '';
             $product   = isset( $item['product'] ) ? $item['product'] : '';
             $rating    = isset( $item['rating'] )  ? (float) $item['rating'] : 0;
-            $avatar    = isset( $item['avatar'] )  ? $item['avatar']  : '';
+            $social    = isset( $item['social'] )  ? sanitize_key( (string) $item['social'] ) : 'none';
+            $show_rating = isset( $item['rating'] ) && $item['rating'] !== null && $item['rating'] !== '';
+            $social_icon_class = isset( $social_icon_map[ $social ] ) ? $social_icon_map[ $social ] : 'fa-solid fa-user';
+            $avatar_social_class = 'review-card__avatar--' . sanitize_html_class( $social ?: 'none' );
 
             // For brand mode
             $brandName = isset( $item['brand'] ) ? $item['brand'] : '';
@@ -142,27 +163,27 @@ $style_attr = $style_rules
                         <?php echo esc_html( $quote ); ?>
                     </p>
 
-                    <div class="review-card__rating">
-                        <?php for ( $i = 0; $i < 5; $i++ ) : ?>
-                            <?php if ( $i < round( $rating ) ) : ?>
-                                <i class="fas fa-star"></i>
-                            <?php else : ?>
-                                <i class="far fa-star"></i>
-                            <?php endif; ?>
-                        <?php endfor; ?>
-                    </div>
+                    <?php if ( $show_rating ) : ?>
+                        <div class="review-card__rating">
+                            <?php for ( $i = 0; $i < 5; $i++ ) : ?>
+                                <?php if ( $i < round( $rating ) ) : ?>
+                                    <i class="fas fa-star"></i>
+                                <?php else : ?>
+                                    <i class="far fa-star"></i>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+                        </div>
+                    <?php endif; ?>
 
                     <div class="review-card__footer">
-                        <div class="review-card__avatar">
-                            <?php if ( $avatar ) : ?>
-                                <img src="<?php echo esc_url( $avatar ); ?>" alt="User avatar" />
-                            <?php else : ?>
-                                <div class="review-card__avatar-placeholder"></div>
-                            <?php endif; ?>
+                        <div class="review-card__avatar <?php echo esc_attr( $avatar_social_class ); ?>">
+                            <i class="<?php echo esc_attr( $social_icon_class ); ?>" aria-hidden="true"></i>
                         </div>
                         <div class="review-card__meta">
-                            <span class="review-card__author">
-                                <?php echo esc_html( $author ); ?>
+                            <span class="review-card__author-wrap">
+                                <span class="review-card__author">
+                                    <?php echo esc_html( $author ); ?>
+                                </span>
                             </span>
                             <span class="review-card__product">
                                 <?php echo esc_html( $product ); ?>

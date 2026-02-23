@@ -31,6 +31,12 @@
     margin: 0;
 }
 
+.brand-carousel__description {
+    margin: 10px auto 0;
+    max-width: 760px;
+    color: #555;
+}
+
 .brand-carousel__track {
     display: flex;
     gap: 2rem;
@@ -142,24 +148,65 @@
 }
 
 .review-card__avatar {
-    width: 48px;
-    height: 48px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
-    overflow: hidden;
     flex-shrink: 0;
-    background: #f0f0f0;
+    background: #eef1f6;
+    border: 1px solid #dfe4ee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
 }
 
-.review-card__avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.review-card__avatar i {
+    color: #2f3647;
+    font-size: 30px;
 }
 
-.review-card__avatar-placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+.review-card__avatar--facebook {
+    background: #1877f2;
+    border-color: #1877f2;
+}
+
+.review-card__avatar--tiktok {
+    background: #000000;
+    border-color: #000000;
+}
+
+.review-card__avatar--instagram {
+    background: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 45%, #6228d7 100%);
+    border-color: #d23b84;
+}
+
+.review-card__avatar--shopee {
+    background: #f1582c;
+    border-color: #f1582c;
+}
+
+.review-card__avatar--lazada {
+    background: linear-gradient(135deg, #4f25d8 0%, #f57a32 100%);
+    border-color: #6d37d4;
+}
+
+.review-card__avatar--other {
+    background: #4a5a72;
+    border-color: #4a5a72;
+}
+
+.review-card__avatar--none {
+    background: #eef1f6;
+    border-color: #dfe4ee;
+}
+
+.review-card__avatar--facebook i,
+.review-card__avatar--tiktok i,
+.review-card__avatar--instagram i,
+.review-card__avatar--shopee i,
+.review-card__avatar--lazada i,
+.review-card__avatar--other i {
+    color: #ffffff;
 }
 
 .review-card__meta {
@@ -177,6 +224,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.review-card__author-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
 }
 
 .review-card__product {
@@ -240,8 +294,12 @@
     }
 
     .review-card__avatar {
-        width: 40px;
-        height: 40px;
+        width: 46px;
+        height: 46px;
+    }
+
+    .review-card__avatar i {
+        font-size: 1rem;
     }
 
     .review-card__author {
