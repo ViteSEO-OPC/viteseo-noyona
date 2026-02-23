@@ -4,7 +4,7 @@
  */
 
 $defaults = array(
-    'image' => '/wp-content/themes/viteseo-noyona/assets/images/contact-logo.png',
+    'image' => '/wp-content/themes/viteseo-noyona/assets/images/brand_with_a_purpose.webp',
     'heading' => 'Where to <span class="find-us__accent">Find Us</span>',
     'description' => 'Visit our stores to experience Noyona products in person. Our beauty advisors are ready to help you find your perfect match.',
     'storeName' => 'Noyona Essentials',

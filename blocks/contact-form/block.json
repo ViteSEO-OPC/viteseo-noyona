@@ -25,7 +25,7 @@
     },
     "brandImage": {
       "type": "string",
-      "default": "/wp-content/themes/viteseo-noyona/assets/images/contact-logo.png"
+      "default": "/wp-content/themes/viteseo-noyona/assets/images/brand_with_a_purpose.webp"
     },
     "socials": {
       "type": "array",

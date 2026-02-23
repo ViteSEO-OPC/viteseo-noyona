@@ -14,19 +14,19 @@ $defaults = array(
 	'subtitle' => 'High-end beauty shouldn’t be exclusive. We bridge the gap between pro-performance and everyday value with ethical, inclusive products.',
 	'cards'    => array(
 		array(
-			'image' => '',
+			'image' => '/wp-content/themes/viteseo-noyona/assets/images/made-for-you.webp',
 			'title' => 'Made for You',
 			'text'  => 'Shades and formulas designed to complement diverse skin tones.',
 			'bg'    => '#f7d7ea',
 		),
 		array(
-			'image' => '',
+			'image' => '/wp-content/themes/viteseo-noyona/assets/images/clean-beauty.webp',
 			'title' => 'Clean Beauty',
 			'text'  => 'No harsh chemicals, just pure, skin-loving goodness.',
 			'bg'    => '#d9ecfb',
 		),
 		array(
-			'image' => '',
+			'image' => '/wp-content/themes/viteseo-noyona/assets/images/affordable-luxury.webp',
 			'title' => 'Affordable Luxury',
 			'text'  => 'Premium quality without the premium price tag.',
 			'bg'    => '#f6f2c5',
@@ -59,9 +59,9 @@ $allowed_title_html = array(
 // Provide theme-local default images if none are set.
 $theme_uri = function_exists( 'get_stylesheet_directory_uri' ) ? get_stylesheet_directory_uri() : '';
 $fallback_images = array(
-	0 => $theme_uri ? $theme_uri . '/assets/images/made-for-you_about.webp' : '',
-	1 => $theme_uri ? $theme_uri . '/assets/images/clean-beauty_about.webp' : '',
-	2 => $theme_uri ? $theme_uri . '/assets/images/affordable-luxury_about.webp' : '',
+	0 => $theme_uri ? $theme_uri . '/assets/images/made-for-you.webp' : '',
+	1 => $theme_uri ? $theme_uri . '/assets/images/clean-beauty.webp' : '',
+	2 => $theme_uri ? $theme_uri . '/assets/images/affordable-luxury.webp' : '',
 );
 
 ?>

@@ -12,51 +12,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! function_exists( 'noyona_guides_pillars_icon_svg' ) ) {
+if ( ! function_exists( 'noyona_guides_pillars_icon_url' ) ) {
 	/**
-	 * Return inline SVG for a given icon slug.
+	 * Return icon image URL for a given icon slug.
 	 *
 	 * @param string $slug Icon slug.
-	 * @return string SVG markup.
+	 * @return string Icon URL.
 	 */
-	function noyona_guides_pillars_icon_svg( $slug ) {
+	function noyona_guides_pillars_icon_url( $slug ) {
 		$slug = (string) $slug;
 
-		// All icons use currentColor stroke; CSS controls size + color.
 		if ( 'choices' === $slug ) {
-			return '<svg viewBox="0 0 64 64" role="img" aria-hidden="true">
-				<path d="M10 38c6 0 10-6 16-6s10 6 16 6 10-6 16-6" />
-				<path d="M10 38v8c0 4 3 8 8 8h6" />
-				<path d="M54 38v8c0 4-3 8-8 8h-6" />
-				<path d="M32 18c-4-6-14-2-12 6 2 8 12 12 12 12s10-4 12-12c2-8-8-12-12-6z" />
-				<path d="M32 36c0 6-5 10-12 12" />
-				<path d="M32 36c0 6 5 10 12 12" />
-			</svg>';
+			return get_theme_file_uri( 'assets/images/concious-choice.webp' );
 		}
 
 		if ( 'everyday' === $slug ) {
-			return '<svg viewBox="0 0 64 64" role="img" aria-hidden="true">
-				<circle cx="26" cy="24" r="8" />
-				<path d="M18 50c1-10 6-16 16-16s15 6 16 16" />
-				<path d="M33 16c4 0 7 3 7 7" />
-				<path d="M46 22h10" />
-				<path d="M48 22v-4c0-2 2-3 3-3s3 1 3 3v4" />
-				<path d="M48 22v14c0 2 2 3 3 3s3-1 3-3V22" />
-				<path d="M42 28h8" />
-				<path d="M44 28v-6h4v6" />
-				<path d="M44 28v10c0 2 2 3 2 3s2-1 2-3V28" />
-			</svg>';
+			return get_theme_file_uri( 'assets/images/beautiful-for-everday-life.webp' );
 		}
 
 		// Default: "purpose".
-		return '<svg viewBox="0 0 64 64" role="img" aria-hidden="true">
-			<circle cx="32" cy="12" r="6" />
-			<path d="M32 2v4" /><path d="M22 12h4" /><path d="M38 12h4" /><path d="M25 5l3 3" /><path d="M39 5l-3 3" />
-			<path d="M24 20h16v8l10 20a8 8 0 0 1-7 12H21a8 8 0 0 1-7-12l10-20v-8z" />
-			<path d="M24 28h16" />
-			<path d="M30 44c4-6 10-6 14 0-6 6-12 6-14 0z" />
-			<path d="M30 44c0 6-4 10-10 12" />
-		</svg>';
+		return get_theme_file_uri( 'assets/images/purposeful-creation.webp' );
 	}
 }
 
@@ -124,10 +99,13 @@ $allowed_title_html = array(
 					$icon  = isset( $item['icon'] ) ? (string) $item['icon'] : 'purpose';
 					$it_t  = isset( $item['title'] ) ? (string) $item['title'] : '';
 					$it_tx = isset( $item['text'] ) ? (string) $item['text'] : '';
+					$icon_url = noyona_guides_pillars_icon_url( $icon );
 					?>
 					<div class="guides-pillars__item">
 						<div class="guides-pillars__icon">
-							<?php echo noyona_guides_pillars_icon_svg( $icon ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( '' !== $icon_url ) : ?>
+								<img src="<?php echo esc_url( $icon_url ); ?>" alt="<?php echo esc_attr( $it_t ); ?>" loading="lazy" />
+							<?php endif; ?>
 						</div>
 
 						<?php if ( '' !== trim( $it_t ) ) : ?>

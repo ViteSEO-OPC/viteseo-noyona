@@ -31,7 +31,22 @@
     }
 
     updateHeaderOffsets();
+    // Logo swap on scroll is intentionally disabled for now.
+    // updateHeaderLogoVariant(y > STICKY_AT);
   }
+
+  /*
+  function updateHeaderLogoVariant(useScrolledLogo) {
+    $$('.site-logo-img[data-logo-default][data-logo-scrolled]').forEach((img) => {
+      const nextSrc = useScrolledLogo ? img.dataset.logoScrolled : img.dataset.logoDefault;
+      if (!nextSrc) return;
+      img.classList.toggle('is-scrolled-logo', useScrolledLogo);
+      if (img.getAttribute('src') !== nextSrc) {
+        img.setAttribute('src', nextSrc);
+      }
+    });
+  }
+  */
 
   function initWishlist() {
     const panel = $('#wishlist-panel');
@@ -190,6 +205,19 @@
     });
   }
 
+  function initMiniCartFallback() {
+    const hasMiniCartButton = () =>
+      !!$('.header-icons .wp-block-woocommerce-mini-cart .wc-block-mini-cart__button');
+
+    const applyState = () => {
+      document.body.classList.toggle('no-mini-cart', !hasMiniCartButton());
+    };
+
+    // Initial pass + delayed pass to catch late-rendered mini-cart markup.
+    applyState();
+    window.setTimeout(applyState, 900);
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     updateHeaderOffsets();
     toggleScrollState();
@@ -202,5 +230,6 @@
     initMobileMenu();
     initMobileSubmenus();
     initActiveNavLinks();
+    initMiniCartFallback();
   });
 })();

@@ -4,13 +4,16 @@
     <!-- LEFT: Logo / Site title -->
     <!-- wp:html -->
         <a class="site-logo site-logo-link" href="/" aria-label="Noyona Essentials home">
-            <img class="site-logo-img site-logo-img--desktop"
-                src="/wp-content/themes/viteseo-noyona/assets/images/LOGO.png"
-                alt="Noyona Essentials" />
-        
-            <img class="site-logo-img site-logo-img--mobile"
-                src="/wp-content/themes/viteseo-noyona/assets/images/contact-logo.png"
-                alt="Noyona Essentials" />
+            <span class="site-logo-mark" aria-hidden="true">
+                <img class="site-logo-img site-logo-img--desktop"
+                    src="/wp-content/themes/viteseo-noyona/assets/images/noyona-logo.webp"
+                    alt="Noyona Essentials" />
+            
+                <img class="site-logo-img site-logo-img--mobile"
+                    src="/wp-content/themes/viteseo-noyona/assets/images/noyona-mobile-logo.webp"
+                    alt="Noyona Essentials" />
+            </span>
+            <!-- <span class="site-logo-text">Noyona Essentials</span> -->
         </a>
     <!-- /wp:html -->
   
@@ -91,6 +94,13 @@
 
         <!-- WooCommerce mini cart with drawer -->
         <!-- wp:woocommerce/mini-cart {"hasDrawer":true,"className":"header-mini-cart"} /-->
+
+        <!-- Fallback cart icon (shown only when mini-cart button is missing) -->
+        <!-- wp:html -->
+        <a class="header-icon header-cart-fallback" href="/cart/" aria-label="View cart">
+            <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+        </a>
+        <!-- /wp:html -->
 
         <!-- Store Locator -->
         <!-- wp:html -->

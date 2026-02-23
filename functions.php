@@ -371,7 +371,7 @@ function woocom_ct_register_blocks() {
     register_block_type( get_stylesheet_directory() . '/blocks/find-us' );
 }
 
-// Force 404 when WP falls back to the homepage for unknown paths.
+// Force 404 only on true unknown routes (avoid clobbering valid page templates).
 add_action( 'template_redirect', 'noyona_force_404_for_unknown_routes', 1 );
 function noyona_force_404_for_unknown_routes() {
     if ( is_admin() || wp_doing_ajax() ) {
@@ -387,6 +387,22 @@ function noyona_force_404_for_unknown_routes() {
     }
 
     if ( is_404() ) {
+        return;
+    }
+
+    // Never interfere with valid resolved requests.
+    if (
+        is_singular() ||
+        is_page() ||
+        is_archive() ||
+        is_search() ||
+        is_tax() ||
+        is_category() ||
+        is_tag() ||
+        is_author() ||
+        is_date() ||
+        is_post_type_archive()
+    ) {
         return;
     }
 
