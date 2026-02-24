@@ -119,7 +119,7 @@ $allowed_heading = array(
                                     <?php if (!empty($brand_key) && isset($social_icon_map[$brand_key])): ?>
                                         <i class="<?php echo esc_attr($social_icon_map[$brand_key]); ?>"></i>
                                     <?php elseif ($is_image): ?>
-                                        <img class="contact-form__social-icon" src="<?php echo esc_url($icon); ?>" alt="<?php echo esc_attr($label); ?>" />
+                                        <img class="contact-form__social-icon" src="<?php echo esc_url($icon); ?>" alt="<?php echo esc_attr($label); ?>" loading="lazy" decoding="async" />
                                     <?php else: ?>
                                         <i class="<?php echo esc_attr($icon); ?>"></i>
                                     <?php endif; ?>
@@ -176,7 +176,7 @@ $allowed_heading = array(
 
                 <?php if (!empty($atts['brandImage'])): ?>
                     <div class="contact-form__brand">
-                        <img src="<?php echo esc_url($atts['brandImage']); ?>" alt="Noyona essentials" />
+                        <img src="<?php echo esc_url($atts['brandImage']); ?>" alt="Noyona essentials" loading="lazy" decoding="async" />
                     </div>
                 <?php endif; ?>
             </div>

@@ -80,7 +80,7 @@ $print_card = function (array $card) {
 			<div class="product-card__media">
 				<a href="<?php echo esc_url($url); ?>">
 					<?php if ($image): ?>
-						<img src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr($title); ?>" />
+						<img src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr($title); ?>" loading="lazy" decoding="async" />
 					<?php else: ?>
 						<div class="product-card__thumb-placeholder"
 							style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;">

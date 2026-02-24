@@ -50,7 +50,7 @@ $unique_id = 'ph-' . uniqid();
                             <?php endif; ?>
                             
                             <?php if ( ! empty( $item['image'] ) ) : ?>
-                                <img src="<?php echo esc_url( $item['image'] ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>" class="ph-card__image" />
+                                <img src="<?php echo esc_url( $item['image'] ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>" class="ph-card__image" loading="lazy" decoding="async" />
                             <?php endif; ?>
                         </div>
 

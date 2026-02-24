@@ -85,7 +85,7 @@ $unique_id = 'ps-' . uniqid();
 
                                 <?php if (!empty($item['image'])): ?>
                                     <img src="<?php echo esc_url($item['image']); ?>" alt="<?php echo esc_attr($title); ?>"
-                                        class="ps-card__image" />
+                                        class="ps-card__image" loading="lazy" decoding="async" />
                                 <?php endif; ?>
                             </div>
 

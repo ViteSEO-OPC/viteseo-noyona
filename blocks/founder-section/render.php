@@ -50,13 +50,13 @@ $button_url = isset($attributes['buttonUrl']) ? (string) $attributes['buttonUrl'
 	<div class="noyona-founder-section__image-column">
 		<?php if ($main_url): ?>
 			<figure class="noyona-founder-section__image-main">
-				<img src="<?php echo esc_url($main_url); ?>" alt="" loading="lazy" />
+				<img src="<?php echo esc_url($main_url); ?>" alt="" loading="lazy" decoding="async" />
 			</figure>
 		<?php endif; ?>
 
 		<?php if ($icon_url): ?>
 			<div class="noyona-founder-section__image-icon">
-				<img src="<?php echo esc_url($icon_url); ?>" alt="" loading="lazy" />
+				<img src="<?php echo esc_url($icon_url); ?>" alt="" loading="lazy" decoding="async" />
 			</div>
 		<?php endif; ?>
 	</div>

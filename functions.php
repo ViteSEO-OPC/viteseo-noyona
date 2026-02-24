@@ -56,24 +56,23 @@ function woocom_ct_enqueue_assets() {
         wp_get_theme()->get( 'Version' )
     );
 
-    // Font Awesome (for icons, hearts, cart, etc.)
-    wp_enqueue_style(
+    // Register Font Awesome for conditional loading.
+    wp_register_style(
         'font-awesome-6',
         'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css',
         array(),
         '6.5.2'
     );
 
-    // Leaflet CSS
-    wp_enqueue_style(
+    // Register Leaflet assets and load only where needed.
+    wp_register_style(
         'leaflet-css',
         'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
         array(),
         '1.9.4'
     );
 
-    // Leaflet JS
-    wp_enqueue_script(
+    wp_register_script(
         'leaflet-js',
         'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
         array(),
@@ -109,6 +108,33 @@ function woocom_ct_enqueue_assets() {
         wp_get_theme()->get( 'Version' ),
         true
     );
+
+    // Most templates render icon-based header/footer controls.
+    // Keep Font Awesome off only for dedicated icon-free templates.
+    $template_slug = '';
+    global $_wp_current_template_id;
+    if ( is_string( $_wp_current_template_id ) && false !== strpos( $_wp_current_template_id, '//' ) ) {
+        $template_parts = explode( '//', $_wp_current_template_id );
+        $template_slug  = (string) end( $template_parts );
+    }
+    if ( 'test' !== $template_slug ) {
+        wp_enqueue_style( 'font-awesome-6' );
+    }
+}
+
+add_filter( 'wp_preload_resources', 'noyona_preload_home_hero_image' );
+function noyona_preload_home_hero_image( $preload_resources ) {
+    if ( ! is_front_page() ) {
+        return $preload_resources;
+    }
+
+    $preload_resources[] = array(
+        'href'          => get_stylesheet_directory_uri() . '/assets/images/hero-banner.webp',
+        'as'            => 'image',
+        'fetchpriority' => 'high',
+    );
+
+    return $preload_resources;
 }
 
 

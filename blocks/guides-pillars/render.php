@@ -104,7 +104,7 @@ $allowed_title_html = array(
 					<div class="guides-pillars__item">
 						<div class="guides-pillars__icon">
 							<?php if ( '' !== $icon_url ) : ?>
-								<img src="<?php echo esc_url( $icon_url ); ?>" alt="<?php echo esc_attr( $it_t ); ?>" loading="lazy" />
+								<img src="<?php echo esc_url( $icon_url ); ?>" alt="<?php echo esc_attr( $it_t ); ?>" loading="lazy" decoding="async" />
 							<?php endif; ?>
 						</div>
 

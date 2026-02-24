@@ -24,7 +24,7 @@ $allowed_html = array(
         <div class="find-us__image-col">
             <div class="find-us__image-box">
                 <?php if (!empty($atts['image'])): ?>
-                    <img src="<?php echo esc_url($atts['image']); ?>" alt="<?php echo esc_attr($atts['storeName']); ?>">
+                    <img src="<?php echo esc_url($atts['image']); ?>" alt="<?php echo esc_attr($atts['storeName']); ?>" loading="lazy" decoding="async">
                 <?php endif; ?>
             </div>
         </div>
