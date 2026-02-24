@@ -45,6 +45,22 @@ $cards = is_array( $atts['cards'] ) ? $atts['cards'] : array();
                     $url         = isset( $card['url'] ) ? $card['url'] : '#';
                     $button      = isset( $card['buttonLabel'] ) ? $card['buttonLabel'] : 'Read More';
                     $image       = isset( $card['imageUrl'] ) ? $card['imageUrl'] : '';
+                    $image_id    = isset( $card['imageId'] ) ? absint( $card['imageId'] ) : 0;
+
+                    if ( $image_id ) {
+                        $resolved_image = wp_get_attachment_image_url( $image_id, 'large' );
+                        if ( $resolved_image ) {
+                            $image = (string) $resolved_image;
+                        }
+                    } elseif ( ! empty( $image ) ) {
+                        $resolved_id = attachment_url_to_postid( $image );
+                        if ( $resolved_id ) {
+                            $resolved_image = wp_get_attachment_image_url( (int) $resolved_id, 'large' );
+                            if ( $resolved_image ) {
+                                $image = (string) $resolved_image;
+                            }
+                        }
+                    }
 
                     if ( '' === $title ) {
                         continue;

@@ -67,6 +67,21 @@ $print_card = function (array $card) {
 	$rating = isset($card['rating']) ? (float) $card['rating'] : 0;
 	$ratingCount = isset($card['ratingCount']) ? (int) $card['ratingCount'] : 0;
 	$image = $card['image'] ?? '';
+	$image_id = isset($card['imageId']) ? absint($card['imageId']) : 0;
+	if ($image_id) {
+		$resolved_image = wp_get_attachment_image_url($image_id, 'large');
+		if ($resolved_image) {
+			$image = (string) $resolved_image;
+		}
+	} elseif (!empty($image)) {
+		$resolved_id = attachment_url_to_postid($image);
+		if ($resolved_id) {
+			$resolved_image = wp_get_attachment_image_url((int) $resolved_id, 'large');
+			if ($resolved_image) {
+				$image = (string) $resolved_image;
+			}
+		}
+	}
 	$url = $card['url'] ?? '#';
 
 	// Generate stars

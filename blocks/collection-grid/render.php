@@ -46,6 +46,21 @@ if (empty($items)) {
         <?php foreach ($items as $item): ?>
             <?php
             $image = isset($item['image']) ? $item['image'] : '';
+            $image_id = isset($item['imageId']) ? absint($item['imageId']) : 0;
+            if ($image_id) {
+                $resolved_image = wp_get_attachment_image_url($image_id, 'large');
+                if ($resolved_image) {
+                    $image = (string) $resolved_image;
+                }
+            } elseif (!empty($image)) {
+                $resolved_id = attachment_url_to_postid($image);
+                if ($resolved_id) {
+                    $resolved_image = wp_get_attachment_image_url((int) $resolved_id, 'large');
+                    if ($resolved_image) {
+                        $image = (string) $resolved_image;
+                    }
+                }
+            }
             $title = isset($item['title']) ? $item['title'] : '';
             $count = isset($item['count']) ? $item['count'] : '0 Products';
             ?>

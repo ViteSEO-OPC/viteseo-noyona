@@ -14,7 +14,11 @@
   "attributes": {
     "image": {
       "type": "string",
-      "default": "/wp-content/themes/viteseo-noyona/assets/images/brand_with_a_purpose.webp"
+      "default": "https://noyonacosmetics.com/wp-content/uploads/2026/02/brand_with_a_purpose.webp"
+    },
+    "imageId": {
+      "type": "number",
+      "default": 0
     },
     "heading": {
       "type": "string",

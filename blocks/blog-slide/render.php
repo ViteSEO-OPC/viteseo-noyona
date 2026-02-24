@@ -38,6 +38,7 @@ if ( $posts_query->have_posts() ) {
         $cards[] = array(
             'tag'          => $tag,
             'title'        => get_the_title(),
+            'imageId'      => (int) get_post_thumbnail_id( $post_id ),
             'image'        => get_the_post_thumbnail_url( $post_id, 'large' ),
             'dateDay'      => get_the_date( 'j', $post_id ),
             'dateLabel'    => get_the_date( 'M Y', $post_id ),
@@ -80,6 +81,21 @@ if ( empty( $cards ) ) {
                     $tag = isset( $item['tag'] ) ? $item['tag'] : '';
                     $title = isset( $item['title'] ) ? $item['title'] : '';
                     $image = isset( $item['image'] ) ? $item['image'] : '';
+                    $image_id = isset( $item['imageId'] ) ? absint( $item['imageId'] ) : 0;
+                    if ( $image_id ) {
+                        $resolved_image = wp_get_attachment_image_url( $image_id, 'large' );
+                        if ( $resolved_image ) {
+                            $image = (string) $resolved_image;
+                        }
+                    } elseif ( ! empty( $image ) ) {
+                        $resolved_id = attachment_url_to_postid( $image );
+                        if ( $resolved_id ) {
+                            $resolved_image = wp_get_attachment_image_url( (int) $resolved_id, 'large' );
+                            if ( $resolved_image ) {
+                                $image = (string) $resolved_image;
+                            }
+                        }
+                    }
                     $date_day = isset( $item['dateDay'] ) ? $item['dateDay'] : '';
                     $date_label = isset( $item['dateLabel'] ) ? $item['dateLabel'] : '';
                     $author = isset( $item['author'] ) ? $item['author'] : '';

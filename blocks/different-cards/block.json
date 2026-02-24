@@ -24,18 +24,21 @@
       "type": "array",
       "default": [
         {
+          "imageId": 0,
           "image": "",
           "title": "Made for You",
           "text": "Shades and formulas designed to complement diverse skin tones.",
           "bg": "#f7d7ea"
         },
         {
+          "imageId": 0,
           "image": "",
           "title": "Clean Beauty",
           "text": "No harsh chemicals, just pure, skin-loving goodness.",
           "bg": "#d9ecfb"
         },
         {
+          "imageId": 0,
           "image": "",
           "title": "Affordable Luxury",
           "text": "Premium quality without the premium price tag.",

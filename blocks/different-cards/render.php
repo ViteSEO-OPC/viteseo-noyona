@@ -14,19 +14,19 @@ $defaults = array(
 	'subtitle' => 'High-end beauty shouldn’t be exclusive. We bridge the gap between pro-performance and everyday value with ethical, inclusive products.',
 	'cards'    => array(
 		array(
-			'image' => '/wp-content/themes/viteseo-noyona/assets/images/made-for-you.webp',
+			'image' => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/made-for-you.webp',
 			'title' => 'Made for You',
 			'text'  => 'Shades and formulas designed to complement diverse skin tones.',
 			'bg'    => '#f7d7ea',
 		),
 		array(
-			'image' => '/wp-content/themes/viteseo-noyona/assets/images/clean-beauty.webp',
+			'image' => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/clean-beauty.webp',
 			'title' => 'Clean Beauty',
 			'text'  => 'No harsh chemicals, just pure, skin-loving goodness.',
 			'bg'    => '#d9ecfb',
 		),
 		array(
-			'image' => '/wp-content/themes/viteseo-noyona/assets/images/affordable-luxury.webp',
+			'image' => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/affordable-luxury.webp',
 			'title' => 'Affordable Luxury',
 			'text'  => 'Premium quality without the premium price tag.',
 			'bg'    => '#f6f2c5',
@@ -83,7 +83,22 @@ $fallback_images = array(
 					<?php
 					$card = is_array( $card ) ? $card : array();
 
+					$image_id = isset( $card['imageId'] ) ? absint( $card['imageId'] ) : 0;
 					$img = isset( $card['image'] ) ? (string) $card['image'] : '';
+					if ( $image_id ) {
+						$resolved_image = wp_get_attachment_image_url( $image_id, 'large' );
+						if ( $resolved_image ) {
+							$img = (string) $resolved_image;
+						}
+					} elseif ( '' !== trim( $img ) ) {
+						$resolved_id = attachment_url_to_postid( $img );
+						if ( $resolved_id ) {
+							$resolved_image = wp_get_attachment_image_url( (int) $resolved_id, 'large' );
+							if ( $resolved_image ) {
+								$img = (string) $resolved_image;
+							}
+						}
+					}
 					if ( '' === trim( $img ) && isset( $fallback_images[ $idx ] ) ) {
 						$img = (string) $fallback_images[ $idx ];
 					}

@@ -35,6 +35,7 @@
           "description": "Shop Noyona Essentials-fair rules, personal use only, and policies designed to protect your shopping experience.",
           "url": "/terms-of-service/",
           "buttonLabel": "Read Full Terms",
+          "imageId": 0,
           "imageUrl": ""
         },
         {
@@ -42,6 +43,7 @@
           "description": "Reliable delivery with clear updates; shipping risks transfer at carrier pickup, but we are here to support you.",
           "url": "/shipping-policy/",
           "buttonLabel": "Read Full Policy",
+          "imageId": 0,
           "imageUrl": ""
         },
         {
@@ -49,6 +51,7 @@
           "description": "Your satisfaction matters-refunds and exchanges follow strict guidelines to keep shopping safe and worry-free.",
           "url": "/refund-policy/",
           "buttonLabel": "Read Full Policy",
+          "imageId": 0,
           "imageUrl": ""
         }
       ],

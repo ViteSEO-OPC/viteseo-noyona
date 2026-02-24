@@ -4,7 +4,7 @@
  */
 
 $defaults = array(
-    'image' => '/wp-content/themes/viteseo-noyona/assets/images/brand_with_a_purpose.webp',
+    'image' => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/brand_with_a_purpose.webp',
     'heading' => 'Where to <span class="find-us__accent">Find Us</span>',
     'description' => 'Visit our stores to experience Noyona products in person. Our beauty advisors are ready to help you find your perfect match.',
     'storeName' => 'Noyona Essentials',
@@ -12,6 +12,22 @@ $defaults = array(
 );
 
 $atts = wp_parse_args($attributes, $defaults);
+$image = !empty($atts['image']) ? (string) $atts['image'] : '';
+$image_id = isset($atts['imageId']) ? absint($atts['imageId']) : 0;
+if ($image_id) {
+    $resolved_image = wp_get_attachment_image_url($image_id, 'large');
+    if ($resolved_image) {
+        $image = (string) $resolved_image;
+    }
+} elseif (!empty($image)) {
+    $resolved_id = attachment_url_to_postid($image);
+    if ($resolved_id) {
+        $resolved_image = wp_get_attachment_image_url((int) $resolved_id, 'large');
+        if ($resolved_image) {
+            $image = (string) $resolved_image;
+        }
+    }
+}
 
 $allowed_html = array(
     'span' => array(
@@ -23,8 +39,8 @@ $allowed_html = array(
     <div class="find-us__container">
         <div class="find-us__image-col">
             <div class="find-us__image-box">
-                <?php if (!empty($atts['image'])): ?>
-                    <img src="<?php echo esc_url($atts['image']); ?>" alt="<?php echo esc_attr($atts['storeName']); ?>" loading="lazy" decoding="async">
+                <?php if (!empty($image)): ?>
+                    <img src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr($atts['storeName']); ?>" loading="lazy" decoding="async">
                 <?php endif; ?>
             </div>
         </div>

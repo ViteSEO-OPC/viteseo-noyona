@@ -7,7 +7,8 @@ $defaults = array(
     'heading' => '<span class="contact-form__accent">Connect</span> with our <span class="contact-form__accent">Community</span>',
     'subheading' => 'Stay updated on product drops, ingredient deep dives, application tips, and behind-the-scenes content from our team.',
     'leftTitle' => "Let's Connect",
-    'brandImage' => '/wp-content/themes/viteseo-noyona/assets/images/contact-logo.png',
+    'brandImage' => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/contact-logo.png',
+    'brandImageId' => 0,
     'socials' => array(),
     'contactLabel' => 'Our Contact',
     'phone' => '0920 510 5555 ',
@@ -27,6 +28,22 @@ $socials = is_array($atts['socials']) ? $atts['socials'] : array();
 $heading = $atts['heading'];
 $subheading = $atts['subheading'];
 $form_action = $atts['formAction'];
+$brand_image = !empty($atts['brandImage']) ? (string) $atts['brandImage'] : '';
+$brand_image_id = isset($atts['brandImageId']) ? absint($atts['brandImageId']) : 0;
+if ($brand_image_id) {
+    $resolved_brand_image = wp_get_attachment_image_url($brand_image_id, 'large');
+    if ($resolved_brand_image) {
+        $brand_image = (string) $resolved_brand_image;
+    }
+} elseif (!empty($brand_image)) {
+    $resolved_brand_id = attachment_url_to_postid($brand_image);
+    if ($resolved_brand_id) {
+        $resolved_brand_image = wp_get_attachment_image_url((int) $resolved_brand_id, 'large');
+        if ($resolved_brand_image) {
+            $brand_image = (string) $resolved_brand_image;
+        }
+    }
+}
 $theme_uri = get_stylesheet_directory_uri();
 $social_asset_map = array(
     'facebook'  => $theme_uri . '/blocks/contact-form/assets/fb.png',
@@ -174,9 +191,9 @@ $allowed_heading = array(
                     </div>
                 </div>
 
-                <?php if (!empty($atts['brandImage'])): ?>
+                <?php if (!empty($brand_image)): ?>
                     <div class="contact-form__brand">
-                        <img src="<?php echo esc_url($atts['brandImage']); ?>" alt="Noyona essentials" loading="lazy" decoding="async" />
+                        <img src="<?php echo esc_url($brand_image); ?>" alt="Noyona essentials" loading="lazy" decoding="async" />
                     </div>
                 <?php endif; ?>
             </div>

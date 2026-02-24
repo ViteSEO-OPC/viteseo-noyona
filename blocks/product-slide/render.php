@@ -67,6 +67,22 @@ $unique_id = 'ps-' . uniqid();
                 <?php foreach ($items as $item): ?>
                     <?php
                     $title = isset($item['title']) ? $item['title'] : '';
+                    $image = isset($item['image']) ? (string) $item['image'] : '';
+                    $image_id = isset($item['imageId']) ? absint($item['imageId']) : 0;
+                    if ($image_id) {
+                        $resolved_image = wp_get_attachment_image_url($image_id, 'large');
+                        if ($resolved_image) {
+                            $image = (string) $resolved_image;
+                        }
+                    } elseif (!empty($image)) {
+                        $resolved_id = attachment_url_to_postid($image);
+                        if ($resolved_id) {
+                            $resolved_image = wp_get_attachment_image_url((int) $resolved_id, 'large');
+                            if ($resolved_image) {
+                                $image = (string) $resolved_image;
+                            }
+                        }
+                    }
                     $primary_text = !empty($item['primaryText']) ? $item['primaryText'] : 'Buy Now';
                     $primary_url = !empty($item['primaryUrl']) ? $item['primaryUrl'] : '#';
                     $primary_bg = !empty($item['primaryBg']) ? $item['primaryBg'] : '#E30B5D';
@@ -83,8 +99,8 @@ $unique_id = 'ps-' . uniqid();
                                     <span class="ps-card__badge"><?php echo esc_html($item['badge']); ?></span>
                                 <?php endif; ?>
 
-                                <?php if (!empty($item['image'])): ?>
-                                    <img src="<?php echo esc_url($item['image']); ?>" alt="<?php echo esc_attr($title); ?>"
+                                <?php if (!empty($image)): ?>
+                                    <img src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr($title); ?>"
                                         class="ps-card__image" loading="lazy" decoding="async" />
                                 <?php endif; ?>
                             </div>

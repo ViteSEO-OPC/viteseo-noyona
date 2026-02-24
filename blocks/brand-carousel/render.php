@@ -129,6 +129,21 @@ $style_attr = $style_rules
             // For brand mode
             $brandName = isset( $item['brand'] ) ? $item['brand'] : '';
             $logo      = isset( $item['logo'] )  ? $item['logo']  : '';
+            $logo_id   = isset( $item['logoId'] ) ? absint( $item['logoId'] ) : 0;
+            if ( $logo_id ) {
+                $resolved_logo = wp_get_attachment_image_url( $logo_id, 'medium' );
+                if ( $resolved_logo ) {
+                    $logo = (string) $resolved_logo;
+                }
+            } elseif ( ! empty( $logo ) ) {
+                $resolved_logo_id = attachment_url_to_postid( $logo );
+                if ( $resolved_logo_id ) {
+                    $resolved_logo = wp_get_attachment_image_url( (int) $resolved_logo_id, 'medium' );
+                    if ( $resolved_logo ) {
+                        $logo = (string) $resolved_logo;
+                    }
+                }
+            }
             ?>
 
             <?php if ( 'brands' === $mode ) : ?>

@@ -43,14 +43,32 @@ $unique_id = 'ph-' . uniqid();
         <div class="product-highlight__track-container">
             <div class="product-highlight__track" style="--cards-visible: <?php echo $cards_to_show; ?>;">
                 <?php foreach ( $items as $item ) : ?>
+                    <?php
+                    $image = ! empty( $item['image'] ) ? (string) $item['image'] : '';
+                    $image_id = isset( $item['imageId'] ) ? absint( $item['imageId'] ) : 0;
+                    if ( $image_id ) {
+                        $resolved_image = wp_get_attachment_image_url( $image_id, 'large' );
+                        if ( $resolved_image ) {
+                            $image = (string) $resolved_image;
+                        }
+                    } elseif ( ! empty( $image ) ) {
+                        $resolved_id = attachment_url_to_postid( $image );
+                        if ( $resolved_id ) {
+                            $resolved_image = wp_get_attachment_image_url( (int) $resolved_id, 'large' );
+                            if ( $resolved_image ) {
+                                $image = (string) $resolved_image;
+                            }
+                        }
+                    }
+                    ?>
                     <div class="product-highlight__card">
                         <div class="ph-card__media">
                             <?php if ( ! empty( $item['badge'] ) ) : ?>
                                 <span class="ph-card__badge"><?php echo esc_html( $item['badge'] ); ?></span>
                             <?php endif; ?>
                             
-                            <?php if ( ! empty( $item['image'] ) ) : ?>
-                                <img src="<?php echo esc_url( $item['image'] ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>" class="ph-card__image" loading="lazy" decoding="async" />
+                            <?php if ( ! empty( $image ) ) : ?>
+                                <img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>" class="ph-card__image" loading="lazy" decoding="async" />
                             <?php endif; ?>
                         </div>
 
