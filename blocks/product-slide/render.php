@@ -143,7 +143,8 @@ $unique_id = 'ps-' . uniqid();
                                     </a>
                                     <?php if ($cart_enabled): ?>
                                         <a href="/coming-soon" class="ps-btn-cart"
-                                            style="background-color: <?php echo esc_attr($cart_bg); ?>;">
+                                            style="background-color: <?php echo esc_attr($cart_bg); ?>;"
+                                            aria-label="<?php echo esc_attr( 'Add ' . ( $title ? $title : 'product' ) . ' to cart' ); ?>">
                                             <i class="fa-solid fa-cart-shopping"></i>
                                         </a>
                                     <?php endif; ?>

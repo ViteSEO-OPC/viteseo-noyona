@@ -103,7 +103,7 @@
 .noyona-footer__btn {
   padding: 12px 24px;
   /* background: var(--footer-btn-bg); */
-  background: gray;
+  background: #333333;
   color: #fff;
   border: none;
   border-radius: 16px;

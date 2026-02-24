@@ -87,7 +87,7 @@
 
         <!-- Wishlist toggle -->
         <!-- wp:html -->
-        <button class="header-icon header-wishlist-toggle" type="button">
+        <button class="header-icon header-wishlist-toggle" type="button" aria-label="Open wishlist">
             <i class="fa-regular fa-heart"></i>
         </button>
         <!-- /wp:html -->
@@ -104,7 +104,7 @@
 
         <!-- Store Locator -->
         <!-- wp:html -->
-        <a class="header-icon header-store-link" href="/store-location/">
+        <a class="header-icon header-store-link" href="/store-location/" aria-label="View store locations">
             <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
         </a>
         <!-- /wp:html -->
@@ -112,7 +112,7 @@
         <!-- Account dropdown (logged-in only) -->
         <!-- wp:html -->
         <div class="header-account header-account--logged-in">
-            <button class="header-icon header-account-toggle" type="button" aria-haspopup="menu" aria-expanded="false"
+            <button class="header-icon header-account-toggle" type="button" aria-label="Open account menu" aria-haspopup="menu" aria-expanded="false"
                 aria-controls="header-account-menu">
                 <i class="fa-regular fa-user"></i>
             </button>
@@ -142,7 +142,7 @@
 <div class="wishlist-panel" id="wishlist-panel">
     <div class="wishlist-panel__overlay"></div>
     <aside class="wishlist-panel__content">
-        <button class="wishlist-panel__close" type="button">&times;</button>
+        <button class="wishlist-panel__close" type="button" aria-label="Close wishlist">&times;</button>
         <h2>Your wishlist</h2>
         <p>this is your all whishlist</p>
     </aside>

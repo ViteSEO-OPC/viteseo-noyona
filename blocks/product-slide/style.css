@@ -208,7 +208,7 @@
 
 .ps-compare-price {
   text-decoration: line-through;
-  color: #b1b1b1;
+  color: #6a6a6a;
   text-align: center;
   font-family: var(--wp--preset--font-family--proxima-nova);
   font-size: clamp(16px, 1.8vw, 24px);
@@ -342,14 +342,19 @@
 }
 
 .ps-dot {
-  width: 10px;
-  height: 10px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 0;
   background: transparent;
   background-image: url("./image/original.png");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: contain;
+  background-size: 10px 10px;
   border: none;
   padding: 0;
   cursor: pointer;
@@ -365,8 +370,9 @@
 }
 
 .ps-dot.active {
-  transform: scale(2);
+  transform: scale(1.1);
   background-image: url("./image/active.png");
+  background-size: 14px 14px;
 }
 
 .product-slide-placeholder {
