@@ -152,7 +152,8 @@ $wrapper = get_block_wrapper_attributes([
           <div class="phone-card__shell">
             <div class="phone-card__screen">
             <iframe
-              src="<?= esc_url($embed_src_muted); ?>"
+              src="about:blank"
+              data-src="<?= esc_url($embed_src_muted); ?>"
               data-embed-muted="<?= esc_attr($embed_src_muted); ?>"
               data-embed-sound="<?= esc_attr($embed_src_sound); ?>"
               title="<?= esc_attr($label ?: 'Video review'); ?>"

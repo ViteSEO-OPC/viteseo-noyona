@@ -149,6 +149,34 @@ function noyona_add_preconnect_hints( $hints, $relation_type ) {
     return array_values( array_unique( $hints ) );
 }
 
+add_action( 'wp_enqueue_scripts', 'noyona_trim_noncommerce_assets', 100 );
+function noyona_trim_noncommerce_assets() {
+    if ( is_admin() ) {
+        return;
+    }
+
+    if ( is_cart() || is_checkout() || is_account_page() || is_woocommerce() ) {
+        return;
+    }
+
+    wp_dequeue_style( 'woocommerce-layout' );
+    wp_dequeue_style( 'woocommerce-smallscreen' );
+    wp_dequeue_style( 'woocommerce-general' );
+    wp_dequeue_style( 'woocommerce-blocktheme' );
+    wp_dequeue_style( 'wc-blocks-style' );
+    wp_dequeue_style( 'wc-blocks-vendors-style' );
+    wp_dequeue_style( 'wc-blocks-packages-style' );
+
+    wp_dequeue_script( 'woocommerce' );
+    wp_dequeue_script( 'wc-cart-fragments' );
+    wp_dequeue_script( 'wc-add-to-cart' );
+    wp_dequeue_script( 'jquery-blockui' );
+    wp_dequeue_script( 'jquery-cookie' );
+    wp_dequeue_script( 'js-cookie' );
+    wp_dequeue_script( 'wc-order-attribution' );
+    wp_dequeue_script( 'sourcebuster-js' );
+}
+
 
 
 // Make sure theme declares WooCommerce support

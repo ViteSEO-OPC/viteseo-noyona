@@ -83,6 +83,7 @@ $unique_id = 'ps-' . uniqid();
                             }
                         }
                     }
+                    $image_alt = $title ? $title : 'Product image';
                     $primary_text = !empty($item['primaryText']) ? $item['primaryText'] : 'Buy Now';
                     $primary_url = !empty($item['primaryUrl']) ? $item['primaryUrl'] : '#';
                     $primary_bg = !empty($item['primaryBg']) ? $item['primaryBg'] : '#E30B5D';
@@ -100,8 +101,31 @@ $unique_id = 'ps-' . uniqid();
                                 <?php endif; ?>
 
                                 <?php if (!empty($image)): ?>
-                                    <img src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr($title); ?>"
-                                        class="ps-card__image" loading="lazy" decoding="async" />
+                                    <?php if ($image_id): ?>
+                                        <?php
+                                        echo wp_get_attachment_image(
+                                            $image_id,
+                                            'large',
+                                            false,
+                                            array(
+                                                'class' => 'ps-card__image',
+                                                'alt' => $image_alt,
+                                                'loading' => 'lazy',
+                                                'decoding' => 'async',
+                                                'sizes' => '(max-width: 780px) 90vw, (max-width: 1280px) 50vw, 406px',
+                                            )
+                                        );
+                                        ?>
+                                    <?php else: ?>
+                                        <img
+                                            src="<?php echo esc_url($image); ?>"
+                                            alt="<?php echo esc_attr($image_alt); ?>"
+                                            class="ps-card__image"
+                                            loading="lazy"
+                                            decoding="async"
+                                            sizes="(max-width: 780px) 90vw, (max-width: 1280px) 50vw, 406px"
+                                        />
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
 

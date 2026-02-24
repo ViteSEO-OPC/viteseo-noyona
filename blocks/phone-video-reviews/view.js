@@ -157,6 +157,28 @@
 
       if (!iframe) return;
 
+      const mutedSrc = iframe.dataset.embedMuted || iframe.dataset.src || '';
+      function hydrateIframe() {
+        if (!mutedSrc) return;
+        if (iframe.dataset.hydrated === '1') return;
+        iframe.src = mutedSrc;
+        iframe.dataset.hydrated = '1';
+      }
+
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              hydrateIframe();
+              io.disconnect();
+            }
+          });
+        }, { rootMargin: '300px 0px' });
+        io.observe(card);
+      } else {
+        hydrateIframe();
+      }
+
       // Initial state
       card.dataset.videoState = 'playing';
       if (toggleBtn && icon) {
@@ -165,6 +187,7 @@
       }
 
       card.addEventListener('click', function (e) {
+        hydrateIframe();
         // Prevent "click-through" re-open after closing the overlay on touch devices.
         if (suppressCardOpenUntil && Date.now() < suppressCardOpenUntil) {
           e.preventDefault();
