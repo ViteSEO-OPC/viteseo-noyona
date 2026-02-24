@@ -128,7 +128,7 @@ function noyona_preload_home_hero_image( $preload_resources ) {
     }
 
     $preload_resources[] = array(
-        'href'          => get_stylesheet_directory_uri() . '/assets/images/hero-banner.webp',
+        'href'          => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/hero-banner.webp',
         'as'            => 'image',
         'fetchpriority' => 'high',
     );

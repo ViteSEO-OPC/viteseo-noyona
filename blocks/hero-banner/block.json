@@ -22,10 +22,12 @@
     "buttonText": { "type": "string", "default": "" },
     "buttonUrl": { "type": "string", "default": "" },
 
+    "backgroundImageId": { "type": "number", "default": 0 },
     "backgroundImage": { "type": "string", "default": "" },
     "backgroundSize": { "type": "string", "default": "" },
     "backgroundPosition": { "type": "string", "default": "" },
 
+    "backgroundImageMobileId": { "type": "number", "default": 0 },
     "backgroundImageMobile": { "type": "string", "default": "" },
     "backgroundSizeMobile": { "type": "string", "default": "" },
     "backgroundPositionMobile": { "type": "string", "default": "" },

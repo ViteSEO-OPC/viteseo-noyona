@@ -25,12 +25,20 @@
     overflow: hidden;
 }
 
-/* Invisible, but discoverable LCP image for faster mobile paint. */
-.hero-banner__lcp-probe {
+/* Rendered media background for responsive srcset/sizes. */
+.hero-banner__bg-media {
     position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0.001;
+    inset: 0;
+    z-index: 0;
+}
+
+.hero-banner__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: var(--hero-banner-bg-size, cover);
+    object-position: var(--hero-banner-bg-position, right center);
     pointer-events: none;
 }
 
@@ -180,6 +188,11 @@
 
         padding-inline: clamp(16px, 4vw, 28px);
         padding-block: clamp(2.5rem, 7vh, 4.5rem);
+    }
+
+    .hero-banner__bg {
+        object-fit: var(--hero-banner-bg-size-mobile, cover);
+        object-position: var(--hero-banner-bg-position-mobile, right center);
     }
 
     .hero-banner__inner {

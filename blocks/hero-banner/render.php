@@ -15,12 +15,14 @@ $defaults = array(
     'buttonText'      => 'Discover Your Glow',
     'buttonUrl'       => '/shop/',
 
+    'backgroundImageId' => 0,
     'backgroundImage' => '',
     'backgroundSize'  => 'cover',
     // ✅ default focal point to the right so the subject on the right won’t get chopped
     'backgroundPosition' => 'right center',
 
     // ✅ mobile-specific (optional)
+    'backgroundImageMobileId' => 0,
     'backgroundImageMobile' => '',
     // Default mobile behavior: fill the hero (no pink bars). Override per-block if you need "contain".
     'backgroundSizeMobile' => 'cover',
@@ -32,13 +34,39 @@ $defaults = array(
 
 $atts = wp_parse_args( $attributes, $defaults );
 
-$bg_image = ! empty( $atts['backgroundImage'] )
-    ? $atts['backgroundImage']
-    : get_stylesheet_directory_uri() . '/assets/images/makeup.jpg';
+$bg_image_id = absint( $atts['backgroundImageId'] );
+$bg_image_mobile_id = absint( $atts['backgroundImageMobileId'] );
 
-$bg_image_mobile = ! empty( $atts['backgroundImageMobile'] )
-    ? $atts['backgroundImageMobile']
-    : $bg_image;
+if ( ! $bg_image_id && ! empty( $atts['backgroundImage'] ) ) {
+    $resolved_id = attachment_url_to_postid( $atts['backgroundImage'] );
+    if ( $resolved_id ) {
+        $bg_image_id = (int) $resolved_id;
+    }
+}
+
+if ( ! $bg_image_mobile_id && ! empty( $atts['backgroundImageMobile'] ) ) {
+    $resolved_mobile_id = attachment_url_to_postid( $atts['backgroundImageMobile'] );
+    if ( $resolved_mobile_id ) {
+        $bg_image_mobile_id = (int) $resolved_mobile_id;
+    }
+}
+
+$fallback_image = get_stylesheet_directory_uri() . '/assets/images/makeup.jpg';
+$bg_image = $bg_image_id
+    ? wp_get_attachment_image_url( $bg_image_id, 'full' )
+    : ( ! empty( $atts['backgroundImage'] ) ? $atts['backgroundImage'] : $fallback_image );
+
+$bg_image_mobile = $bg_image_mobile_id
+    ? wp_get_attachment_image_url( $bg_image_mobile_id, 'full' )
+    : ( ! empty( $atts['backgroundImageMobile'] ) ? $atts['backgroundImageMobile'] : $bg_image );
+
+if ( empty( $bg_image ) ) {
+    $bg_image = $fallback_image;
+}
+
+if ( empty( $bg_image_mobile ) ) {
+    $bg_image_mobile = $bg_image;
+}
 
 $bg_size = $atts['backgroundSize'] ?: 'cover';
 $bg_position = $atts['backgroundPosition'] ?: 'right center';
@@ -48,12 +76,14 @@ $bg_position_mobile = $atts['backgroundPositionMobile'] ?: 'right center';
 
 $bg_color = $atts['backgroundColor'] ?: '#f7d0d8';
 $is_front_page = is_front_page();
+$mobile_srcset = $bg_image_mobile_id ? wp_get_attachment_image_srcset( $bg_image_mobile_id, 'full' ) : '';
+$desktop_srcset = $bg_image_id ? wp_get_attachment_image_srcset( $bg_image_id, 'full' ) : '';
 ?>
 <section
     class="wp-block-noyona-hero-banner hero-banner alignfull"
     style="
-        --hero-banner-bg: url('<?php echo esc_url( $bg_image ); ?>');
-        --hero-banner-bg-mobile: url('<?php echo esc_url( $bg_image_mobile ); ?>');
+        --hero-banner-bg: none;
+        --hero-banner-bg-mobile: none;
 
         --hero-banner-bg-size: <?php echo esc_attr( $bg_size ); ?>;
         --hero-banner-bg-position: <?php echo esc_attr( $bg_position ); ?>;
@@ -64,17 +94,35 @@ $is_front_page = is_front_page();
         --hero-banner-bg-color: <?php echo esc_attr( $bg_color ); ?>;
     "
 >
-    <?php if ( $is_front_page ) : ?>
+    <picture class="hero-banner__bg-media" aria-hidden="true">
+        <?php if ( ! empty( $bg_image_mobile ) ) : ?>
+            <source
+                media="(max-width: 900px)"
+                <?php if ( ! empty( $mobile_srcset ) ) : ?>
+                    srcset="<?php echo esc_attr( $mobile_srcset ); ?>"
+                    sizes="100vw"
+                <?php else : ?>
+                    srcset="<?php echo esc_url( $bg_image_mobile ); ?>"
+                <?php endif; ?>
+            />
+        <?php endif; ?>
         <img
-            class="hero-banner__lcp-probe"
+            class="hero-banner__bg"
             src="<?php echo esc_url( $bg_image ); ?>"
             alt=""
             decoding="async"
-            fetchpriority="high"
-            loading="eager"
-            aria-hidden="true"
+            <?php if ( ! empty( $desktop_srcset ) ) : ?>
+                srcset="<?php echo esc_attr( $desktop_srcset ); ?>"
+                sizes="100vw"
+            <?php endif; ?>
+            <?php if ( $is_front_page ) : ?>
+                fetchpriority="high"
+                loading="eager"
+            <?php else : ?>
+                loading="lazy"
+            <?php endif; ?>
         />
-    <?php endif; ?>
+    </picture>
     <div class="hero-banner__inner">
         <div class="hero-banner__content">
             <?php if ( ! empty( $atts['eyebrow'] ) ) : ?>
