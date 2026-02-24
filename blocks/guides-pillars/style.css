@@ -2,7 +2,7 @@
   /* Full-width soft pink gradient like the provided design */
   background: linear-gradient(90deg, #f6c7cd 0%, #f6d6d2 45%, #f7e6d6 100%);
   color: var(--wp--preset--color--ink, #333333);
-  font-family: var(--wp--preset--font-family--proxima-nova, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-family: var(--wp--preset--font-family--proxima-nova, system-ui, -apple-system, "Segoe UI", sans-serif);
 
   padding-top: clamp(48px, 6vw, 88px);
   padding-bottom: clamp(48px, 6vw, 88px);

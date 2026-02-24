@@ -1,7 +1,7 @@
 .wp-block-noyona-different-cards.different-cards {
   background: #ffffff;
   color: var(--wp--preset--color--ink, #333333);
-  font-family: var(--wp--preset--font-family--proxima-nova, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-family: var(--wp--preset--font-family--proxima-nova, system-ui, -apple-system, "Segoe UI", sans-serif);
 
   padding-top: clamp(44px, 6vw, 84px);
   padding-bottom: clamp(44px, 6vw, 84px);

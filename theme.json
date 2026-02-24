@@ -10,7 +10,7 @@
     "typography": {
       "fontFamilies": [
         {
-          "fontFamily": "\"Proxima Nova\", \"Inter\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+          "fontFamily": "\"Proxima Nova\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
           "name": "Proxima Nova",
           "slug": "proxima-nova"
         },
@@ -18,16 +18,6 @@
           "fontFamily": "\"Noto Serif SemiCondensed\", \"Noto Serif\", \"Times New Roman\", serif",
           "name": "Noto Serif SemiCondensed",
           "slug": "noto-serif-semicondensed"
-        },
-        {
-          "fontFamily": "\"Inter\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
-          "name": "Inter",
-          "slug": "inter"
-        },
-        {
-          "fontFamily": "\"Playfair Display\", \"Times New Roman\", serif",
-          "name": "Playfair Display",
-          "slug": "playfair-display"
         }
       ],
       "fluid": true,

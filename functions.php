@@ -10,10 +10,10 @@ function woocom_ct_enqueue_assets() {
         wp_get_theme()->get( 'Version' )
     );
 
-    // Web fonts (free Google fonts)
+    // Web fonts (only families used by this theme)
     wp_enqueue_style(
         'noyona-fonts',
-        'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Noto+Serif+SemiCondensed:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap',
+        'https://fonts.googleapis.com/css2?family=Noto+Serif+SemiCondensed:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap',
         array(),
         null
     );
