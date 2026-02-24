@@ -32,7 +32,7 @@
     },
     "buttonText": {
       "type": "string",
-      "default": "Learn More"
+      "default": "Our Natural Story"
     },
     "buttonUrl": {
       "type": "string",
