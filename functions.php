@@ -48,8 +48,8 @@ function woocom_ct_enqueue_assets() {
         wp_get_theme()->get( 'Version' )
     );
 
-    // Product-gatherer CSS
-    wp_enqueue_style(
+    // Register Product-gatherer assets and load only where needed.
+    wp_register_style(
         'woocom-ct-product-gatherer',
         get_stylesheet_directory_uri() . '/assets/css/product-gatherer.css',
         array( 'woocom-ct-style', 'woocom-ct-header' ),
@@ -100,8 +100,7 @@ function woocom_ct_enqueue_assets() {
         )
     );
 
-    // Product-gatherer JS
-    wp_enqueue_script(
+    wp_register_script(
         'woocom-ct-product-gatherer',
         get_stylesheet_directory_uri() . '/assets/js/product-gatherer.js',
         array(),
@@ -137,6 +136,19 @@ function noyona_preload_home_hero_image( $preload_resources ) {
     return $preload_resources;
 }
 
+add_filter( 'wp_resource_hints', 'noyona_add_preconnect_hints', 10, 2 );
+function noyona_add_preconnect_hints( $hints, $relation_type ) {
+    if ( 'preconnect' !== $relation_type ) {
+        return $hints;
+    }
+
+    $hints[] = 'https://fonts.googleapis.com';
+    $hints[] = 'https://fonts.gstatic.com';
+    $hints[] = 'https://cdnjs.cloudflare.com';
+
+    return array_values( array_unique( $hints ) );
+}
+
 
 
 // Make sure theme declares WooCommerce support
@@ -155,6 +167,9 @@ function woocom_ct_product_gatherer_shortcode( $atts ) {
     if ( ! class_exists( 'WooCommerce' ) ) {
         return '<p>WooCommerce is not active.</p>';
     }
+
+    wp_enqueue_style( 'woocom-ct-product-gatherer' );
+    wp_enqueue_script( 'woocom-ct-product-gatherer' );
 
     // Read filters from query string
     $search = isset( $_GET['pg_search'] ) ? sanitize_text_field( wp_unslash( $_GET['pg_search'] ) ) : '';

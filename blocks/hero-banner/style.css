@@ -25,6 +25,15 @@
     overflow: hidden;
 }
 
+/* Invisible, but discoverable LCP image for faster mobile paint. */
+.hero-banner__lcp-probe {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0.001;
+    pointer-events: none;
+}
+
 /* overlay */
 .hero-banner::before {
     content: "";

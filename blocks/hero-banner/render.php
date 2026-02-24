@@ -47,6 +47,7 @@ $bg_size_mobile = $atts['backgroundSizeMobile'] ?: 'cover';
 $bg_position_mobile = $atts['backgroundPositionMobile'] ?: 'right center';
 
 $bg_color = $atts['backgroundColor'] ?: '#f7d0d8';
+$is_front_page = is_front_page();
 ?>
 <section
     class="wp-block-noyona-hero-banner hero-banner alignfull"
@@ -63,6 +64,17 @@ $bg_color = $atts['backgroundColor'] ?: '#f7d0d8';
         --hero-banner-bg-color: <?php echo esc_attr( $bg_color ); ?>;
     "
 >
+    <?php if ( $is_front_page ) : ?>
+        <img
+            class="hero-banner__lcp-probe"
+            src="<?php echo esc_url( $bg_image ); ?>"
+            alt=""
+            decoding="async"
+            fetchpriority="high"
+            loading="eager"
+            aria-hidden="true"
+        />
+    <?php endif; ?>
     <div class="hero-banner__inner">
         <div class="hero-banner__content">
             <?php if ( ! empty( $atts['eyebrow'] ) ) : ?>

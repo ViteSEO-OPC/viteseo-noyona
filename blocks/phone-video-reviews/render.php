@@ -91,7 +91,7 @@ $wrapper = get_block_wrapper_attributes([
           $base = 'https://www.youtube-nocookie.com/embed/' . rawurlencode($video_id);
           $params = [
             'enablejsapi' => '1',
-            'autoplay' => '1',
+            'autoplay' => '0',
             'mute' => '1',
             'playsinline' => '1',
             'controls' => '0',
@@ -104,6 +104,7 @@ $wrapper = get_block_wrapper_attributes([
             'playlist' => $video_id,
           ];
           $embed_src_muted = $base . '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+          $params['autoplay'] = '1';
           $params['mute'] = '0';
           $params['controls'] = '1';
           $embed_src_sound = $base . '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
@@ -118,7 +119,7 @@ $wrapper = get_block_wrapper_attributes([
           // Facebook specific overrides for autoplay/mute
           if ($is_facebook) {
             if (strpos($embed_src_muted, 'autoplay=') === false) {
-              $embed_src_muted .= (strpos($embed_src_muted, '?') === false ? '?' : '&') . 'autoplay=true';
+              $embed_src_muted .= (strpos($embed_src_muted, '?') === false ? '?' : '&') . 'autoplay=false';
             }
             if (strpos($embed_src_muted, 'muted=') === false && strpos($embed_src_muted, 'mute=') === false) {
               $embed_src_muted .= '&muted=true';
@@ -126,6 +127,8 @@ $wrapper = get_block_wrapper_attributes([
 
             // Unmuted for modal
             $embed_src_sound = str_replace(['muted=true', 'mute=true'], ['muted=false', 'mute=false'], $embed_src_muted);
+            $embed_src_sound = str_replace('autoplay=false', 'autoplay=true', $embed_src_sound);
+            $embed_src_sound = str_replace('autoplay=0', 'autoplay=1', $embed_src_sound);
             if (strpos($embed_src_sound, 'muted=') === false && strpos($embed_src_sound, 'mute=') === false) {
               $embed_src_sound .= '&muted=false';
             }
