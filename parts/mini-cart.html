@@ -2,6 +2,20 @@
 <div class="wp-block-woocommerce-mini-cart-contents">
 	<!-- wp:woocommerce/filled-mini-cart-contents-block -->
 	<div class="wp-block-woocommerce-filled-mini-cart-contents-block">
+		<!-- wp:html -->
+		<div class="noyona-mini-cart-topbar">
+			<button type="button" class="noyona-mini-cart-continue">
+				<span aria-hidden="true">←</span>
+				<span>Continue Shopping</span>
+			</button>
+		</div>
+		<div class="noyona-mini-cart-message">Item added to your cart</div>
+		<div class="noyona-mini-cart-shipping" data-free-shipping-threshold="500" data-default-shipping-fee="50">
+			Add more items for Free Shipping
+		</div>
+		<div class="noyona-mini-cart-progress"><span class="noyona-mini-cart-progress-bar"></span></div>
+		<!-- /wp:html -->
+
 		<!-- wp:woocommerce/mini-cart-title-block -->
 		<div class="wp-block-woocommerce-mini-cart-title-block">
 			<!-- wp:woocommerce/mini-cart-title-label-block -->
@@ -25,9 +39,27 @@
 		<!-- /wp:woocommerce/mini-cart-items-block -->
 		<!-- wp:woocommerce/mini-cart-footer-block -->
 		<div class="wp-block-woocommerce-mini-cart-footer-block">
-			<!-- wp:woocommerce/mini-cart-cart-button-block -->
-			<div class="wp-block-woocommerce-mini-cart-cart-button-block"></div>
-			<!-- /wp:woocommerce/mini-cart-cart-button-block -->
+			<!-- wp:html -->
+			<div class="noyona-mini-cart-summary">
+				<div class="noyona-mini-cart-summary-row">
+					<span>Subtotal</span>
+					<strong class="noyona-mini-cart-subtotal">₱0.00</strong>
+				</div>
+				<div class="noyona-mini-cart-summary-row">
+					<span>Shipping</span>
+					<strong class="noyona-mini-cart-shipping-fee">₱0.00</strong>
+				</div>
+				<div class="noyona-mini-cart-summary-row noyona-mini-cart-summary-row--total">
+					<span>Total</span>
+					<strong class="noyona-mini-cart-total">₱0.00</strong>
+				</div>
+				<label class="noyona-mini-cart-terms">
+					<input type="checkbox" class="noyona-mini-cart-terms-checkbox">
+					<span>I agree to the <a href="/terms-of-service/">Terms &amp; Condition</a> and <a href="/shipping-policy/">Shipping &amp; Returns</a></span>
+				</label>
+			</div>
+			<!-- /wp:html -->
+
 			<!-- wp:woocommerce/mini-cart-checkout-button-block -->
 			<div class="wp-block-woocommerce-mini-cart-checkout-button-block"></div>
 			<!-- /wp:woocommerce/mini-cart-checkout-button-block -->

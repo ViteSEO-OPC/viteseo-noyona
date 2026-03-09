@@ -12,9 +12,22 @@
 
   function perView(maxCards) {
     const w = window.innerWidth;
-    if (w >= 1400) return Math.min(3, maxCards);
+    // Prefer 4 cards on desktop/large laptops, fallback to 3 on standard laptops.
+    if (w >= 1600) return Math.min(4, maxCards);
+    if (w >= 1260) return Math.min(3, maxCards);
     if (w >= 770) return Math.min(2, maxCards);
     return 1;
+  }
+
+  function getAddToCartEndpoint() {
+    if (window.wc_add_to_cart_params && window.wc_add_to_cart_params.wc_ajax_url) {
+      return String(window.wc_add_to_cart_params.wc_ajax_url).replace(
+        "%%endpoint%%",
+        "add_to_cart"
+      );
+    }
+    // Fallback endpoint when Woo params are unavailable on custom pages.
+    return "/?wc-ajax=add_to_cart";
   }
 
   function initCarousel(root) {
@@ -83,6 +96,71 @@
 
     prevBtn.addEventListener("click", () => goTo(currentIndex - 1));
     nextBtn.addEventListener("click", () => goTo(currentIndex + 1));
+
+    root.addEventListener("click", function (event) {
+      const cartBtn = event.target.closest(
+        ".ps-btn-cart.ajax_add_to_cart[data-product_id]"
+      );
+      if (!cartBtn || !root.contains(cartBtn)) return;
+
+      event.preventDefault();
+
+      if (cartBtn.classList.contains("loading")) return;
+
+      const endpoint = getAddToCartEndpoint();
+      const href =
+        cartBtn.getAttribute("href") ||
+        cartBtn.getAttribute("data-cart-url") ||
+        "";
+      const productId = parseInt(cartBtn.getAttribute("data-product_id"), 10) || 0;
+      const quantity = parseInt(cartBtn.getAttribute("data-quantity"), 10) || 1;
+
+      if (!endpoint || !productId) {
+        if (href) window.location.href = href;
+        return;
+      }
+
+      cartBtn.classList.add("loading");
+
+      fetch(endpoint, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        },
+        body: new URLSearchParams({
+          product_id: String(productId),
+          quantity: String(quantity),
+        }).toString(),
+      })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          if (data && data.error && data.product_url) {
+            window.location.href = data.product_url;
+            return;
+          }
+
+          cartBtn.classList.remove("loading");
+          cartBtn.classList.add("added");
+
+          // Keep Woo fragments/cart counters in sync with header mini-cart.
+          if (window.jQuery) {
+            window.jQuery(document.body).trigger("added_to_cart", [
+              data && data.fragments ? data.fragments : null,
+              data && data.cart_hash ? data.cart_hash : "",
+              cartBtn,
+            ]);
+          }
+        })
+        .catch(function () {
+          if (href) window.location.href = href;
+        })
+        .finally(function () {
+          cartBtn.classList.remove("loading");
+        });
+    });
 
     const onResize = debounce(updateWidths, 150);
     window.addEventListener("resize", onResize);

@@ -8,8 +8,34 @@
 .collection-grid__header {
     text-align: center;
     margin-bottom: 3rem;
+    /* max-width: 800px; */
+    margin-inline: auto;
+}
+
+.collection-grid__header--heading-left .collection-grid__heading {
+    text-align: left;
+}
+.collection-grid__header--heading-center .collection-grid__heading {
+    text-align: center;
+}
+.collection-grid__header--heading-right .collection-grid__heading {
+    text-align: right;
+}
+
+.collection-grid__header--desc-left .collection-grid__description {
+    text-align: left;
+    max-width: 800px;
+    margin-right: auto;
+}
+.collection-grid__header--desc-center .collection-grid__description {
+    text-align: center;
     max-width: 800px;
     margin-inline: auto;
+}
+.collection-grid__header--desc-right .collection-grid__description {
+    text-align: right;
+    max-width: 800px;
+    margin-left: auto;
 }
 
 .collection-grid__heading {
@@ -22,7 +48,7 @@
 }
 
 .collection-grid__heading-accent {
-    color: #E30B5D;
+    color: #E199A4;
 }
 
 .collection-grid__description {
@@ -47,7 +73,7 @@
 
 /* Card Styling */
 .collection-card {
-    background: #E5989B;  
+    background: #E199A4;  
     position: relative;
     border-radius: 24px;
     overflow: hidden;
@@ -149,10 +175,49 @@
     z-index: 10;
 }
 
+.collection-grid__cta {
+    margin-top: 1.25rem;
+    display: flex;
+}
+.collection-grid__cta--left {
+    justify-content: flex-start;
+}
+.collection-grid__cta--center {
+    justify-content: center;
+}
+.collection-grid__cta--right {
+    justify-content: flex-end;
+}
+
+.collection-grid__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    background: #E199A4;
+    color: #fff;
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    font-size: clamp(16px, 1.1vw, 20px);
+    font-weight: 600;
+    line-height: 1;
+}
+
 /* =========================================================
    Mobile: swipeable "carousel" (scroll-snap) instead of 1-by-1 stack
 ========================================================= */
 @media (max-width: 768px) {
+    .collection-grid__header {
+        text-align: center;
+    }
+    .collection-grid__header .collection-grid__heading,
+    .collection-grid__header .collection-grid__description {
+        text-align: center !important;
+    }
+    .collection-grid__cta {
+        justify-content: center !important;
+    }
+
     .collection-grid__header {
         margin-bottom: 1.75rem;
     }

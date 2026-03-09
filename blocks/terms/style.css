@@ -1,5 +1,5 @@
 .terms {
-    background: #f5f2f3;
+    background: #fff;
     font-family: var(--wp--preset--font-family--proxima-nova);
     color: #222;
 }
@@ -60,11 +60,11 @@
 
 .terms__crumb-link:hover,
 .terms__crumb-link:focus {
-    color: #d01558;
+    color: #E199A4;
 }
 
 .terms__crumb-current {
-    color: #d01558;
+    color: #E199A4;
     font-weight: 600;
 }
 
@@ -128,7 +128,7 @@
 
 .terms__toc-link:hover,
 .terms__toc-link:focus {
-    color: #d01558;
+    color: #E199A4;
 }
 
 .terms__toc-item.is-active {
@@ -137,7 +137,7 @@
 }
 
 .terms__toc-item.is-active .terms__toc-link {
-    color: #d01558;
+    color: #E199A4;
     font-weight: 600;
 }
 
@@ -174,7 +174,7 @@
     font-size: clamp(16px, 1.2vw, 20px);
     font-weight: 700;
     font-family: var(--wp--preset--font-family--proxima-nova);
-    color: #d01558;
+    color: #E199A4;
 }
 
 .terms__section p {

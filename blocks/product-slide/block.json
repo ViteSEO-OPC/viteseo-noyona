@@ -23,6 +23,22 @@
       "type": "number",
       "default": 3
     },
+    "useWooProducts": {
+      "type": "boolean",
+      "default": false
+    },
+    "wooOnlyFeatured": {
+      "type": "boolean",
+      "default": true
+    },
+    "wooProductsLimit": {
+      "type": "number",
+      "default": 8
+    },
+    "wooColorAttribute": {
+      "type": "string",
+      "default": "pa_color"
+    },
     "items": {
       "type": "array",
       "default": [],

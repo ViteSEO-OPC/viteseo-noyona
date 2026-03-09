@@ -1,3 +1,25 @@
+<!-- wp:group {"className":"header-brand-strip","layout":{"type":"default"}} -->
+<div class="wp-block-group header-brand-strip">
+    <!-- wp:noyona/brand-carousel {
+        "align":"full",
+        "heading":"",
+        "speed":40,
+        "mode":"brands",
+        "brandFontSize":"16px",
+        "brandFontWeight":"500",
+        "brandFontColor":"#000",
+        "paddingTop":"0.5rem",
+        "paddingBottom":"0.5rem",
+        "backgroundColor":"#EFB5BE",
+        "items":[
+            { "brand":"Beauty rooted in nature" },
+            { "brand":"Beauty rooted in nature" },
+            { "brand":"Beauty rooted in nature" }
+        ]
+    } /-->
+</div>
+<!-- /wp:group -->
+
 <!-- wp:group {"layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center"}} -->
 <div class="wp-block-group site-header">
 
@@ -6,17 +28,16 @@
         <a class="site-logo site-logo-link" href="/" aria-label="Noyona Essentials home">
             <span class="site-logo-mark" aria-hidden="true">
                 <img class="site-logo-img site-logo-img--desktop"
-                    src="https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-logo.webp"
+                    src="/wp-content/themes/viteseo-noyona/assets/images/noyona-logo.webp"
                     alt="Noyona Essentials"
                     width="250"
-                    height="70"
+                    height="30"
                     decoding="async"
                     loading="eager"
                     fetchpriority="high" />
             
                 <img class="site-logo-img site-logo-img--mobile"
-                    src="https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-mobile-logo.webp"
-                    srcset="https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-mobile-logo-150x150.webp 150w, https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-mobile-logo-300x300.webp 300w, https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-mobile-logo.webp 1960w"
+                    src="/wp-content/themes/viteseo-noyona/assets/images/noyona-mobile-logo.webp"
                     sizes="98px"
                     alt="Noyona Essentials"
                     width="98"
@@ -25,6 +46,7 @@
                     loading="eager"
                     fetchpriority="high" />
             </span>
+            <!-- srcset="https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-mobile-logo-150x150.webp 150w, https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-mobile-logo-300x300.webp 300w, https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-mobile-logo.webp 1960w" -->
             <!-- <span class="site-logo-text">Noyona Essentials</span> -->
         </a>
     <!-- /wp:html -->
@@ -43,17 +65,17 @@
             </li>
             <li class="nav-item has-dropdown">
                 <div class="nav-link-wrapper">
-                    <a href="/coming-soon/" class="nav-link">Shop</a>
+                    <a href="/shop/" class="nav-link">Shop</a>
                     <button class="submenu-toggle" type="button" aria-label="Toggle sub-menu" aria-expanded="false">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
                 <ul class="dropdown-menu">
-                    <li><a href="/coming-soon/">Face</a></li>
-                    <li><a href="/coming-soon/">Lip</a></li>
-                    <li><a href="/coming-soon/">Eye</a></li>
-                    <li><a href="/coming-soon/">Hair</a></li>
-                    <li><a href="/coming-soon/">Body</a></li>
+                    <li><a href="/Face/">Face</a></li>
+                    <li><a href="/Lips/">Lip</a></li>
+                    <li><a href="/Eyes/">Eyes</a></li>
+                    <li><a href="/Hair/">Hair</a></li>
+                    <li><a href="/Body/">Body</a></li>
                 </ul>
             </li>
             <li class="nav-item has-dropdown">
@@ -107,13 +129,6 @@
         <!-- WooCommerce mini cart with drawer -->
         <!-- wp:woocommerce/mini-cart {"hasDrawer":true,"className":"header-mini-cart"} /-->
 
-        <!-- Fallback cart icon (shown only when mini-cart button is missing) -->
-        <!-- wp:html -->
-        <a class="header-icon header-cart-fallback" href="/cart/" aria-label="View cart">
-            <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
-        </a>
-        <!-- /wp:html -->
-
         <!-- Store Locator -->
         <!-- wp:html -->
         <a class="header-icon header-store-link" href="/store-location/" aria-label="View store locations">
@@ -154,9 +169,21 @@
 <div class="wishlist-panel" id="wishlist-panel">
     <div class="wishlist-panel__overlay"></div>
     <aside class="wishlist-panel__content">
-        <button class="wishlist-panel__close" type="button" aria-label="Close wishlist">&times;</button>
-        <h2>Your wishlist</h2>
-        <p>this is your all whishlist</p>
+        <div class="wishlist-panel__topbar">
+            <button class="wishlist-panel__back" type="button" data-wishlist-close aria-label="Close wishlist">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Continue Shopping</span>
+            </button>
+            <!-- <button class="wishlist-panel__close" type="button" data-wishlist-close aria-label="Close wishlist">×</button> -->
+        </div>
+        <div class="wishlist-panel__body">
+            <h2 class="wishlist-panel__title">Your Wishlist</h2>
+            <p class="wishlist-panel__subtitle">Save your favorite products here and add them to cart anytime.</p>
+            <div class="wishlist-panel__empty">
+                <i class="fa-regular fa-heart"></i>
+                <p>No wishlist items yet.</p>
+            </div>
+        </div>
     </aside>
 </div>
 <!-- /wp:html -->

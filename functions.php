@@ -92,11 +92,54 @@ function woocom_ct_enqueue_assets() {
     $logout_url = function_exists( 'wc_logout_url' ) && function_exists( 'wc_get_page_permalink' )
         ? wc_logout_url( wc_get_page_permalink( 'myaccount' ) )
         : wp_logout_url( home_url( '/' ) );
+
+    $shop_price_step = 150;
+    $shop_price_max  = 0;
+    $is_shop_archive = function_exists( 'is_shop' ) && ( is_shop() || is_tax( 'product_cat' ) );
+    if ( $is_shop_archive && class_exists( 'WooCommerce' ) && function_exists( 'wc_get_products' ) ) {
+        $max_price_args = array(
+            'limit'   => 1,
+            'orderby' => 'price',
+            'order'   => 'DESC',
+            'status'  => 'publish',
+            'return'  => 'ids',
+        );
+
+        if ( is_tax( 'product_cat' ) ) {
+            $term = get_queried_object();
+            if ( $term instanceof WP_Term ) {
+                $max_price_args['category'] = array( $term->slug );
+            }
+        }
+
+        $product_ids = wc_get_products( $max_price_args );
+
+        if ( ! empty( $product_ids ) ) {
+            $top_product = wc_get_product( (int) $product_ids[0] );
+            if ( $top_product ) {
+                $shop_price_max = (float) $top_product->get_price();
+            }
+        }
+    }
+
+    if ( $shop_price_max < 0 ) {
+        $shop_price_max = 0;
+    }
+
+    $shop_price_ceiling = (int) ( ceil( $shop_price_max / $shop_price_step ) * $shop_price_step );
+    if ( $shop_price_ceiling <= 0 ) {
+        $shop_price_ceiling = $shop_price_step;
+    }
+
     wp_localize_script(
         'woocom-ct-header',
         'noyonaHeader',
         array(
-            'logoutUrl' => $logout_url,
+            'logoutUrl'       => $logout_url,
+            'shopPriceFilter' => array(
+                'step'     => $shop_price_step,
+                'maxPrice' => $shop_price_ceiling,
+            ),
         )
     );
 
@@ -155,6 +198,11 @@ function noyona_trim_noncommerce_assets() {
         return;
     }
 
+    // Keep Woo assets when header mini-cart is present on a page.
+    if ( has_block( 'woocommerce/mini-cart' ) ) {
+        return;
+    }
+
     if ( is_cart() || is_checkout() || is_account_page() || is_woocommerce() ) {
         return;
     }
@@ -167,8 +215,9 @@ function noyona_trim_noncommerce_assets() {
     wp_dequeue_style( 'wc-blocks-vendors-style' );
     wp_dequeue_style( 'wc-blocks-packages-style' );
 
-    wp_dequeue_script( 'woocommerce' );
-    wp_dequeue_script( 'wc-cart-fragments' );
+    // Keep these to avoid breaking header mini-cart drawer behavior.
+    // wp_dequeue_script( 'woocommerce' );
+    // wp_dequeue_script( 'wc-cart-fragments' );
     wp_dequeue_script( 'wc-add-to-cart' );
     wp_dequeue_script( 'jquery-blockui' );
     wp_dequeue_script( 'jquery-cookie' );
@@ -184,9 +233,274 @@ add_action( 'after_setup_theme', function() {
     add_theme_support( 'woocommerce' );
 } );
 
+/**
+ * Product category URLs under /shop/{slug}/ to avoid collision with regular pages like /eyes/.
+ */
+add_action( 'init', 'noyona_register_shop_category_rewrites' );
+function noyona_register_shop_category_rewrites() {
+    add_rewrite_rule(
+        '^shop/([^/]+)/?$',
+        'index.php?product_cat=$matches[1]',
+        'top'
+    );
+
+    add_rewrite_rule(
+        '^shop/([^/]+)/page/([0-9]{1,})/?$',
+        'index.php?product_cat=$matches[1]&paged=$matches[2]',
+        'top'
+    );
+}
+
+add_filter( 'term_link', 'noyona_product_cat_term_link_to_shop_base', 10, 3 );
+function noyona_product_cat_term_link_to_shop_base( $url, $term, $taxonomy ) {
+    if ( 'product_cat' !== $taxonomy || ! $term instanceof WP_Term ) {
+        return $url;
+    }
+
+    $path = 'shop/' . $term->slug;
+    return home_url( user_trailingslashit( $path ) );
+}
+
+add_action( 'after_switch_theme', 'noyona_flush_rewrite_rules_on_switch' );
+function noyona_flush_rewrite_rules_on_switch() {
+    noyona_register_shop_category_rewrites();
+    flush_rewrite_rules();
+}
+
+add_action( 'init', 'noyona_maybe_flush_shop_category_rewrites', 20 );
+function noyona_maybe_flush_shop_category_rewrites() {
+    $version = get_option( 'noyona_shop_category_rewrite_version', '' );
+    if ( '1' === $version ) {
+        return;
+    }
+
+    noyona_register_shop_category_rewrites();
+    flush_rewrite_rules( false );
+    update_option( 'noyona_shop_category_rewrite_version', '1', false );
+}
+
+add_action( 'template_redirect', 'noyona_redirect_old_product_category_base', 0 );
+function noyona_redirect_old_product_category_base() {
+    if ( ! is_tax( 'product_cat' ) ) {
+        return;
+    }
+
+    $term = get_queried_object();
+    if ( ! ( $term instanceof WP_Term ) ) {
+        return;
+    }
+
+    $request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+    $request_path = (string) wp_parse_url( $request_uri, PHP_URL_PATH );
+    $trimmed_path = trim( $request_path, '/' );
+    if ( 0 === strpos( $trimmed_path, 'shop/' ) ) {
+        return;
+    }
+
+    $target = home_url( user_trailingslashit( 'shop/' . $term->slug ) );
+    wp_safe_redirect( $target, 301 );
+    exit;
+}
+
 add_action( 'woocommerce_login_form_end', 'woocom_ct_add_register_link_to_login' );
 function woocom_ct_add_register_link_to_login() {
     echo '<p class="noyona-login-register-link"><a href="' . esc_url( home_url( '/register/' ) ) . '">Registration</a></p>';
+}
+
+/**
+ * Control products-per-page on shop/category archives.
+ * Default is 14, with optional URL override for testing: ?ppp=2
+ */
+add_filter( 'loop_shop_per_page', 'noyona_loop_shop_per_page', 20 );
+function noyona_loop_shop_per_page( $per_page ) {
+    if ( is_page( array( 'face', 'lips', 'eyes', 'hair', 'body' ) ) ) {
+        return 4;
+    }
+
+    $default_per_page = 14;
+
+    if ( isset( $_GET['ppp'] ) ) {
+        $override = absint( wp_unslash( $_GET['ppp'] ) );
+        if ( $override >= 1 && $override <= 60 ) {
+            return $override;
+        }
+    }
+
+    return $default_per_page;
+}
+
+/**
+ * Category page slugs (WooCommerce product_cat slugs) for Eyes, Face, Lips, Hair, Body.
+ * Used to force Store API product queries to filter by this category when on the corresponding page.
+ */
+function noyona_get_shop_category_page_slugs() {
+    return array( 'face', 'lips', 'eyes', 'hair', 'body' );
+}
+
+/**
+ * Set a short-lived cookie when visiting a category page so Store API can apply the category filter
+ * even when the Referer header is missing. Clear the cookie when not on a category page.
+ */
+add_action( 'template_redirect', 'noyona_set_shop_category_cookie_on_category_page', 5 );
+function noyona_set_shop_category_cookie_on_category_page() {
+    $cookie_name = 'noyona_shop_cat';
+    $page_slugs  = noyona_get_shop_category_page_slugs();
+    $match_slug  = null;
+
+    if ( is_page() ) {
+        $post = get_queried_object();
+        if ( $post instanceof WP_Post ) {
+            $slug       = strtolower( $post->post_name );
+            $match_slug = in_array( $slug, $page_slugs, true ) ? $slug : null;
+        }
+    }
+
+    if ( ! headers_sent() ) {
+        if ( $match_slug !== null ) {
+            setcookie( $cookie_name, $match_slug, time() + 60, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, is_ssl(), true );
+        } elseif ( isset( $_COOKIE[ $cookie_name ] ) ) {
+            setcookie( $cookie_name, '', time() - 3600, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, is_ssl(), true );
+        }
+    }
+}
+
+/**
+ * On landing pages (Face, Lips, Eyes, Hair, Body), replace the product-collection block with server-rendered
+ * output so we always show exactly 4 products for that category (no Store API / inherit issues).
+ */
+add_filter( 'render_block', 'noyona_render_landing_page_products_block', 10, 2 );
+function noyona_render_landing_page_products_block( $block_content, $block ) {
+    if ( ! isset( $block['blockName'] ) || $block['blockName'] !== 'woocommerce/product-collection' ) {
+        return $block_content;
+    }
+
+    $attrs = isset( $block['attrs'] ) ? $block['attrs'] : array();
+    $class = isset( $attrs['className'] ) ? $attrs['className'] : '';
+    if ( strpos( $class, 'noyona-shop-products' ) === false ) {
+        return $block_content;
+    }
+
+    $post = get_queried_object();
+    if ( ! $post instanceof WP_Post || $post->post_type !== 'page' ) {
+        return $block_content;
+    }
+
+    $slug_lower = strtolower( $post->post_name );
+    $page_slugs = noyona_get_shop_category_page_slugs();
+    if ( ! in_array( $slug_lower, $page_slugs, true ) ) {
+        return $block_content;
+    }
+
+    if ( ! function_exists( 'wc_get_products' ) ) {
+        return $block_content;
+    }
+
+    $products = wc_get_products( array(
+        'status'   => 'publish',
+        'limit'    => 4,
+        'orderby'  => 'title',
+        'order'    => 'ASC',
+        'category' => array( $slug_lower ),
+        'return'   => 'objects',
+    ) );
+
+    $has_more = count( wc_get_products( array(
+        'status'   => 'publish',
+        'limit'    => 5,
+        'category' => array( $slug_lower ),
+        'return'   => 'ids',
+    ) ) ) > 4;
+
+    if ( empty( $products ) ) {
+        return '<div class="wp-block-woocommerce-product-collection noyona-shop-products"><div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px;"><div class="wc-block-product" style="grid-column:1/-1;padding:32px;text-align:center;border-radius:16px;background:#f9f9f9;"><p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">Coming Soon</p></div></div></div>';
+    }
+
+    $shop_category_url = home_url( user_trailingslashit( 'shop/' . $slug_lower ) );
+    $category_label    = ucfirst( $slug_lower );
+
+    ob_start();
+    echo '<div class="wp-block-woocommerce-product-collection noyona-shop-products"><div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;">';
+    foreach ( $products as $product ) {
+        $image_id = $product->get_image_id();
+        $image    = $image_id ? wp_get_attachment_image( $image_id, 'woocommerce_thumbnail', false, array( 'class' => 'wc-block-components-product-image' ) ) : wc_placeholder_img( 'woocommerce_thumbnail' );
+        $title    = $product->get_name();
+        $link     = $product->get_permalink();
+        $excerpt  = has_excerpt( $product->get_id() ) ? get_the_excerpt( $product->get_id() ) : '';
+        if ( $excerpt ) {
+            $excerpt = wp_trim_words( $excerpt, 22 );
+        }
+        $price_html = $product->get_price_html();
+        $add_to_cart_url = $product->add_to_cart_url();
+        ?>
+        <div class="wc-block-product">
+            <a href="<?php echo esc_url( $link ); ?>" class="wc-block-components-product-image"><?php echo $image; ?></a>
+            <h3 class="wc-block-product-title wp-block-post-title" style="font-size:16px;font-weight:700;line-height:1.25;margin:0 0 8px;"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $title ); ?></a></h3>
+            <?php if ( $excerpt ) : ?>
+                <div class="wp-block-post-excerpt" style="font-size:13px;color:#666;margin:0 0 12px;"><p style="margin:0"><?php echo esc_html( $excerpt ); ?></p></div>
+            <?php endif; ?>
+            <div class="wc-block-components-product-price" style="font-size:15px;font-weight:700;margin:0 0 12px;"><?php echo $price_html; ?></div>
+            <div class="wp-block-buttons"><div class="wp-block-button">
+                <a href="<?php echo esc_url( $add_to_cart_url ); ?>" class="wp-block-button__link add_to_cart_button ajax_add_to_cart" data-product_id="<?php echo (int) $product->get_id(); ?>" data-product_sku="<?php echo esc_attr( $product->get_sku() ); ?>" style="width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;border:2px solid #e11a63;"><?php echo esc_html__( 'Add to cart', 'woocommerce' ); ?></a>
+            </div></div>
+        </div>
+        <?php
+    }
+    echo '</div>';
+    if ( $has_more ) {
+        echo '<div class="noyona-landing-show-more">';
+        echo '<a href="' . esc_url( $shop_category_url ) . '" class="noyona-landing-show-more-btn">';
+        echo esc_html( 'Show more ' . $category_label . ' products' );
+        echo '</a></div>';
+    }
+    echo '</div>';
+    return ob_get_clean();
+}
+
+/**
+ * Force Store API product queries on category pages (face, lips, eyes, hair, body) to only return products in that category.
+ * Uses HTTP Referer first; falls back to noyona_shop_cat cookie when referer is missing or doesn't match.
+ */
+add_filter( 'rest_request_before_callbacks', 'noyona_force_product_category_on_category_pages', 10, 3 );
+function noyona_force_product_category_on_category_pages( $response, $handler, $request ) {
+    $route = $request->get_route();
+    if ( ! is_string( $route ) || strpos( $route, 'wc/store' ) === false || strpos( $route, 'products' ) === false ) {
+        return $response;
+    }
+
+    $page_slugs = noyona_get_shop_category_page_slugs();
+    $match_slug = null;
+
+    // Prefer category from HTTP Referer (current page URL).
+    $referer = isset( $_SERVER['HTTP_REFERER'] ) ? wp_unslash( $_SERVER['HTTP_REFERER'] ) : '';
+    if ( $referer !== '' ) {
+        $referer_path = wp_parse_url( $referer, PHP_URL_PATH );
+        $referer_path = is_string( $referer_path ) ? trim( $referer_path, '/' ) : '';
+        if ( $referer_path !== '' ) {
+            $path_parts = explode( '/', $referer_path );
+            foreach ( $path_parts as $segment ) {
+                $segment_lower = strtolower( $segment );
+                if ( in_array( $segment_lower, $page_slugs, true ) ) {
+                    $match_slug = $segment_lower;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Fallback: category page cookie (set on template_redirect when visiting Eyes, Face, Lips, etc.).
+    if ( $match_slug === null && isset( $_COOKIE['noyona_shop_cat'] ) ) {
+        $cookie_slug = strtolower( sanitize_text_field( wp_unslash( $_COOKIE['noyona_shop_cat'] ) ) );
+        if ( in_array( $cookie_slug, $page_slugs, true ) ) {
+            $match_slug = $cookie_slug;
+        }
+    }
+
+    if ( $match_slug === null ) {
+        return $response;
+    }
+
+    $request->set_param( 'category', array( $match_slug ) );
+    return $response;
 }
 
 // Shortcode: [product_gatherer]
@@ -424,6 +738,11 @@ function woocom_ct_register_blocks() {
     register_block_type( get_stylesheet_directory() . '/blocks/phone-video-reviews' );
     register_block_type( get_stylesheet_directory() . '/blocks/discover-posts-carousel' );
     register_block_type( get_stylesheet_directory() . '/blocks/founder-section' );
+    register_block_type( get_stylesheet_directory() . '/blocks/landing-feature-banner' );
+    register_block_type( get_stylesheet_directory() . '/blocks/types-cards' );
+    register_block_type( get_stylesheet_directory() . '/blocks/benefits-strip' );
+    register_block_type( get_stylesheet_directory() . '/blocks/values-strip' );
+    register_block_type( get_stylesheet_directory() . '/blocks/newsletter-strip' );
     register_block_type( get_stylesheet_directory() . '/blocks/faq' );
     register_block_type( get_stylesheet_directory() . '/blocks/faq-list' );
     register_block_type( get_stylesheet_directory() . '/blocks/contact' );

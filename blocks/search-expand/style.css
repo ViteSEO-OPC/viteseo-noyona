@@ -1,14 +1,107 @@
+/* Inline header search (no modal) */
+.wp-block-noyona-search-expand {
+    display: inline-flex;
+    align-items: center;
+}
+
+.search-inline-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+}
+
+.search-inline-input {
+    /* width: clamp(150px, 16vw, 220px); */
+    border: 0;
+    border-bottom: 1px solid #e6c7ce;
+    border-radius: 0;
+    background: transparent;
+    padding: 0.35rem 0;
+    font-size: 0.88rem;
+    line-height: 1.1;
+    color: #1f1f1f;
+    outline: none;
+}
+
+.search-inline-input::placeholder {
+    color: #d9a2ad;
+    opacity: 1;
+}
+
+.search-inline-submit {
+    border: 0;
+    background: transparent;
+    color: #e199a4;
+    cursor: pointer;
+}
+
+.search-inline-submit:hover {
+    background: rgba(144, 30, 88, 0.08);
+}
+
+/* Keep the search icon visually beside wishlist icon */
+.search-inline-form .search-inline-submit {
+    margin-right: 0.05rem;
+}
+
+@media (max-width: 900px) {
+    .search-inline-input {
+        display: none;
+    }
+}
+
+/* Legacy overlay UI disabled */
+.search-expand-overlay,
+.search-expand-container,
+.search-expand-results,
+.search-expand-footer {
+    display: none !important;
+}
+
 /* Base Trigger */
 .search-expand-trigger {
     background: transparent;
-    border: none;
+    border: 0;
+    border-bottom: 1px solid #e6c7ce;
+    border-radius: 0;
     cursor: pointer;
-    font-size: 1.2rem;
-    color: inherit;
-    padding: 0.5rem;
-    display: flex;
+    font-size: 1rem;
+    color: #d9a2ad;
+    padding: 0.35rem 0 0.4rem;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    min-width: clamp(170px, 18vw, 240px);
+}
+
+.search-expand-trigger:focus,
+.search-expand-trigger:active {
+    outline: none;
+    box-shadow: none;
+}
+
+.search-expand-trigger:focus-visible {
+    outline: 2px solid rgba(225, 153, 164, 0.7);
+    outline-offset: 3px;
+}
+
+.search-expand-trigger:hover {
+    border-bottom-color: #e199a4;
+    color: #e199a4;
+}
+
+.search-expand-trigger-text {
+    font-size: 0.9rem;
+    line-height: 1;
+    white-space: nowrap;
+    color: currentColor;
+}
+
+.search-expand-trigger i {
+    font-size: 0.95rem;
+    color: currentColor;
 }
 
 /* Overlay — full-screen click-catcher + (optional) backdrop */
@@ -35,6 +128,11 @@
     transition: opacity 0.2s ease, visibility 0s linear 0.2s;
     z-index: 9999;
   }
+
+  body.search-expand-open .search-expand-overlay {
+    top: var(--noyona-header-total-offset, 96px);
+    height: calc(100dvh - var(--noyona-header-total-offset, 96px));
+  }
   
   .search-expand-overlay.is-open {
     opacity: 1;
@@ -46,10 +144,10 @@
   /* Container */
   .search-expand-container {
     /* Put the spacing HERE (not as overlay padding-top) */
-    margin-top: calc(var(--noyona-header-total-offset, 96px) + 8px);
+    margin-top: 20px;
   
     width: min(960px, calc(100vw - 24px));
-    max-height: calc(100dvh - (var(--noyona-header-total-offset, 96px) + 24px));
+    /* max-height: calc(100dvh - (var(--noyona-header-total-offset, 96px) + 24px)); */
   
     background: #fff;
     border-radius: 18px;
@@ -79,33 +177,39 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    border: 1px solid #f0f0f0;
-    border-radius: 999px;
-    padding: 0.6rem 0.9rem 0.6rem 1rem;
-    background: #faf7f4;
+    border: 0;
+    border-bottom: 1px solid #e6c7ce;
+    border-radius: 0;
+    padding: 0.4rem 0;
+    background: transparent;
 }
 
 .search-icon-input {
-    font-size: 1.2rem;
-    color: #8b5a3c;
+    font-size: 1rem;
+    color: #d9a2ad;
 }
 
 .search-expand-input {
     width: 100%;
     border: none;
     background: transparent;
-    font-size: 1.1rem;
+    font-size: 1rem;
     outline: none;
-    color: #4b2f1e;
+    color: #1f1f1f;
     font-family: inherit;
+}
+
+.search-expand-input::placeholder {
+    color: #d9a2ad;
+    opacity: 1;
 }
 
 .search-expand-close {
     background: transparent;
     border: none;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     cursor: pointer;
-    color: #c5a899;
+    color: #d9a2ad;
     transition: color 0.15s ease;
 }
 
@@ -204,7 +308,7 @@
 /* Responsive */
 @media (max-width: 800px) {
     .search-expand-container {
-        margin-top: 0px;
+        margin-top: -100px;
         width: min(720px, 100%);
     }
 
@@ -218,6 +322,16 @@
 }
 
 @media (max-width: 540px) {
+    .search-expand-trigger {
+        min-width: 0;
+        border-bottom: 0;
+        padding: 0.5rem;
+    }
+
+    .search-expand-trigger-text {
+        display: none;
+    }
+
     .search-expand-container {
         padding: 0.9rem 1rem 1rem;
         border-radius: 14px;

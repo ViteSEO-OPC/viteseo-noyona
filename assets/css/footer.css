@@ -1,7 +1,7 @@
 /* Footer Styles (moved out of style.css) */
 
 .noyona-footer {
-  background-color: var(--footer-bg);
+  background-color: #EFB5BE;
   color: var(--footer-text);
   padding-bottom: 2rem;
   font-family: var(--wp--preset--font-family--proxima-nova, system-ui, -apple-system, "Segoe UI", sans-serif);
@@ -11,42 +11,6 @@
   text-decoration: none;
   color: inherit;
   transition: color 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
-}
-
-/* Values Section */
-.noyona-footer__values {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(1.2rem, 2.2vw, 2rem);
-  text-align: center;
-  margin: 0 auto 3rem auto;
-  max-width: 96rem;
-  padding-left: var(--page-gutter-left);
-  padding-right: var(--page-gutter-right);
-}
-
-.noyona-footer__value-item {
-  min-width: 0;
-}
-
-.noyona-footer__value-item img {
-  width: 150px;
-  height: 150px;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto 0.5rem auto;
-}
-
-.noyona-footer__value-title {
-  font-weight: 700;
-  font-size: var(--wp--preset--font-size--h-3);
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.noyona-footer__value-desc {
-  font-size: 16px;
-  opacity: 0.8;
 }
 
 /* Main Footer Content (grid version - this overrides the earlier flex in old style.css) */
@@ -242,8 +206,8 @@
 
 .noyona-footer__social-btn {
   position: relative;
-  width: 42px;
-  height: 42px;
+  width: 50px;
+  height: 50px;
   background: #f0f0f0;
   color: #fff !important;
   display: inline-flex;
@@ -330,8 +294,8 @@
 }
 
 .noyona-footer__payment-icons img {
-  width: 65px;
-  height: 33px;
+  width: 70px;
+  height: 30px;
   display: block;
   filter: saturate(1.05);
 }
@@ -343,13 +307,6 @@
 }
 
 /* Responsive */
-@media (max-width: 1100px) {
-  .noyona-footer__values {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.2rem 1rem;
-  }
-}
-
 /* Collapse footer main at <=900px */
 @media (max-width: 900px) {
   .noyona-footer__main {
@@ -444,13 +401,313 @@
   }
 }
 
-@media (max-width: 500px) {
-  .noyona-footer__values {
+/* ------------------------------------------------------------------ */
+/* Footer redesign to match approved mockup                           */
+/* ------------------------------------------------------------------ */
+
+.noyona-footer {
+  background: #EFB5BE;
+  color: #111;
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+}
+
+.noyona-footer .noyona-footer__newsletter-wrap {
+  max-width: 96rem;
+  margin: -8.5rem auto 2.5rem;
+  padding-left: var(--page-gutter-left, 1rem);
+  padding-right: var(--page-gutter-right, 1rem);
+}
+
+.noyona-footer .noyona-footer__newsletter {
+  max-width: 760px;
+  margin: 0 auto;
+  background: #EFB5BE;
+  border-radius: 999px 999px 24px 24px;
+  padding: 2rem 2rem 2.2rem;
+  text-align: center;
+}
+
+.noyona-footer .noyona-footer__newsletter h2 {
+  margin: 0;
+  font-size: clamp(38px, 3.5vw, 56px);
+  line-height: 1.05;
+  font-weight: 700;
+}
+
+.noyona-footer .noyona-footer__newsletter h2 em {
+  font-style: italic;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.noyona-footer .noyona-footer__newsletter p {
+  margin: 0.6rem 0 1.1rem;
+  font-size: 1rem;
+  opacity: 0.86;
+  width: 100% !important;
+}
+
+.noyona-footer .noyona-footer__form {
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0;
+  flex-wrap: nowrap;
+}
+
+.noyona-footer .noyona-footer__input {
+  flex: 0 1 420px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(17, 17, 17, 0.25);
+  padding: 0.6rem 0.95rem;
+  font-size: 0.95rem;
+}
+
+.noyona-footer .noyona-footer__btn {
+  width: auto;
+  min-width: 88px;
+  border-radius: 10px;
+  color: #E199A4;
+  background: #fff;
+  padding: 0.62rem 1rem;
+  font-size: 0.9rem;
+  pointer-events: auto;
+}
+
+.noyona-footer .noyona-footer__main {
+  max-width: 96rem;
+  margin: 0 auto;
+  padding-left: var(--page-gutter-left, 1rem);
+  padding-right: var(--page-gutter-right, 1rem);
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(420px, 1.5fr);
+  gap: clamp(1.5rem, 4vw, 5rem);
+}
+
+.noyona-footer .noyona-footer__brand {
+  display: flex;
+  align-items: flex-start;
+}
+
+.noyona-footer .noyona-footer__brand-logo {
+  width: clamp(220px, 28vw, 265px);
+  height: auto;
+  display: block;
+}
+
+.noyona-footer .noyona-footer__links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.6vw, 3rem);
+}
+
+.noyona-footer .noyona-footer__col-title {
+  font-size: 1rem;
+  letter-spacing: 0;
+  margin-bottom: 0.85rem;
+}
+
+.noyona-footer .noyona-footer__nav a {
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.noyona-footer .noyona-footer__nav a::after {
+  display: none;
+}
+
+.noyona-footer .noyona-footer__nav a:hover,
+.noyona-footer .noyona-footer__nav a:focus-visible {
+  transform: none;
+  color: #000;
+  opacity: 0.75;
+}
+
+.noyona-footer .noyona-footer__bottom {
+  max-width: 96rem;
+  margin: 1.25rem auto 0;
+  padding-left: var(--page-gutter-left, 1rem);
+  padding-right: var(--page-gutter-right, 1rem);
+  padding-top: 0;
+}
+
+.noyona-footer .noyona-footer__bottom-row {
+  padding-top: 0;
+  padding-bottom: 0.8rem;
+}
+
+.noyona-footer .noyona-footer__social-icons {
+  gap: 0.5rem;
+}
+
+.noyona-footer .noyona-footer__social-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  font-size: 1rem;
+  transform: none;
+  box-shadow: none !important;
+}
+
+.noyona-footer .noyona-footer__social-btn:hover {
+  transform: translateY(-1px);
+}
+
+.noyona-footer .noyona-footer__payment-icons img {
+  width: 50px;
+  height: auto;
+}
+
+.noyona-footer .noyona-footer__bottom-divider {
+  background: rgba(17, 17, 17, 0.45);
+}
+
+.noyona-footer .noyona-footer__copyright {
+  padding-top: 0.65rem;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 900px) {
+  .noyona-footer {
+    padding-top: 4.8rem;
+  }
+
+  .noyona-footer .noyona-footer__newsletter-wrap {
+    margin-top: -7.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .noyona-footer .noyona-footer__main {
     grid-template-columns: 1fr;
+  }
+
+  .noyona-footer .noyona-footer__brand {
+    justify-content: center;
+  }
+
+  .noyona-footer .noyona-footer__links {
+    text-align: center;
   }
 }
 
+@media (max-width: 640px) {
+  .noyona-footer .noyona-footer__newsletter {
+    border-radius: 28px;
+    padding: 1.35rem 1rem 1.45rem;
+  }
 
+  .noyona-footer .noyona-footer__newsletter h2 {
+    font-size: clamp(30px, 9vw, 42px);
+  }
 
+  .noyona-footer .noyona-footer__form {
+    flex-wrap: wrap;
+  }
 
+  .noyona-footer .noyona-footer__input {
+    flex-basis: 100%;
+  }
+
+  .noyona-footer .noyona-footer__btn {
+    width: 100%;
+  }
+
+  .noyona-footer .noyona-footer__links {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+  }
+}
+
+/* Footer social icons: muted default, brand color on hover/active */
+.noyona-footer .noyona-footer__social-icons {
+  gap: 0.7rem;
+}
+
+.noyona-footer .noyona-footer__social-btn {
+  --social-brand-bg: #7a0038;
+  --social-brand-color: #ffffff;
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: #7a0038;
+  color: #f3c7d3 !important;
+  font-size: 1.2rem;
+  box-shadow: none !important;
+  transform: none;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, filter 0.2s ease;
+}
+
+.noyona-footer .noyona-footer__social-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%) translateY(4px);
+  background: #111111;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+  padding: 7px 10px;
+  border-radius: 7px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  z-index: 20;
+}
+
+.noyona-footer .noyona-footer__social-btn::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  transform: translateX(-50%);
+  border-width: 6px 6px 0 6px;
+  border-style: solid;
+  border-color: #111111 transparent transparent transparent;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  z-index: 20;
+}
+
+.noyona-footer .noyona-footer__social-btn--facebook { --social-brand-bg: #1877f2; }
+.noyona-footer .noyona-footer__social-btn--tiktok { --social-brand-bg: #000000; }
+.noyona-footer .noyona-footer__social-btn--instagram {
+  --social-brand-bg: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 6%, #fd5949 45%, #d6249f 60%, #285aeb 92%);
+}
+.noyona-footer .noyona-footer__social-btn--shopee { --social-brand-bg: #ee4d2d; }
+.noyona-footer .noyona-footer__social-btn--lazada { --social-brand-bg: #5f2eea; }
+
+.noyona-footer .noyona-footer__social-btn:hover,
+.noyona-footer .noyona-footer__social-btn:focus-visible,
+.noyona-footer .noyona-footer__social-btn.is-active {
+  background: var(--social-brand-bg);
+  color: var(--social-brand-color) !important;
+  filter: saturate(1.03);
+}
+
+.noyona-footer .noyona-footer__social-btn:hover,
+.noyona-footer .noyona-footer__social-btn:focus-visible {
+  transform: translateY(-2px);
+}
+
+.noyona-footer .noyona-footer__social-btn:hover::after,
+.noyona-footer .noyona-footer__social-btn:hover::before,
+.noyona-footer .noyona-footer__social-btn:focus-visible::after,
+.noyona-footer .noyona-footer__social-btn:focus-visible::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+.noyona-footer .noyona-footer__social-btn:hover::after,
+.noyona-footer .noyona-footer__social-btn:focus-visible::after {
+  transform: translateX(-50%) translateY(0);
+}
 

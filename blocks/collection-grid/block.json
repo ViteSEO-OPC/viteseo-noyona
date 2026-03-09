@@ -19,6 +19,26 @@
       "type": "string",
       "default": "Noyona offers makeup, hair, and body care essentials designed for Filipino skin tones, simple, effective, and confidence-boosting every day."
     },
+    "headingAlign": {
+      "type": "string",
+      "default": "center"
+    },
+    "descriptionAlign": {
+      "type": "string",
+      "default": "center"
+    },
+    "buttonText": {
+      "type": "string",
+      "default": ""
+    },
+    "buttonUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "buttonAlign": {
+      "type": "string",
+      "default": "center"
+    },
     "items": {
       "type": "array",
       "default": [],

@@ -19,7 +19,7 @@
 }
 
 .contact-form__accent {
-    color: #E30B5D;
+    color: #E199A4;
 }
 
 .contact-form__subtitle {
@@ -69,7 +69,7 @@
     margin: 0;
     font-size: clamp(20px, 2.4vw, 24px);
     font-weight: 700;
-    color: #E30B5D;
+    color: #E199A4;
 }
 
 .contact-form__brand {
@@ -186,7 +186,7 @@
     margin: 0 0 0.5rem;
     font-size: clamp(20px, 2.4vw, 24px);
     font-weight: 700;
-    color: #E30B5D;
+    color: #E199A4;
 }
 
 .contact-form__info-item {
@@ -199,7 +199,7 @@
 }
 
 .contact-form__info-item i {
-    color: #E30B5D;
+    color: #E199A4;
     margin-top: 2px;
 }
 
@@ -211,7 +211,7 @@
 
 .contact-form__info-link:hover,
 .contact-form__info-link:focus-visible {
-    color: #E30B5D;
+    color: #E199A4;
 }
 
 .contact-form__map {
@@ -252,7 +252,7 @@
     justify-content: center;
     padding: 0.55rem 1.6rem;
     border-radius: 16px;
-    background: #E30B5D;
+    background: #E199A4;
     color: #fff;
     text-decoration: none;
     font-weight: 700;
@@ -338,7 +338,7 @@
     justify-content: center;
     padding: 0.55rem 1.6rem;
     border-radius: 16px;
-    background: #E30B5D;
+    background: #E199A4;
     color: #fff;
     text-decoration: none;
     font-weight: 700;
@@ -431,7 +431,7 @@
     font-size: 14px;
     line-height: 1.3;
     margin-top: 6px;
-    color: #E30B5D;
+    color: #E199A4;
   }
   
   .contact-form__field.is-invalid .contact-form__error{
@@ -440,7 +440,7 @@
   
   .contact-form__field.is-invalid input,
   .contact-form__field.is-invalid textarea{
-    border-color: #E30B5D !important;
+    border-color: #E199A4 !important;
     box-shadow: 0 0 0 3px rgba(227, 11, 93, 0.18);
   }
   

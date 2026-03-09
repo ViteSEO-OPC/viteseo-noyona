@@ -164,7 +164,7 @@
 
 .ph-btn-primary {
     flex: 1;
-    background: #E30B5D;
+    background: #E199A4;
     color: #fff;
     text-decoration: none;
     padding: 10px;
@@ -185,7 +185,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #E30B5D;
+    background: #E199A4;
     color: #fff;
     border-radius: 8px;
     text-decoration: none;
@@ -200,7 +200,7 @@
 .ph-nav-btn {
     background: transparent;
     border: none;
-    color: #E30B5D; /* Pinkish arrow */
+    color: #E199A4; /* Pinkish arrow */
     font-size: 2rem;
     cursor: pointer;
     padding: 0 10px;

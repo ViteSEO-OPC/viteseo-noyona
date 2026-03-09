@@ -107,7 +107,7 @@
 }
 
 .review-card__quote-icon {
-    color: #ff6b9d;
+    color: #E199A4;
     font-size: 2rem;
     line-height: 1;
 }
@@ -253,11 +253,6 @@
     100% {
         transform: translateX(-25%);
     }
-}
-
-/* Pause on hover */
-.brand-carousel:hover .brand-carousel__track {
-    animation-play-state: paused;
 }
 
 /* ================================

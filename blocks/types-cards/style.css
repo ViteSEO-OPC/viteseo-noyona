@@ -1,0 +1,105 @@
+.wp-block-noyona-types-cards {
+  margin: 0 !important;
+}
+
+.noyona-types-cards {
+  background: #ffffff;
+  padding: clamp(36px, 4vw, 52px) clamp(16px, 3vw, 32px);
+}
+
+.wp-block-noyona-types-cards.alignfull,
+.noyona-types-cards.alignfull {
+  width: auto;
+  max-width: none;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+}
+
+.noyona-types-cards__inner {
+  max-width: 1520px;
+  margin: 0 auto;
+}
+
+.noyona-types-cards__title {
+  margin: 0 0 clamp(24px, 2.5vw, 34px);
+  text-align: center;
+  color: #151515;
+  font-size: clamp(32px, 4.2vw, 55px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.noyona-types-cards__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));
+  gap: clamp(14px, 1.8vw, 22px);
+  justify-items: center;
+}
+
+.noyona-types-cards__card {
+  border: 1px solid #f0f0f0;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  width: min(100%, 480px);
+  height: 472px;
+  display: flex;
+  flex-direction: column;
+}
+
+.noyona-types-cards__media {
+  flex: 1 1 50%;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #f7dbe1;
+}
+
+.noyona-types-cards__image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.noyona-types-cards__image-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #fbe7eb 0%, #f3cfd8 100%);
+}
+
+.noyona-types-cards__body {
+  padding: 14px 14px 16px;
+  flex: 1 1 50%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.noyona-types-cards__card-title {
+  margin: 0 0 6px;
+  color: #0f0f0f;
+  font-size: clamp(20px, 1.25vw, 24px);
+  font-weight: 700;
+  line-height: 1.2;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+}
+
+.noyona-types-cards__card-text {
+  margin: 0;
+  color: #3b3b3b;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.45;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+}
+
+@media (max-width: 980px) {
+  .noyona-types-cards__card {
+    width: 100%;
+    max-width: 640px;
+    height: auto;
+  }
+}

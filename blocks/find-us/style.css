@@ -1,5 +1,5 @@
 .find-us {
-    --find-us-accent: #E30B5D;
+    --find-us-accent: #E199A4;
     --find-us-bg: linear-gradient(135deg, #fce4e6 0%, #ffffff 100%);
     padding: clamp(2rem, 5vw, 4rem) var(--page-gutter-left);
     font-family: var(--wp--preset--font-family--proxima-nova);
@@ -26,7 +26,7 @@
     background: #fff;
     border-radius: 12px;
     padding: 1.5rem;
-    width: 100%;
+    /* width: 100%; */
     aspect-ratio: 1/1;
     display: flex;
     align-items: center;
@@ -35,7 +35,7 @@
 }
 
 .find-us__image-box img {
-    max-width: 100%;
+    width: clamp(350px, 33vw, 650px);
     height: auto;
     object-fit: contain;
 }
@@ -91,7 +91,7 @@
     /* max-width: 350px; */
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
     .find-us__container {
         grid-template-columns: 1fr;
         padding: 1.5rem;

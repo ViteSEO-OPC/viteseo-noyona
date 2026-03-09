@@ -1,0 +1,49 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/benefits-strip",
+  "version": "1.0.0",
+  "title": "Benefits Strip",
+  "category": "design",
+  "icon": "star-filled",
+  "description": "Pink benefits section with title and three icon points.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "Why Noyona Face Makeup Work For You"
+    },
+    "backgroundColor": {
+      "type": "string",
+      "default": "#E9A3AD"
+    },
+    "items": {
+      "type": "array",
+      "default": [
+        {
+          "iconClass": "fa-solid fa-shield-heart",
+          "title": "Safe for Sensitive Skin",
+          "description": "All Noyona foundations and concealers are hypoallergenic and dermatologically tested."
+        },
+        {
+          "iconClass": "fa-regular fa-clock",
+          "title": "Long-Lasting in Humid Conditions",
+          "description": "Sweat-proof formulas keep your makeup fresh from day to night."
+        },
+        {
+          "iconClass": "fa-solid fa-wand-magic-sparkles",
+          "title": "On-the-Go Touch-Ups",
+          "description": "Easy to refresh your look anytime with compact-friendly essentials."
+        }
+      ],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

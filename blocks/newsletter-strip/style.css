@@ -1,0 +1,116 @@
+.newsletter-strip {
+  /* margin: 0 auto -5.5rem; */
+  position: relative;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.newsletter-strip__inner {
+  /* max-width: 760px; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: auto;
+  background: #F6CACE;
+  border-radius: 200px 200px 0px 0px;
+  text-align: center;
+  box-sizing: border-box;
+  pointer-events: auto;
+  height: clamp(245px, 30vw, 327px);
+}
+
+.newsletter-strip__title {
+  margin: 0;
+  font-size: clamp(38px, 3.5vw, 56px);
+  line-height: 1.05;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.35rem;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+}
+
+.newsletter-strip__title em {
+  font-style: italic;
+  font-family: "Times New Roman", serif;
+}
+
+.newsletter-strip__subtitle {
+  margin: 0.6rem 0 1.1rem;
+  font-size: clamp(18px, 1.4vw, 20px);
+  color: #525252;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+}
+
+.newsletter-strip__form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.newsletter-strip__input {
+  flex: 0 1 420px;
+  border-radius: 10px;
+  border: 1px solid rgba(17, 17, 17, 0.25);
+  background: rgba(255, 255, 255, 0.5);
+  padding: 0.6rem 0.95rem;
+  font-size: clamp(16px, 1.4vw, 18px);
+  box-sizing: border-box;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+}
+
+.newsletter-strip__button {
+  border: 0;
+  border-radius: 10px;
+  color: #E199A4;
+  background: #fff;
+  padding: 10px;
+  font-size: clamp(16px, 1.4vw, 18px);
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+}
+
+.newsletter-strip__button:hover {
+  filter: brightness(1.05);
+}
+
+@media (max-width: 900px) {
+  .newsletter-strip {
+    margin-bottom: -4rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .newsletter-strip {
+    margin-bottom: -2.5rem;
+  }
+
+  .newsletter-strip__inner {
+    border-radius: 28px 28px 0px 0px;
+    padding-right: var(--page-gutter-right);
+    padding-left: var(--page-gutter-left);
+  }
+
+  .newsletter-strip__title {
+    font-size: clamp(30px, 9vw, 42px);
+    flex-wrap: wrap;
+    gap: 0.2rem;
+  }
+
+  .newsletter-strip__form {
+    flex-wrap: wrap;
+  }
+
+  .newsletter-strip__input {
+    flex-basis: 100%;
+  }
+
+  .newsletter-strip__button {
+    width: 100%;
+  }
+}

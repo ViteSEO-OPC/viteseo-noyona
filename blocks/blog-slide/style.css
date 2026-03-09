@@ -1,6 +1,6 @@
 .blog-slide {
-    --bs-accent: #AF0D4B;
-    --bs-tag-bg: #903C3E;
+    --bs-accent: #E199A4;
+    --bs-tag-bg: #E199A4;
     --bs-shadow: 0 16px 30px rgba(0, 0, 0, 0.12);
     padding: clamp(2.5rem, 5vw, 3.5rem) clamp(1rem, 4vw, var(--page-gutter-right)) clamp(3rem, 6vw, 4rem) clamp(1rem, 4vw, var(--page-gutter-left));
     font-family: var(--wp--preset--font-family--proxima-nova);

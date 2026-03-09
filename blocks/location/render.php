@@ -346,6 +346,7 @@ if ($store_query->have_posts()) {
             <div class="nsl-v2-store-panel">
                 <div class="nsl-v2-store-count"></div>
                 <div class="nsl-v2-store-grid"></div>
+                <div class="nsl-v2-store-pagination"></div>
             </div>
         </div>
     </section>

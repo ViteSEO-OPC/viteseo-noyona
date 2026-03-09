@@ -157,7 +157,7 @@
     justify-content: center;
     padding: 0.85rem 1.4rem;
     background: #ffffff;
-    color: #3d1f1c;
+    color: #E199A4;
     border-radius: 10px;
     font-weight: 600;
     font-size: clamp(16px, 2vw, 24px);
@@ -171,7 +171,7 @@
     transform: translateY(-1px);
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
     color: #fff;
-    background: #ff2b7b;
+    background: #E199A4;
 
 }
 

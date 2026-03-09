@@ -1,0 +1,45 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/types-cards",
+  "version": "1.0.0",
+  "title": "Types Cards",
+  "category": "design",
+  "icon": "index-card",
+  "description": "Centered section title with three product-type cards.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "default": "Types of Face Makeup"
+    },
+    "cards": {
+      "type": "array",
+      "default": [
+        {
+          "imageId": 0,
+          "image": "",
+          "title": "Foundation",
+          "text": "Provides an even base and smooth skin tone."
+        },
+        {
+          "imageId": 0,
+          "image": "",
+          "title": "Concealer",
+          "text": "Covers blemishes, dark circles, and uneven areas."
+        },
+        {
+          "imageId": 0,
+          "image": "",
+          "title": "Powder",
+          "text": "Sets foundation and controls shine for a natural finish."
+        }
+      ]
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

@@ -20,18 +20,19 @@ if ( ! function_exists( 'noyona_guides_pillars_icon_url' ) ) {
 	 * @return string Icon URL.
 	 */
 	function noyona_guides_pillars_icon_url( $slug ) {
-		$slug = (string) $slug;
+		$slug = sanitize_key( (string) $slug );
 
-		if ( 'choices' === $slug ) {
-			return get_theme_file_uri( 'assets/images/concious-choice.webp' );
+		$icon_map = array(
+			'purpose'  => content_url( 'uploads/2026/02/purposeful-creation.webp' ),
+			'choices'  => content_url( 'uploads/2026/02/concious-choice.webp' ),
+			'everyday' => content_url( 'uploads/2026/02/beautiful-for-everday-life.webp' ),
+		);
+
+		if ( isset( $icon_map[ $slug ] ) ) {
+			return $icon_map[ $slug ];
 		}
 
-		if ( 'everyday' === $slug ) {
-			return get_theme_file_uri( 'assets/images/beautiful-for-everday-life.webp' );
-		}
-
-		// Default: "purpose".
-		return get_theme_file_uri( 'assets/images/purposeful-creation.webp' );
+		return $icon_map['purpose'];
 	}
 }
 

@@ -231,8 +231,8 @@
 }
 
 .nsl-v2-route-mode-btn.is-active {
-    border-color: #e30b5d;
-    color: #e30b5d;
+    border-color: #E199A4;
+    color: #E199A4;
     background: #fff1f6;
 }
 
@@ -486,10 +486,10 @@
 }
 
 .nsl-v2-open-review-modal {
-    border: 1px solid #e30b5d;
+    border: 1px solid #E199A4;
     border-radius: 10px;
     background: #fff1f6;
-    color: #e30b5d;
+    color: #E199A4;
     padding: 8px 10px;
     font-weight: 600;
     cursor: pointer;
@@ -558,7 +558,7 @@ body.nsl-v2-review-modal-open {
     width: 100%;
     border: 0;
     border-radius: 10px;
-    background: #e30b5d;
+    background: #E199A4;
     color: #fff;
     padding: 10px 12px;
     font-weight: 600;
@@ -580,7 +580,7 @@ body.nsl-v2-review-modal-open {
     justify-content: center;
     border-radius: 10px;
     padding: 9px 12px;
-    background: #e30b5d;
+    background: #E199A4;
     color: #fff;
     text-decoration: none;
     font-weight: 600;
@@ -672,8 +672,8 @@ body.nsl-v2-review-modal-open {
 .nsl-v2-filter-parent.is-active,
 .nsl-v2-filter-child.is-active,
 .nsl-v2-filter-extra.is-active {
-    border-color: #e30b5d;
-    color: #e30b5d;
+    border-color: #E199A4;
+    color: #E199A4;
     background: #fff1f6;
 }
 
@@ -703,8 +703,53 @@ body.nsl-v2-review-modal-open {
 
 .nsl-v2-store-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
+}
+
+@media (max-width: 1550px) {
+    .nsl-v2-store-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.nsl-v2-store-pagination {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.nsl-v2-store-pagination__btn {
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #fff;
+    color: #444;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.nsl-v2-store-pagination__btn:hover {
+    border-color: #E199A4;
+    color: #E199A4;
+}
+
+.nsl-v2-store-pagination__btn.is-active {
+    border-color: #E199A4;
+    background: #fff1f6;
+    color: #E199A4;
+}
+
+.nsl-v2-store-pagination__btn[disabled] {
+    cursor: not-allowed;
+    opacity: 0.55;
+    border-color: #ececec;
+    color: #999;
 }
 
 .nsl-v2-store-card {
@@ -785,7 +830,7 @@ body.nsl-v2-review-modal-open {
     color: #666;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1300px) {
     .nsl-v2-map-shell {
         display: flex;
         flex-direction: column;
@@ -823,6 +868,16 @@ body.nsl-v2-review-modal-open {
 
     .nsl-v2-bottom-row {
         grid-template-columns: 1fr;
+    }
+
+    .nsl-v2-store-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .nsl-v2-store-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 

@@ -1,0 +1,50 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/newsletter-strip",
+  "version": "1.0.0",
+  "title": "Newsletter Strip",
+  "category": "design",
+  "icon": "email-alt",
+  "description": "Reusable newsletter signup strip for page templates.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "headingBefore": {
+      "type": "string",
+      "default": "Join the"
+    },
+    "headingAccent": {
+      "type": "string",
+      "default": "Noyona"
+    },
+    "headingAfter": {
+      "type": "string",
+      "default": "Family"
+    },
+    "subtitle": {
+      "type": "string",
+      "default": "Get notified to our exclusive updates, discounts, and more!"
+    },
+    "placeholder": {
+      "type": "string",
+      "default": "Your email address"
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Notify"
+    },
+    "formAction": {
+      "type": "string",
+      "default": "#"
+    },
+    "backgroundColor": {
+      "type": "string",
+      "default": "#E8BCC3"
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

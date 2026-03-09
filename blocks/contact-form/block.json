@@ -25,7 +25,7 @@
     },
     "brandImage": {
       "type": "string",
-      "default": "https://noyonacosmetics.com/wp-content/uploads/2026/02/brand_with_a_purpose.webp"
+      "default": "/wp-content/themes/viteseo-noyona/assets/images/noyona-mobile-logo.webp"
     },
     "brandImageId": {
       "type": "number",

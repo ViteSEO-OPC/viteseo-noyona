@@ -17,7 +17,11 @@
         "align":"wide",
         "heading":"Our Best Seller",
         "subheading":"Loved for skin-friendly formulas, flattering shades, and all-day wear.",
-        "cardsToShow":3,
+        "cardsToShow":4,
+        "useWooProducts":true,
+        "wooOnlyFeatured":true,
+        "wooProductsLimit":8,
+        "wooColorAttribute":"pa_color",
         "items":[
             {
                 "badge":"BEST",
@@ -32,10 +36,10 @@
                 "ratingCount":98,
                 "primaryText":"BUY NOW!",
                 "primaryUrl":"/coming-soon/",
-                "primaryBg":"#E30B5D",
+                "primaryBg":"#E199A4",
                 "cartEnabled":true,
                 "cartUrl":"/cart/",
-                "cartBg":"#E30B5D"
+                "cartBg":"#E199A4"
             },
             {
                 "badge":"BEST",
@@ -50,10 +54,10 @@
                 "ratingCount":98,
                 "primaryText":"BUY NOW!",
                 "primaryUrl":"/coming-soon/",
-                "primaryBg":"#E30B5D",
+                "primaryBg":"#E199A4",
                 "cartEnabled":true,
                 "cartUrl":"/cart/",
-                "cartBg":"#E30B5D"
+                "cartBg":"#E199A4"
             },
             {
                 "badge":"BEST",
@@ -68,10 +72,10 @@
                 "ratingCount":98,
                 "primaryText":"BUY NOW!",
                 "primaryUrl":"/coming-soon/",
-                "primaryBg":"#E30B5D",
+                "primaryBg":"#E199A4",
                 "cartEnabled":true,
                 "cartUrl":"/cart/",
-                "cartBg":"#E30B5D"
+                "cartBg":"#E199A4"
             },
             {
                 "badge":"BEST",
@@ -86,10 +90,10 @@
                 "ratingCount":98,
                 "primaryText":"BUY NOW!",
                 "primaryUrl":"/coming-soon/",
-                "primaryBg":"#E30B5D",
+                "primaryBg":"#E199A4",
                 "cartEnabled":true,
                 "cartUrl":"/cart/",
-                "cartBg":"#E30B5D"
+                "cartBg":"#E199A4"
             }
         ]
     } /-->
@@ -98,108 +102,84 @@
         "align":"wide",
         "heading":"Our Collections",
         "description":"Noyona offers makeup, hair, and body care essentials designed for Filipino skin tones, simple, effective, and confidence-boosting every day.",
+        "headingAlign":"center",
+        "descriptionAlign":"center",
+        "buttonAlign":"center",
         "items":[
             {
             "title":"Noyona Keratin",
-            "image":"https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-keratin.webp",
+            "image":"/wp-content/themes/viteseo-noyona/assets/images/noyona-keratin.webp",
             "count":"1 Product"
             },
             {
             "title":"Lovial",
-            "image":"https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-lovial.webp",
+            "image":"/wp-content/themes/viteseo-noyona/assets/images/noyona-lovial.webp",
             "count":"2 Products"
             },
             {
             "title":"Noyona Cosmetics",
-            "image":"https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona-cosmetics.webp",
+            "image":"/wp-content/themes/viteseo-noyona/assets/images/noyona-cosmetics.webp",
             "count":"10 Products"
             }
         ]
     } /-->
 
-    <!-- wp:noyona/discover-posts-carousel_hide {
-        "sectionTitle": "Our Products",
-        "sectionDescription": "Skin-friendly essentials for Filipino tones. coming-soon makeup, hair, and body care for all-day wear.",
-        "viewAllLabel": "Filter by type",
-        "buttonLabel": "Find your perfect clean beauty match",
-        "viewAllUrl": "/coming-soon",
+    <!-- wp:noyona/collection-grid {
+        "align":"wide",
+        "heading":"Our Products",
+        "description":"Skin-friendly essentials for Filipino tones, simple, effective, and confidence-boosting every day.",
+        "headingAlign":"left",
+        "descriptionAlign":"left",
+        "buttonText":"Find your perfect clean beauty match",
+        "buttonUrl":"/coming-soon",
+        "buttonAlign":"center",
         "items": [
             {
-                "title": "Dual - Powder Foundation",
-                "description": "Provides buildable coverage, helps control oil, and keeps your skin radiant and flawless for up to 12 hours.",
-                "price": "₱349",
-                "originalPrice": "₱450",
-                "rating": 4.8,
-                "ratingCount": 98,
-                "image": "",
-                "url": "/coming-soon",
-                "type": "face"
+                "title": "Eyes",
+                "image":"/wp-content/themes/viteseo-noyona/assets/images/noyona-eyes.webp",
+                "count":"3 Products"
             },
             {
-                "title": "Velvet Matte Lipstick",
-                "description": "Velvet Matte Lipstick delivers a velvety, lightweight matte finish with rich, moisturizing color.",
-                "price": "₱239",
-                "originalPrice": "₱400",
-                "rating": 4.5,
-                "ratingCount": 98,
-                "image": "",
-                "url": "/coming-soon",
-                "type": "lips"
+                "title": "Face",
+                "image":"/wp-content/themes/viteseo-noyona/assets/images/noyona-face.webp",
+                "count":"5 Products"
             },
             {
-                "title": "Dual - Powder Foundation",
-                "description": "Provides buildable coverage, helps control oil, and keeps your skin radiant and flawless for up to 12 hours.",
-                "price": "₱349",
-                "originalPrice": "₱450",
-                "rating": 4.8,
-                "ratingCount": 98,
-                "image": "",
-                "url": "/coming-soon",
-                "type": "face"
+                "title": "Lips",
+                "image":"/wp-content/themes/viteseo-noyona/assets/images/noyona-lips.webp",
+                "count":"3 Products"
             },
             {
-                "title": "Velvet Matte Lipstick",
-                "description": "Velvet Matte Lipstick delivers a velvety, lightweight matte finish with rich, moisturizing color.",
-                "price": "₱239",
-                "originalPrice": "₱400",
-                "rating": 4.5,
-                "ratingCount": 98,
-                "image": "",
-                "url": "/coming-soon",
-                "type": "eyes"
+                "title": "Hair",
+                "image":"/wp-content/themes/viteseo-noyona/assets/images/noyona-hair.webp",
+                "count":"4 Products"
+            }
+        ]
+    } /-->
+
+    <!-- wp:noyona/values-strip {
+        "align":"full",
+        "backgroundColor":"#EFB5BE",
+        "items":[
+            {
+                "icon":"/wp-content/themes/viteseo-noyona/assets/images/cruelty-free-300x300.webp",
+                "title":"Cruelty-free",
+                "description":"Never tested on animals"
             },
             {
-                "title": "Velvet Matte Lipstick",
-                "description": "Velvet Matte Lipstick delivers a velvety, lightweight matte finish with rich, moisturizing color.",
-                "price": "₱239",
-                "originalPrice": "₱400",
-                "rating": 4.5,
-                "ratingCount": 98,
-                "image": "",
-                "url": "/coming-soon",
-                "type": "lips"
+                "icon":"https://noyonacosmetics.com/wp-content/uploads/2026/02/sustainability-300x300.webp",
+                "title":"Sustainably-sourced",
+                "description":"Responsibly sourced ingredients"
             },
             {
-                "title": "Dual - Powder Foundation",
-                "description": "Provides buildable coverage, helps control oil, and keeps your skin radiant and flawless for up to 12 hours.",
-                "price": "₱349",
-                "originalPrice": "₱450",
-                "rating": 4.8,
-                "ratingCount": 98,
-                "image": "",
-                "url": "/coming-soon",
-                "type": "eyes"
+                "icon":"https://noyonacosmetics.com/wp-content/uploads/2026/02/vegan-300x290.webp",
+                "title":"Vegan",
+                "description":"No animal-derived ingredients"
             },
             {
-                "title": "Velvet Matte Lipstick",
-                "description": "Velvet Matte Lipstick delivers a velvety, lightweight matte finish with rich, moisturizing color.",
-                "price": "₱239",
-                "originalPrice": "₱400",
-                "rating": 4.5,
-                "ratingCount": 98,
-                "image": "",
-                "url": "/coming-soon",
-                "type": "eyes"
+                "icon":"https://noyonacosmetics.com/wp-content/uploads/2026/02/paraben_free-300x300.webp",
+                "title":"Paraben-free",
+                "description":"Formulated without parabens"
             }
         ]
     } /-->
@@ -249,7 +229,7 @@
     <!-- wp:noyona/founder-section {
         "align":"wide",
         "image":{
-            "main": "https://noyonacosmetics.com/wp-content/uploads/2026/02/noyona_founder.webp"
+            "main": "/wp-content/themes/viteseo-noyona/assets/images/noyona_founder.webp"
         },
         "title":"About the <span class=\"founder-accent\">Founder</span>",
         "body":"Noyona Cosmetics was officially registered and founded by Ms. Mary Grace Ong on September 27, 2021. We began as an online business during the height of the pandemic. After recognizing the potential and receiving strong feedback from our customers, we expanded into the FMCG sector in 2023, where we continue to grow today.\n\nFounded in 2021, Noyona Cosmetics and Skin Care Products OPC is a proudly Filipino-owned company committed to making natural, high-quality, and affordable beauty accessible to all.",
@@ -257,6 +237,8 @@
         "buttonUrl":"/about-noyona-essentials"
     } /-->
 
+    <!-- wp:noyona/newsletter-strip {"align":"full"} /-->
+        
 </main>
 <!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
 

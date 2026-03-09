@@ -36,7 +36,6 @@
             overlay.classList.add('is-open');
             overlay.setAttribute('aria-hidden', 'false');
             document.body.classList.add('search-expand-open');
-            document.body.style.overflow = 'hidden';
             setTimeout(function () {
                 input.focus();
             }, 80);
@@ -46,7 +45,6 @@
             overlay.classList.remove('is-open');
             overlay.setAttribute('aria-hidden', 'true');
             document.body.classList.remove('search-expand-open');
-            document.body.style.overflow = '';
             // reset UI so you don't see leftovers next open
             input.value = '';
             if (typeof hideResults === 'function') hideResults();

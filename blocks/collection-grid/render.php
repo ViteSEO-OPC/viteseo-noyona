@@ -6,11 +6,22 @@
 $defaults = array(
     'heading' => '',
     'description' => '',
+    'headingAlign' => 'center',
+    'descriptionAlign' => 'center',
+    'buttonText' => '',
+    'buttonUrl' => '',
+    'buttonAlign' => 'center',
     'items' => array(),
 );
 
 $atts = wp_parse_args($attributes, $defaults);
 $items = $atts['items'];
+$allowed_align = array('left', 'center', 'right');
+$heading_align = in_array($atts['headingAlign'], $allowed_align, true) ? $atts['headingAlign'] : 'center';
+$description_align = in_array($atts['descriptionAlign'], $allowed_align, true) ? $atts['descriptionAlign'] : 'center';
+$button_align = in_array($atts['buttonAlign'], $allowed_align, true) ? $atts['buttonAlign'] : 'center';
+$button_text = isset($atts['buttonText']) ? (string) $atts['buttonText'] : '';
+$button_url = isset($atts['buttonUrl']) ? (string) $atts['buttonUrl'] : '';
 
 if (empty($items)) {
     if (is_admin()) {
@@ -21,17 +32,22 @@ if (empty($items)) {
 ?>
 <div class="wp-block-noyona-collection-grid collection-grid alignwide">
 
-    <div class="collection-grid__header">
+    <div class="collection-grid__header collection-grid__header--heading-<?php echo esc_attr($heading_align); ?> collection-grid__header--desc-<?php echo esc_attr($description_align); ?>">
         <?php if ($atts['heading']): ?>
             <?php
             $heading = (string) $atts['heading'];
             $heading_html = esc_html($heading);
-            $pos = stripos($heading, 'Collections');
-            if ($pos !== false) {
-                $before = substr($heading, 0, $pos);
-                $match = substr($heading, $pos, strlen('Collections'));
-                $after = substr($heading, $pos + strlen('Collections'));
-                $heading_html = esc_html($before) . '<span class="collection-grid__heading-accent">' . esc_html($match) . '</span>' . esc_html($after);
+
+            $accent_words = array('Collections', 'Products');
+            foreach ($accent_words as $accent_word) {
+                $pos = stripos($heading, $accent_word);
+                if ($pos !== false) {
+                    $before = substr($heading, 0, $pos);
+                    $match = substr($heading, $pos, strlen($accent_word));
+                    $after = substr($heading, $pos + strlen($accent_word));
+                    $heading_html = esc_html($before) . '<span class="collection-grid__heading-accent">' . esc_html($match) . '</span>' . esc_html($after);
+                    break;
+                }
             }
             ?>
             <h2 class="collection-grid__heading">
@@ -81,6 +97,14 @@ if (empty($items)) {
             </div>
         <?php endforeach; ?>
     </div>
+
+    <?php if ('' !== trim($button_text)): ?>
+        <div class="collection-grid__cta collection-grid__cta--<?php echo esc_attr($button_align); ?>">
+            <a class="collection-grid__button" href="<?php echo esc_url($button_url ? $button_url : '#'); ?>">
+                <?php echo esc_html($button_text); ?>
+            </a>
+        </div>
+    <?php endif; ?>
 </div>
 
 <script>

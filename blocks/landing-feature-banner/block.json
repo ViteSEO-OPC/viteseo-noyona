@@ -1,0 +1,26 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/landing-feature-banner",
+  "version": "1.0.0",
+  "title": "Landing Feature Banner",
+  "category": "design",
+  "icon": "cover-image",
+  "description": "Full-width landing banner with label, title, subheading, paragraph, and text position.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "label": { "type": "string", "default": "Noyona Essentials" },
+    "title": { "type": "string", "default": "Best Face Makeup" },
+    "subheading": { "type": "string", "default": "Discover Face Makeup Designed for Filipino Skin" },
+    "paragraph": {
+      "type": "string",
+      "default": "Build your everyday glow with lightweight, skin-friendly formulas crafted for tropical weather and morena skin tones."
+    },
+    "textPosition": { "type": "string", "default": "left" }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

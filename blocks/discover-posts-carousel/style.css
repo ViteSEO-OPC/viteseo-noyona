@@ -4,7 +4,7 @@
 
 /* Scope slider accent to this block only (avoid global :root leakage) */
 .carousel-block.discover-carousel {
-  --slider-accent: #E30B5D;
+  --slider-accent: #E199A4;
 }
 
 .carousel-block {
@@ -44,7 +44,7 @@
 .empty-state-inner .filter-reset-btn {
     display: inline-flex;
     padding: 10px 24px;
-    background: #E30B5D;
+    background: #E199A4;
     color: #fff;
     border: none;
     border-radius: 99px;
@@ -91,7 +91,7 @@
 }
 
 .discover-carousel__title-accent {
-  color: #E30B5D;
+  color: #E199A4;
 }
 
 .discover-carousel__subtitle {
@@ -177,7 +177,7 @@
 }
 
 .filter-item.is-active {
-    background: #E30B5D;
+    background: #E199A4;
     color: #fff;
 }
 
@@ -386,7 +386,7 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #E30B5D;
+    background: #E199A4;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     border: 2px solid #fff;
@@ -396,7 +396,7 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #E30B5D;
+    background: #E199A4;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     border: 2px solid #fff;
@@ -568,14 +568,14 @@
 /* icon inside the button */
 .product-card__cart-icon {
   font-size: clamp(1.2rem, 4vw, 1.9rem);
-  color: #E30B5D;
+  color: #E199A4;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .product-card__cart:hover {
-  background: #E30B5D;
+  background: #E199A4;
   transform: translate(20%, 15%);
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
 }
@@ -622,11 +622,11 @@
 
   .product-card__cart-icon {
     font-size: 2.4rem; /* Make icon slightly larger/visible as standalone */
-    color: #E30B5D; /* Softer pink as seen in snapshot */
+    color: #E199A4; /* Softer pink as seen in snapshot */
   }
   
   .product-card__cart:hover .product-card__cart-icon {
-    color: #E30B5D; /* Darker pink on hover */
+    color: #E199A4; /* Darker pink on hover */
   }
 }
 

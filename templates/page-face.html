@@ -1,0 +1,207 @@
+<!-- wp:template-part {"slug":"header"} /-->
+
+<!-- wp:group {"tagName":"main","className":"noyona-shop-archive noyona-face-page","layout":{"inherit":true,"type":"constrained"}} -->
+<main class="wp-block-group noyona-shop-archive noyona-face-page">
+    <!-- wp:group {"align":"wide","className":"noyona-shop-top","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"wrap"}} -->
+    <div class="wp-block-group alignwide noyona-shop-top">
+        <!-- wp:post-title {"level":1,"className":"noyona-shop-title"} /-->
+    </div>
+    <!-- /wp:group -->
+
+    <!-- wp:columns {"align":"wide","className":"noyona-shop-layout"} -->
+    <div class="wp-block-columns alignwide noyona-shop-layout">
+        <!-- wp:column {"width":"28%","className":"noyona-shop-sidebar"} -->
+        <div class="wp-block-column noyona-shop-sidebar" style="flex-basis:28%">
+            <!-- wp:html -->
+            <button type="button" class="noyona-shop-filter-overlay" aria-label="Close filter panel"></button>
+            <!-- /wp:html -->
+            <!-- wp:group {"className":"noyona-shop-filters","layout":{"type":"constrained"}} -->
+            <div id="noyona-shop-filter-panel" class="wp-block-group noyona-shop-filters">
+                <!-- wp:html -->
+                <button type="button" class="noyona-shop-filter-close" aria-label="Close filters">✕</button>
+                <!-- /wp:html -->
+                <!-- wp:html -->
+                <div class="noyona-shop-filter-sections" aria-hidden="true">
+                    <section class="noyona-shop-filter-section">
+                        <h5>Stock Status</h5>
+                        <label><input type="radio" name="noyona-stock-status" checked> In Stock</label>
+                        <label><input type="radio" name="noyona-stock-status"> Out of Stock</label>
+                    </section>
+
+                    <section class="noyona-shop-filter-section">
+                        <h5>Price</h5>
+                        <div class="noyona-shop-filter-price" data-min="0" data-step="150">
+                            <div class="noyona-shop-filter-price-inputs">
+                                <label class="noyona-shop-filter-price-input">
+                                    <span aria-hidden="true">₱</span>
+                                    <input type="number" inputmode="numeric" min="0" step="1" value="0" name="noyona-price-min" aria-label="Minimum price">
+                                </label>
+                                <span class="noyona-shop-filter-price-separator" aria-hidden="true">-</span>
+                                <label class="noyona-shop-filter-price-input">
+                                    <span aria-hidden="true">₱</span>
+                                    <input type="number" inputmode="numeric" min="0" step="1" value="0" name="noyona-price-max" aria-label="Maximum price">
+                                </label>
+                            </div>
+                            <div class="noyona-shop-filter-price-slider" role="group" aria-label="Price range">
+                                <div class="noyona-shop-filter-price-track"></div>
+                                <div class="noyona-shop-filter-price-track-fill"></div>
+                                <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="Minimum price handle"></button>
+                                <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="Maximum price handle"></button>
+                            </div>
+                            <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
+                        </div>
+                    </section>
+
+                    <section class="noyona-shop-filter-section">
+                        <h5>Star Rating</h5>
+                        <label><input type="radio" name="noyona-star-rating"> Bestsellers</label>
+                        <label><input type="radio" name="noyona-star-rating"> Top Rated</label>
+                        <label><input type="radio" name="noyona-star-rating"> High Volume</label>
+                        <label><input type="radio" name="noyona-star-rating"> Customer Favorites</label>
+                        <label><input type="radio" name="noyona-star-rating"> Community Verified</label>
+                    </section>
+                </div>
+                <!-- /wp:html -->
+
+                <!-- wp:group {"className":"noyona-shop-filter-blocks","layout":{"type":"constrained"}} -->
+                <div class="wp-block-group noyona-shop-filter-blocks">
+                    <!-- wp:woocommerce/product-filter-active /-->
+                    <!-- wp:woocommerce/product-filter-stock-status /-->
+                    <!-- wp:woocommerce/product-filter-price /-->
+                    <!-- wp:woocommerce/product-filter-rating /-->
+                </div>
+                <!-- /wp:group -->
+            </div>
+            <!-- /wp:group -->
+        </div>
+        <!-- /wp:column -->
+
+        <!-- wp:column {"width":"72%","className":"noyona-shop-products-column"} -->
+        <div class="wp-block-column noyona-shop-products-column" style="flex-basis:72%">
+            <!-- wp:group {"className":"noyona-shop-toolbar","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"wrap"}} -->
+            <div class="wp-block-group noyona-shop-toolbar">
+                <!-- wp:woocommerce/product-results-count {"className":"noyona-shop-count"} /-->
+
+                <!-- wp:group {"className":"noyona-shop-toolbar-right","layout":{"type":"flex","verticalAlignment":"center","justifyContent":"right","flexWrap":"nowrap"}} -->
+                <div class="wp-block-group noyona-shop-toolbar-right">
+                    <!-- wp:html -->
+                    <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
+                        <span class="noyona-shop-view-label" style="color: #e11a63; font-weight: 600; font-size: 14px;">View As</span>
+                        <div class="noyona-shop-view-toggle" aria-label="View">
+                            <button type="button" class="is-active" data-shop-view="grid" aria-pressed="true">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
+                            </button>
+                            <button type="button" data-shop-view="list" aria-pressed="false">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h18v4H3z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /wp:html -->
+
+                    <!-- wp:html -->
+                    <button type="button" class="noyona-shop-filter-toggle" aria-expanded="false" aria-controls="noyona-shop-filter-panel">Filter</button>
+                    <!-- /wp:html -->
+
+                    <!-- wp:woocommerce/catalog-sorting {"className":"noyona-shop-sort"} /-->
+                </div>
+                <!-- /wp:group -->
+            </div>
+            <!-- /wp:group -->
+
+            <!-- wp:woocommerce/product-collection {"queryId":1,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","outofstock","onbackorder"],"taxQuery":[{"taxonomy":"product_cat","field":"slug","terms":["face"],"operator":"IN"}],"isProductCollectionBlock":true,"perPage":4,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false},"tagName":"div","dimensions":{"widthType":"fill","fixedWidth":""},"displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},"convertedFromProducts":false,"queryContextIncludes":["collection"],"className":"noyona-shop-products"} -->
+            <div class="wp-block-woocommerce-product-collection noyona-shop-products">
+                <!-- wp:woocommerce/product-template -->
+                <!-- wp:woocommerce/product-image {"showSaleBadge":true,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
+                <!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
+                <!-- /wp:woocommerce/product-image -->
+                <!-- wp:post-title {"level":3,"isLink":true,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title","style":{"typography":{"lineHeight":"1.25"}}} /-->
+                <!-- wp:post-excerpt {"excerptLength":22,"showMoreOnNewLine":false} /-->
+                <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+                <!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+                <!-- /wp:woocommerce/product-template -->
+
+                <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
+                <!-- wp:query-pagination-previous /-->
+                <!-- wp:query-pagination-numbers /-->
+                <!-- wp:query-pagination-next /-->
+                <!-- /wp:query-pagination -->
+
+                <!-- wp:woocommerce/product-collection-no-results -->
+                <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","flexWrap":"wrap"}} -->
+                <div class="wp-block-group">
+                    <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"30px","fontWeight":"700"}},"textColor":"vivid-pink-cyan"} -->
+                    <p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">Coming Soon</p>
+                    <!-- /wp:paragraph -->
+                </div>
+                <!-- /wp:group -->
+                <!-- /wp:woocommerce/product-collection-no-results -->
+            </div>
+            <!-- /wp:woocommerce/product-collection -->
+        </div>
+        <!-- /wp:column -->
+    </div>
+    <!-- /wp:columns -->
+
+    <!-- wp:noyona/landing-feature-banner {
+        "align":"full",
+        "label":"Noyona Essentials",
+        "title":"Best Face Makeup",
+        "subheading":"Discover Face Makeup Designed for <span class=\"noyona-landing-feature-banner__subheading-accent\">Filipino Skin</span>",
+        "paragraph":"If you’ve ever searched for makeup that suits morena skin or survives Manila’s humidity, you’ve likely struggled with finding the right formula. At Noyona Essentials, face makeup means satin foundations, sweat-proof powders, and climate-adapted concealers crafted specifically for Filipino skin tones and tropical conditions. \n\n Our essentials foundation, concealer, and powder work together to create a flawless, long-lasting look. From seamless coverage to humidity-resistant finishes, each product is designed to help you achieve your perfect everyday glow.",
+        "textPosition":"left"
+    } /-->
+
+    <!-- wp:noyona/types-cards {
+     "align":"full",
+     "title":"Types of Face Makeup",
+     "cards":[
+        {
+            "imageId":0,
+            "image":"",
+            "title":"Foundation",
+            "text":"Provides an even base and smooth skin tone, best for daily wear or special occasions, with Noyona Liquid Satin Foundation for natural glow or Liquid Matte Foundation for oil control in humid climates."
+        },
+        {
+            "imageId":0,
+            "image":"",
+            "title":"Concealer",
+            "text":"Covers blemishes, dark circles, and uneven skin tone, ideal for under-eye brightening or spot correction, using Liquid Satin Concealer or Soft Matte Concealer, suitable for normal to combination skin."
+        },
+        {
+            "imageId":0,
+            "image":"",
+            "title":"Powder",
+            "text":"Sets foundation and concealer to control shine and maintain makeup all day, perfect for touch-ups in humid conditions, with Dual-Use Powder Foundation for on-the-go refresh."
+        }
+    ]} /-->
+
+    <!-- wp:noyona/benefits-strip {
+      "align":"full",
+      "title":"Why Noyona Face Makeup Work For You",
+      "backgroundColor":"#E9A3AD",
+      "items":[
+        {
+          "iconClass":"fa-solid fa-shield-heart",
+          "title":"Safe for Sensitive Skin",
+          "description":"All Noyona foundations and concealers are hypoallergenic and dermatologist-tested, so they’re gentle on even the most sensitive skin."
+        },
+        {
+          "iconClass":"fa-regular fa-clock",
+          "title":"Long-Lasting in Humid Conditions",
+          "description":"Sweat-proof formulas keep your makeup fresh for up to 12 hours, making them ideal for tropical weather and busy Manila commutes."
+        },
+        {
+          "iconClass":"fa-solid fa-wand-magic-sparkles",
+          "title":"On-the-Go Touch-Ups",
+          "description":"allows you to refresh your look anytime, anywhere — perfect for events, fiestas, or a long day out."
+        }
+      ]
+    } /-->
+
+    <!-- wp:html -->
+    <button type="button" class="noyona-scroll-top" aria-label="Scroll to top">↑</button>
+    <!-- /wp:html -->
+</main>
+<!-- /wp:group -->#E199A4
+
+<!-- wp:template-part {"slug":"footer"} /-->

@@ -242,6 +242,7 @@
     var extraFilterList = wrapper.querySelector(".nsl-v2-extra-filter-list");
     var storeGrid = wrapper.querySelector(".nsl-v2-store-grid");
     var storeCount = wrapper.querySelector(".nsl-v2-store-count");
+    var storePagination = wrapper.querySelector(".nsl-v2-store-pagination");
     var useLocationBtn = wrapper.querySelector(".nsl-v2-use-location");
     var reviewModal = document.getElementById("nsl-v2-review-modal");
     var reviewModalPostId = document.getElementById("nsl-v2-comment-post-id");
@@ -268,6 +269,8 @@
     var activeRegion = "all";
     var activeQuickFilter = "all";
     var selectedStoreId = null;
+    var currentPage = 1;
+    var pageSize = 24;
     var routeMode = "driving";
     var userLocation = null;
     var userMarker = null;
@@ -613,10 +616,62 @@
         .join("");
     }
 
+    function renderPagination(totalItems, totalPages) {
+      if (!storePagination) return;
+      if (totalItems <= pageSize || totalPages <= 1) {
+        storePagination.innerHTML = "";
+        return;
+      }
+
+      var html = "";
+      html +=
+        '<button type="button" class="nsl-v2-store-pagination__btn" data-page-nav="prev"' +
+        (currentPage <= 1 ? " disabled" : "") +
+        '>Prev</button>';
+
+      var windowStart = Math.max(1, currentPage - 2);
+      var windowEnd = Math.min(totalPages, windowStart + 4);
+      windowStart = Math.max(1, windowEnd - 4);
+      for (var pageNo = windowStart; pageNo <= windowEnd; pageNo += 1) {
+        html +=
+          '<button type="button" class="nsl-v2-store-pagination__btn' +
+          (pageNo === currentPage ? " is-active" : "") +
+          '" data-page="' +
+          pageNo +
+          '">' +
+          pageNo +
+          "</button>";
+      }
+
+      html +=
+        '<button type="button" class="nsl-v2-store-pagination__btn" data-page-nav="next"' +
+        (currentPage >= totalPages ? " disabled" : "") +
+        '>Next</button>';
+
+      storePagination.innerHTML = html;
+    }
+
     function renderStoresAndMap() {
       var filtered = getFullyFilteredStores();
-      storeCount.textContent = filtered.length + " store(s) found";
-      storeGrid.innerHTML = filtered.length ? filtered.map(formatStoreCard).join("") : '<div class="nsl-v2-empty">No stores match your filters.</div>';
+      var totalItems = filtered.length;
+      var totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+      if (currentPage > totalPages) {
+        currentPage = totalPages;
+      }
+      if (currentPage < 1) {
+        currentPage = 1;
+      }
+      var startIndex = (currentPage - 1) * pageSize;
+      var endIndex = startIndex + pageSize;
+      var paged = filtered.slice(startIndex, endIndex);
+
+      storeCount.textContent = totalItems + " store(s) found";
+      if (totalItems > 0) {
+        storeCount.textContent += " - Page " + currentPage + " of " + totalPages;
+      }
+
+      storeGrid.innerHTML = paged.length ? paged.map(formatStoreCard).join("") : '<div class="nsl-v2-empty">No stores match your filters.</div>';
+      renderPagination(totalItems, totalPages);
 
       markerLayer.clearLayers();
       filtered.forEach(function (store) {
@@ -695,6 +750,7 @@
         selectedStoreId = null;
         clearRoute();
       }
+      currentPage = 1;
       renderSuggestions();
       renderFilters();
       renderExtraFilters();
@@ -725,6 +781,7 @@
       if (filterBtn) {
         activeIsland = filterBtn.getAttribute("data-island") || "all";
         activeRegion = filterBtn.getAttribute("data-region") || "all";
+        currentPage = 1;
         renderFilters();
         renderExtraFilters();
         renderStoresAndMap();
@@ -744,6 +801,7 @@
               setUserMarker(pos.coords.latitude, pos.coords.longitude);
               map.flyTo([pos.coords.latitude, pos.coords.longitude], 14, { duration: 1 });
               activeQuickFilter = "near";
+              currentPage = 1;
               renderExtraFilters();
               renderStoresAndMap();
             },
@@ -755,8 +813,32 @@
           return;
         }
         activeQuickFilter = nextQuickFilter;
+        currentPage = 1;
         renderExtraFilters();
         renderStoresAndMap();
+        return;
+      }
+
+      var pageBtn = event.target.closest(".nsl-v2-store-pagination__btn[data-page]");
+      if (pageBtn) {
+        var targetPage = parseInt(pageBtn.getAttribute("data-page") || "1", 10);
+        if (targetPage > 0 && targetPage !== currentPage) {
+          currentPage = targetPage;
+          renderStoresAndMap();
+          storeGrid.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return;
+      }
+
+      var pageNavBtn = event.target.closest(".nsl-v2-store-pagination__btn[data-page-nav]");
+      if (pageNavBtn && !pageNavBtn.disabled) {
+        var direction = pageNavBtn.getAttribute("data-page-nav");
+        currentPage += direction === "next" ? 1 : -1;
+        if (currentPage < 1) {
+          currentPage = 1;
+        }
+        renderStoresAndMap();
+        storeGrid.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
 

@@ -1,0 +1,29 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/values-strip",
+  "version": "1.0.0",
+  "title": "Values Strip",
+  "category": "design",
+  "icon": "awards",
+  "description": "Reusable values strip with icon, title, and description items.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "backgroundColor": {
+      "type": "string",
+      "default": "#EFB5BE"
+    },
+    "items": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}
