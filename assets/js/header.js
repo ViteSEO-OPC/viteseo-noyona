@@ -110,6 +110,14 @@
   }
 
   function initMiniCartDynamicUi() {
+    const resolveCheckoutUrl = () => {
+      const configuredUrl = (window.noyonaHeader && window.noyonaHeader.checkoutUrl)
+        ? String(window.noyonaHeader.checkoutUrl)
+        : '';
+      if (configuredUrl) return configuredUrl;
+      return '/checkout/';
+    };
+
     const formatPeso = (value) => {
       const amount = Number(value) || 0;
       return new Intl.NumberFormat('en-PH', {
@@ -182,9 +190,7 @@
 
       const checkoutBtn = root.querySelector('.wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button');
       if (!checkoutBtn) return;
-      const checkoutUrl = (window.noyonaHeader && window.noyonaHeader.checkoutUrl)
-        ? String(window.noyonaHeader.checkoutUrl)
-        : '/checkout/';
+      const checkoutUrl = resolveCheckoutUrl();
       checkoutBtn.innerHTML = '<span>Checkout</span><span class="noyona-mini-cart-checkout-arrow" aria-hidden="true">→</span>';
       if (checkoutBtn.tagName === 'A') {
         checkoutBtn.setAttribute('href', checkoutUrl);
@@ -215,7 +221,17 @@
           if (!checkbox.checked) {
             event.preventDefault();
             event.stopPropagation();
+            return;
           }
+
+          const checkoutUrl = resolveCheckoutUrl();
+          if (checkoutBtn.tagName === 'A') {
+            checkoutBtn.setAttribute('href', checkoutUrl);
+            return;
+          }
+
+          event.preventDefault();
+          window.location.assign(checkoutUrl);
         });
         checkoutBtn.dataset.noyonaGuardBound = '1';
       }

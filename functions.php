@@ -1546,6 +1546,10 @@ add_filter('pre_get_document_title', function ($title) {
     return $title;
 });
 
+add_filter( 'woocommerce_get_checkout_url', function ( $url ) {
+    return esc_url_raw( home_url( '/checkout/' ) );
+}, 99 );
+
 /* =================================================
  * SEO: META DESCRIPTIONS
  * ================================================= */
