@@ -488,8 +488,15 @@
   }
 
   function initBrandStripFallback() {
-    const strip = document.querySelector('.header-brand-strip');
-    if (!strip) return;
+    let strip = document.querySelector('.header-brand-strip');
+    if (!strip) {
+      const siteHeader = document.querySelector('.site-header');
+      if (!siteHeader || !siteHeader.parentNode) return;
+
+      strip = document.createElement('div');
+      strip.className = 'wp-block-group header-brand-strip';
+      siteHeader.parentNode.insertBefore(strip, siteHeader);
+    }
 
     const hasCarousel = strip.querySelector(
       '.wp-block-noyona-brand-carousel, .brand-carousel, .brand-carousel__track'

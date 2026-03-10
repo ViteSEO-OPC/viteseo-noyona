@@ -268,6 +268,63 @@ function noyona_flush_rewrite_rules_on_switch() {
     flush_rewrite_rules();
 }
 
+/**
+ * One-time safeguard:
+ * Remove stale DB-saved block-theme header template parts so the theme file
+ * parts/header.html is used consistently (prevents production/local mismatch).
+ */
+add_action( 'init', 'noyona_one_time_reset_header_template_part_override', 30 );
+function noyona_one_time_reset_header_template_part_override() {
+    $safeguard_version = '1';
+    $option_key        = 'noyona_header_template_part_safeguard_version';
+    if ( $safeguard_version === get_option( $option_key, '' ) ) {
+        return;
+    }
+
+    if ( ! post_type_exists( 'wp_template_part' ) ) {
+        update_option( $option_key, $safeguard_version, false );
+        return;
+    }
+
+    $theme_terms = array_values(
+        array_unique(
+            array_filter(
+                array(
+                    get_stylesheet(),
+                    get_template(),
+                )
+            )
+        )
+    );
+
+    $query_args = array(
+        'post_type'      => 'wp_template_part',
+        'post_status'    => 'any',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'name'           => 'header',
+    );
+
+    if ( ! empty( $theme_terms ) ) {
+        $query_args['tax_query'] = array(
+            array(
+                'taxonomy' => 'wp_theme',
+                'field'    => 'name',
+                'terms'    => $theme_terms,
+            ),
+        );
+    }
+
+    $header_template_part_ids = get_posts( $query_args );
+    if ( ! empty( $header_template_part_ids ) ) {
+        foreach ( $header_template_part_ids as $template_part_id ) {
+            wp_delete_post( (int) $template_part_id, true );
+        }
+    }
+
+    update_option( $option_key, $safeguard_version, false );
+}
+
 add_action( 'init', 'noyona_maybe_flush_shop_category_rewrites', 20 );
 function noyona_maybe_flush_shop_category_rewrites() {
     $version = get_option( 'noyona_shop_category_rewrite_version', '' );
