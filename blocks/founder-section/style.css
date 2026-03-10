@@ -4,7 +4,7 @@
     display: flex;
     flex-wrap: nowrap;
     gap: clamp(1rem, 2.5vw, 2.25rem);
-    align-items: center;
+    align-items: stretch;
     width: 100%;
     box-sizing: border-box;
     overflow: hidden;
@@ -22,7 +22,8 @@
     max-width: none;
     min-width: 0;
     display: flex;
-    align-items: center;
+    align-items: stretch;
+    align-self: stretch;
   
     /* Default (image on LEFT): push image toward the text (to the right) */
     justify-content: flex-end;
@@ -31,7 +32,8 @@
   .noyona-founder-section__image-main {
     position: relative;
     width: min(588px, 100%);
-    aspect-ratio: 600 / 600;
+    height: 100%;
+    min-height: 100%;
     margin: 0;
     /* background: #E5989B !important; */
     border-radius: 24px;
@@ -82,7 +84,8 @@
     padding-right: clamp(16px, 2.5vw, 36px);
     padding-left: clamp(16px, 2.5vw, 28px);
   
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 0.25rem;
   
     /* Default: stretch children so text uses the full column width */
     align-items: stretch;
@@ -148,7 +151,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    margin-top: 1rem;
+    margin-top: auto;
     width: fit-content;
     padding: 10px 20px;
     border-radius: 16px;
@@ -173,6 +176,23 @@
   /* =========================
      Responsive
   ========================= */
+
+  @media (max-width: 1240px) {
+    .noyona-founder-section {
+      gap: clamp(1rem, 2.2vw, 1.75rem);
+    }
+
+    .noyona-founder-section__content-column {
+      padding-top: clamp(40px, 8vw, 84px);
+      padding-bottom: clamp(36px, 7vw, 80px);
+      padding-left: clamp(14px, 2.3vw, 22px);
+      padding-right: clamp(14px, 2.3vw, 28px);
+    }
+
+    .noyona-founder-section__title {
+      font-size: clamp(30px, 4.8vw, 48px);
+    }
+  }
   
   @media (max-width: 1499px) {
     .noyona-founder-section {
@@ -192,13 +212,27 @@
     .noyona-founder-section__image-column {
       margin-bottom: 0;
       order: 0;
-      justify-content: center; /* better centered when stacked */
+      justify-content: center !important; /* centered for left/right variants */
+      align-items: center;
+    }
+
+    .noyona-founder-section--image-right .noyona-founder-section__image-column {
+      justify-content: center !important;
+    }
+
+    .noyona-founder-section__image-main {
+      width: min(588px, 92vw);
+      margin-left: auto;
+      margin-right: auto;
+      aspect-ratio: 588 / 602;
     }
   
     .noyona-founder-section__content-column {
       align-self: auto;
       padding-top: clamp(28px, 6vw, 60px);
       padding-bottom: clamp(24px, 6vw, 60px);
+      justify-content: flex-start;
+      gap: 0;
     }
   
     /* when stacked, remove the “push toward image” behavior */
@@ -207,9 +241,6 @@
       margin-left: 0;
     }
   
-    .noyona-founder-section__image-main {
-      aspect-ratio: 588 / 602;
-    }
   }
   
   @media (max-width: 960px) {
@@ -221,6 +252,8 @@
       order: -1;
       margin-bottom: 0;
       z-index: 1;
+      justify-content: center !important;
+      align-items: center;
     }
   
     .noyona-founder-section__image-icon {
@@ -235,6 +268,43 @@
       padding-left: 16px;
       padding-right: 16px;
       background: #ffffff;
+    }
+
+    .noyona-founder-section__title {
+      margin-bottom: 0.9rem;
+      font-size: clamp(28px, 8vw, 40px);
+    }
+
+    .noyona-founder-section__body p {
+      font-size: clamp(15px, 3.6vw, 18px);
+      line-height: 1.55;
+    }
+
+    .noyona-founder-section__button {
+      font-size: clamp(16px, 4.2vw, 20px);
+      padding: 9px 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .noyona-founder-section {
+      padding-top: 32px !important;
+      padding-bottom: 14px !important;
+      gap: 0.75rem;
+    }
+
+    .noyona-founder-section__image-main {
+      width: min(520px, 94vw);
+      border-radius: 18px;
+    }
+
+    .noyona-founder-section__content-column {
+      max-width: 100%;
+      padding-top: 16px;
+      padding-bottom: 10px;
+      padding-left: 8px;
+      padding-right: 8px;
+      justify-content: flex-start;
     }
   }
   
