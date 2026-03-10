@@ -1306,6 +1306,38 @@ function noyona_normalize_header_rendered_markup( $block_content, $block ) {
     return $block_content;
 }
 
+add_filter( 'render_block', 'noyona_force_minicart_checkout_link', 30, 2 );
+function noyona_force_minicart_checkout_link( $block_content, $block ) {
+    if ( is_admin() || empty( $block['blockName'] ) ) {
+        return $block_content;
+    }
+
+    if ( 'woocommerce/mini-cart-checkout-button-block' !== $block['blockName'] ) {
+        return $block_content;
+    }
+
+    if ( false === strpos( (string) $block_content, 'wp-block-woocommerce-mini-cart-checkout-button-block' ) ) {
+        return $block_content;
+    }
+
+    $checkout_url = esc_url( home_url( '/checkout/' ) );
+    $pattern      = '#<a\b[^>]*class=(["\'])[^"\']*\bwp-block-woocommerce-mini-cart-checkout-button-block\b[^"\']*\1[^>]*>#i';
+
+    return preg_replace_callback(
+        $pattern,
+        function ( $matches ) use ( $checkout_url ) {
+            $anchor = $matches[0];
+            if ( preg_match( '#\bhref=(["\']).*?\1#i', $anchor ) ) {
+                return preg_replace( '#\bhref=(["\']).*?\1#i', 'href="' . $checkout_url . '"', $anchor, 1 );
+            }
+
+            return preg_replace( '#<a\b#i', '<a href="' . $checkout_url . '"', $anchor, 1 );
+        },
+        (string) $block_content,
+        1
+    );
+}
+
 /* =================================================
  * UX / MISC
  * ================================================= */
