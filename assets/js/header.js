@@ -182,7 +182,13 @@
 
       const checkoutBtn = root.querySelector('.wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button');
       if (!checkoutBtn) return;
+      const checkoutUrl = (window.noyonaHeader && window.noyonaHeader.checkoutUrl)
+        ? String(window.noyonaHeader.checkoutUrl)
+        : '/checkout/';
       checkoutBtn.innerHTML = '<span>Checkout</span><span class="noyona-mini-cart-checkout-arrow" aria-hidden="true">→</span>';
+      if (checkoutBtn.tagName === 'A') {
+        checkoutBtn.setAttribute('href', checkoutUrl);
+      }
       checkoutBtn.dataset.noyonaLabeled = '1';
     };
 

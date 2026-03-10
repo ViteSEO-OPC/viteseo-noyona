@@ -1,326 +1,266 @@
 .noyona-founder-section {
-    padding-left: var(--page-gutter-left, 1rem);
-    padding-right: var(--page-gutter-right, 1rem);
-    display: flex;
-    flex-wrap: nowrap;
-    gap: clamp(1rem, 2.5vw, 2.25rem);
-    align-items: stretch;
-    width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-    padding-bottom: 20px !important;
-    padding-top: 50px !important;
-  }
-  
-  /* =========================
-     Image column
-  ========================= */
-  
-  .noyona-founder-section__image-column {
-    position: relative;
-    flex: 3 1 0;
-    max-width: none;
-    min-width: 0;
-    display: flex;
-    align-items: stretch;
-    align-self: stretch;
-  
-    /* Default (image on LEFT): push image toward the text (to the right) */
-    justify-content: flex-end;
-  }
-  
-  .noyona-founder-section__image-main {
-    position: relative;
-    width: min(588px, 100%);
-    height: 100%;
-    min-height: 100%;
-    margin: 0;
-    /* background: #E5989B !important; */
-    border-radius: 24px;
-    overflow: hidden;
-    display: block;
-  }
-  
-  .noyona-founder-section__image-main img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  /* Icon in top area of the image container */
-  .noyona-founder-section__image-icon {
-    position: absolute;
-    top: clamp(-18px, -2vw, -8px);
-    right: clamp(8px, 2vw, 24px);
-    transform: translate(35%, -35%);
-    background: transparent;
-    width: clamp(120px, 20vw, 220px);
-    z-index: 2;
-  }
-  
-  .noyona-founder-section__image-icon img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-  
-  /* =========================
-     Content column
-  ========================= */
-  
-  .noyona-founder-section__content-column {
-    flex: 7 1 0;
-    max-width: none;
-    min-width: 0;
-    border-radius: 12px;
-    background: #ffffff;
-    box-sizing: border-box;
-    display: flex;
+  padding-left: var(--page-gutter-left, 1rem);
+  padding-right: var(--page-gutter-right, 1rem);
+  display: flex;
+  flex-wrap: nowrap;
+  gap: clamp(1rem, 2.5vw, 2.25rem);
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding-bottom: 20px !important;
+  padding-top: 50px !important;
+}
+
+/* =========================
+   Image column
+========================= */
+
+.noyona-founder-section__image-column {
+  position: relative;
+  flex: 3 1 0;
+  max-width: none;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+
+  /* Default (image on LEFT): push image toward the text (to the right) */
+  justify-content: flex-end;
+}
+
+.noyona-founder-section__image-main {
+  position: relative;
+  width: min(588px, 100%);
+  aspect-ratio: 600 / 600;
+  margin: 0;
+  /* background: #E5989B !important; */
+  border-radius: 24px;
+  overflow: hidden;
+  display: block;
+}
+
+.noyona-founder-section__image-main img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Icon in top area of the image container */
+.noyona-founder-section__image-icon {
+  position: absolute;
+  top: clamp(-18px, -2vw, -8px);
+  right: clamp(8px, 2vw, 24px);
+  transform: translate(35%, -35%);
+  background: transparent;
+  width: clamp(120px, 20vw, 220px);
+  z-index: 2;
+}
+
+.noyona-founder-section__image-icon img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* =========================
+   Content column
+========================= */
+
+.noyona-founder-section__content-column {
+  flex: 7 1 0;
+  max-width: none;
+  min-width: 0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  padding-top: clamp(60px, 10vw, 120px);
+  padding-bottom: clamp(60px, 10vw, 120px);
+  padding-right: clamp(16px, 2.5vw, 36px);
+  padding-left: clamp(16px, 2.5vw, 28px);
+
+  justify-content: center;
+
+  /* Default: stretch children so text uses the full column width */
+  align-items: stretch;
+}
+
+/* =========================
+   IMAGE RIGHT modifier
+   (keeps things side-by-side + prevents tiny text)
+========================= */
+
+.noyona-founder-section--image-right {
+  flex-direction: row-reverse;
+}
+
+/* When image is on the right, pull image toward the content (not far edge) */
+.noyona-founder-section--image-right .noyona-founder-section__image-column {
+  justify-content: flex-start;
+}
+
+/* Keep content stretching (IMPORTANT: prevents “tiny text block”) */
+.noyona-founder-section--image-right .noyona-founder-section__content-column {
+  align-items: stretch;
+  text-align: left;
+}
+
+/* IMAGE RIGHT: keep text aligned to the left guide line */
+.noyona-founder-section--image-right .noyona-founder-section__content-column{
+  align-items: stretch;
+}
+
+.noyona-founder-section--image-right .noyona-founder-section__content-column > *{
+  width: 100%;
+  /* max-width: 780px; */
+  margin-left: 0;
+  margin-right: auto; /* <-- keeps it left, instead of pushing it right */
+}
+
+/* =========================
+   Typography
+========================= */
+
+.noyona-founder-section__title {
+  margin: 0 0 1.25rem;
+  font-size: clamp(32px, 5vw, 55px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.noyona-founder-section__body p {
+  margin: 0 0 0.75rem;
+  line-height: 1.6;
+  font-size: clamp(16px, 1.5vw, 20px);
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-weight: 400;
+  text-align: left;
+}
+
+/* =========================
+   CTA button
+========================= */
+
+.noyona-founder-section__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  width: fit-content;
+  padding: 10px 20px;
+  border-radius: 16px;
+  text-decoration: none;
+  font-size: clamp(18px, 1.4vw, 24px);
+  background: #E199A4;
+  color: #ffffff;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+.noyona-founder-section__button:hover,
+.noyona-founder-section__button:focus-visible {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.noyona-founder-section__button-icon {
+  display: inline-block;
+}
+
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 1499px) {
+  .noyona-founder-section {
     flex-direction: column;
-    align-self: stretch;
-    padding-top: clamp(60px, 10vw, 120px);
-    padding-bottom: clamp(60px, 10vw, 120px);
-    padding-right: clamp(16px, 2.5vw, 36px);
-    padding-left: clamp(16px, 2.5vw, 28px);
-  
-    justify-content: flex-start;
-    gap: 0.25rem;
-  
-    /* Default: stretch children so text uses the full column width */
-    align-items: stretch;
-  }
-  
-  /* =========================
-     IMAGE RIGHT modifier
-     (keeps things side-by-side + prevents tiny text)
-  ========================= */
-  
-  .noyona-founder-section--image-right {
-    flex-direction: row-reverse;
-  }
-  
-  /* When image is on the right, pull image toward the content (not far edge) */
-  .noyona-founder-section--image-right .noyona-founder-section__image-column {
-    justify-content: flex-start;
-  }
-  
-  /* Keep content stretching (IMPORTANT: prevents “tiny text block”) */
-  .noyona-founder-section--image-right .noyona-founder-section__content-column {
-    align-items: stretch;
-    text-align: left;
-  }
-  
-  /* IMAGE RIGHT: keep text aligned to the left guide line */
-  .noyona-founder-section--image-right .noyona-founder-section__content-column{
-    align-items: stretch;
-  }
-  
-  .noyona-founder-section--image-right .noyona-founder-section__content-column > *{
-    width: 100%;
-    /* max-width: 780px; */
-    margin-left: 0;
-    margin-right: auto; /* <-- keeps it left, instead of pushing it right */
-  }
-  
-  /* =========================
-     Typography
-  ========================= */
-  
-  .noyona-founder-section__title {
-    margin: 0 0 1.25rem;
-    font-size: clamp(32px, 5vw, 55px);
-    font-weight: 700;
-    line-height: 1.1;
-  }
-  
-  .noyona-founder-section__body p {
-    margin: 0 0 0.75rem;
-    line-height: 1.6;
-    font-size: clamp(16px, 1.5vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    font-weight: 400;
-    text-align: left;
-  }
-  
-  /* =========================
-     CTA button
-  ========================= */
-  
-  .noyona-founder-section__button {
-    display: inline-flex;
+    gap: 2rem;
     align-items: center;
-    gap: 0.6rem;
-    margin-top: auto;
-    width: fit-content;
-    padding: 10px 20px;
-    border-radius: 16px;
-    text-decoration: none;
-    font-size: clamp(18px, 1.4vw, 24px);
-    background: #E199A4;
-    color: #ffffff;
-    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
-  }
-  
-  .noyona-founder-section__button:hover,
-  .noyona-founder-section__button:focus-visible {
-    filter: brightness(1.04);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  }
-  
-  .noyona-founder-section__button-icon {
-    display: inline-block;
-  }
-  
-  /* =========================
-     Responsive
-  ========================= */
-
-  @media (max-width: 1240px) {
-    .noyona-founder-section {
-      gap: clamp(1rem, 2.2vw, 1.75rem);
-    }
-
-    .noyona-founder-section__content-column {
-      padding-top: clamp(40px, 8vw, 84px);
-      padding-bottom: clamp(36px, 7vw, 80px);
-      padding-left: clamp(14px, 2.3vw, 22px);
-      padding-right: clamp(14px, 2.3vw, 28px);
-    }
-
-    .noyona-founder-section__title {
-      font-size: clamp(30px, 4.8vw, 48px);
-    }
-  }
-  
-  @media (max-width: 1499px) {
-    .noyona-founder-section {
-      flex-direction: column;
-      gap: 2rem;
-      align-items: center;
-      text-align: center;
-    }
-  
-    .noyona-founder-section__image-column,
-    .noyona-founder-section__content-column {
-      width: 100%;
-      max-width: min(720px, 100%);
-      flex: auto;
-    }
-  
-    .noyona-founder-section__image-column {
-      margin-bottom: 0;
-      order: 0;
-      justify-content: center !important; /* centered for left/right variants */
-      align-items: center;
-    }
-
-    .noyona-founder-section--image-right .noyona-founder-section__image-column {
-      justify-content: center !important;
-    }
-
-    .noyona-founder-section__image-main {
-      width: min(588px, 92vw);
-      margin-left: auto;
-      margin-right: auto;
-      aspect-ratio: 588 / 602;
-    }
-  
-    .noyona-founder-section__content-column {
-      align-self: auto;
-      padding-top: clamp(28px, 6vw, 60px);
-      padding-bottom: clamp(24px, 6vw, 60px);
-      justify-content: flex-start;
-      gap: 0;
-    }
-  
-    /* when stacked, remove the “push toward image” behavior */
-    .noyona-founder-section--image-right .noyona-founder-section__content-column > * {
-      max-width: 100%;
-      margin-left: 0;
-    }
-  
-  }
-  
-  @media (max-width: 960px) {
-    .noyona-founder-section {
-      gap: 1rem;
-    }
-  
-    .noyona-founder-section__image-column {
-      order: -1;
-      margin-bottom: 0;
-      z-index: 1;
-      justify-content: center !important;
-      align-items: center;
-    }
-  
-    .noyona-founder-section__image-icon {
-      top: clamp(-14px, -2vw, -6px);
-      right: clamp(6px, 2vw, 18px);
-      left: auto;
-    }
-  
-    .noyona-founder-section__content-column {
-      padding-top: 22px;
-      padding-bottom: 18px;
-      padding-left: 16px;
-      padding-right: 16px;
-      background: #ffffff;
-    }
-
-    .noyona-founder-section__title {
-      margin-bottom: 0.9rem;
-      font-size: clamp(28px, 8vw, 40px);
-    }
-
-    .noyona-founder-section__body p {
-      font-size: clamp(15px, 3.6vw, 18px);
-      line-height: 1.55;
-    }
-
-    .noyona-founder-section__button {
-      font-size: clamp(16px, 4.2vw, 20px);
-      padding: 9px 16px;
-    }
+    text-align: center;
   }
 
-  @media (max-width: 640px) {
-    .noyona-founder-section {
-      padding-top: 32px !important;
-      padding-bottom: 14px !important;
-      gap: 0.75rem;
-    }
+  .noyona-founder-section__image-column,
+  .noyona-founder-section__content-column {
+    width: 100%;
+    max-width: min(720px, 100%);
+    flex: auto;
+  }
 
-    .noyona-founder-section__image-main {
-      width: min(520px, 94vw);
-      border-radius: 18px;
-    }
+  .noyona-founder-section__image-column {
+    margin-bottom: 0;
+    order: 0;
+    justify-content: center; /* better centered when stacked */
+  }
 
-    .noyona-founder-section__content-column {
-      max-width: 100%;
-      padding-top: 16px;
-      padding-bottom: 10px;
-      padding-left: 8px;
-      padding-right: 8px;
-      justify-content: flex-start;
-    }
+  .noyona-founder-section__content-column {
+    align-self: auto;
+    padding-top: clamp(28px, 6vw, 60px);
+    padding-bottom: clamp(24px, 6vw, 60px);
   }
-  
-  /* =========================
-     Helpers
-  ========================= */
-  
-  .noyona-founder-section__body .founder-accent {
-    color: #E199A4;
-    font-weight: 700;
+
+  /* when stacked, remove the “push toward image” behavior */
+  .noyona-founder-section--image-right .noyona-founder-section__content-column > * {
+    max-width: 100%;
+    margin-left: 0;
   }
-  
-  .noyona-founder-section__body .founder-bold {
-    font-weight: 700;
+
+  .noyona-founder-section__image-main {
+    aspect-ratio: 602 / 602;
   }
-  
-  .noyona-founder-section__title .founder-accent {
-    color: #E199A4;
+
+  /* stacked layout: keep image and title centered for both variants */
+  .noyona-founder-section--image-right .noyona-founder-section__image-column {
+    justify-content: center;
   }
+
+  .noyona-founder-section__title,
+  .noyona-founder-section--image-right .noyona-founder-section__title {
+    text-align: center;
+  }
+}
+
+@media (max-width: 960px) {
+  .noyona-founder-section {
+    gap: 1rem;
+  }
+
+  .noyona-founder-section__image-column {
+    order: -1;
+    margin-bottom: 0;
+    z-index: 1;
+  }
+
+  .noyona-founder-section__image-icon {
+    top: clamp(-14px, -2vw, -6px);
+    right: clamp(6px, 2vw, 18px);
+    left: auto;
+  }
+
+  .noyona-founder-section__content-column {
+    padding-top: 22px;
+    padding-bottom: 18px;
+    padding-left: 16px;
+    padding-right: 16px;
+    background: #ffffff;
+  }
+}
+
+/* =========================
+   Helpers
+========================= */
+
+.noyona-founder-section__body .founder-accent {
+  color: #E199A4;
+  font-weight: 700;
+}
+
+.noyona-founder-section__body .founder-bold {
+  font-weight: 700;
+}
+
+.noyona-founder-section__title .founder-accent {
+  color: #E199A4;
+}
