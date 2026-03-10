@@ -1260,18 +1260,10 @@ function noyona_normalize_header_rendered_markup( $block_content, $block ) {
 
     if (
         false === strpos( $block_content, 'site-logo-img--desktop' ) &&
-        false === strpos( $block_content, 'site-logo-img--mobile' ) &&
-        false === strpos( $block_content, 'header-cart-fallback' )
+        false === strpos( $block_content, 'site-logo-img--mobile' )
     ) {
         return $block_content;
     }
-
-    // Remove unexpected cart fallback icon/link injected by upstream block output.
-    $block_content = preg_replace(
-        '#<a[^>]*class=(["\'])[^"\']*\bheader-cart-fallback\b[^"\']*\1[^>]*>.*?</a>#is',
-        '',
-        $block_content
-    );
 
     $theme_uri     = untrailingslashit( get_stylesheet_directory_uri() );
     $desktop_logo  = esc_url( $theme_uri . '/assets/images/noyona-logo.webp' );

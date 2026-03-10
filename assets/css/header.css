@@ -436,11 +436,6 @@ body.has-scrolled-header .site-logo-text {
   color: inherit;
 }
 
-/* Safety: hide unexpected Woo fallback cart icon/link in header. */
-.header-cart-fallback {
-  display: none !important;
-}
-
 .header-store-link {
   width: auto;
   padding: 0 10px;
