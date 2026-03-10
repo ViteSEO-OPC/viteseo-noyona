@@ -86,6 +86,7 @@
     white-space: pre-line;
     font-family: var(--wp--preset--font-family--proxima-nova);
     letter-spacing: -5%;
+    color: #ce798a;
 }
 
 .hero-banner__title-line--accent {
@@ -98,6 +99,41 @@
     font-family: var(--wp--preset--font-family--noto-serif-semicondensed);
     font-style: italic;
     font-weight: 400;
+}
+
+.hero-banner__title .hero-banner__accent-green {
+    position: relative;
+    display: inline-block;
+    color: #97ab75;
+    font-family: var(--wp--preset--font-family--noto-serif-semicondensed), "Segoe Script", cursive;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1;
+    padding-bottom: 0.24em;
+}
+
+.hero-banner__title .hero-banner__accent-green::after {
+    content: "";
+    position: absolute;
+    left: -4%;
+    bottom: 0.02em;
+    width: 112%;
+    height: 0.075em;
+    background: #E199A4;
+    border-radius: 999px;
+    transform: rotate(-4deg);
+    transform-origin: left center;
+}
+
+.hero-banner__title .hero-banner__title-white {
+    color: #fff;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-style: normal;
+    font-weight: 500;
+}
+
+.hero-banner__title .hero-banner__title-white .hero-banner__accent {
+    color: #fff;
 }
 
 .hero-banner__body {

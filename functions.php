@@ -804,6 +804,18 @@ function noyona_force_404_for_unknown_routes() {
         return;
     }
 
+    // $ignore_prefixes = array(
+    //     'wp-admin',
+    //     'wp-login.php',
+    //     'wp-login',
+    //     'wp-cron.php',
+    //     'wp-json',
+    //     'xmlrpc.php',
+    //     'robots.txt',
+    //     'favicon.ico',
+    //     'sitemap.xml',
+    // );
+
     $ignore_prefixes = array(
         'wp-admin',
         'wp-login.php',
@@ -813,7 +825,16 @@ function noyona_force_404_for_unknown_routes() {
         'xmlrpc.php',
         'robots.txt',
         'favicon.ico',
+        'wp-sitemap.xml',
         'sitemap.xml',
+        'sitemap1.xml',
+        'sitemap_index.xml',
+        'product-sitemap.xml',
+        'page-sitemap.xml',
+        'post-sitemap.xml',
+        'category-sitemap.xml',
+        'product_cat-sitemap.xml',
+        'product_tag-sitemap.xml',
     );
 
     foreach ( $ignore_prefixes as $prefix ) {
@@ -1290,29 +1311,98 @@ function noyona_handle_contact_form() {
 /* =================================================
  * SEO: ROBOTS META
  * ================================================= */
-function noyona_is_site_under_development() {
+// function noyona_is_site_under_development() {
     // Set to false (or override via filter) when ready for production indexing.
-    return (bool) apply_filters( 'noyona_site_under_development', true );
-}
+//     return (bool) apply_filters( 'noyona_site_under_development', true );
+// }
 
-add_action('wp_head', function () {
-    if ( noyona_is_site_under_development() ) {
-        echo '<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">';
-        return;
-    }
-    echo '<meta name="robots" content="index, follow">';
-}, 1);
+// add_action('wp_head', function () {
+//     if ( noyona_is_site_under_development() ) {
+//         echo '<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">';
+//         return;
+//     }
+//     echo '<meta name="robots" content="index, follow">';
+// }, 1);
 
 /* =================================================
  * GLOBAL ROBOTS HEADERS
  * ================================================= */
-add_action('send_headers', function () {
+// add_action('send_headers', function () {
+//     if ( noyona_is_site_under_development() ) {
+//         header('X-Robots-Tag: noindex, nofollow, noarchive, nosnippet', true);
+//         return;
+//     }
+//     header('X-Robots-Tag: index, follow, archive, snippet', true);
+// });
+
+/* =================================================
+ * SEO / CRAWL CONTROL
+ * ================================================= */
+function noyona_is_site_under_development() {
+    return (bool) apply_filters( 'noyona_site_under_development', true );
+}
+
+/**
+ * Disable WordPress core XML sitemaps.
+ */
+add_filter( 'wp_sitemaps_enabled', '__return_false' );
+
+/**
+ * Force a restrictive robots.txt from WordPress.
+ * Note: this discourages crawlers, but does not secure URLs from direct browser access.
+ */
+add_filter( 'robots_txt', 'noyona_custom_robots_txt', 999, 2 );
+function noyona_custom_robots_txt( $output, $public ) {
+    if ( ! noyona_is_site_under_development() ) {
+        return implode( "\n", array(
+            'User-agent: *',
+            'Allow: /',
+        ) );
+    }
+
+    return implode( "\n", array(
+        'User-agent: *',
+        'Disallow: /',
+        'Disallow: /wp-sitemap.xml',
+        'Disallow: /sitemap.xml',
+        'Disallow: /sitemap1.xml',
+        'Disallow: /sitemap_index.xml',
+        'Disallow: /product-sitemap.xml',
+        'Disallow: /page-sitemap.xml',
+        'Disallow: /post-sitemap.xml',
+        'Disallow: /category-sitemap.xml',
+        'Disallow: /product_cat-sitemap.xml',
+        'Disallow: /product_tag-sitemap.xml',
+    ) );
+}
+
+/**
+ * Output robots meta tag.
+ */
+add_action( 'wp_head', 'noyona_output_robots_meta', 1 );
+function noyona_output_robots_meta() {
     if ( noyona_is_site_under_development() ) {
-        header('X-Robots-Tag: noindex, nofollow, noarchive, nosnippet', true);
+        echo '<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, max-snippet:0, max-image-preview:none, max-video-preview:0">' . "\n";
         return;
     }
-    header('X-Robots-Tag: index, follow, archive, snippet', true);
-});
+
+    echo '<meta name="robots" content="index, follow">' . "\n";
+}
+
+/**
+ * Send X-Robots-Tag header.
+ */
+add_action( 'send_headers', 'noyona_send_robots_headers', 1 );
+function noyona_send_robots_headers() {
+    if ( noyona_is_site_under_development() ) {
+        header( 'X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex, max-snippet:0, max-image-preview:none, max-video-preview:0', true );
+        return;
+    }
+
+    header( 'X-Robots-Tag: index, follow, archive, snippet', true );
+}
+
+
 
 /* =================================================
  * SEO: DOCUMENT TITLES
