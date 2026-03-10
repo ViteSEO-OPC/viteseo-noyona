@@ -13,15 +13,26 @@
 
 .search-inline-input {
     /* width: clamp(150px, 16vw, 220px); */
+    -webkit-appearance: none;
+    appearance: none;
     border: 0;
     border-bottom: 1px solid #e6c7ce;
     border-radius: 0;
     background: transparent;
+    background-image: none !important;
     padding: 0.35rem 0;
     font-size: 0.88rem;
     line-height: 1.1;
     color: #1f1f1f;
     outline: none;
+}
+
+.search-inline-input::-webkit-search-decoration,
+.search-inline-input::-webkit-search-cancel-button,
+.search-inline-input::-webkit-search-results-button,
+.search-inline-input::-webkit-search-results-decoration {
+    display: none;
+    -webkit-appearance: none;
 }
 
 .search-inline-input::placeholder {
@@ -34,6 +45,13 @@
     background: transparent;
     color: #e199a4;
     cursor: pointer;
+}
+
+/* Prevent third-party/icon-font pseudo-elements from injecting wrong icons. */
+.search-inline-submit::before,
+.search-inline-submit::after {
+    content: none !important;
+    display: none !important;
 }
 
 .search-inline-submit:hover {

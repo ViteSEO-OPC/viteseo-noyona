@@ -136,6 +136,7 @@ function woocom_ct_enqueue_assets() {
         'noyonaHeader',
         array(
             'logoutUrl'       => $logout_url,
+            'themeUri'        => untrailingslashit( get_stylesheet_directory_uri() ),
             'shopPriceFilter' => array(
                 'step'     => $shop_price_step,
                 'maxPrice' => $shop_price_ceiling,

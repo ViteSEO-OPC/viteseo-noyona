@@ -4,6 +4,32 @@
   const $ = (s, scope = document) => scope.querySelector(s);
   const $$ = (s, scope = document) => Array.from(scope.querySelectorAll(s));
 
+  function normalizeHeaderLogos() {
+    const themeUri = (window.noyonaHeader && window.noyonaHeader.themeUri)
+      ? String(window.noyonaHeader.themeUri).replace(/\/$/, '')
+      : '/wp-content/themes/viteseo-noyona';
+
+    const expectedDesktopLogo = themeUri + '/assets/images/noyona-logo.webp';
+    const expectedMobileLogo = themeUri + '/assets/images/noyona-mobile-logo.webp';
+
+    const applyLogo = (selector, expectedSrc) => {
+      const img = $(selector);
+      if (!img) return;
+
+      const currentSrc = (img.getAttribute('src') || '').trim();
+      const usesUploadImage = /\/wp-content\/uploads\//i.test(currentSrc);
+      if (!currentSrc || usesUploadImage || currentSrc !== expectedSrc) {
+        img.setAttribute('src', expectedSrc);
+      }
+
+      // Prevent stale DB/media srcset from overriding the forced logo.
+      img.removeAttribute('srcset');
+    };
+
+    applyLogo('.site-logo-img--desktop', expectedDesktopLogo);
+    applyLogo('.site-logo-img--mobile', expectedMobileLogo);
+  }
+
   function updateHeaderOffsets() {
     const root = document.documentElement;
     const headerPart = $('header.wp-block-template-part');
@@ -812,6 +838,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    normalizeHeaderLogos();
     updateHeaderOffsets();
     toggleScrollState();
     window.addEventListener('scroll', toggleScrollState, { passive: true });
