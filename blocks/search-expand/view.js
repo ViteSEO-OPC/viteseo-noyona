@@ -20,6 +20,63 @@
     }
 
     function attachSearch(block) {
+        // Inline search behavior used by the current header block.
+        const inlineForm = block.querySelector('.search-inline-form');
+        const inlineInput = block.querySelector('.search-inline-input');
+        const inlineSubmit = block.querySelector('.search-inline-submit');
+        if (inlineForm && inlineInput && inlineSubmit) {
+            const mobileQuery = window.matchMedia('(max-width: 500px)');
+
+            const collapseMobileInput = function () {
+                inlineForm.classList.remove('is-mobile-expanded');
+            };
+
+            const syncMode = function () {
+                if (!mobileQuery.matches) {
+                    collapseMobileInput();
+                }
+            };
+
+            inlineSubmit.addEventListener('click', function (evt) {
+                if (!mobileQuery.matches) {
+                    return;
+                }
+
+                const isExpanded = inlineForm.classList.contains('is-mobile-expanded');
+                if (!isExpanded) {
+                    evt.preventDefault();
+                    inlineForm.classList.add('is-mobile-expanded');
+                    setTimeout(function () {
+                        inlineInput.focus();
+                    }, 0);
+                }
+            });
+
+            document.addEventListener('click', function (evt) {
+                if (!mobileQuery.matches) {
+                    return;
+                }
+                if (!inlineForm.contains(evt.target)) {
+                    collapseMobileInput();
+                }
+            });
+
+            inlineInput.addEventListener('keydown', function (evt) {
+                if (evt.key === 'Escape') {
+                    collapseMobileInput();
+                    inlineSubmit.focus();
+                }
+            });
+
+            if (typeof mobileQuery.addEventListener === 'function') {
+                mobileQuery.addEventListener('change', syncMode);
+            } else if (typeof mobileQuery.addListener === 'function') {
+                mobileQuery.addListener(syncMode);
+            }
+            syncMode();
+            return;
+        }
+
         const trigger = block.querySelector('.search-expand-trigger');
         const overlay = block.querySelector('.search-expand-overlay');
         const closeBtn = block.querySelector('.search-expand-close');

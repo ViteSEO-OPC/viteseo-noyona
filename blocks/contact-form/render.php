@@ -131,7 +131,7 @@ $allowed_heading = array(
                                 }
                                 ?>
                                 <!-- <?php echo esc_url($url); ?> -->
-                                <a class="<?php echo esc_attr($social_classes); ?>" href="coming-soon" 
+                                <a class="<?php echo esc_attr($social_classes); ?>" href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener noreferrer"
                                     aria-label="<?php echo esc_attr($label); ?>">
                                     <?php if (!empty($brand_key) && isset($social_icon_map[$brand_key])): ?>
                                         <i class="<?php echo esc_attr($social_icon_map[$brand_key]); ?>"></i>

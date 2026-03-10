@@ -106,6 +106,12 @@
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
+.review-card--link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
 .review-card__quote-icon {
     color: #E199A4;
     font-size: 2rem;

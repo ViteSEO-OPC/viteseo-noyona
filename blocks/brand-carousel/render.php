@@ -38,6 +38,14 @@ $social_icon_map = array(
     'other'     => 'fa-solid fa-globe',
 );
 
+$social_url_map = array(
+    'facebook'  => 'https://www.facebook.com/Noyonacosmetics',
+    'instagram' => 'https://www.instagram.com/noyonacosmetics/',
+    'tiktok'    => 'https://www.tiktok.com/@noyona_cosmetics',
+    'shopee'    => 'https://shopee.ph/noyona_official',
+    'lazada'    => 'https://www.lazada.com.ph/shop/noyona-lovial-essentials/',
+);
+
 // Early exit if no items
 if ( empty( $items ) ) {
     if ( is_admin() ) {
@@ -125,6 +133,7 @@ $style_attr = $style_rules
             $show_rating = isset( $item['rating'] ) && $item['rating'] !== null && $item['rating'] !== '';
             $social_icon_class = isset( $social_icon_map[ $social ] ) ? $social_icon_map[ $social ] : 'fa-solid fa-user';
             $avatar_social_class = 'review-card__avatar--' . sanitize_html_class( $social ?: 'none' );
+            $card_url = isset( $social_url_map[ $social ] ) ? $social_url_map[ $social ] : '';
 
             // For brand mode
             $brandName = isset( $item['brand'] ) ? $item['brand'] : '';
@@ -169,43 +178,51 @@ $style_attr = $style_rules
             <?php else : ?>
 
                 <!-- REVIEW CARD ITEM -->
-                <div class="review-card">
-                    <div class="review-card__quote-icon">
-                        <i class="fas fa-quote-left"></i>
-                    </div>
-
-                    <p class="review-card__text">
-                        <?php echo esc_html( $quote ); ?>
-                    </p>
-
-                    <?php if ( $show_rating ) : ?>
-                        <div class="review-card__rating">
-                            <?php for ( $i = 0; $i < 5; $i++ ) : ?>
-                                <?php if ( $i < round( $rating ) ) : ?>
-                                    <i class="fas fa-star"></i>
-                                <?php else : ?>
-                                    <i class="far fa-star"></i>
-                                <?php endif; ?>
-                            <?php endfor; ?>
+                <?php if ( ! empty( $card_url ) ) : ?>
+                    <a class="review-card review-card--link" href="<?php echo esc_url( $card_url ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr( ucfirst( $social ) . ' review by ' . $author ); ?>">
+                <?php else : ?>
+                    <div class="review-card">
+                <?php endif; ?>
+                        <div class="review-card__quote-icon">
+                            <i class="fas fa-quote-left"></i>
                         </div>
-                    <?php endif; ?>
 
-                    <div class="review-card__footer">
-                        <div class="review-card__avatar <?php echo esc_attr( $avatar_social_class ); ?>">
-                            <i class="<?php echo esc_attr( $social_icon_class ); ?>" aria-hidden="true"></i>
-                        </div>
-                        <div class="review-card__meta">
-                            <span class="review-card__author-wrap">
-                                <span class="review-card__author">
-                                    <?php echo esc_html( $author ); ?>
+                        <p class="review-card__text">
+                            <?php echo esc_html( $quote ); ?>
+                        </p>
+
+                        <?php if ( $show_rating ) : ?>
+                            <div class="review-card__rating">
+                                <?php for ( $i = 0; $i < 5; $i++ ) : ?>
+                                    <?php if ( $i < round( $rating ) ) : ?>
+                                        <i class="fas fa-star"></i>
+                                    <?php else : ?>
+                                        <i class="far fa-star"></i>
+                                    <?php endif; ?>
+                                <?php endfor; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="review-card__footer">
+                            <div class="review-card__avatar <?php echo esc_attr( $avatar_social_class ); ?>">
+                                <i class="<?php echo esc_attr( $social_icon_class ); ?>" aria-hidden="true"></i>
+                            </div>
+                            <div class="review-card__meta">
+                                <span class="review-card__author-wrap">
+                                    <span class="review-card__author">
+                                        <?php echo esc_html( $author ); ?>
+                                    </span>
                                 </span>
-                            </span>
-                            <span class="review-card__product">
-                                <?php echo esc_html( $product ); ?>
-                            </span>
+                                <span class="review-card__product">
+                                    <?php echo esc_html( $product ); ?>
+                                </span>
+                            </div>
                         </div>
+                <?php if ( ! empty( $card_url ) ) : ?>
+                    </a>
+                <?php else : ?>
                     </div>
-                </div>
+                <?php endif; ?>
 
             <?php endif; ?>
 
