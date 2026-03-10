@@ -14,7 +14,7 @@ $defaults = array(
 	'subtitle' => 'High-end beauty shouldn’t be exclusive. We bridge the gap between pro-performance and everyday value with ethical, inclusive products.',
 	'cards'    => array(
 		array(
-			'image' => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/Rectangle-170-8.png',
+			'image' => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/made-for-you.webp',
 			'title' => 'Made for You',
 			'text'  => 'Shades and formulas designed to complement diverse skin tones.',
 			'bg'    => '#f7d7ea',
