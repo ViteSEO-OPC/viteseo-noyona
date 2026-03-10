@@ -448,13 +448,13 @@
     if (!shopNavItem) return;
 
     const labelToPath = {
-      face: '/shop/face/',
-      lip: '/shop/lips/',
-      lips: '/shop/lips/',
-      eye: '/shop/eyes/',
-      eyes: '/shop/eyes/',
-      hair: '/shop/hair/',
-      body: '/shop/body/',
+      face: '/face/',
+      lip: '/lips/',
+      lips: '/lips/',
+      eye: '/eyes/',
+      eyes: '/eyes/',
+      hair: '/hair/',
+      body: '/body/',
     };
 
     const normalize = (value) => String(value || '').trim().toLowerCase();
