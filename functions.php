@@ -1194,6 +1194,60 @@ function woocom_ct_remove_customer_account_block( $block_content, $block ) {
     return $block_content;
 }
 
+add_filter( 'render_block', 'noyona_normalize_header_rendered_markup', 20, 2 );
+function noyona_normalize_header_rendered_markup( $block_content, $block ) {
+    if ( is_admin() || '' === trim( (string) $block_content ) ) {
+        return $block_content;
+    }
+
+    if (
+        false === strpos( $block_content, 'site-logo-img--desktop' ) &&
+        false === strpos( $block_content, 'site-logo-img--mobile' ) &&
+        false === strpos( $block_content, 'header-cart-fallback' )
+    ) {
+        return $block_content;
+    }
+
+    // Remove unexpected cart fallback icon/link injected by upstream block output.
+    $block_content = preg_replace(
+        '#<a[^>]*class=(["\'])[^"\']*\bheader-cart-fallback\b[^"\']*\1[^>]*>.*?</a>#is',
+        '',
+        $block_content
+    );
+
+    $theme_uri     = untrailingslashit( get_stylesheet_directory_uri() );
+    $desktop_logo  = esc_url( $theme_uri . '/assets/images/noyona-logo.webp' );
+    $mobile_logo   = esc_url( $theme_uri . '/assets/images/noyona-mobile-logo.webp' );
+
+    $block_content = preg_replace_callback(
+        '#<img\b[^>]*>#i',
+        function ( $matches ) use ( $desktop_logo, $mobile_logo ) {
+            $img_html = $matches[0];
+
+            if ( false === stripos( $img_html, 'site-logo-img--desktop' ) && false === stripos( $img_html, 'site-logo-img--mobile' ) ) {
+                return $img_html;
+            }
+
+            $target_src = false !== stripos( $img_html, 'site-logo-img--desktop' ) ? $desktop_logo : $mobile_logo;
+
+            // Remove any srcset that could reselect old media-library images.
+            $img_html = preg_replace( '#\s+srcset=(["\']).*?\1#i', '', $img_html );
+
+            // Replace existing src, or inject one if missing.
+            $src_replaced = 0;
+            $img_html     = preg_replace( '#\s+src=(["\']).*?\1#i', ' src="' . $target_src . '"', $img_html, 1, $src_replaced );
+            if ( 0 === (int) $src_replaced ) {
+                $img_html = preg_replace( '#<img\b#i', '<img src="' . $target_src . '"', $img_html, 1 );
+            }
+
+            return $img_html;
+        },
+        $block_content
+    );
+
+    return $block_content;
+}
+
 /* =================================================
  * UX / MISC
  * ================================================= */
