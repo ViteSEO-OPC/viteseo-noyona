@@ -56,12 +56,11 @@ $allowed_title_html = array(
 	'br'     => array(),
 );
 
-// Provide theme-local default images if none are set.
-$theme_uri = function_exists( 'get_stylesheet_directory_uri' ) ? get_stylesheet_directory_uri() : '';
+// Provide uploads-hosted default images if none are set.
 $fallback_images = array(
-	0 => $theme_uri ? $theme_uri . '/assets/images/made-for-you.webp' : '',
-	1 => $theme_uri ? $theme_uri . '/assets/images/clean-beauty.webp' : '',
-	2 => $theme_uri ? $theme_uri . '/assets/images/affordable-luxury.webp' : '',
+	0 => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/made-for-you.webp',
+	1 => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/clean-beauty.webp',
+	2 => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/affordable-luxury.webp',
 );
 
 ?>
