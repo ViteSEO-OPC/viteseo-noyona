@@ -334,6 +334,51 @@
     queueRefresh(0);
   }
 
+  function initHeaderCartFallback() {
+    const iconsRoot = document.querySelector('.header-icons');
+    if (!iconsRoot) return;
+
+    const resolveCartUrl = () => {
+      const configuredUrl = (window.noyonaHeader && window.noyonaHeader.cartUrl)
+        ? String(window.noyonaHeader.cartUrl)
+        : '';
+      if (configuredUrl) return configuredUrl;
+      return '/cart/';
+    };
+
+    const ensureCartIcon = () => {
+      const hasMiniCartButton = !!iconsRoot.querySelector('.wc-block-mini-cart__button');
+      const existingFallback = iconsRoot.querySelector('.header-cart-fallback');
+
+      if (hasMiniCartButton) {
+        if (existingFallback) existingFallback.remove();
+        return;
+      }
+
+      if (existingFallback) return;
+
+      const fallbackLink = document.createElement('a');
+      fallbackLink.className = 'header-icon header-cart-fallback';
+      fallbackLink.href = resolveCartUrl();
+      fallbackLink.setAttribute('aria-label', 'Open cart');
+      fallbackLink.innerHTML = '<i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>';
+
+      const storeLink = iconsRoot.querySelector('.header-store-link');
+      if (storeLink && storeLink.parentNode === iconsRoot) {
+        iconsRoot.insertBefore(fallbackLink, storeLink);
+      } else {
+        iconsRoot.appendChild(fallbackLink);
+      }
+    };
+
+    ensureCartIcon();
+    setTimeout(ensureCartIcon, 150);
+    setTimeout(ensureCartIcon, 500);
+
+    const observer = new MutationObserver(() => ensureCartIcon());
+    observer.observe(iconsRoot, { childList: true, subtree: true });
+  }
+
   function initAccountDropdown() {
     $$('.header-account').forEach((wrapper) => {
       const toggle = wrapper.querySelector('.header-account-toggle');
@@ -966,6 +1011,7 @@
     initWishlist();
     initMiniCartCloseAction();
     initMiniCartDynamicUi();
+    initHeaderCartFallback();
     initAccountDropdown();
     initLogoutLinks();
     initMobileMenu();

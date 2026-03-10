@@ -416,6 +416,11 @@ body.has-scrolled-header .site-logo-text {
   order: 3;
 }
 
+.header-icons .header-cart-fallback {
+  order: 3;
+  font-size: 18px;
+}
+
 .header-icons .header-store-link {
   order: 4;
 }

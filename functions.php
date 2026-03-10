@@ -136,6 +136,7 @@ function woocom_ct_enqueue_assets() {
         'noyonaHeader',
         array(
             'logoutUrl'       => $logout_url,
+            'cartUrl'         => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ),
             'checkoutUrl'     => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' ),
             'themeUri'        => untrailingslashit( get_stylesheet_directory_uri() ),
             'shopPriceFilter' => array(
@@ -276,7 +277,7 @@ function noyona_flush_rewrite_rules_on_switch() {
  */
 add_action( 'init', 'noyona_one_time_reset_header_template_part_override', 30 );
 function noyona_one_time_reset_header_template_part_override() {
-    $safeguard_version = '1';
+    $safeguard_version = '2';
     $option_key        = 'noyona_header_template_part_safeguard_version';
     if ( $safeguard_version === get_option( $option_key, '' ) ) {
         return;
