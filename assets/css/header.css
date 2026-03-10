@@ -26,6 +26,38 @@ body.search-expand-open header.wp-block-template-part {
   opacity: 1;
 }
 
+.noyona-brand-strip-fallback {
+  background: #efb5be;
+  overflow: hidden;
+  padding: 0.5rem 0;
+}
+
+.noyona-brand-strip-fallback__track {
+  display: inline-flex;
+  gap: 2rem;
+  min-width: max-content;
+  white-space: nowrap;
+  animation: noyona-brand-strip-scroll 28s linear infinite;
+}
+
+.noyona-brand-strip-fallback__item {
+  font-family: "Proxima Nova", var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+@keyframes noyona-brand-strip-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 /* Avoid admin bar overlap when logged in */
 .admin-bar header.wp-block-template-part {
   top: var(--noyona-adminbar-height, 32px);
@@ -254,9 +286,9 @@ body.has-scrolled-header .site-logo-text {
 }
 
 .nav-link {
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: "Proxima Nova", var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
   font-size: clamp(16px, 2vw, 20px);
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
   color: #000;
   padding: 0.5rem 0;
@@ -339,8 +371,9 @@ body.has-scrolled-header .site-logo-text {
   padding: 0.6rem 1.25rem;
   color: #333;
   text-decoration: none;
+  font-family: "Proxima Nova", var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 400;
   transition: background 0.2s, color 0.2s;
 }
 

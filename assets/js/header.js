@@ -438,6 +438,95 @@
     });
   }
 
+  function normalizeShopDropdownLinks() {
+    const navItems = Array.from(document.querySelectorAll('.nav-item.has-dropdown'));
+    const shopNavItem = navItems.find((item) => {
+      const topLink = item.querySelector('.nav-link-wrapper .nav-link');
+      return topLink && topLink.textContent && topLink.textContent.trim().toLowerCase() === 'shop';
+    });
+
+    if (!shopNavItem) return;
+
+    const labelToPath = {
+      face: '/shop/face/',
+      lip: '/shop/lips/',
+      lips: '/shop/lips/',
+      eye: '/shop/eyes/',
+      eyes: '/shop/eyes/',
+      hair: '/shop/hair/',
+      body: '/shop/body/',
+    };
+
+    const normalize = (value) => String(value || '').trim().toLowerCase();
+    const toPathname = (href) => {
+      try {
+        return new URL(href, window.location.origin).pathname;
+      } catch (e) {
+        return '';
+      }
+    };
+
+    const shopTopLink = shopNavItem.querySelector('.nav-link-wrapper .nav-link');
+    if (shopTopLink) {
+      const currentPath = toPathname(shopTopLink.getAttribute('href') || shopTopLink.href);
+      if (currentPath !== '/shop/') {
+        shopTopLink.setAttribute('href', '/shop/');
+      }
+    }
+
+    const subLinks = Array.from(shopNavItem.querySelectorAll('.dropdown-menu a'));
+    subLinks.forEach((link) => {
+      const key = normalize(link.textContent);
+      const expectedPath = labelToPath[key];
+      if (!expectedPath) return;
+
+      const currentPath = toPathname(link.getAttribute('href') || link.href);
+      if (currentPath !== expectedPath) {
+        link.setAttribute('href', expectedPath);
+      }
+    });
+  }
+
+  function initBrandStripFallback() {
+    const strip = document.querySelector('.header-brand-strip');
+    if (!strip) return;
+
+    const hasCarousel = strip.querySelector(
+      '.wp-block-noyona-brand-carousel, .brand-carousel, .brand-carousel__track'
+    );
+    if (hasCarousel) return;
+
+    const textContent = String(strip.textContent || '').trim();
+    if (textContent.length > 0) return;
+
+    const fallback = document.createElement('div');
+    fallback.className = 'noyona-brand-strip-fallback';
+    fallback.setAttribute('aria-label', 'Beauty rooted in nature');
+
+    const track = document.createElement('div');
+    track.className = 'noyona-brand-strip-fallback__track';
+
+    const baseItems = [
+      'Beauty rooted in nature',
+      'Beauty rooted in nature',
+      'Beauty rooted in nature',
+      'Beauty rooted in nature',
+      'Beauty rooted in nature',
+      'Beauty rooted in nature',
+    ];
+
+    const items = baseItems.concat(baseItems);
+    items.forEach((label) => {
+      const item = document.createElement('span');
+      item.className = 'noyona-brand-strip-fallback__item';
+      item.textContent = label;
+      track.appendChild(item);
+    });
+
+    fallback.appendChild(track);
+    strip.appendChild(fallback);
+  }
+
   function initShopArchiveViewToggle() {
     const toggle = document.querySelector('.noyona-shop-view-toggle');
     const productCollection = document.querySelector('.noyona-shop-products');
@@ -838,6 +927,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    initBrandStripFallback();
     normalizeHeaderLogos();
     updateHeaderOffsets();
     toggleScrollState();
@@ -851,6 +941,7 @@
     initLogoutLinks();
     initMobileMenu();
     initMobileSubmenus();
+    normalizeShopDropdownLinks();
     initActiveNavLinks();
     initShopArchiveViewToggle();
     initShopCategoryActiveByPath();
