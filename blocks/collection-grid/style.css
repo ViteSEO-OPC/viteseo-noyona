@@ -203,6 +203,14 @@
     line-height: 1;
 }
 
+.collection-grid__button:hover,
+.collection-grid__button:focus-visible{
+    color: #FFF;
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
 /* =========================================================
    Mobile: swipeable "carousel" (scroll-snap) instead of 1-by-1 stack
 ========================================================= */

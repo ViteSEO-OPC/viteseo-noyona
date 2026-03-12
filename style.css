@@ -85,6 +85,27 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Global button/CTA radius standard */
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.wp-block-button__link,
+a[class*="__button"],
+button[class*="__button"],
+input[class*="__button"],
+a[class*="__cta"],
+button[class*="__cta"],
+input[class*="__cta"],
+a[class*="-button"],
+button[class*="-button"],
+input[class*="-button"],
+a[class*="-cta"],
+button[class*="-cta"],
+input[class*="-cta"] {
+  border-radius: 16px !important;
+}
+
 /* Typography (h1/h2/h3/body only) */
 body {
   font-family: "Proxima Nova", system-ui, -apple-system, "Segoe UI", sans-serif;

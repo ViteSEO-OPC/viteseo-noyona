@@ -1,0 +1,238 @@
+.noyona-discover-face-banner {
+  padding-left: var(--page-gutter-left);
+  padding-right: var(--page-gutter-right);
+  margin-top: var(--section-mt);
+}
+
+.noyona-discover-face-banner__inner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 34px;
+  min-height: clamp(360px, 42vw, 540px);
+  padding: clamp(24px, 4vw, 60px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  align-items: center;
+  gap: clamp(20px, 3vw, 50px);
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(160, 24, 101, 0.72) 0%, rgba(160, 24, 101, 0.72) 100%),
+    var(--discover-face-bg-image, none),
+    linear-gradient(115deg, #9d0f65 0%, #8c185f 45%, #b03c7f 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+.noyona-discover-face-banner__inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.1) 8%, rgba(255, 255, 255, 0) 40%),
+    radial-gradient(circle at 18% 80%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 48%);
+}
+
+.noyona-discover-face-banner__content,
+.noyona-discover-face-banner__cards {
+  position: relative;
+  z-index: 1;
+}
+
+.noyona-discover-face-banner__heading {
+  margin: 0;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(32px, 3.8vw, 55px);
+  font-weight: 700;
+  line-height: 1.06;
+}
+
+.noyona-discover-face-banner__subheading {
+  margin: 0.1em 0 0;
+  font-family: var(--wp--preset--font-family--noto-serif-semicondensed);
+  font-size: clamp(34px, 3.3vw, 62px);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1;
+  color: #f7bfd0;
+}
+
+.noyona-discover-face-banner__paragraph {
+  margin: 1rem 0 0;
+  max-width: 620px;
+  color: rgba(255, 255, 255, 0.93);
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(16px, 1.3vw, 20px);
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.noyona-discover-face-banner__cta {
+  margin-top: clamp(1.1rem, 2.4vw, 2rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 55px;
+  padding: 0.65rem 1.5rem;
+  border-radius: 999px;
+  text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #fff;
+  color: #651339;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(16px, 1.2vw, 20px);
+  font-weight: 600;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.noyona-discover-face-banner__cta:hover,
+.noyona-discover-face-banner__cta:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.noyona-discover-face-banner__cards {
+  display: grid;
+  gap: 5px;
+  align-content: center;
+  justify-items: center;
+}
+
+.noyona-discover-face-banner__card {
+  border-radius: 22px;
+  width: 100%;
+  max-width: 450px;
+  min-height: 190px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(2px);
+  transform-origin: center center;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: center;
+  text-align: left;
+}
+
+.noyona-discover-face-banner__card:nth-child(1) {
+  transform: rotate(-2.2deg) translateX(8px);
+}
+
+.noyona-discover-face-banner__card:nth-child(2) {
+  transform: rotate(2deg) translateX(-22px) translateY(-8px);
+}
+
+.noyona-discover-face-banner__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.7rem;
+}
+
+.noyona-discover-face-banner__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eab1c1;
+  color: #9f1e5f;
+  flex-shrink: 0;
+  font-size: 17px;
+}
+
+.noyona-discover-face-banner__chips {
+  display: inline-flex;
+  align-items: center;
+  isolation: isolate;
+}
+
+.noyona-discover-face-banner__chip {
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  font-weight: 700;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  background: #2e2e2e;
+  color: #fff;
+  position: relative;
+  border: 3px solid transparent;
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.2),
+    0 8px 18px rgba(0, 0, 0, 0.3);
+}
+
+.noyona-discover-face-banner__chip + .noyona-discover-face-banner__chip {
+  margin-left: -10px;
+}
+
+.noyona-discover-face-banner__chip:nth-child(1) {
+  background: #101114;
+  z-index: 1;
+  box-shadow:
+    0 0 14px rgba(16, 17, 20, 0.45),
+    0 8px 18px rgba(0, 0, 0, 0.32);
+}
+
+.noyona-discover-face-banner__chip:nth-child(2) {
+  background: #f16035;
+  z-index: 2;
+  box-shadow:
+    0 0 14px rgba(241, 96, 53, 0.55),
+    0 8px 18px rgba(0, 0, 0, 0.32);
+}
+
+.noyona-discover-face-banner__chip:nth-child(3) {
+  background: #1f238d;
+  z-index: 3;
+  box-shadow:
+    0 0 14px rgba(31, 35, 141, 0.55),
+    0 8px 18px rgba(0, 0, 0, 0.32);
+}
+
+.noyona-discover-face-banner__card-title {
+  margin: 0;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(20px, 1.8vw, 30px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.noyona-discover-face-banner__card-description {
+  margin: 0.45rem 0 0;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(14px, 1.15vw, 18px);
+  font-weight: 400;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+@media (max-width: 1100px) {
+  .noyona-discover-face-banner__inner {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .noyona-discover-face-banner__cards {
+    width: min(100%, 640px);
+  }
+
+  .noyona-discover-face-banner__card:nth-child(1),
+  .noyona-discover-face-banner__card:nth-child(2) {
+    transform: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .noyona-discover-face-banner__inner {
+    border-radius: 24px;
+    min-height: auto;
+  }
+}

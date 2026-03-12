@@ -1,0 +1,84 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/customer-reviews",
+  "version": "1.0.0",
+  "title": "Customer Reviews Grid",
+  "category": "design",
+  "icon": "testimonial",
+  "description": "Responsive customer reviews section with review cards and CTA links.",
+  "supports": {
+    "align": ["wide", "full"],
+    "html": false
+  },
+  "attributes": {
+    "align": {
+      "type": "string",
+      "default": "wide"
+    },
+    "heading": {
+      "type": "string",
+      "default": "Customer Reviews"
+    },
+    "writeReviewText": {
+      "type": "string",
+      "default": "Write a Review"
+    },
+    "writeReviewUrl": {
+      "type": "string",
+      "default": "#"
+    },
+    "readMoreText": {
+      "type": "string",
+      "default": "Read More Reviews"
+    },
+    "readMoreUrl": {
+      "type": "string",
+      "default": "#"
+    },
+    "reviews": {
+      "type": "array",
+      "default": [
+        {
+          "name": "Lorem L.",
+          "timeAgo": "2 days ago",
+          "title": "Stays on all day!",
+          "content": "Absolutely love this lipstick! The color is vibrant and it really stays on all day without drying my lips. I wore it to a wedding and didn't have to touch up once.",
+          "rating": 5,
+          "verified": true,
+          "helpfulText": "Yes",
+          "mediaCount": 2,
+          "avatarUrl": ""
+        },
+        {
+          "name": "Lorem L.",
+          "timeAgo": "2 days ago",
+          "title": "Stays on all day!",
+          "content": "Absolutely love this lipstick! The color is vibrant and it really stays on all day without drying my lips. I wore it to a wedding and didn't have to touch up once.",
+          "rating": 5,
+          "verified": true,
+          "helpfulText": "Yes",
+          "mediaCount": 2,
+          "avatarUrl": ""
+        },
+        {
+          "name": "Lorem L.",
+          "timeAgo": "2 days ago",
+          "title": "Stays on all day!",
+          "content": "Absolutely love this lipstick! The color is vibrant and it really stays on all day without drying my lips. I wore it to a wedding and didn't have to touch up once.",
+          "rating": 5,
+          "verified": true,
+          "helpfulText": "Yes",
+          "mediaCount": 2,
+          "avatarUrl": ""
+        }
+      ],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

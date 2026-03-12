@@ -29,7 +29,19 @@ $cards = is_array( $atts['cards'] ) ? $atts['cards'] : array();
 
     <div class="term-overview__body">
         <?php if ( ! empty( $atts['sectionTitle'] ) ) : ?>
-            <h2 class="term-overview__section-title"><?php echo esc_html( $atts['sectionTitle'] ); ?></h2>
+            <h2 class="term-overview__section-title">
+                <?php
+                echo wp_kses(
+                    $atts['sectionTitle'],
+                    array(
+                        'span' => array(
+                            'class' => array(),
+                        ),
+                        'em' => array(),
+                    )
+                );
+                ?>
+            </h2>
         <?php endif; ?>
 
         <?php if ( ! empty( $atts['sectionIntro'] ) ) : ?>

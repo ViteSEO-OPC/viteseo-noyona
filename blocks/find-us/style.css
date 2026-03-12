@@ -6,11 +6,11 @@
 }
 
 .find-us__container {
-  background: linear-gradient(90deg, #EBAAAC 0%, #FFF 100%);
+  background: #FBDDE2;
   border-radius: 24px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 40%) minmax(0, 60%);
   gap: 2rem;
   padding: 2.5rem;
   align-items: center;
@@ -23,19 +23,19 @@
 }
 
 .find-us__image-box {
-    background: #fff;
-    border-radius: 12px;
-    padding: 1.5rem;
+    /* background: #fff; */
+    /* border-radius: 12px; */
+    /* padding: 1.5rem; */
     /* width: 100%; */
     aspect-ratio: 1/1;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); */
 }
 
 .find-us__image-box img {
-    width: clamp(350px, 33vw, 650px);
+    width: clamp(250px, 33vw, 350px);
     height: auto;
     object-fit: contain;
 }
@@ -46,10 +46,12 @@
 
 .find-us__title {
     font-size: clamp(32px, 4vw, 48px);
-    font-weight: 800;
+    font-weight: 700;
     color: #000;
-    margin: 0 0 1rem;
-    line-height: 1.1;
+    margin: 0;
+    line-height: 72px;
+    letter-spacing: -0.02em;
+    font-family: var(--wp--preset--font-family--proxima-nova);
 }
 
 .find-us__accent {
@@ -57,18 +59,25 @@
 }
 
 .find-us__description {
-    font-size: clamp(16px, 2vw, 20px);
-    color: #555;
-    line-height: 1.5;
+    color: #525252;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: clamp(24px, 2.4vw, 32px);
+    text-align: left;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
     margin: 0 0 2rem;
-    /* max-width: 400px; */
 }
 
 .find-us__store-name {
-    font-size: clamp(20px, 2.4vw, 24px);
+    font-size: clamp(32px, 4vw, 48px);
+    color: #E199A4;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-style: normal;
     font-weight: 700;
-    color: #7A1D39; /* Deep maroon/wine color from image */
-    margin: 0 0 0.75rem;
+    line-height: 72px;
+    letter-spacing: -0.02em;
+    margin: 0;
 }
 
 .find-us__address-row {
@@ -79,16 +88,19 @@
 
 .find-us__icon {
     color: var(--find-us-accent);
-    font-size: 1.25rem;
-    margin-top: 0.2rem;
+    font-size: 50px;
+    /* margin-top: 0.2rem; */
 }
 
 .find-us__address {
-    font-size: clamp(16px, 2vw, 20px);
-    color: #444;
-    line-height: 1.4;
-    margin: 0;
-    /* max-width: 350px; */
+    color: #525252;
+    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: clamp(24px, 2.4vw, 32px);
+    text-align: left;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 2rem;
 }
 
 @media (max-width: 1000px) {
@@ -100,19 +112,28 @@
     
     .find-us__image-col {
         order: 2;
+        margin-inline: auto;
     }
     
     .find-us__content-col {
         order: 1;
+        margin-inline: auto;
         padding-left: 0;
         text-align: center;
     }
-    
+
     .find-us__description {
         margin-inline: auto;
     }
     
     .find-us__address-row {
         justify-content: center;
+    }
+}
+
+@media (max-width: 700px) {
+    .find-us__image-col,
+    .find-us__content-col {
+        width: 100%;
     }
 }

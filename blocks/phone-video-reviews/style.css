@@ -57,6 +57,46 @@
     line-height: 1.5;
     color: var(--pr-muted);
   }
+
+  .phone-reviews__cta{
+    display: flex;
+    width: 100%;
+    margin-top: clamp(1rem, 2.8vw, 2rem);
+  }
+
+  .phone-reviews__cta--left{
+    justify-content: flex-start;
+  }
+
+  .phone-reviews__cta--center{
+    justify-content: center;
+  }
+
+  .phone-reviews__cta--right{
+    justify-content: flex-end;
+  }
+
+  .phone-reviews__button{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    background: #E199A4;
+    color: #fff;
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    font-size: clamp(16px, 1.1vw, 20px);
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .phone-reviews__button:hover,
+  .phone-reviews__button:focus-visible{
+    color: #FFF;
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
   
   /* ===========================
      Grid (desktop)

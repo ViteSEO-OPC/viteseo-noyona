@@ -113,8 +113,9 @@
   margin: 0 0 1.25rem;
   display: block;
   text-transform: uppercase;
-  font-size: var(--wp--preset--font-size--body);
-  letter-spacing: 0.05em;
+  font-size: clamp(18px, 1.4vw, 24px);
+  letter-spacing: -1.2px;
+  font-family: var(--wp--preset--font-family--proxima-nova);
 }
 
 .noyona-footer__nav {
@@ -503,14 +504,17 @@
 }
 
 .noyona-footer .noyona-footer__col-title {
-  font-size: 1rem;
-  letter-spacing: 0;
+  font-size: clamp(18px, 1.4vw, 24px);
+  letter-spacing: -1.2px;
+  font-family: var(--wp--preset--font-family--proxima-nova);
   margin-bottom: 0.85rem;
 }
 
 .noyona-footer .noyona-footer__nav a {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: clamp(16px, 1.4vw, 20px);
+  letter-spacing: -1px;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-weight: 400;
   text-transform: uppercase;
 }
 
@@ -709,5 +713,42 @@
 .noyona-footer .noyona-footer__social-btn:hover::after,
 .noyona-footer .noyona-footer__social-btn:focus-visible::after {
   transform: translateX(-50%) translateY(0);
+}
+
+/* Image-based footer social icons: neutral hover with subtle lift/glow */
+.noyona-footer .noyona-footer__social-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: transparent !important;
+  border: none;
+  box-shadow: none !important;
+  color: inherit !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.noyona-footer .noyona-footer__social-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.noyona-footer .noyona-footer__social-btn:hover,
+.noyona-footer .noyona-footer__social-btn:focus-visible,
+.noyona-footer .noyona-footer__social-btn.is-active {
+  background: transparent !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(122, 0, 56, 0.2) !important;
+  animation: noyona-footer-social-glow 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes noyona-footer-social-glow {
+  0% {
+    box-shadow: 0 5px 12px rgba(122, 0, 56, 0.14);
+  }
+  100% {
+    box-shadow: 0 8px 16px rgba(122, 0, 56, 0.22);
+  }
 }
 

@@ -48,6 +48,7 @@
 
     function initPager(root) {
         const allCards = Array.from(root.querySelectorAll('.blog-card'));
+        const cardsContainer = root.querySelector('.blog-list__cards');
         const dotsContainer = root.querySelector('.blog-list__dots');
         const navButtons = root.querySelectorAll('.blog-list__nav');
         const filterButtons = Array.from(root.querySelectorAll('.blog-filter[data-blog-filter]'));
@@ -55,8 +56,18 @@
         const shareButtons = Array.from(root.querySelectorAll('.blog-card__save[data-share-url]'));
         const shareModal = root.querySelector('.blog-share-modal');
         const shareHint = shareModal ? shareModal.querySelector('.blog-share-modal__hint') : null;
+        const heroSearchInput = document.querySelector('.wp-block-noyona-hero-banner .hero-banner__search-input');
+        const heroSearchForm = heroSearchInput ? heroSearchInput.closest('form') : null;
+        const noResults = document.createElement('div');
 
         if (!allCards.length || !dotsContainer || navButtons.length < 2) return;
+
+        noResults.className = 'blog-list__empty-search';
+        noResults.hidden = true;
+        noResults.innerHTML = '<strong>No matching blogs found.</strong><span>Try a different keyword to see related articles.</span>';
+        if (cardsContainer && cardsContainer.parentNode) {
+            cardsContainer.parentNode.insertBefore(noResults, cardsContainer.nextSibling);
+        }
 
         const prevBtn = navButtons[0];
         const nextBtn = navButtons[1];
@@ -65,9 +76,39 @@
         let pageSize = perPage();
         let pages = buildPages(allCards.length, customSizes, pageSize);
         let totalPages = pages.length;
+        let activeFilterValue = '';
+        let activeSearchQuery = '';
 
         function activeCards() {
-            return allCards.filter((card) => !card.classList.contains('is-filtered-out'));
+            return allCards.filter(
+                (card) =>
+                    !card.classList.contains('is-filtered-out') &&
+                    !card.classList.contains('is-searched-out')
+            );
+        }
+
+        function applyFilters() {
+            const normalizedQuery = activeSearchQuery.trim().toLowerCase();
+            const isSearching = normalizedQuery.length > 0;
+            root.classList.toggle('is-searching', isSearching);
+
+            allCards.forEach((card) => {
+                const cats = (card.dataset.blogCats || '').trim();
+                const categoryMatches =
+                    isSearching ||
+                    !activeFilterValue ||
+                    (cats && cats.split(/\s+/).includes(activeFilterValue));
+
+                const searchableText = (card.textContent || '').toLowerCase();
+                const searchMatches =
+                    !normalizedQuery || searchableText.includes(normalizedQuery);
+
+                card.classList.toggle('is-filtered-out', !categoryMatches);
+                card.classList.toggle('is-searched-out', !searchMatches);
+            });
+
+            currentPage = 0;
+            updateLayout();
         }
 
         function buildDots() {
@@ -107,6 +148,10 @@
             prevBtn.style.display = hideNav ? 'none' : '';
             nextBtn.style.display = hideNav ? 'none' : '';
             dotsContainer.style.display = hideNav ? 'none' : '';
+
+            if (noResults) {
+                noResults.hidden = visiblePool.length > 0;
+            }
         }
 
         function goTo(page) {
@@ -127,7 +172,7 @@
         }
 
         function setActiveFilter(value) {
-            const filterValue = (value || 'all').toString();
+            const filterValue = (value || '').toString();
 
             // Update UI state
             filterButtons.forEach((btn) => {
@@ -139,18 +184,13 @@
                 filterSelect.value = filterValue;
             }
 
-            // Apply to cards
-            allCards.forEach((card) => {
-                const cats = (card.dataset.blogCats || '').trim();
-                const matches =
-                    filterValue === 'all' ||
-                    (cats && cats.split(/\s+/).includes(filterValue));
-                card.classList.toggle('is-filtered-out', !matches);
-            });
+            activeFilterValue = filterValue;
+            applyFilters();
+        }
 
-            // Reset to first page when filter changes
-            currentPage = 0;
-            updateLayout();
+        function setSearchQuery(query) {
+            activeSearchQuery = (query || '').toString();
+            applyFilters();
         }
 
         prevBtn.addEventListener('click', () => goTo(currentPage - 1));
@@ -161,17 +201,37 @@
         // Bind filter interactions
         if (filterButtons.length) {
             filterButtons.forEach((btn) => {
-                btn.addEventListener('click', () => setActiveFilter(btn.dataset.blogFilter || 'all'));
+                btn.addEventListener('click', () => setActiveFilter(btn.dataset.blogFilter || ''));
             });
         }
         if (filterSelect) {
-            filterSelect.addEventListener('change', () => setActiveFilter(filterSelect.value || 'all'));
+            filterSelect.addEventListener('change', () => setActiveFilter(filterSelect.value || ''));
         }
 
-        // Initialize with whatever is marked active in markup; fallback to "all"
+        // Initialize with whatever is marked active in markup; fallback to first available filter.
         const initialBtn = filterButtons.find((b) => b.classList.contains('is-active'));
-        const initialValue = (initialBtn && initialBtn.dataset.blogFilter) || (filterSelect && filterSelect.value) || 'all';
+        const initialValue =
+            (initialBtn && initialBtn.dataset.blogFilter) ||
+            (filterSelect && filterSelect.value) ||
+            (filterButtons[0] && filterButtons[0].dataset.blogFilter) ||
+            '';
         setActiveFilter(initialValue);
+
+        if (heroSearchInput) {
+            heroSearchInput.addEventListener(
+                'input',
+                debounce(() => {
+                    setSearchQuery(heroSearchInput.value || '');
+                }, 120)
+            );
+        }
+
+        if (heroSearchForm && heroSearchInput) {
+            heroSearchForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                setSearchQuery(heroSearchInput.value || '');
+            });
+        }
 
         // Share modal logic
         function setHint(message) {

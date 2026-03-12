@@ -46,17 +46,11 @@ if ($brand_image_id) {
 }
 $theme_uri = get_stylesheet_directory_uri();
 $social_asset_map = array(
-    'facebook'  => $theme_uri . '/blocks/contact-form/assets/fb.png',
-    'tiktok'    => $theme_uri . '/blocks/contact-form/assets/tiktok.png',
-    'instagram' => $theme_uri . '/blocks/contact-form/assets/instagram.png',
-    'lazada'    => $theme_uri . '/blocks/contact-form/assets/lazada.png',
-    'shopee'    => $theme_uri . '/blocks/contact-form/assets/shopee.png',
-);
-$social_icon_map = array(
-    'facebook'  => 'fa-brands fa-facebook-f',
-    'tiktok'    => 'fa-brands fa-tiktok',
-    'instagram' => 'fa-brands fa-instagram',
-    'shopee'    => 'fa-solid fa-bag-shopping',
+    'facebook'  => $theme_uri . '/assets/images/fb_icon.webp',
+    'tiktok'    => $theme_uri . '/assets/images/titktok_icon.webp',
+    'instagram' => $theme_uri . '/assets/images/instagram_icon.webp',
+    'lazada'    => $theme_uri . '/assets/images/lazada_icon.webp',
+    'shopee'    => $theme_uri . '/assets/images/shopee_icon.webp',
 );
 
 $allowed_heading = array(
@@ -132,10 +126,8 @@ $allowed_heading = array(
                                 ?>
                                 <!-- <?php echo esc_url($url); ?> -->
                                 <a class="<?php echo esc_attr($social_classes); ?>" href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener noreferrer"
-                                    aria-label="<?php echo esc_attr($label); ?>">
-                                    <?php if (!empty($brand_key) && isset($social_icon_map[$brand_key])): ?>
-                                        <i class="<?php echo esc_attr($social_icon_map[$brand_key]); ?>"></i>
-                                    <?php elseif ($is_image): ?>
+                                    aria-label="<?php echo esc_attr($label); ?>" data-tooltip="<?php echo esc_attr($label); ?>">
+                                    <?php if ($is_image): ?>
                                         <img class="contact-form__social-icon" src="<?php echo esc_url($icon); ?>" alt="<?php echo esc_attr($label); ?>" loading="lazy" decoding="async" />
                                     <?php else: ?>
                                         <i class="<?php echo esc_attr($icon); ?>"></i>

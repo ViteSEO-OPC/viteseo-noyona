@@ -817,6 +817,8 @@ function woocom_ct_register_blocks() {
     register_block_type( get_stylesheet_directory() . '/blocks/thank-you' );
     register_block_type( get_stylesheet_directory() . '/blocks/coming-soon' );
     register_block_type( get_stylesheet_directory() . '/blocks/find-us' );
+    register_block_type( get_stylesheet_directory() . '/blocks/customer-reviews' );
+    register_block_type( get_stylesheet_directory() . '/blocks/discover-face-banner' );
 }
 
 // Force 404 only on true unknown routes (avoid clobbering valid page templates).

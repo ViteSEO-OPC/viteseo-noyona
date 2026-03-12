@@ -45,6 +45,10 @@
     font-weight: 700;
 }
 
+.term-overview__section-title__accent {
+    color: #E199A4;
+}
+
 .term-overview__section-title em,
 .term-overview__section-title .term-overview__highlight {
     color: #E199A4;

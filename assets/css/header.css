@@ -288,7 +288,7 @@ body.has-scrolled-header .site-logo-text {
 .nav-link {
   font-family: "Proxima Nova", var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
   font-size: clamp(16px, 2vw, 20px);
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
   color: #000;
   padding: 0.5rem 0;
@@ -297,6 +297,7 @@ body.has-scrolled-header .site-logo-text {
   gap: 0.4rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-bottom: 2px solid transparent;
+  letter-spacing: -5%;
 }
 
 .nav-link:hover,
@@ -372,8 +373,9 @@ body.has-scrolled-header .site-logo-text {
   color: #333;
   text-decoration: none;
   font-family: "Proxima Nova", var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
-  font-size: 0.9rem;
-  font-weight: 400;
+  font-size: clamp(18px, 1.4vw, 20px);
+  font-weight: 600;
+  letter-spacing: -5%;
   transition: background 0.2s, color 0.2s;
 }
 

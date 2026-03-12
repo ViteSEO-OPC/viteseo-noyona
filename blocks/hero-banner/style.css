@@ -12,27 +12,27 @@
     background-position: var(--hero-banner-bg-position, right center);
     background-repeat: no-repeat;
 
-    /* keep the big hero on desktop */
-    min-height: 90vh;
+    /* desktop hero height is configurable per block instance */
+    min-height: var(--hero-banner-desktop-height, 900px);
 
     display: flex;
     align-items: center;
     justify-content: flex-start;
 
-    padding-inline: max(2rem, 5vw);
-    padding-block: clamp(3rem, 8vh, 7rem);
-
+    padding: 0 var(--page-gutter-left);
     overflow: hidden;
 }
 
 /* Rendered media background for responsive srcset/sizes. */
 .hero-banner__bg-media {
+    
     position: absolute;
     inset: 0;
     z-index: 0;
 }
 
 .hero-banner__bg {
+    
     position: absolute;
     inset: 0;
     width: 100%;
@@ -141,7 +141,7 @@
     color: rgba(255, 255, 255, 0.9);
     font-size: clamp(16px, 2vw, 20px);
     width: 100%;
-    max-width: 733px;
+    /* max-width: 733px; */
     line-height: 1.5;
     letter-spacing: -5%;
     font-family: var(--wp--preset--font-family--proxima-nova);
@@ -152,34 +152,50 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    /* max-width: 520px; */
-    width: 100%;
+    max-width: 800px;
+    width: min(
+        800px,
+        calc(100vw - var(--page-gutter-left, 1rem) - var(--page-gutter-right, 1rem))
+    );
     background: #ffffff;
-    border-radius: 999px;
-    padding: 0.35rem 0.6rem;
-    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.12);
+    border-radius: 16px !important;
+    padding: clamp(0.2rem, 0.35vw, 0.3rem) clamp(0.4rem, 0.9vw, 0.7rem) clamp(0.2rem, 0.35vw, 0.3rem) clamp(0.75rem, 1.5vw, 1rem);
+    min-height: clamp(44px, 4.2vw, 54px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+    margin-top: 10rem;
+    box-sizing: border-box;
 }
 
 .hero-banner__search-input {
     flex: 1;
     border: none;
     outline: none;
-    font-size: 0.95rem;
-    padding: 0.45rem 0.6rem;
+    font-size: clamp(15px, 1.2vw, 18px);
+    padding: clamp(0.3rem, 0.7vw, 0.45rem) 0.1rem;
     background: transparent;
     color: #333;
+    min-width: 0;
 }
 
 .hero-banner__search-input::placeholder {
     color: #8f8f8f;
 }
 
+.hero-banner__search-input::-webkit-search-cancel-button,
+.hero-banner__search-input::-webkit-search-decoration,
+.hero-banner__search-input::-webkit-search-results-button,
+.hero-banner__search-input::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+}
+
 .hero-banner__search-btn {
     border: none;
     background: transparent;
-    color: #444;
-    width: 34px;
-    height: 34px;
+    color: #767676;
+    width: clamp(28px, 2.2vw, 34px);
+    height: clamp(28px, 2.2vw, 34px);
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
@@ -187,20 +203,43 @@
     cursor: pointer;
 }
 
+.hero-banner__search-btn:hover,
+.hero-banner__search-btn:focus-visible {
+    color: #4f4f4f;
+}
+
 .hero-banner__cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.85rem 1.4rem;
+    padding: clamp(0.62rem, 1.1vw, 0.85rem) clamp(1rem, 1.8vw, 1.4rem);
     background: #ffffff;
     color: #E199A4;
-    border-radius: 10px;
+    border-radius: clamp(8px, 1vw, 12px) !important;
     font-weight: 600;
     font-size: clamp(16px, 2vw, 24px);
     text-decoration: none;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     width: clamp(160px, 20vw, 250px);
+}
+
+.hero-banner--button-center .hero-banner__cta {
+    justify-self: center;
+}
+
+.hero-banner--button-right .hero-banner__cta {
+    justify-self: end;
+}
+
+.hero-banner--button-center .hero-banner__inner,
+.hero-banner--button-right .hero-banner__inner {
+    width: 100%;
+}
+
+.hero-banner--button-center .hero-banner__content,
+.hero-banner--button-right .hero-banner__content {
+    width: 100%;
 }
 
 .hero-banner__cta:hover {
@@ -233,6 +272,10 @@
 
     .hero-banner__inner {
         max-width: 640px;
+    }
+
+    .hero-banner__search {
+        margin-inline: auto;
     }
 }
 

@@ -21,6 +21,7 @@
 
     "buttonText": { "type": "string", "default": "" },
     "buttonUrl": { "type": "string", "default": "" },
+    "buttonAlign": { "type": "string", "default": "" },
 
     "backgroundImageId": { "type": "number", "default": 0 },
     "backgroundImage": { "type": "string", "default": "" },
@@ -31,6 +32,7 @@
     "backgroundImageMobile": { "type": "string", "default": "" },
     "backgroundSizeMobile": { "type": "string", "default": "" },
     "backgroundPositionMobile": { "type": "string", "default": "" },
+    "desktopHeight": { "type": "string", "default": "" },
 
     "backgroundColor": { "type": "string", "default": "" }
   },

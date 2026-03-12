@@ -53,7 +53,7 @@
 
 .newsletter-strip__input {
   flex: 0 1 420px;
-  border-radius: 10px;
+  border-radius: 16px;
   border: 1px solid rgba(17, 17, 17, 0.25);
   background: rgba(255, 255, 255, 0.5);
   padding: 0.6rem 0.95rem;
@@ -64,10 +64,10 @@
 
 .newsletter-strip__button {
   border: 0;
-  border-radius: 10px;
-  color: #E199A4;
-  background: #fff;
-  padding: 10px;
+  border-radius: 16px;
+  color: #fff;
+  background: #E199A4;
+  padding: 10px 20px;
   font-size: clamp(16px, 1.4vw, 18px);
   font-weight: 600;
   cursor: pointer;

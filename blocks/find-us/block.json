@@ -14,7 +14,7 @@
   "attributes": {
     "image": {
       "type": "string",
-      "default": "/wp-content/themes/viteseo-noyona/assets/images/noyona-mobile-logo.webp"
+      "default": "/wp-content/themes/viteseo-noyona/assets/images/brand-logo.webp"
     },
     "imageId": {
       "type": "number",
@@ -22,7 +22,7 @@
     },
     "heading": {
       "type": "string",
-      "default": "Where to <span class=\"find-us__accent\">Find Us</span>"
+      "default": "<span class=\"find-us__accent\">Where to Find Us</span>"
     },
     "description": {
       "type": "string",

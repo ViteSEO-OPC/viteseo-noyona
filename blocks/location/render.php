@@ -301,8 +301,18 @@ if ($store_query->have_posts()) {
 ?>
 
 <div <?php echo $wrapper_attributes; ?>>
+    <nav class="nsl-v2-breadcrumbs" aria-label="<?php esc_attr_e('Breadcrumb', 'noyona'); ?>">
+        <a class="nsl-v2-breadcrumbs__home" href="<?php echo esc_url(home_url('/')); ?>">
+            <?php esc_html_e('Home', 'noyona'); ?>
+        </a>
+        <span class="nsl-v2-breadcrumbs__sep" aria-hidden="true">/</span>
+        <span class="nsl-v2-breadcrumbs__current">
+            <?php esc_html_e('Find a Store', 'noyona'); ?>
+        </span>
+    </nav>
+
     <div class="nsl-v2-header">
-        <h2 class="nsl-v2-title">Find a Store</h2>
+        <h2 class="nsl-v2-title">Find a <span class="nsl-v2-title__accent">Store</span></h2>
         <p class="nsl-v2-subtitle">Search by store name or address and explore branches by region.</p>
     </div>
 

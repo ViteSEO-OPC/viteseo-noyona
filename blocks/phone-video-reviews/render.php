@@ -6,6 +6,11 @@ if (!defined('ABSPATH')) {
 $heading = isset($attributes['heading']) ? trim((string) $attributes['heading']) : '';
 $subheading = isset($attributes['subheading']) ? trim((string) $attributes['subheading']) : '';
 $cards = is_array($attributes['cards'] ?? null) ? $attributes['cards'] : [];
+$button_text = isset($attributes['buttonText']) ? trim((string) $attributes['buttonText']) : '';
+$button_url = isset($attributes['buttonUrl']) ? trim((string) $attributes['buttonUrl']) : '';
+$allowed_button_align = array('left', 'center', 'right');
+$button_align_raw = isset($attributes['buttonAlign']) ? (string) $attributes['buttonAlign'] : 'center';
+$button_align = in_array($button_align_raw, $allowed_button_align, true) ? $button_align_raw : 'center';
 
 $carousel_autoplay = !empty($attributes['carouselAutoPlay']);
 $carousel_autoplay_seconds = isset($attributes['carouselAutoPlaySeconds']) ? (int) $attributes['carouselAutoPlaySeconds'] : 0;
@@ -178,6 +183,15 @@ $wrapper = get_block_wrapper_attributes([
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
+
+  <?php if ($button_text !== ''): ?>
+    <div class="phone-reviews__cta phone-reviews__cta--<?= esc_attr($button_align); ?>">
+      <a class="phone-reviews__button" href="<?= esc_url($button_url !== '' ? $button_url : '#'); ?>">
+        <?= esc_html($button_text); ?>
+      </a>
+    </div>
+  <?php endif; ?>
+
   <!-- Cinematic overlay (desktop click-through) -->
   <div class="phone-reviews__overlay" aria-hidden="true">
     <div class="phone-reviews__overlay-backdrop"></div>

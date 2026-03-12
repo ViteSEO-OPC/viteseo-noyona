@@ -1,0 +1,66 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/discover-face-banner",
+  "version": "1.0.0",
+  "title": "Discover Face Banner",
+  "category": "design",
+  "icon": "cover-image",
+  "description": "Gradient promo banner with CTA and feature cards.",
+  "supports": {
+    "align": ["wide", "full"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Discover Face"
+    },
+    "subheading": {
+      "type": "string",
+      "default": "Makeup Essentials"
+    },
+    "paragraphOne": {
+      "type": "string",
+      "default": "Choosing the right face makeup for morena skin and humid weather ensures your look lasts all day."
+    },
+    "paragraphTwo": {
+      "type": "string",
+      "default": "Browse our full collection online and enjoy fast, reliable delivery via TikTok, Shopee and Lazada."
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "View all products"
+    },
+    "buttonUrl": {
+      "type": "string",
+      "default": "/coming-soon/"
+    },
+    "backgroundImage": {
+      "type": "string",
+      "default": ""
+    },
+    "cards": {
+      "type": "array",
+      "default": [
+        {
+          "title": "Easy Shopping",
+          "description": "Available on your favorite platforms for seamless checkout.",
+          "iconClass": "fa-regular fa-face-smile",
+          "chips": []
+        },
+        {
+          "title": "Fast Delivery",
+          "description": "Get your essentials delivered straight to your doorstep.",
+          "iconClass": "fa-solid fa-truck-fast",
+          "chips": ["TK", "SP", "LZ"]
+        }
+      ],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

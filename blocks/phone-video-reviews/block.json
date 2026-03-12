@@ -26,6 +26,18 @@
       "type": "string",
       "default": ""
     },
+    "buttonText": {
+      "type": "string",
+      "default": ""
+    },
+    "buttonUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "buttonAlign": {
+      "type": "string",
+      "default": "center"
+    },
 
     "carouselAutoPlay": {
       "type": "boolean",

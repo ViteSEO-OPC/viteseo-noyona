@@ -100,7 +100,7 @@ if ( empty( $cards ) ) {
 // - Prefer dynamic categories from queried posts (WP admin)
 // - Fall back to configured block filters when no WP posts are available
 $filter_options = array();
-$active_filter_value = 'all';
+$active_filter_value = '';
 
 // Dynamic categories (sorted by count desc, then label)
 if ( ! empty( $category_counts ) ) {
@@ -119,17 +119,16 @@ if ( ! empty( $category_counts ) ) {
         }
     );
 
-    $filter_options[] = array(
-        'label' => 'All',
-        'value' => 'all',
-    );
-
     foreach ( $terms as $slug ) {
         $label = isset( $category_labels[ $slug ] ) ? (string) $category_labels[ $slug ] : (string) $slug;
         $filter_options[] = array(
             'label' => $label,
             'value' => (string) $slug,
         );
+    }
+
+    if ( ! empty( $terms ) ) {
+        $active_filter_value = (string) $terms[0];
     }
 } elseif ( ! empty( $filters ) ) {
     foreach ( $filters as $filter ) {
@@ -143,7 +142,7 @@ if ( ! empty( $category_counts ) ) {
             'label' => $label,
             'value' => $value,
         );
-        if ( $active && 'all' === $active_filter_value ) {
+        if ( $active && '' === $active_filter_value ) {
             $active_filter_value = $value;
         }
     }
