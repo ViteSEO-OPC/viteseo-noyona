@@ -62,7 +62,7 @@ if ( empty( $cards ) ) {
     return;
 }
 ?>
-<section class="wp-block-noyona-blog-slide blog-slide alignwide" data-cards-to-show="<?php echo esc_attr( $cards_to_show ); ?>">
+<section class="wp-block-noyona-blog-slide blog-slide alignfull" data-cards-to-show="<?php echo esc_attr( $cards_to_show ); ?>">
     <div class="blog-slide__header">
         <?php if ( ! empty( $atts['heading'] ) ) : ?>
             <h2 class="blog-slide__title"><?php echo esc_html( $atts['heading'] ); ?></h2>

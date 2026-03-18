@@ -85,9 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const buildShareLinks = (url) => {
             if (!shareModal) return;
             const encoded = encodeURIComponent(url);
+            const encodedTitle = encodeURIComponent(document.title || '');
             const map = {
                 facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encoded,
-                x: 'https://twitter.com/intent/tweet?url=' + encoded,
+                x: 'https://x.com/intent/tweet?url=' + encoded + '&text=' + encodedTitle,
                 linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + encoded,
             };
 
@@ -142,6 +143,15 @@ document.addEventListener('DOMContentLoaded', () => {
             shareBtn.addEventListener('click', (event) => {
                 event.preventDefault();
                 const url = shareBtn.dataset.shareUrl || '';
+                // Always open the custom modal so platform options
+                // (Facebook, Instagram copy flow, X, LinkedIn, Copy)
+                // are consistently available across devices.
+                if (shareModal) {
+                    openShare(url);
+                    return;
+                }
+
+                // Fallback only when modal is unavailable.
                 if (navigator.share) {
                     navigator
                         .share({
@@ -149,9 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             url,
                         })
                         .catch(() => {});
-                    return;
                 }
-                openShare(url);
             });
         }
 
@@ -182,8 +190,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (platform === 'instagram') {
                     e.preventDefault();
-                    const ok = await copyToClipboard(url);
-                    setHint(ok ? 'Link copied — paste it into Instagram.' : 'Could not copy link.');
+                    let sharedViaNative = false;
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({
+                                title: document.title,
+                                url,
+                            });
+                            sharedViaNative = true;
+                            setHint('Opened your native share options.');
+                        } catch (err) {
+                            // User canceled or browser blocked; continue to copy/open flow.
+                        }
+                    }
+
+                    if (!sharedViaNative) {
+                        const ok = await copyToClipboard(url);
+                        window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+                        setHint(
+                            ok
+                                ? 'Link copied. Instagram opened in a new tab — paste the link in your post, story, or DM.'
+                                : 'Instagram opened. Copy failed — please copy the URL manually.'
+                        );
+                    }
                 }
             });
 

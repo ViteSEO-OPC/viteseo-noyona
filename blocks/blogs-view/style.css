@@ -1,6 +1,9 @@
 .blogs-view {
     background: radial-gradient(120% 120% at 20% -10%, #f8e6eb 0%, #ffffff 55%);
-    padding: clamp(2.5rem, 5vw, 3.5rem) var(--page-gutter-right) clamp(3.5rem, 6vw, 5rem) var(--page-gutter-left);
+    padding-top: clamp(2.5rem, 5vw, 3.5rem);
+    padding-right: var(--page-gutter-right);
+    padding-bottom: clamp(3.5rem, 6vw, 5rem);
+    padding-left: var(--page-gutter-left);
     font-family: var(--wp--preset--font-family--proxima-nova);
     color: #2a2a2a;
 }
@@ -9,6 +12,10 @@
     html {
         scroll-behavior: smooth;
     }
+}
+
+.wp-block-heading {
+    margin: 0 0 1rem !important;
 }
 
 .blogs-view__inner {
@@ -43,9 +50,14 @@
 
 .blogs-view__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) clamp(170px, 15.3vw, 230px);
-    gap: clamp(1.5rem, 4vw, 2.8rem);
+    grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.8rem);
     align-items: start;
+}
+
+.blogs-view__article {
+    width: 100%;
+    min-width: 0;
 }
 
 .blogs-view__header {
@@ -68,10 +80,10 @@
 
 .blogs-view__title {
     margin: 0 0 0.6rem;
-    font-size: clamp(2.2rem, 4.5vw, 96px);
+    font-size: 96px;
     color: #E199A4;
     line-height: 1.1;
-    padding:20px 0 20px;
+    padding: 20px 0;
 }
 
 .blogs-view__excerpt {
@@ -79,7 +91,7 @@
     color: #676767;
     font-size: 20px;
     line-height: 1.6;
-    max-width: 90%;
+    max-width: 100%;
 }
 
 .blogs-view__hero {
@@ -88,7 +100,7 @@
     overflow: hidden;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
     background: #f0d6dc;
-    width: clamp(320px, 90vw, 980px);
+    width: 100%;
     max-width: 100%;
     height: clamp(170px, 53vw, 520px);
 }
@@ -153,10 +165,7 @@
 .blogs-view__meta .wp-block-paragraph {
     font-size: 20px;
 }
-.wp-block-heading{
-    font-size: 55px;
-    font-family: inherit;
-}
+
 .blogs-view__author-name {
     font-weight: 600;
     font-size: 24px;
@@ -187,12 +196,19 @@
 }
 
 .blogs-view__content h2 {
-    font-size: 55px;
+    font-size: 48px;
+    line-height: 1.2;
+}
+
+.blogs-view__content h3 {
+    font-size: 24px;
+    line-height: 1.35;
 }
 
 .blogs-view__content p {
     margin: 0 0 1rem;
     font-size: 20px;
+    line-height: 1.6;
 }
 
 .blogs-view__content ul,
@@ -213,6 +229,8 @@
 .blogs-view__toc {
     position: sticky;
     top: var(--toc-top, 96px);
+    width: 100%;
+    min-width: 0;
 }
 
 .blogs-view__toc-card {
@@ -222,7 +240,10 @@
     box-shadow: 0 16px 30px rgba(0, 0, 0, 0.12);
     border: 1px solid rgba(0, 0, 0, 0.05);
     text-align: center;
-    width: 130%;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .blogs-view__toc-title {
@@ -251,41 +272,54 @@
 
 .blogs-view__toc-item {
     position: relative;
-    padding-left: 1rem;
+    padding-left: 1.35rem;
+    line-height: 1.45;
 }
 
 .blogs-view__toc-item::before {
     content: "";
-    width: 4px;
-    height: 4px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: #E199A4;
     position: absolute;
     left: 0;
-    top: 0.55rem;
+    top: 0.72em;
+    transform: translateY(-50%);
 }
 
 .blogs-view__toc-item.is-sub {
-    padding-left: 1.5rem;
+    padding-left: 1.65rem;
 }
 
 .blogs-view__toc-item.is-sub::before {
-    width: 3px;
-    height: 3px;
+    width: 5px;
+    height: 5px;
     background: #f0a7b8;
+    left: 0.15rem;
+}
+
+.blogs-view__toc-item u {
+    text-decoration: none;
 }
 
 .blogs-view__toc-link {
     color: #5a5a5a;
     font-size: 20px;
     font-family: "Proxima Nova Light", "Proxima Nova", sans-serif;
-    text-decoration: none;
+    text-decoration-line: underline;
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
     transition: color 0.2s ease;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .blogs-view__toc-link:hover,
 .blogs-view__toc-link.is-active {
     color: #E199A4;
+    text-decoration-color: #E199A4;
 }
 
 .blogs-view__toc-empty {
@@ -299,21 +333,25 @@
     margin-top: 0.8rem;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: 0.5rem;
-    width: 143%;
+    width: 100%;
 }
 
 .blogs-view__pill {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.4rem;
-    padding: 0.35rem 0.9rem;
+    padding: 0.55rem 1.2rem;
     border-radius: 999px;
     background: #E199A4;
     color: #fff;
     text-decoration: none;
-    font-size: 0.7rem;
+    font-size: 15px;
+    line-height: 1;
     font-weight: 600;
+    min-height: 44px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -330,14 +368,14 @@
 }
 
 .blogs-view__pill--icon {
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
     padding: 0;
     justify-content: center;
 }
 
 .blogs-view__pill--share i {
-    font-size: 15px;
+    font-size: 16px;
 }
 
 /* Share modal (scoped to blogs view) */
@@ -511,8 +549,8 @@
 
 @media (max-width: 980px) {
     .blogs-view {
-        padding-right: clamp(1rem, 4vw, calc(var(--page-gutter-right) * 0.4));
-        padding-left: clamp(1rem, 4vw, var(--page-gutter-left));
+        padding-right: clamp(16px, 4vw, var(--page-gutter-right));
+        padding-left: clamp(16px, 4vw, var(--page-gutter-left));
     }
 
     .blogs-view__toc-card {
@@ -522,6 +560,18 @@
 
     .blogs-view__layout {
         grid-template-columns: 1fr;
+    }
+
+    .blogs-view__title {
+        font-size: clamp(44px, 8vw, 72px);
+    }
+
+    .blogs-view__content h2 {
+        font-size: clamp(32px, 5vw, 42px);
+    }
+
+    .blogs-view__content h3 {
+        font-size: clamp(22px, 3.4vw, 24px);
     }
 
     .blogs-view__toc {
@@ -537,7 +587,8 @@
 
 @media (max-width: 640px) {
     .blogs-view {
-        padding-inline: 1rem;
+        padding-right: 16px;
+        padding-left: 16px;
     }
 
     .blogs-view__meta {
@@ -547,5 +598,25 @@
 
     .blogs-view__hero {
         border-radius: 16px;
+    }
+
+    .blogs-view__title {
+        font-size: clamp(34px, 11vw, 48px);
+    }
+
+    .blogs-view__content h2 {
+        font-size: clamp(28px, 8vw, 34px);
+    }
+
+    .blogs-view__content h3 {
+        font-size: 24px;
+    }
+
+    .blogs-view__content p,
+    .blogs-view__excerpt,
+    .blogs-view__author-summary,
+    .blogs-view__author-name,
+    .blogs-view__date {
+        font-size: clamp(17px, 4.2vw, 20px);
     }
 }
