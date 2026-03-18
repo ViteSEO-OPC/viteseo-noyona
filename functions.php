@@ -174,7 +174,7 @@ function noyona_preload_home_hero_image( $preload_resources ) {
     }
 
     $preload_resources[] = array(
-        'href'          => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/hero-banner.webp',
+        'href'          => get_stylesheet_directory_uri() . '/assets/images/hp-desktop-1920x1080px.webp',
         'as'            => 'image',
         'fetchpriority' => 'high',
     );
@@ -1458,7 +1458,7 @@ function noyona_handle_contact_form() {
 
 // add_action('wp_head', function () {
 //     if ( noyona_is_site_under_development() ) {
-//         echo '<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">';
+//         echo '<meta name="robots" content="index, follow, noarchive, nosnippet">';
 //         return;
 //     }
 //     echo '<meta name="robots" content="index, follow">';
@@ -1469,7 +1469,7 @@ function noyona_handle_contact_form() {
  * ================================================= */
 // add_action('send_headers', function () {
 //     if ( noyona_is_site_under_development() ) {
-//         header('X-Robots-Tag: noindex, nofollow, noarchive, nosnippet', true);
+//         header('X-Robots-Tag: index, follow, noarchive, nosnippet', true);
 //         return;
 //     }
 //     header('X-Robots-Tag: index, follow, archive, snippet', true);
@@ -1522,7 +1522,7 @@ function noyona_custom_robots_txt( $output, $public ) {
 add_action( 'wp_head', 'noyona_output_robots_meta', 1 );
 function noyona_output_robots_meta() {
     if ( noyona_is_site_under_development() ) {
-        echo '<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, max-snippet:0, max-image-preview:none, max-video-preview:0">' . "\n";
+        echo '<meta name="robots" content="index, follow, archive, snippet, imageindex, videoindex">' . "\n";
         return;
     }
 
@@ -1535,7 +1535,7 @@ function noyona_output_robots_meta() {
 add_action( 'send_headers', 'noyona_send_robots_headers', 1 );
 function noyona_send_robots_headers() {
     if ( noyona_is_site_under_development() ) {
-        header( 'X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex, max-snippet:0, max-image-preview:none, max-video-preview:0', true );
+        header( 'X-Robots-Tag: index, follow, archive, snippet, imageindex, videoindex', true );
         return;
     }
 

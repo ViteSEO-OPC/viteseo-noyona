@@ -4,41 +4,27 @@
     isolation: isolate;
     color: #fff;
 
-    /* ✅ fallback fill color (prevents white gaps when using contain) */
-    background-color: var(--hero-banner-bg-color, #f7d0d8);
+    background-color: transparent;
 
-    background-image: var(--hero-banner-bg, none);
-    background-size: var(--hero-banner-bg-size, cover);
-    background-position: var(--hero-banner-bg-position, right center);
-    background-repeat: no-repeat;
-
-    /* desktop hero height is configurable per block instance */
-    min-height: var(--hero-banner-desktop-height, 900px);
-
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-
-    padding: 0 var(--page-gutter-left);
+    display: block;
     overflow: hidden;
 }
 
 /* Rendered media background for responsive srcset/sizes. */
 .hero-banner__bg-media {
-    
-    position: absolute;
-    inset: 0;
+    position: relative;
+    display: block;
+    width: 100%;
     z-index: 0;
 }
 
 .hero-banner__bg {
-    
-    position: absolute;
-    inset: 0;
+    position: relative;
+    display: block;
     width: 100%;
-    height: 100%;
-    object-fit: var(--hero-banner-bg-size, cover);
-    object-position: var(--hero-banner-bg-position, right center);
+    height: auto;
+    object-fit: contain;
+    object-position: var(--hero-banner-bg-position, center top);
     pointer-events: none;
 }
 
@@ -58,14 +44,21 @@
 }
 
 .hero-banner__inner {
-    position: relative;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding-left: var(--page-gutter-left, 1rem);
+    padding-right: var(--page-gutter-right, 1rem);
     z-index: 2;
 }
 
 .hero-banner__content {
     display: grid;
     gap: 1rem;
-    /* max-width: 1400px; */
+    max-width: 800px;
 }
 
 .hero-banner__eyebrow {
@@ -86,12 +79,14 @@
     white-space: pre-line;
     font-family: var(--wp--preset--font-family--proxima-nova);
     letter-spacing: -5%;
-    color: #ce798a;
+    /* color: #ce798a; */
+    max-width: 700px;
 }
 
 .hero-banner__title-line--accent {
     font-style: italic;
     font-weight: 400;
+    
 }
 
 .hero-banner__title-line span,
@@ -162,7 +157,7 @@
     padding: clamp(0.2rem, 0.35vw, 0.3rem) clamp(0.4rem, 0.9vw, 0.7rem) clamp(0.2rem, 0.35vw, 0.3rem) clamp(0.75rem, 1.5vw, 1rem);
     min-height: clamp(44px, 4.2vw, 54px);
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
-    margin-top: 10rem;
+    /* margin-top: 10rem; */
     box-sizing: border-box;
 }
 
@@ -242,6 +237,13 @@
     width: 100%;
 }
 
+@media (min-width: 768px) {
+    .hero-banner--button-center .hero-banner__inner {
+        align-items: center;
+        justify-content: center;
+    }
+}
+
 .hero-banner__cta:hover {
     transform: translateY(-1px);
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
@@ -250,28 +252,41 @@
 
 }
 
-@media (max-width: 900px) {
-    .hero-banner {
-        /* ✅ use mobile background variables (or desktop fallback) */
-        background-image: var(--hero-banner-bg-mobile, var(--hero-banner-bg, none));
-        /* Default: fill the hero (no letterboxing/pink bars). You can override with block vars if needed. */
-        background-size: var(--hero-banner-bg-size-mobile, cover);
-        background-position: var(--hero-banner-bg-position-mobile, right center);
-
-        /* Keep a healthy hero height even if the page has no text (e.g. Contact page) */
-        min-height: clamp(360px, 55vh, 560px);
-
-        padding-inline: clamp(16px, 4vw, 28px);
-        padding-block: clamp(2.5rem, 7vh, 4.5rem);
+@media (max-width: 980px) {
+    .hero-banner.hero-banner--has-search .hero-banner__inner {
+        justify-content: center;
     }
 
+    .hero-banner.hero-banner--has-search .hero-banner__content {
+        justify-items: center;
+        text-align: center;
+    }
+
+    .hero-banner.hero-banner--has-search .hero-banner__title,
+    .hero-banner.hero-banner--has-search .hero-banner__body {
+        text-align: center;
+    }
+
+    .hero-banner.hero-banner--has-search .hero-banner__search {
+        margin-inline: auto;
+    }
+}
+
+@media (max-width: 1280px) {
+    .hero-banner__inner {
+        padding-inline: clamp(18px, 3vw, 28px);
+    }
+}
+
+@media (max-width: 1024px) {
     .hero-banner__bg {
-        object-fit: var(--hero-banner-bg-size-mobile, cover);
-        object-position: var(--hero-banner-bg-position-mobile, right center);
+        object-position: var(--hero-banner-bg-position-mobile, center top);
     }
 
     .hero-banner__inner {
-        max-width: 640px;
+        max-width: none;
+        padding-inline: clamp(16px, 4vw, 24px);
+        padding-block: clamp(1.5rem, 4vh, 2.5rem);
     }
 
     .hero-banner__search {
@@ -280,18 +295,27 @@
 }
 
 /* If the viewport is short/landscape, reduce padding/height a bit so the hero doesn't feel cramped. */
-@media (max-width: 900px) and (max-height: 580px) {
-    .hero-banner {
-        min-height: clamp(300px, 70vh, 440px);
-        padding-block: clamp(1.75rem, 6vh, 3rem);
+@media (max-width: 1024px) and (max-height: 700px) {
+    .hero-banner__inner {
+        padding-block: clamp(1rem, 3vh, 1.75rem);
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
     .hero-banner {
         /* optional: if alignfull, border-radius can show page background at corners */
         border-radius: 0;
-        padding-block: clamp(2.25rem, 6vh, 4rem);
+        padding-block: 0;
+    }
+
+    .hero-banner--button-center .hero-banner__inner {
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: clamp(16px, 5vw, 28px);
+    }
+
+    .hero-banner--button-center .hero-banner__content {
+        justify-items: center;
     }
 }
 

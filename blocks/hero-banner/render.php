@@ -18,6 +18,12 @@ $defaults = array(
 
     'backgroundImageId' => 0,
     'backgroundImage' => '',
+    'backgroundImageDesktopId' => 0,
+    'backgroundImageDesktop' => '',
+    'backgroundImageLaptopId' => 0,
+    'backgroundImageLaptop' => '',
+    'backgroundImageTabletId' => 0,
+    'backgroundImageTablet' => '',
     'backgroundSize'  => 'cover',
     // ✅ default focal point to the right so the subject on the right won’t get chopped
     'backgroundPosition' => 'right center',
@@ -37,12 +43,36 @@ $defaults = array(
 $atts = wp_parse_args( $attributes, $defaults );
 
 $bg_image_id = absint( $atts['backgroundImageId'] );
+$bg_image_desktop_id = absint( $atts['backgroundImageDesktopId'] );
+$bg_image_laptop_id = absint( $atts['backgroundImageLaptopId'] );
+$bg_image_tablet_id = absint( $atts['backgroundImageTabletId'] );
 $bg_image_mobile_id = absint( $atts['backgroundImageMobileId'] );
 
 if ( ! $bg_image_id && ! empty( $atts['backgroundImage'] ) ) {
     $resolved_id = attachment_url_to_postid( $atts['backgroundImage'] );
     if ( $resolved_id ) {
         $bg_image_id = (int) $resolved_id;
+    }
+}
+
+if ( ! $bg_image_desktop_id && ! empty( $atts['backgroundImageDesktop'] ) ) {
+    $resolved_desktop_id = attachment_url_to_postid( $atts['backgroundImageDesktop'] );
+    if ( $resolved_desktop_id ) {
+        $bg_image_desktop_id = (int) $resolved_desktop_id;
+    }
+}
+
+if ( ! $bg_image_laptop_id && ! empty( $atts['backgroundImageLaptop'] ) ) {
+    $resolved_laptop_id = attachment_url_to_postid( $atts['backgroundImageLaptop'] );
+    if ( $resolved_laptop_id ) {
+        $bg_image_laptop_id = (int) $resolved_laptop_id;
+    }
+}
+
+if ( ! $bg_image_tablet_id && ! empty( $atts['backgroundImageTablet'] ) ) {
+    $resolved_tablet_id = attachment_url_to_postid( $atts['backgroundImageTablet'] );
+    if ( $resolved_tablet_id ) {
+        $bg_image_tablet_id = (int) $resolved_tablet_id;
     }
 }
 
@@ -54,20 +84,44 @@ if ( ! $bg_image_mobile_id && ! empty( $atts['backgroundImageMobile'] ) ) {
 }
 
 $fallback_image = get_stylesheet_directory_uri() . '/assets/images/makeup.jpg';
+$bg_image_desktop = $bg_image_desktop_id
+    ? wp_get_attachment_image_url( $bg_image_desktop_id, 'full' )
+    : ( ! empty( $atts['backgroundImageDesktop'] ) ? $atts['backgroundImageDesktop'] : '' );
+
 $bg_image = $bg_image_id
     ? wp_get_attachment_image_url( $bg_image_id, 'full' )
-    : ( ! empty( $atts['backgroundImage'] ) ? $atts['backgroundImage'] : $fallback_image );
+    : ( ! empty( $atts['backgroundImage'] ) ? $atts['backgroundImage'] : '' );
+
+if ( empty( $bg_image_desktop ) ) {
+    $bg_image_desktop = ! empty( $bg_image ) ? $bg_image : $fallback_image;
+}
+
+$bg_image_laptop = $bg_image_laptop_id
+    ? wp_get_attachment_image_url( $bg_image_laptop_id, 'full' )
+    : ( ! empty( $atts['backgroundImageLaptop'] ) ? $atts['backgroundImageLaptop'] : $bg_image_desktop );
+
+$bg_image_tablet = $bg_image_tablet_id
+    ? wp_get_attachment_image_url( $bg_image_tablet_id, 'full' )
+    : ( ! empty( $atts['backgroundImageTablet'] ) ? $atts['backgroundImageTablet'] : $bg_image_laptop );
 
 $bg_image_mobile = $bg_image_mobile_id
     ? wp_get_attachment_image_url( $bg_image_mobile_id, 'full' )
-    : ( ! empty( $atts['backgroundImageMobile'] ) ? $atts['backgroundImageMobile'] : $bg_image );
+    : ( ! empty( $atts['backgroundImageMobile'] ) ? $atts['backgroundImageMobile'] : $bg_image_tablet );
 
-if ( empty( $bg_image ) ) {
-    $bg_image = $fallback_image;
+if ( empty( $bg_image_desktop ) ) {
+    $bg_image_desktop = $fallback_image;
+}
+
+if ( empty( $bg_image_laptop ) ) {
+    $bg_image_laptop = $bg_image_desktop;
+}
+
+if ( empty( $bg_image_tablet ) ) {
+    $bg_image_tablet = $bg_image_laptop;
 }
 
 if ( empty( $bg_image_mobile ) ) {
-    $bg_image_mobile = $bg_image;
+    $bg_image_mobile = $bg_image_tablet;
 }
 
 $bg_size = $atts['backgroundSize'] ?: 'cover';
@@ -80,8 +134,12 @@ $desktop_height = $desktop_height_raw !== '' ? $desktop_height_raw : '900px';
 
 $bg_color = $atts['backgroundColor'] ?: '#f7d0d8';
 $is_front_page = is_front_page();
+$desktop_srcset = $bg_image_desktop_id
+    ? wp_get_attachment_image_srcset( $bg_image_desktop_id, 'full' )
+    : ( $bg_image_id ? wp_get_attachment_image_srcset( $bg_image_id, 'full' ) : '' );
+$laptop_srcset = $bg_image_laptop_id ? wp_get_attachment_image_srcset( $bg_image_laptop_id, 'full' ) : '';
+$tablet_srcset = $bg_image_tablet_id ? wp_get_attachment_image_srcset( $bg_image_tablet_id, 'full' ) : '';
 $mobile_srcset = $bg_image_mobile_id ? wp_get_attachment_image_srcset( $bg_image_mobile_id, 'full' ) : '';
-$desktop_srcset = $bg_image_id ? wp_get_attachment_image_srcset( $bg_image_id, 'full' ) : '';
 
 $allowed_button_align = array( 'left', 'center', 'right' );
 $button_align_raw = isset( $atts['buttonAlign'] ) ? strtolower( trim( (string) $atts['buttonAlign'] ) ) : '';
@@ -89,6 +147,9 @@ $button_align = in_array( $button_align_raw, $allowed_button_align, true ) ? $bu
 $hero_banner_class = 'wp-block-noyona-hero-banner hero-banner alignfull';
 if ( '' !== $button_align ) {
     $hero_banner_class .= ' hero-banner--button-' . $button_align;
+}
+if ( ! empty( $atts['searchEnabled'] ) ) {
+    $hero_banner_class .= ' hero-banner--has-search';
 }
 ?>
 <section
@@ -110,7 +171,7 @@ if ( '' !== $button_align ) {
     <picture class="hero-banner__bg-media" aria-hidden="true">
         <?php if ( ! empty( $bg_image_mobile ) ) : ?>
             <source
-                media="(max-width: 900px)"
+                media="(max-width: 767px)"
                 <?php if ( ! empty( $mobile_srcset ) ) : ?>
                     srcset="<?php echo esc_attr( $mobile_srcset ); ?>"
                     sizes="100vw"
@@ -119,9 +180,31 @@ if ( '' !== $button_align ) {
                 <?php endif; ?>
             />
         <?php endif; ?>
+        <?php if ( ! empty( $bg_image_tablet ) ) : ?>
+            <source
+                media="(max-width: 1024px)"
+                <?php if ( ! empty( $tablet_srcset ) ) : ?>
+                    srcset="<?php echo esc_attr( $tablet_srcset ); ?>"
+                    sizes="100vw"
+                <?php else : ?>
+                    srcset="<?php echo esc_url( $bg_image_tablet ); ?>"
+                <?php endif; ?>
+            />
+        <?php endif; ?>
+        <?php if ( ! empty( $bg_image_laptop ) ) : ?>
+            <source
+                media="(max-width: 1280px)"
+                <?php if ( ! empty( $laptop_srcset ) ) : ?>
+                    srcset="<?php echo esc_attr( $laptop_srcset ); ?>"
+                    sizes="100vw"
+                <?php else : ?>
+                    srcset="<?php echo esc_url( $bg_image_laptop ); ?>"
+                <?php endif; ?>
+            />
+        <?php endif; ?>
         <img
             class="hero-banner__bg"
-            src="<?php echo esc_url( $bg_image ); ?>"
+            src="<?php echo esc_url( $bg_image_desktop ); ?>"
             alt=""
             decoding="async"
             <?php if ( ! empty( $desktop_srcset ) ) : ?>

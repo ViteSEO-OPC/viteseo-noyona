@@ -25,6 +25,12 @@
 
     "backgroundImageId": { "type": "number", "default": 0 },
     "backgroundImage": { "type": "string", "default": "" },
+    "backgroundImageDesktopId": { "type": "number", "default": 0 },
+    "backgroundImageDesktop": { "type": "string", "default": "" },
+    "backgroundImageLaptopId": { "type": "number", "default": 0 },
+    "backgroundImageLaptop": { "type": "string", "default": "" },
+    "backgroundImageTabletId": { "type": "number", "default": 0 },
+    "backgroundImageTablet": { "type": "string", "default": "" },
     "backgroundSize": { "type": "string", "default": "" },
     "backgroundPosition": { "type": "string", "default": "" },
 
