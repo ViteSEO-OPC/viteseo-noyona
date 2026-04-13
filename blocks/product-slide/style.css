@@ -159,6 +159,44 @@
   display: inline-block;
 }
 
+.ps-swatch--option {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #d9d9d9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.ps-swatch--option:hover {
+  transform: translateY(-1px);
+}
+
+.ps-swatch--option:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(225, 26, 99, 0.2), 0 0 0 1px #E199A4;
+}
+
+.ps-swatch--option.is-selected {
+  box-shadow: 0 0 0 2px #E199A4;
+}
+
+.ps-swatch--option.is-selected::after {
+  content: "";
+  width: 7px;
+  height: 12px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.45));
+}
+
 .ps-card__title {
   color: #000;
   font-family: var(--wp--preset--font-family--proxima-nova);

@@ -1,0 +1,13 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/pdp-social-proof",
+  "version": "1.0.0",
+  "title": "PDP social proof",
+  "category": "woocommerce",
+  "icon": "megaphone",
+  "description": "Optional pill line from product meta (e.g. sales message).",
+  "supports": { "html": false },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "viteseo-noyona-childtheme"
+}

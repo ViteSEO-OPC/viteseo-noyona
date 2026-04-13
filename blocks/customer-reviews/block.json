@@ -1,13 +1,14 @@
 {
   "apiVersion": 3,
   "name": "noyona/customer-reviews",
-  "version": "1.0.0",
+  "version": "1.1.8",
   "title": "Customer Reviews Grid",
   "category": "design",
   "icon": "testimonial",
   "description": "Responsive customer reviews section with review cards and CTA links.",
   "supports": {
     "align": ["wide", "full"],
+    "anchor": true,
     "html": false
   },
   "attributes": {
@@ -34,6 +35,45 @@
     "readMoreUrl": {
       "type": "string",
       "default": "#"
+    },
+    "dataSource": {
+      "type": "string",
+      "default": "auto"
+    },
+    "sourceCategories": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "postsPerPage": {
+      "type": "number",
+      "default": 9
+    },
+    "initialVisible": {
+      "type": "number",
+      "default": 3
+    },
+    "showWriteReviewCta": {
+      "type": "boolean",
+      "default": true
+    },
+    "showReadMore": {
+      "type": "boolean",
+      "default": true
+    },
+    "showProductMeta": {
+      "type": "boolean",
+      "default": true
+    },
+    "showReviewForm": {
+      "type": "boolean",
+      "default": true
+    },
+    "emptyMessage": {
+      "type": "string",
+      "default": "No reviews yet."
     },
     "reviews": {
       "type": "array",

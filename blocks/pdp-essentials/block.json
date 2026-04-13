@@ -1,0 +1,28 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/pdp-essentials",
+  "version": "1.0.0",
+  "title": "PDP Essentials",
+  "category": "woocommerce",
+  "icon": "awards",
+  "description": "Why Noyona Essentials feature cards for product page.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Why Noyona Essentials?"
+    },
+    "items": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "viteseo-noyona-childtheme"
+}

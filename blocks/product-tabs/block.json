@@ -1,0 +1,13 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/product-tabs",
+  "version": "1.0.0",
+  "title": "Product content tabs",
+  "category": "woocommerce",
+  "icon": "editor-table",
+  "description": "Description (product editor), Ingredients & How to use (PDP fields).",
+  "supports": { "html": false, "align": ["wide", "full"] },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "viteseo-noyona-childtheme"
+}

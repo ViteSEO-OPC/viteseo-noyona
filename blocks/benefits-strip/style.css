@@ -32,9 +32,62 @@
 
 .noyona-benefits-strip__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 412px), 1fr));
   gap: clamp(14px, 2.2vw, 28px);
   justify-items: center;
+  align-items: start;
+}
+
+/* Item count: explicit columns on large screens (avoids 3+1 wrap from auto-fit). */
+.noyona-benefits-strip__grid--count-1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.noyona-benefits-strip__grid--count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.noyona-benefits-strip__grid--count-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.noyona-benefits-strip__grid--count-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* 5+ items: flexible columns without forcing a 3+1 orphan row. */
+.noyona-benefits-strip__grid--many {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+
+/* Tablet: 2 columns — 4 items → 2×2; 3 items → 2 + 1 centered. */
+@media (max-width: 980px) {
+  .noyona-benefits-strip__grid--count-3,
+  .noyona-benefits-strip__grid--count-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .noyona-benefits-strip__grid--count-3 > .noyona-benefits-strip__item:nth-child(3) {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+
+  .noyona-benefits-strip__item {
+    max-width: 640px;
+  }
+}
+
+/* Small: single column stack. */
+@media (max-width: 640px) {
+  .noyona-benefits-strip__grid--count-2,
+  .noyona-benefits-strip__grid--count-3,
+  .noyona-benefits-strip__grid--count-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .noyona-benefits-strip__grid--count-3 > .noyona-benefits-strip__item:nth-child(3) {
+    grid-column: auto;
+    justify-self: center;
+  }
 }
 
 .noyona-benefits-strip__item {
@@ -78,13 +131,12 @@
   font-family: var(--wp--preset--font-family--proxima-nova);
 }
 
-@media (max-width: 980px) {
-  .noyona-benefits-strip__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .noyona-benefits-strip__item {
-    max-width: 640px;
-    margin: 0 auto;
+@media (max-width: 640px) {
+  .noyona-benefits-strip__grid--count-1 .noyona-benefits-strip__item,
+  .noyona-benefits-strip__grid--count-2 .noyona-benefits-strip__item,
+  .noyona-benefits-strip__grid--count-3 .noyona-benefits-strip__item,
+  .noyona-benefits-strip__grid--count-4 .noyona-benefits-strip__item {
+    margin-left: auto;
+    margin-right: auto;
   }
 }

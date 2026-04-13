@@ -45,7 +45,15 @@ if ( 'full' === $align_value ) {
         <?php endif; ?>
 
         <?php if ( ! empty( $items ) ) : ?>
-            <div class="noyona-benefits-strip__grid">
+            <?php
+            $item_count = count( $items );
+            if ( $item_count > 4 ) {
+                $grid_count_class = 'noyona-benefits-strip__grid--many';
+            } else {
+                $grid_count_class = 'noyona-benefits-strip__grid--count-' . (int) $item_count;
+            }
+            ?>
+            <div class="noyona-benefits-strip__grid <?php echo esc_attr( $grid_count_class ); ?>">
                 <?php foreach ( $items as $item ) : ?>
                     <?php
                     $item = is_array( $item ) ? $item : array();

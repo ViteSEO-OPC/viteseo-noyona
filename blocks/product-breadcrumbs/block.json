@@ -1,0 +1,13 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/product-breadcrumbs",
+  "version": "1.0.0",
+  "title": "Product breadcrumbs",
+  "category": "woocommerce",
+  "icon": "arrow-right-alt",
+  "description": "Home → Shop → category → product trail for PDP.",
+  "supports": { "html": false },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "viteseo-noyona-childtheme"
+}

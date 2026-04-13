@@ -1,9 +1,26 @@
-<!-- wp:template-part {"slug":"checkout-header","tagName":"header"} /-->
-<!-- wp:woocommerce/page-content-wrapper {"page":"checkout"} -->
-<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group">
-	<!-- wp:woocommerce/store-notices /-->
-	<!-- wp:post-content {"align":"wide"} /-->
-</main>
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"className":"noyona-checkout-shell","layout":{"type":"constrained"}} -->
+<div class="wp-block-group noyona-checkout-shell">
+	<!-- wp:html -->
+	<nav class="noyona-checkout-steps" aria-label="Checkout progress">
+		<ol>
+			<li class="is-complete"><a href="/cart/" class="noyona-checkout-steps__link"><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-bag-shopping"></i></span> Cart</a></li>
+			<li class="is-active"><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-truck"></i></span> Details</li>
+			<li><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-box"></i></span> Reviews</li>
+			<li><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-check"></i></span> Done</li>
+		</ol>
+	</nav>
+	<!-- /wp:html -->
+
+	<!-- wp:group {"tagName":"main","layout":{"type":"constrained"},"className":"noyona-checkout-main"} -->
+	<main class="wp-block-group noyona-checkout-main">
+		<!-- wp:shortcode -->
+		[woocommerce_checkout]
+		<!-- /wp:shortcode -->
+	</main>
+	<!-- /wp:group -->
+</div>
 <!-- /wp:group -->
-<!-- /wp:woocommerce/page-content-wrapper -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

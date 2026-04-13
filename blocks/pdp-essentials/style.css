@@ -1,0 +1,94 @@
+.noyona-pdp-essentials {
+  width: 100%;
+  border: 1px solid #ececec;
+  border-radius: 16px;
+  background: #fff;
+  padding: 50px;
+  margin: 0 0 0.85rem;
+  box-sizing: border-box;
+}
+
+.noyona-pdp-essentials__title {
+  margin: 0 0 0.85rem;
+  text-align: center;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.noyona-pdp-essentials__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.noyona-pdp-essentials__item {
+  text-align: center;
+}
+
+.noyona-pdp-essentials__icon-wrap {
+  width: clamp(32px, 3vw, 40px);
+  height: clamp(32px, 3vw, 40px);
+  border-radius: clamp(10px, 1.2vw, 12px);
+  margin: 0 auto clamp(0.45rem, 1vw, 0.55rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.9rem, 1.3vw, 1.05rem);
+}
+
+.noyona-pdp-essentials__item:nth-child(1) .noyona-pdp-essentials__icon-wrap {
+  background: #fdeff4;
+  color: #dd7394;
+}
+
+.noyona-pdp-essentials__item:nth-child(2) .noyona-pdp-essentials__icon-wrap {
+  background: #e9faf0;
+  color: #2ea766;
+}
+
+.noyona-pdp-essentials__item:nth-child(3) .noyona-pdp-essentials__icon-wrap {
+  background: #edf8f0;
+  color: #2f9f63;
+}
+
+.noyona-pdp-essentials__item:nth-child(4) .noyona-pdp-essentials__icon-wrap {
+  background: #f7edfe;
+  color: #9a69cc;
+}
+
+.noyona-pdp-essentials__item-title {
+  margin: 0 0 0.2rem;
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-weight: 700;
+  line-height: 1.2;
+  color: #202124;
+}
+
+.noyona-pdp-essentials__item-desc {
+  margin: 0;
+  font-size: clamp(0.875rem, 1.15vw, 1rem);
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-weight: 400;
+  color: #6e737c;
+  line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+  .noyona-pdp-essentials__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .noyona-pdp-essentials {
+    padding: 32px 20px 1rem;
+  }
+
+  .noyona-pdp-essentials__grid {
+    grid-template-columns: 1fr;
+  }
+}

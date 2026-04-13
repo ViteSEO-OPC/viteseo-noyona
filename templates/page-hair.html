@@ -28,9 +28,16 @@
                         <label><input type="radio" name="noyona-stock-status"> Out of Stock</label>
                     </section>
 
-                    <section class="noyona-shop-filter-section">
-                        <h5>Price</h5>
-                        <div class="noyona-shop-filter-price" data-min="0" data-step="150">
+                    <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
+                        <h5 class="noyona-shop-filter-price-title">Price</h5>
+                        <div class="noyona-shop-filter-price" data-min="0" data-step="50">
+                            <div class="noyona-shop-filter-price-slider" role="group" aria-label="Price range">
+                                <div class="noyona-shop-filter-price-track"></div>
+                                <div class="noyona-shop-filter-price-track-fill"></div>
+                                <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="Minimum price handle"></button>
+                                <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="Maximum price handle"></button>
+                            </div>
+                            
                             <div class="noyona-shop-filter-price-inputs">
                                 <label class="noyona-shop-filter-price-input">
                                     <span aria-hidden="true">₱</span>
@@ -42,16 +49,11 @@
                                     <input type="number" inputmode="numeric" min="0" step="1" value="0" name="noyona-price-max" aria-label="Maximum price">
                                 </label>
                             </div>
-                            <div class="noyona-shop-filter-price-slider" role="group" aria-label="Price range">
-                                <div class="noyona-shop-filter-price-track"></div>
-                                <div class="noyona-shop-filter-price-track-fill"></div>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="Minimum price handle"></button>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="Maximum price handle"></button>
-                            </div>
+                            
                             <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
                         </div>
                     </section>
-
+<!-- 
                     <section class="noyona-shop-filter-section">
                         <h5>Star Rating</h5>
                         <label><input type="radio" name="noyona-star-rating"> Bestsellers</label>
@@ -59,7 +61,7 @@
                         <label><input type="radio" name="noyona-star-rating"> High Volume</label>
                         <label><input type="radio" name="noyona-star-rating"> Customer Favorites</label>
                         <label><input type="radio" name="noyona-star-rating"> Community Verified</label>
-                    </section>
+                    </section> -->
                 </div>
                 <!-- /wp:html -->
 
@@ -86,7 +88,7 @@
                 <div class="wp-block-group noyona-shop-toolbar-right">
                     <!-- wp:html -->
                     <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
-                        <span class="noyona-shop-view-label" style="color: #e11a63; font-weight: 600; font-size: 14px;">View As</span>
+                        <span class="noyona-shop-view-label" style="color: #E199A4; font-weight: 600; font-size: 14px;">View As</span>
                         <div class="noyona-shop-view-toggle" aria-label="View">
                             <button type="button" class="is-active" data-shop-view="grid" aria-pressed="true">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>

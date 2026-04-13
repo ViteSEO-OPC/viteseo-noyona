@@ -1,3 +1,5 @@
+console.log('🔥 HEADER JS LOADED — build', Date.now());
+
 (function () {
   const STICKY_AT = 15;
 
@@ -110,12 +112,44 @@
   }
 
   function initMiniCartDynamicUi() {
+    const CART_STORE_KEYS = ['wc/store/cart', 'wc/store/cart-data', 'wc/store'];
+
     const resolveCheckoutUrl = () => {
-      const configuredUrl = (window.noyonaHeader && window.noyonaHeader.checkoutUrl)
-        ? String(window.noyonaHeader.checkoutUrl)
+      const configuredUrl = (window.noyonaHeader && window.noyonaHeader.cartUrl)
+        ? String(window.noyonaHeader.cartUrl)
         : '';
       if (configuredUrl) return configuredUrl;
-      return '/checkout/';
+      return '/cart/';
+    };
+
+    const resolveAccountUrl = () => {
+      const configuredUrl = (window.noyonaHeader && window.noyonaHeader.accountUrl)
+        ? String(window.noyonaHeader.accountUrl)
+        : '';
+      if (configuredUrl) return configuredUrl;
+      return '/my-account/';
+    };
+
+    const resolveLoginUrl = () => {
+      const configuredUrl = (window.noyonaHeader && window.noyonaHeader.loginUrl)
+        ? String(window.noyonaHeader.loginUrl)
+        : '';
+      if (configuredUrl) return configuredUrl;
+      return '/wp-login.php';
+    };
+
+    const resolveRegisterUrl = () => {
+      const accountUrl = resolveAccountUrl();
+      try {
+        const registerUrl = new URL(accountUrl, window.location.origin);
+        registerUrl.searchParams.set('action', 'register');
+        return registerUrl.toString();
+      } catch (e) {
+        if (String(accountUrl).includes('?')) {
+          return String(accountUrl) + '&action=register';
+        }
+        return String(accountUrl).replace(/\/?$/, '/') + '?action=register';
+      }
     };
 
     const formatPeso = (value) => {
@@ -138,6 +172,121 @@
     const parseMinorAmount = (value) => {
       const n = parseInt(value, 10);
       return Number.isFinite(n) ? n : 0;
+    };
+
+    const stripToText = (value) => {
+      if (value === null || typeof value === 'undefined') return '';
+      const probe = document.createElement('div');
+      probe.innerHTML = String(value);
+      return String(probe.textContent || probe.innerText || '').trim();
+    };
+
+    const isShadeKey = (key) => /(?:^|[\s_-])(color|colour|shade|swatch|tone|tint)(?:$|[\s_-])/i.test(String(key || '').trim());
+
+    const extractShadeFromCartItem = (item) => {
+      if (!item || typeof item !== 'object') return '';
+
+      if (Array.isArray(item.item_data)) {
+        for (const detail of item.item_data) {
+          const key = detail && (detail.key || detail.name || detail.label) ? String(detail.key || detail.name || detail.label) : '';
+          const val = detail && (detail.value || detail.display_value || detail.display || detail.raw) ? String(detail.value || detail.display_value || detail.display || detail.raw) : '';
+          if (isShadeKey(key) && stripToText(val)) return stripToText(val);
+        }
+      }
+
+      if (Array.isArray(item.variation)) {
+        for (const detail of item.variation) {
+          const key = detail && (detail.attribute || detail.name || detail.key || detail.label) ? String(detail.attribute || detail.name || detail.key || detail.label) : '';
+          const val = detail && (detail.value || detail.display_value || detail.display) ? String(detail.value || detail.display_value || detail.display) : '';
+          if (isShadeKey(key) && stripToText(val)) return stripToText(val);
+        }
+      } else if (item.variation && typeof item.variation === 'object') {
+        for (const [key, val] of Object.entries(item.variation)) {
+          if (isShadeKey(key) && stripToText(val)) return stripToText(val);
+        }
+      }
+
+      return '';
+    };
+
+    const extractShadeFromDomDetails = (wrap) => {
+      if (!wrap) return '';
+      const detailNames = wrap.querySelectorAll('.wc-block-components-product-details__name');
+      for (const nameEl of detailNames) {
+        const key = stripToText(nameEl.textContent);
+        if (!isShadeKey(key)) continue;
+        let valueEl = null;
+        if (nameEl.parentElement) {
+          valueEl = nameEl.parentElement.querySelector('.wc-block-components-product-details__value');
+        }
+        if (!valueEl) {
+          const next = nameEl.nextElementSibling;
+          if (next) valueEl = next;
+        }
+        const val = stripToText(valueEl ? valueEl.textContent : '');
+        if (val) return val;
+      }
+      return '';
+    };
+
+    const syncWooBlocksCartStore = (cart) => {
+      if (!cart || !window.wp || !window.wp.data) return;
+
+      CART_STORE_KEYS.forEach((storeKey) => {
+        let dispatch = null;
+        try {
+          dispatch = window.wp.data.dispatch(storeKey);
+        } catch (e) {
+          dispatch = null;
+        }
+        if (!dispatch) return;
+
+        if (typeof dispatch.receiveCart === 'function') {
+          try {
+            dispatch.receiveCart(cart);
+          } catch (e) {
+            // Keep trying with alternative APIs below.
+          }
+        }
+        if (typeof dispatch.receiveCartData === 'function') {
+          try {
+            dispatch.receiveCartData(cart);
+          } catch (e) {
+            // Keep trying with alternative APIs below.
+          }
+        }
+        if (typeof dispatch.receiveCartContents === 'function') {
+          try {
+            dispatch.receiveCartContents(cart);
+          } catch (e) {
+            // Keep trying with alternative APIs below.
+          }
+        }
+        if (typeof dispatch.invalidateResolutionForStore === 'function') {
+          try {
+            dispatch.invalidateResolutionForStore();
+          } catch (e) {
+            // noop
+          }
+        }
+        if (typeof dispatch.invalidateResolution === 'function') {
+          try {
+            dispatch.invalidateResolution('getCartData', []);
+          } catch (e) {
+            // noop
+          }
+          try {
+            dispatch.invalidateResolution('getCart', []);
+          } catch (e) {
+            // noop
+          }
+          try {
+            dispatch.invalidateResolution('getCartTotals', []);
+          } catch (e) {
+            // noop
+          }
+        }
+      });
     };
 
     const getMiniCartRoot = () => document.querySelector('.wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-contents');
@@ -178,6 +327,44 @@
       });
     };
 
+    const syncSelectedShadeRows = (root, cart) => {
+      if (!root) return;
+      const items = cart && Array.isArray(cart.items) ? cart.items : [];
+      const rows = root.querySelectorAll('.wc-block-cart-items__row, .wc-block-mini-cart-items__row');
+
+      rows.forEach((row, index) => {
+        const wrap = row.querySelector('.wc-block-cart-item__wrap');
+        if (!wrap) return;
+
+        const existing = wrap.querySelector('.noyona-mini-cart-selected-shade');
+        const fromCart = extractShadeFromCartItem(items[index] || null);
+        const fromDom = extractShadeFromDomDetails(wrap);
+        const shadeValue = fromCart || fromDom;
+
+        if (!shadeValue) {
+          if (existing) existing.remove();
+          return;
+        }
+
+        const shadeText = 'Shade: ' + shadeValue;
+        if (existing) {
+          existing.textContent = shadeText;
+          return;
+        }
+
+        const rowEl = document.createElement('div');
+        rowEl.className = 'noyona-mini-cart-selected-shade';
+        rowEl.textContent = shadeText;
+
+        const anchor = wrap.querySelector('.noyona-mini-cart-title-price-row');
+        if (anchor && anchor.parentNode) {
+          anchor.parentNode.insertBefore(rowEl, anchor.nextSibling);
+        } else {
+          wrap.appendChild(rowEl);
+        }
+      });
+    };
+
     const readSubtotalFallback = (root) => {
       if (!root) return 0;
       const subtotalNode = root.querySelector('.wc-block-mini-cart__footer-subtotal');
@@ -185,58 +372,206 @@
       return parseCurrencyText(subtotalNode.textContent);
     };
 
+    // WooCommerce Blocks renders the checkout button in two possible patterns:
+    //   A) <div class="wp-block-woocommerce-mini-cart-checkout-button-block">
+    //        <a class="wc-block-components-button" href="…">…</a>
+    //      </div>
+    //   B) <a class="wp-block-woocommerce-mini-cart-checkout-button-block
+    //                 wc-block-components-button" href="…">…</a>
+    //
+    // We also add a fallback class so we can always find it.
+    const findCheckoutBtn = (root) => {
+      if (!root) return null;
+      // Pattern A: descendant
+      return root.querySelector('.wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button')
+        // Pattern B: both classes on same element
+        || root.querySelector('.wp-block-woocommerce-mini-cart-checkout-button-block.wc-block-components-button')
+        // Pattern C: WC might also use this class for the footer checkout link
+        || root.querySelector('.wc-block-mini-cart__footer-checkout')
+        // Pattern D: our own marker from a previous syncCheckoutButton
+        || root.querySelector('[data-noyona-checkout-btn]');
+    };
+
     const syncCheckoutButton = (root) => {
       if (!root) return;
 
-      const checkoutBtn = root.querySelector('.wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button');
+      const checkoutBtn = findCheckoutBtn(root);
       if (!checkoutBtn) return;
-      const checkoutUrl = resolveCheckoutUrl();
+
+      // Mark it so we can always find it again even if React changes classes.
+      checkoutBtn.setAttribute('data-noyona-checkout-btn', '1');
+
+      // Label the button.
       checkoutBtn.innerHTML = '<span>Checkout</span><span class="noyona-mini-cart-checkout-arrow" aria-hidden="true">→</span>';
-      if (checkoutBtn.tagName === 'A') {
-        checkoutBtn.setAttribute('href', checkoutUrl);
-      }
-      checkoutBtn.dataset.noyonaLabeled = '1';
+
+      const base = resolveCheckoutUrl();
+      if (checkoutBtn.tagName === 'A') checkoutBtn.setAttribute('href', base);
     };
 
+    // Visual-only: toggle .is-disabled on the checkout button based on
+    // terms checkbox state.
     const syncTermsGate = (root) => {
       if (!root) return;
 
-      const checkbox = root.querySelector('.noyona-mini-cart-terms-checkbox');
-      const checkoutBtn = root.querySelector('.wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button');
-      if (!checkbox || !checkoutBtn) return;
+      const termsBox = root.querySelector('.noyona-mini-cart-terms-checkbox');
+      const checkoutBtn = findCheckoutBtn(root);
 
       const applyState = () => {
-        const isChecked = !!checkbox.checked;
-        checkoutBtn.classList.toggle('is-disabled', !isChecked);
-        checkoutBtn.setAttribute('aria-disabled', isChecked ? 'false' : 'true');
+        if (!checkoutBtn) return;
+        const termsOk = termsBox ? !!termsBox.checked : true;
+        checkoutBtn.classList.toggle('is-disabled', !termsOk);
+        checkoutBtn.setAttribute('aria-disabled', !termsOk ? 'true' : 'false');
       };
 
-      if (!checkbox.dataset.noyonaBound) {
-        checkbox.addEventListener('change', applyState);
-        checkbox.dataset.noyonaBound = '1';
-      }
-
-      if (!checkoutBtn.dataset.noyonaGuardBound) {
-        checkoutBtn.addEventListener('click', (event) => {
-          if (!checkbox.checked) {
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-          }
-
-          const checkoutUrl = resolveCheckoutUrl();
-          if (checkoutBtn.tagName === 'A') {
-            checkoutBtn.setAttribute('href', checkoutUrl);
-            return;
-          }
-
-          event.preventDefault();
-          window.location.assign(checkoutUrl);
-        });
-        checkoutBtn.dataset.noyonaGuardBound = '1';
+      if (termsBox && !termsBox.dataset.noyonaBound) {
+        termsBox.addEventListener('change', applyState);
+        termsBox.dataset.noyonaBound = '1';
       }
 
       applyState();
+    };
+
+    const getMiniCartLoginModal = () => {
+      return document.querySelector('[data-mini-cart-login-modal-global]');
+    };
+
+    const closeMiniCartLoginModal = () => {
+      const modal = getMiniCartLoginModal();
+      if (!modal) return;
+      modal.hidden = true;
+      document.documentElement.classList.remove('noyona-mini-cart-login-open');
+    };
+
+    const setMiniCartLoginModalCopy = (titleText, copyText) => {
+      const modal = getMiniCartLoginModal();
+      if (!modal) return;
+
+      const title = modal.querySelector('.noyona-mini-cart-login-title');
+      const copy = modal.querySelector('.noyona-mini-cart-login-copy');
+      if (title && titleText) {
+        title.textContent = String(titleText);
+      }
+      if (copy && copyText) {
+        copy.textContent = String(copyText);
+      }
+    };
+
+    const openMiniCartLoginModal = () => {
+      const modal = getMiniCartLoginModal();
+      if (!modal) return;
+      setMiniCartLoginModalCopy(
+        'Log In to continue checkout',
+        'Please log in to your account before checking out.'
+      );
+      modal.hidden = false;
+      document.documentElement.classList.add('noyona-mini-cart-login-open');
+    };
+
+    const bindMiniCartLoginModal = () => {
+      const modal = getMiniCartLoginModal();
+      if (!modal) return;
+
+      const loginUrl = resolveLoginUrl();
+      const cartUrl = resolveCheckoutUrl();
+      const loginAction = modal.querySelector('[data-mini-cart-login-action]');
+      const registerAction = modal.querySelector('[data-mini-cart-register-action]');
+      const loginForm = modal.querySelector('form.noyona-mini-cart-login-form');
+      const loginRedirect = modal.querySelector('[data-mini-cart-login-redirect]');
+
+      if (loginForm) {
+        loginForm.setAttribute('action', loginUrl);
+      }
+      if (loginRedirect) {
+        loginRedirect.setAttribute('value', cartUrl);
+      }
+      if (loginAction) {
+        loginAction.setAttribute('href', loginUrl);
+      }
+      if (registerAction) {
+        registerAction.setAttribute('href', resolveRegisterUrl());
+      }
+
+      if (modal.dataset.noyonaBound === '1') return;
+      modal.dataset.noyonaBound = '1';
+
+      const closeButtons = modal.querySelectorAll('[data-mini-cart-login-close]');
+      closeButtons.forEach((button) => {
+        button.addEventListener('click', () => closeMiniCartLoginModal());
+      });
+    };
+
+    // ── Capture-phase checkout click handler ──
+    // Bound to `document` ONCE.  Because it uses the capture phase it
+    // fires before React's delegated handlers and before the browser
+    // follows the <a> href.  It can never be destroyed by React
+    // re-rendering the mini-cart button.
+
+    const isCheckoutButton = (el) => {
+      if (!el) return false;
+      // Match via our own marker
+      if (el.hasAttribute('data-noyona-checkout-btn')) return true;
+      // Match via WC class (both classes on same element OR as descendant)
+      if (el.classList.contains('wc-block-components-button') &&
+          el.closest('.wp-block-woocommerce-mini-cart-checkout-button-block')) return true;
+      if (el.classList.contains('wp-block-woocommerce-mini-cart-checkout-button-block') &&
+          el.classList.contains('wc-block-components-button')) return true;
+      // Match via WC footer checkout class
+      if (el.classList.contains('wc-block-mini-cart__footer-checkout')) return true;
+      return false;
+    };
+
+    const findClickedCheckoutBtn = (target) => {
+      // Walk up from the click target to find the checkout button.
+      let el = target;
+      while (el && el !== document.body) {
+        if (isCheckoutButton(el)) return el;
+        el = el.parentElement;
+      }
+      return null;
+    };
+
+    let checkoutClickBound = false;
+    let miniCartLoginEscapeBound = false;
+    const bindCheckoutClick = () => {
+      if (checkoutClickBound) return;
+      checkoutClickBound = true;
+
+      document.addEventListener('click', (event) => {
+        // Only care about clicks inside the mini-cart drawer.
+        const drawer = event.target.closest('.wc-block-mini-cart__drawer');
+        if (!drawer) return;
+
+        const btn = findClickedCheckoutBtn(event.target);
+        if (!btn) return;
+
+        const root = getMiniCartRoot();
+        if (!root) return;
+
+        bindMiniCartLoginModal();
+
+        if (!document.body.classList.contains('logged-in')) {
+          event.preventDefault();
+          event.stopPropagation();
+          openMiniCartLoginModal();
+          return;
+        }
+
+        // Terms gate.
+        const termsBox = root.querySelector('.noyona-mini-cart-terms-checkbox');
+        if (termsBox && !termsBox.checked) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+      }, true); // ← CAPTURE phase: fires before React & browser default
+
+      if (!miniCartLoginEscapeBound) {
+        miniCartLoginEscapeBound = true;
+        document.addEventListener('keydown', (event) => {
+          if (event.key !== 'Escape') return;
+          closeMiniCartLoginModal();
+        });
+      }
     };
 
     const applySummaryFromSubtotal = (root, subtotal) => {
@@ -277,59 +612,204 @@
       if (totalEl) totalEl.textContent = formatPeso(total);
     };
 
-    const fetchStoreCart = () => fetch('/wp-json/wc/store/cart', {
+    const fetchStoreCart = () => fetch('/wp-json/wc/store/cart?_t=' + Date.now(), {
       credentials: 'same-origin',
       headers: { Accept: 'application/json' },
+      cache: 'no-store',
     }).then((res) => (res.ok ? res.json() : null)).catch(() => null);
 
+    const readCartItemCount = (cart) => {
+      if (!cart || typeof cart !== 'object') return 0;
+      if (Number.isFinite(Number(cart.items_count))) {
+        return Math.max(0, Number(cart.items_count) || 0);
+      }
+      if (Array.isArray(cart.items)) {
+        return cart.items.reduce((total, item) => {
+          const qty = item && Number.isFinite(Number(item.quantity)) ? Number(item.quantity) : 0;
+          return total + Math.max(0, qty);
+        }, 0);
+      }
+      return 0;
+    };
+
+    const ensureHeaderCartBadge = () => {
+      const controls = document.querySelectorAll(
+        '.header-mini-cart .wc-block-mini-cart__button, .header-icons .header-cart-fallback'
+      );
+      controls.forEach((control) => {
+        const nativeBadge = control.querySelector('.wc-block-mini-cart__badge, .wc-block-mini-cart__button-badge');
+        let customBadge = control.querySelector('.noyona-cart-count-badge');
+
+        // If Woo renders its own badge, keep that one and remove custom clone.
+        if (nativeBadge) {
+          if (customBadge) {
+            customBadge.remove();
+          }
+          return;
+        }
+
+        if (!customBadge) {
+          customBadge = document.createElement('span');
+          customBadge.className = 'noyona-cart-count-badge is-hidden';
+          customBadge.textContent = '0';
+          customBadge.setAttribute('aria-hidden', 'true');
+          control.appendChild(customBadge);
+        }
+      });
+    };
+
+    const syncHeaderCartBadge = (count) => {
+      const safeCount = Math.max(0, parseInt(count, 10) || 0);
+      ensureHeaderCartBadge();
+
+      document
+        .querySelectorAll(
+          '.noyona-cart-count-badge, .wc-block-mini-cart__badge, .wc-block-mini-cart__button-badge'
+        )
+        .forEach((badge) => {
+          badge.textContent = String(safeCount);
+          badge.classList.toggle('is-hidden', safeCount < 1);
+          badge.setAttribute('aria-hidden', safeCount < 1 ? 'true' : 'false');
+        });
+
+      document.querySelectorAll('.header-mini-cart .wc-block-mini-cart__button').forEach((button) => {
+        button.classList.toggle('wc-block-mini-cart__button--empty', safeCount < 1);
+      });
+    };
+
+    let miniCartRowsRetryPending = false;
+    let miniCartRowsRetryCount = 0;
+
+    const requestMiniCartRowsRetry = () => {
+      if (miniCartRowsRetryPending || miniCartRowsRetryCount >= 4) {
+        return;
+      }
+      miniCartRowsRetryPending = true;
+      miniCartRowsRetryCount += 1;
+
+      document.body.dispatchEvent(
+        new CustomEvent('wc-blocks_added_to_cart', {
+          bubbles: true,
+          detail: { preserveCartData: false, source: 'header-mini-cart-retry' },
+        })
+      );
+
+      setTimeout(() => {
+        miniCartRowsRetryPending = false;
+        refreshMiniCart();
+      }, 360);
+    };
+
+    const reconcileMiniCartRows = (root, cart) => {
+      if (!root) return true;
+
+      const items = cart && Array.isArray(cart.items) ? cart.items : [];
+      const rows = Array.from(root.querySelectorAll('.wc-block-cart-items__row, .wc-block-mini-cart-items__row'));
+
+      if (items.length < 1) {
+        miniCartRowsRetryCount = 0;
+        return true;
+      }
+
+      if (rows.length < 1) {
+        requestMiniCartRowsRetry();
+        return false;
+      }
+
+      if (rows.length !== items.length) {
+        requestMiniCartRowsRetry();
+      } else {
+        miniCartRowsRetryCount = 0;
+      }
+
+      rows.forEach((row, index) => {
+        const item = items[index];
+        if (!item) return;
+        const quantity = Math.max(0, parseInt(item.quantity, 10) || 0);
+
+        const qtyInput = row.querySelector(
+          '.wc-block-components-quantity-selector__input, .wc-block-components-quantity-selector input[type="number"], input.qty'
+        );
+        if (qtyInput && String(qtyInput.value || '') !== String(quantity)) {
+          qtyInput.value = String(quantity);
+          qtyInput.setAttribute('value', String(quantity));
+        }
+      });
+
+      return true;
+    };
+
     const refreshMiniCart = () => {
-      const root = getMiniCartRoot();
-      if (!root) return;
-
-      syncProductTitlePriceRows(root);
-      syncCheckoutButton(root);
-      syncTermsGate(root);
-
       fetchStoreCart().then((cart) => {
+        syncHeaderCartBadge(readCartItemCount(cart));
+        syncWooBlocksCartStore(cart);
+
+        const root = getMiniCartRoot();
+        if (!root) return;
+
+        syncProductTitlePriceRows(root);
+        syncSelectedShadeRows(root, cart);
+        reconcileMiniCartRows(root, cart);
+        syncCheckoutButton(root);
+        syncTermsGate(root);
+        bindMiniCartLoginModal();
+
+        // Fallback: full cart totals from Store API.
         const totals = cart && cart.totals ? cart.totals : null;
         const subtotalMinor = totals
           ? (parseMinorAmount(totals.total_items) || parseMinorAmount(totals.subtotal_price) || parseMinorAmount(totals.total_price))
           : 0;
 
-        if (subtotalMinor > 0) {
-          applySummaryFromSubtotal(root, subtotalMinor / 100);
-          return;
-        }
-
-        applySummaryFromSubtotal(root, readSubtotalFallback(root));
+        applySummaryFromSubtotal(root, subtotalMinor > 0 ? subtotalMinor / 100 : readSubtotalFallback(root));
       });
     };
+
+    // Bind the checkout click interceptor once — must happen before any
+    // user interaction, not inside refreshMiniCart which runs repeatedly.
+    bindCheckoutClick();
 
     let refreshTimer = null;
     const queueRefresh = (delay = 180) => {
       clearTimeout(refreshTimer);
       refreshTimer = setTimeout(refreshMiniCart, delay);
     };
+    const queueRefreshSeries = () => {
+      queueRefresh(120);
+      setTimeout(() => queueRefresh(420), 420);
+      setTimeout(() => queueRefresh(980), 980);
+      setTimeout(() => queueRefresh(1700), 1700);
+      setTimeout(() => queueRefresh(2600), 2600);
+    };
 
     document.addEventListener('click', (e) => {
+      const clickedAddToCart = !!e.target.closest('.add_to_cart_button');
       if (
         e.target.closest('.wc-block-mini-cart__button') ||
-        e.target.closest('.add_to_cart_button') ||
+        clickedAddToCart ||
         e.target.closest('.wc-block-components-quantity-selector__button') ||
         e.target.closest('.wc-block-cart-item__remove-link')
       ) {
-        queueRefresh(250);
+        if (clickedAddToCart) {
+          queueRefreshSeries();
+        } else {
+          queueRefresh(250);
+        }
       }
     });
 
     if (window.jQuery) {
       window.jQuery(document.body).on('added_to_cart removed_from_cart updated_wc_div wc_fragments_refreshed', () => {
-        queueRefresh(180);
+        queueRefreshSeries();
       });
     }
 
-    const observer = new MutationObserver(() => queueRefresh(100));
-    observer.observe(document.body, { childList: true, subtree: true });
+    document.body.addEventListener('wc-blocks_added_to_cart', () => {
+      queueRefreshSeries();
+    });
+    document.body.addEventListener('noyona_cart_added', () => {
+      // Keep cart count based on server truth to avoid badge/cart mismatch.
+      queueRefreshSeries();
+    });
 
     queueRefresh(0);
   }
@@ -337,14 +817,6 @@
   function initHeaderCartFallback() {
     const iconsRoot = document.querySelector('.header-icons');
     if (!iconsRoot) return;
-
-    const resolveCartUrl = () => {
-      const configuredUrl = (window.noyonaHeader && window.noyonaHeader.cartUrl)
-        ? String(window.noyonaHeader.cartUrl)
-        : '';
-      if (configuredUrl) return configuredUrl;
-      return '/cart/';
-    };
 
     const ensureCartIcon = () => {
       const hasMiniCartButton = !!iconsRoot.querySelector('.wc-block-mini-cart__button');
@@ -359,7 +831,7 @@
 
       const fallbackLink = document.createElement('a');
       fallbackLink.className = 'header-icon header-cart-fallback';
-      fallbackLink.href = resolveCartUrl();
+      fallbackLink.href = '#open-cart';
       fallbackLink.setAttribute('aria-label', 'Open cart');
       fallbackLink.innerHTML = '<i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>';
 
@@ -377,6 +849,45 @@
 
     const observer = new MutationObserver(() => ensureCartIcon());
     observer.observe(iconsRoot, { childList: true, subtree: true });
+  }
+
+  /**
+   * Auto-open the mini cart drawer:
+   *  – when redirected from /cart via ?open-cart=1
+   *  – when any link with href="#open-cart" is clicked
+   */
+  function initMiniCartAutoOpen() {
+    const openMiniCart = () => {
+      const btn = document.querySelector('.wc-block-mini-cart__button');
+      if (btn) {
+        btn.click();
+        return true;
+      }
+      return false;
+    };
+
+    // Auto-open after /cart → /?open-cart=1 redirect.
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('open-cart')) {
+      params.delete('open-cart');
+      const clean = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, '', clean);
+
+      const tryOpen = (attempts) => {
+        if (openMiniCart() || attempts <= 0) return;
+        setTimeout(() => tryOpen(attempts - 1), 250);
+      };
+      // Give WC blocks time to mount.
+      setTimeout(() => tryOpen(12), 400);
+    }
+
+    // Handle #open-cart links anywhere on the page.
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('a[href="#open-cart"]');
+      if (!link) return;
+      e.preventDefault();
+      openMiniCart();
+    });
   }
 
   function initAccountDropdown() {
@@ -608,12 +1119,30 @@
 
     const buttons = Array.from(toggle.querySelectorAll('button[data-shop-view]'));
     if (!buttons.length) return;
+    const storageKey = 'noyonaShopViewMode';
+
+    const getStoredView = () => {
+      try {
+        return localStorage.getItem(storageKey);
+      } catch (e) {
+        return '';
+      }
+    };
+
+    const setStoredView = (view) => {
+      try {
+        localStorage.setItem(storageKey, view);
+      } catch (e) {
+        // noop
+      }
+    };
 
     const applyView = (view) => {
       const isList = view === 'list';
       document.body.classList.toggle('noyona-shop-view-list', isList);
       document.body.classList.toggle('noyona-shop-view-grid', !isList);
       productCollection.setAttribute('data-shop-view', isList ? 'list' : 'grid');
+      setStoredView(isList ? 'list' : 'grid');
 
       buttons.forEach((button) => {
         const active = button.dataset.shopView === (isList ? 'list' : 'grid');
@@ -622,7 +1151,14 @@
       });
     };
 
-    const initial = document.body.classList.contains('noyona-shop-view-list') ? 'list' : 'grid';
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get('shop_view');
+    const fromStorage = getStoredView();
+    const initial = (fromUrl === 'list' || fromUrl === 'grid')
+      ? fromUrl
+      : (fromStorage === 'list' || fromStorage === 'grid')
+        ? fromStorage
+        : (document.body.classList.contains('noyona-shop-view-list') ? 'list' : 'grid');
     applyView(initial);
 
     buttons.forEach((button) => {
@@ -763,6 +1299,66 @@
       render();
     };
 
+    let filterRequestController = null;
+    const applyFilterResultsAjax = (nextUrl) => {
+      if (filterRequestController) {
+        filterRequestController.abort();
+      }
+
+      const controller = new AbortController();
+      filterRequestController = controller;
+
+      root.classList.add('is-loading');
+
+      fetch(nextUrl, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: { Accept: 'text/html' },
+        signal: controller.signal,
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Failed to load filtered products');
+          }
+          return response.text();
+        })
+        .then((html) => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          const nextProducts = doc.querySelector('.noyona-shop-products');
+          const currentProducts = document.querySelector('.noyona-shop-products');
+          if (!nextProducts || !currentProducts) {
+            throw new Error('Missing products container in AJAX response');
+          }
+
+          currentProducts.replaceWith(nextProducts);
+
+          const nextCount = doc.querySelector('.noyona-shop-count');
+          const currentCount = document.querySelector('.noyona-shop-count');
+          if (nextCount && currentCount) {
+            currentCount.replaceWith(nextCount);
+          }
+
+          window.history.replaceState({}, '', nextUrl);
+
+          const isListView = document.body.classList.contains('noyona-shop-view-list');
+          nextProducts.setAttribute('data-shop-view', isListView ? 'list' : 'grid');
+
+          initShopProductActions();
+        })
+        .catch((error) => {
+          if (error && error.name === 'AbortError') return;
+          window.location.assign(nextUrl);
+        })
+        .finally(() => {
+          if (filterRequestController === controller) {
+            filterRequestController = null;
+          }
+          root.classList.remove('is-loading');
+        });
+    };
+
     const applyUrlFilters = () => {
       const nextParams = new URLSearchParams(window.location.search);
 
@@ -779,11 +1375,30 @@
       }
 
       nextParams.delete('filtering');
+      const activeViewBtn = document.querySelector('.noyona-shop-view-toggle button.is-active[data-shop-view]');
+      const activeView = activeViewBtn ? String(activeViewBtn.dataset.shopView || '').toLowerCase() : '';
+      const shouldKeepListView = activeView === 'list' || document.body.classList.contains('noyona-shop-view-list');
+      if (shouldKeepListView) {
+        nextParams.set('shop_view', 'list');
+      } else {
+        nextParams.delete('shop_view');
+      }
+
+      // Reset pagination whenever price range changes.
+      const pageKeysToDelete = [];
+      nextParams.forEach((_, key) => {
+        if (/^query-\d+-page$/.test(key)) {
+          pageKeysToDelete.push(key);
+        }
+      });
+      pageKeysToDelete.forEach((key) => nextParams.delete(key));
+      nextParams.delete('paged');
+
       const nextQuery = nextParams.toString();
       const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}`;
       const currentUrl = `${window.location.pathname}${window.location.search}`;
       if (nextUrl !== currentUrl) {
-        window.location.assign(nextUrl);
+        applyFilterResultsAjax(nextUrl);
       }
     };
 
@@ -876,6 +1491,7 @@
 
       const nativeAdd = card.querySelector('.wp-block-button .wp-block-button__link, .add_to_cart_button');
       const nativeButtonWrap = card.querySelector('.wp-block-button');
+      const hasPrimaryFooterCta = !!card.querySelector('.noyona-product-card-footer .noyona-buy-now-btn');
       const titleLink = card.querySelector('.wp-block-post-title a');
       const imageLink = card.querySelector('.wc-block-components-product-image a');
       const productUrl = (titleLink && titleLink.href) || (imageLink && imageLink.href) || '#';
@@ -898,31 +1514,37 @@
         wishlistButton.setAttribute('aria-pressed', isOn ? 'false' : 'true');
       });
 
-      const footerActions = document.createElement('div');
-      footerActions.className = 'noyona-shop-card-footer-actions';
-
-      const cartButton = document.createElement('button');
-      cartButton.type = 'button';
-      cartButton.className = 'noyona-shop-add-cart-icon';
-      cartButton.setAttribute('aria-label', 'Add to cart');
-      cartButton.innerHTML = cartSvg;
-      cartButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        if (nativeAdd) {
-          nativeAdd.click();
-        }
-      });
-
-      const buyNowLink = document.createElement('a');
-      buyNowLink.className = 'noyona-shop-buy-now';
-      buyNowLink.href = productUrl;
-      buyNowLink.textContent = 'Buy Now';
-      buyNowLink.setAttribute('aria-label', 'Go to product details');
-
-      footerActions.appendChild(cartButton);
-      footerActions.appendChild(buyNowLink);
       actions.appendChild(wishlistButton);
-      actions.appendChild(footerActions);
+
+      // Cards rendered with the Noyona footer already include the primary Buy Now CTA.
+      // Keep only wishlist on those cards to avoid duplicate actions in list view.
+      if (!hasPrimaryFooterCta) {
+        const footerActions = document.createElement('div');
+        footerActions.className = 'noyona-shop-card-footer-actions';
+
+        if (nativeAdd) {
+          const cartButton = document.createElement('button');
+          cartButton.type = 'button';
+          cartButton.className = 'noyona-shop-add-cart-icon';
+          cartButton.setAttribute('aria-label', 'Add to cart');
+          cartButton.innerHTML = cartSvg;
+          cartButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            nativeAdd.click();
+          });
+          footerActions.appendChild(cartButton);
+        }
+
+        const buyNowLink = document.createElement('a');
+        buyNowLink.className = 'noyona-shop-buy-now';
+        buyNowLink.href = productUrl;
+        buyNowLink.textContent = 'Buy Now';
+        buyNowLink.setAttribute('aria-label', 'Go to product details');
+        footerActions.appendChild(buyNowLink);
+
+        actions.appendChild(footerActions);
+      }
+
       card.appendChild(actions);
 
       card.dataset.noyonaActionsReady = '1';
@@ -1012,6 +1634,7 @@
     initMiniCartCloseAction();
     initMiniCartDynamicUi();
     initHeaderCartFallback();
+    initMiniCartAutoOpen();
     initAccountDropdown();
     initLogoutLinks();
     initMobileMenu();

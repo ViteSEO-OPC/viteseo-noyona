@@ -1,0 +1,13 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/pdp-stock-shipping",
+  "version": "1.0.0",
+  "title": "PDP stock & shipping note",
+  "category": "woocommerce",
+  "icon": "cart",
+  "description": "Stock badge and free shipping message.",
+  "supports": { "html": false },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "viteseo-noyona-childtheme"
+}

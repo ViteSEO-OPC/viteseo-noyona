@@ -1,0 +1,1649 @@
+/**
+ * Noyona checkout page — custom two-column layout.
+ * Shares design tokens with noyona-cart.css via :root variables.
+ */
+
+/* ═══════════════════════════════════════
+   SHELL — match cart page width: 1200px / 94vw
+   ═══════════════════════════════════════ */
+.noyona-checkout-shell,
+body.woocommerce-checkout .wp-site-blocks {
+  --wp--style--global--content-size: min(1200px, 94vw);
+  --wp--style--global--wide-size: min(1200px, 94vw);
+}
+
+.noyona-checkout-shell {
+  padding-top: clamp(1rem, 3vw, 2rem);
+  padding-bottom: clamp(2rem, 5vw, 4rem);
+}
+
+/* WooCommerce wrappers inside the constrained main must
+   fill the available width — not get further constrained. */
+.noyona-checkout-main .woocommerce,
+.noyona-checkout-main .wp-block-shortcode {
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  float: none !important;
+}
+
+/* The <form> itself must be a plain block */
+.noyona-checkout-form {
+  display: block;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+/* ═══════════════════════════════════════
+   STEPPER OVERRIDES (base in noyona-cart.css)
+   ═══════════════════════════════════════ */
+
+/* Completed step — soft green */
+.noyona-checkout-steps li.is-complete {
+  background: #66bb6a;
+  color: #fff;
+}
+
+/* Completed connector line turns green too */
+.noyona-checkout-steps li.is-complete::after {
+  background: #81c784;
+}
+
+/* Clickable completed step */
+.noyona-checkout-steps__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.noyona-checkout-steps__link:hover {
+  opacity: 0.85;
+}
+
+/* ═══════════════════════════════════════
+   TWO-COLUMN LAYOUT
+   ═══════════════════════════════════════ */
+.noyona-checkout-columns {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  grid-template-rows: auto;
+  gap: clamp(1.75rem, 3.5vw, 3rem);
+  align-items: start;
+  width: 100%;
+}
+
+/* Explicit grid placement — prevents any stray
+   WooCommerce/WP element from becoming a grid item. */
+.noyona-checkout-col-left {
+  grid-column: 1;
+  grid-row: 1;
+  display: block;
+  min-width: 0;
+}
+
+.noyona-checkout-col-right {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* Review step: show only review-focused right panel while keeping
+   WooCommerce internals available in the hidden left panel. */
+body.noyona-review-step .noyona-checkout-columns {
+  display: block;
+}
+
+body.noyona-review-step .noyona-checkout-col-left {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+body.noyona-review-step .noyona-checkout-col-right {
+  position: static;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+body.noyona-review-step .noyona-checkout-card--notes {
+  display: none;
+}
+
+body.noyona-review-step .noyona-checkout-card--summary {
+  background: #fff;
+  border-color: #f0f0f0;
+}
+
+body.noyona-review-step .noyona-review-heading {
+  justify-content: center;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  margin-bottom: 1.5rem;
+}
+
+body.noyona-review-step .noyona-checkout-card--review-items .noyona-order-items {
+  border-bottom: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+body.noyona-review-step .noyona-checkout-card--review-meta,
+body.noyona-review-step .noyona-checkout-card--review-totals {
+  background: #fff;
+}
+
+body.noyona-review-step .noyona-checkout-card--review-totals .noyona-order-totals__row {
+  padding: 0.3rem 0;
+}
+
+body.noyona-review-step .noyona-checkout-actions__submit {
+  background: #f8dce3;
+  color: #e199a4;
+  box-shadow: none;
+}
+
+body.noyona-review-step .noyona-checkout-actions__submit:hover {
+  background: #f3cdd6;
+  box-shadow: none;
+}
+
+/* ═══════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════ */
+.noyona-checkout-card {
+  background: #fff;
+  border: 1px solid var(--noyona-cart-line, #efefef);
+  border-radius: 16px;
+  padding:  20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.noyona-checkout-card:last-child {
+  margin-bottom: 0;
+}
+
+/* Sidebar cards — lighter treatment */
+.noyona-checkout-card--sidebar {
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.03);
+}
+
+/* Summary card — warm cream tint */
+.noyona-checkout-card--summary {
+  background: #fdf8f3;
+  border-color: #f0e8df;
+}
+
+/* Card header row (title + action button) */
+.noyona-checkout-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  /* margin-bottom: clamp(1rem, 2.5vw, 1.5rem); */
+}
+
+.noyona-checkout-card__header .noyona-checkout-card__title {
+  margin-bottom: 0;
+}
+
+/* Card title */
+.noyona-checkout-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 clamp(1rem, 2.5vw, 1.5rem);
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  line-height: 1.2;
+  color: #1a1a1a;
+}
+
+.noyona-checkout-card__title i {
+  color: var(--noyona-cart-pink, #e199a4);
+  font-size: 1em;
+}
+
+/* Amber icon variant (order notes) */
+.noyona-checkout-card__title--amber i {
+  color: #d4952a;
+}
+
+/* Subtitle and hint text */
+.noyona-checkout-card__subtitle {
+  margin: -0.5rem 0 0.85rem;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #444;
+}
+
+.noyona-checkout-card__hint {
+  margin: 0.65rem 0 0;
+  font-size: 0.78rem;
+  color: #aaa;
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════
+   "USE CURRENT ADDRESS" BUTTON
+   ═══════════════════════════════════════ */
+.noyona-use-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: 1px solid var(--noyona-cart-line, #efefef);
+  border-radius: 8px;
+  background: #fafafa;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--noyona-cart-pink, #e199a4);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.noyona-use-location:hover {
+  background: var(--noyona-cart-pink-soft, #fef0f2);
+  border-color: var(--noyona-cart-pink, #e199a4);
+}
+
+.noyona-use-location.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.noyona-use-location.is-done {
+  color: #66bb6a;
+  border-color: #a5d6a7;
+  background: #f1f8f1;
+}
+
+/* ═══════════════════════════════════════
+   DELIVERY ESTIMATE BAR
+   ═══════════════════════════════════════ */
+.noyona-delivery-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1.25rem;
+  padding: 12px 16px;
+  background: #eef6ff;
+  border: 1px solid #d4e8fc;
+  border-radius: 10px;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.85rem;
+  color: #1a6bb5;
+  line-height: 1.4;
+}
+
+.noyona-delivery-bar i {
+  font-size: 1.1em;
+  color: #4a9ede;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   REVIEW META CARD
+   ═══════════════════════════════════════ */
+.noyona-review-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.noyona-review-meta__title {
+  margin: 0 0 0.45rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #444;
+}
+
+.noyona-review-meta__name {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.noyona-review-meta__text {
+  margin: 0.15rem 0;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: #666;
+}
+
+.noyona-review-terms {
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.noyona-review-terms__label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.noyona-review-terms__checkbox {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--noyona-cart-pink, #e199a4);
+  flex-shrink: 0;
+}
+
+.noyona-review-terms__text {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #666;
+}
+
+.noyona-review-terms__text a {
+  color: var(--noyona-cart-pink, #e199a4);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.noyona-review-terms__text a:hover {
+  text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════
+   OPT-IN CHECKBOXES (newsletter, gift, save info)
+   ═══════════════════════════════════════ */
+.noyona-checkout-optin {
+  /* margin-top: 1.25rem; */
+  padding-top: 1rem;
+  border-top: 1px solid var(--noyona-cart-line, #efefef);
+}
+
+.noyona-checkout-optin__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #555;
+  line-height: 1.4;
+}
+
+.noyona-checkout-optin__input {
+  accent-color: var(--noyona-cart-pink, #e199a4);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.noyona-checkout-optin__icon--gift {
+  color: var(--noyona-cart-pink, #e199a4);
+  font-size: 0.95em;
+}
+
+/* Gift variant — less top margin when inside notes card */
+.noyona-checkout-optin--gift {
+  margin-top: 1rem;
+}
+
+/* ═══════════════════════════════════════
+   FORM FIELDS — GLOBAL OVERRIDES
+   ═══════════════════════════════════════ */
+
+/* Hide default WooCommerce headings and duplicate elements */
+.noyona-checkout-form .woocommerce-billing-fields h3,
+.noyona-checkout-form .woocommerce-shipping-fields h3,
+.noyona-checkout-form #ship-to-different-address {
+  display: none;
+}
+
+/* WooCommerce's shipping template includes order notes (woocommerce-additional-fields)
+   inside the left column — hide it since we render notes in the right column. */
+.noyona-checkout-col-left .woocommerce-additional-fields {
+  display: none;
+}
+
+.noyona-checkout-form .woocommerce-billing-fields__field-wrapper,
+.noyona-checkout-form .woocommerce-shipping-fields__field-wrapper,
+.noyona-checkout-form .woocommerce-additional-fields__field-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* gap: 16px; */
+}
+
+/* Kill WooCommerce legacy float-based field layout inside custom checkout */
+.noyona-checkout-form .form-row-first,
+.noyona-checkout-form .form-row-last,
+.noyona-checkout-form .form-row-wide {
+  width: auto !important;
+  float: none !important;
+  clear: none !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Keep full-width fields truly full width */
+.noyona-checkout-form #billing_email_field,
+.noyona-checkout-form #billing_phone_field,
+.noyona-checkout-form #shipping_address_1_field,
+.noyona-checkout-form #shipping_postcode_field,
+.noyona-checkout-form #order_comments_field {
+  grid-column: 1 / -1;
+}
+
+/* Full-width fields */
+.noyona-checkout-form #billing_email_field,
+.noyona-checkout-form #billing_phone_field,
+.noyona-checkout-form #shipping_address_1_field,
+.noyona-checkout-form #shipping_postcode_field,
+.noyona-checkout-form #order_comments_field {
+  grid-column: 1 / -1;
+}
+
+/* shipping_city + shipping_state stay as 2-column (grid default) */
+
+.noyona-checkout-form .form-row {
+  margin: 0;
+  padding: 0;
+}
+
+.noyona-checkout-form .form-row label {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease;
+}
+
+.noyona-checkout-form .form-row label .required {
+  color: var(--noyona-cart-pink, #e199a4);
+}
+
+.noyona-checkout-form .form-row label .optional {
+  font-weight: 400;
+  color: #aaa;
+  font-size: 0.8em;
+}
+
+.noyona-checkout-form .form-row input.input-text,
+.noyona-checkout-form .form-row textarea,
+.noyona-checkout-form .form-row select {
+  width: 100%;
+  height: 48px;
+  padding: 0 1rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fafafa;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-sizing: border-box;
+}
+
+.noyona-checkout-form .form-row textarea {
+  height: auto;
+  min-height: 100px;
+  padding: 0.85rem 1rem;
+  resize: vertical;
+}
+
+.noyona-checkout-form .form-row input.input-text:focus,
+.noyona-checkout-form .form-row textarea:focus,
+.noyona-checkout-form .form-row select:focus {
+  border-color: var(--noyona-cart-pink, #e199a4);
+  box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.12);
+  background: #fff;
+}
+
+.noyona-checkout-form .form-row input.input-text::placeholder,
+.noyona-checkout-form .form-row textarea::placeholder {
+  color: #bbb;
+}
+
+/* ═══════════════════════════════════════
+   VALIDATION STATES
+   ═══════════════════════════════════════ */
+
+/* Error — soft brand-compatible pink/salmon */
+.noyona-checkout-form .form-row.woocommerce-invalid input.input-text,
+.noyona-checkout-form .form-row.woocommerce-invalid select,
+.noyona-checkout-form .form-row.woocommerce-invalid .select2-container--default .select2-selection--single {
+  border-color: #e8838e;
+  box-shadow: 0 0 0 3px rgba(232, 131, 142, 0.12);
+  background: #fff8f7;
+}
+
+.noyona-checkout-form .form-row.woocommerce-invalid label {
+  color: #d4636f;
+}
+
+/* Inline validation message (WooCommerce adds these as <span> or via JS) */
+.noyona-checkout-form .form-row .woocommerce-error,
+.noyona-checkout-form .form-row .error {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #d4636f;
+}
+
+/* Validated — subtle green border */
+.noyona-checkout-form .form-row.woocommerce-validated input.input-text,
+.noyona-checkout-form .form-row.woocommerce-validated select,
+.noyona-checkout-form .form-row.woocommerce-validated .select2-container--default .select2-selection--single {
+  border-color: #a5d6a7;
+}
+
+/* Error notice group */
+.noyona-checkout-shell .woocommerce-NoticeGroup-checkout {
+  scroll-margin-top: 120px;
+}
+
+.noyona-checkout-shell .woocommerce-error li {
+  padding: 4px 0;
+}
+
+.noyona-checkout-shell .woocommerce-error li:not(:last-child) {
+  border-bottom: 1px solid rgba(232, 131, 142, 0.15);
+}
+
+/* ═══════════════════════════════════════
+   SELECT2 OVERRIDES
+   ═══════════════════════════════════════ */
+.noyona-checkout-form .select2-container--default .select2-selection--single {
+  height: 48px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 0 1rem;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.noyona-checkout-form .select2-container--default .select2-selection--single .select2-selection__rendered {
+  line-height: 48px;
+  padding-left: 0;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+}
+
+.noyona-checkout-form .select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 48px;
+  right: 8px;
+}
+
+.noyona-checkout-form .select2-container--default.select2-container--focus .select2-selection--single,
+.noyona-checkout-form .select2-container--default.select2-container--open .select2-selection--single {
+  border-color: var(--noyona-cart-pink, #e199a4);
+  box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.12);
+  background: #fff;
+}
+
+/* ═══════════════════════════════════════
+   PAYMENT METHODS
+   ═══════════════════════════════════════ */
+.noyona-checkout-form .wc_payment_methods {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.noyona-checkout-form .wc_payment_method {
+  margin-bottom: 10px;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.noyona-checkout-form .wc_payment_method:last-child {
+  margin-bottom: 0;
+}
+
+.noyona-checkout-form .wc_payment_method.payment_method_selected,
+.noyona-checkout-form .wc_payment_method:has(input:checked) {
+  border-color: var(--noyona-cart-pink, #e199a4);
+  box-shadow: 0 0 0 1px var(--noyona-cart-pink, #e199a4);
+}
+
+.noyona-checkout-form .wc_payment_method > label {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  margin: 0 !important;
+  cursor: pointer;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  color: #1a1a1a !important;
+}
+
+.noyona-checkout-form .wc_payment_method > label input[type="radio"] {
+  accent-color: var(--noyona-cart-pink, #e199a4);
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.noyona-checkout-form .wc_payment_method > label img {
+  max-height: 24px;
+  width: auto;
+}
+
+.noyona-checkout-form .payment_box {
+  padding: 16px 18px;
+  background: var(--noyona-cart-pink-soft, #fef0f2);
+  border-top: 1px solid #f0e0e3;
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.55;
+}
+
+.noyona-checkout-form .payment_box p {
+  margin: 0;
+}
+
+/* No-payment-methods empty state */
+.noyona-checkout-form .woocommerce-checkout-payment .woocommerce-notice,
+.noyona-checkout-form .woocommerce-checkout-payment .woocommerce-info,
+.noyona-checkout-form .woocommerce-checkout-payment > .woocommerce-notices-wrapper + .wc-no-payment-methods-notice,
+.noyona-checkout-form #order_review .woocommerce-info {
+  background: #f9f5f0;
+  border: 1px dashed #e0d5c8;
+  border-left: 3px solid #d4952a;
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.875rem;
+  color: #8a7050;
+  line-height: 1.55;
+}
+
+/* Payment box inner fields (Stripe, etc.) */
+.noyona-checkout-form .payment_box fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.noyona-checkout-form .payment_box .form-row {
+  margin-bottom: 12px;
+}
+
+.noyona-checkout-form .payment_box .form-row:last-child {
+  margin-bottom: 0;
+}
+
+/* ═══════════════════════════════════════
+   PLACE ORDER — hidden (relay via Review Order)
+   ═══════════════════════════════════════ */
+.noyona-checkout-form .place-order {
+  margin-top: 1.25rem;
+  padding: 0;
+}
+
+/* Visually hide but keep accessible for JS click relay */
+.noyona-checkout-form #place_order {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Terms & conditions — keep visible in payment card */
+.noyona-checkout-form .woocommerce-terms-and-conditions-wrapper {
+  margin-top: 1.25rem;
+  margin-bottom: 0;
+  padding: 14px 16px;
+  background: #fafafa;
+  border-radius: 10px;
+  border: 1px solid var(--noyona-cart-line, #efefef);
+}
+
+.noyona-checkout-form .woocommerce-terms-and-conditions-wrapper .form-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.noyona-checkout-form .woocommerce-terms-and-conditions-wrapper input[type="checkbox"] {
+  accent-color: var(--noyona-cart-pink, #e199a4);
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.noyona-checkout-form .woocommerce-terms-and-conditions-wrapper label {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.noyona-checkout-form .woocommerce-terms-and-conditions-wrapper a {
+  color: var(--noyona-cart-pink, #e199a4);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.noyona-checkout-form .woocommerce-terms-and-conditions-wrapper a:hover {
+  text-decoration: underline;
+}
+
+/* Processing overlay */
+.noyona-checkout-form.processing {
+  position: relative;
+  pointer-events: none;
+}
+
+.noyona-checkout-form.processing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 16px;
+  z-index: 10;
+}
+
+/* Also dim the review order button during processing */
+.noyona-checkout-form.processing ~ .noyona-checkout-col-right .noyona-checkout-actions__submit,
+.noyona-checkout-columns:has(.noyona-checkout-form.processing) .noyona-checkout-actions__submit {
+  opacity: 0.6;
+  pointer-events: none;
+  position: relative;
+}
+
+/* ═══════════════════════════════════════
+   ACTION BUTTONS (Back + Review Order)
+═══════════════════════════════════════ */
+.noyona-checkout-actions {
+display: flex;
+align-items: stretch;
+gap: 12px;
+margin-top: 1rem;
+margin-bottom: 0.75rem;
+}
+
+.noyona-checkout-actions__back,
+.noyona-checkout-actions__submit {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+min-height: 52px;
+margin: 0;
+box-sizing: border-box;
+}
+
+.noyona-checkout-actions__back {
+flex: 0 0 36%;
+padding: 0 1.25rem;
+border: 2px solid #ddd;
+border-radius: 12px;
+background: #fff;
+font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+font-size: 0.95rem;
+font-weight: 700;
+color: #666;
+text-decoration: none;
+transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+cursor: pointer;
+}
+
+.noyona-checkout-actions__back:hover {
+border-color: #bbb;
+color: #1a1a1a;
+background: #fafafa;
+}
+
+.noyona-checkout-actions__back i {
+font-size: 0.8em;
+line-height: 1;
+}
+
+.noyona-checkout-actions__submit {
+flex: 1 1 auto;
+padding: 0 1.5rem;
+border: none;
+border-radius: 12px;
+background: var(--noyona-cart-pink, #e199a4);
+font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+font-size: 0.95rem;
+font-weight: 700;
+letter-spacing: 0.04em;
+color: #fff;
+box-shadow: 0 4px 16px rgba(225, 153, 164, 0.3);
+transition: background 0.2s ease, box-shadow 0.2s ease;
+cursor: pointer;
+}
+
+.noyona-checkout-actions__submit:hover {
+background: var(--noyona-cart-pink-dark, #cc848f);
+box-shadow: 0 6px 20px rgba(225, 153, 164, 0.4);
+}
+
+.noyona-checkout-actions__submit i {
+font-size: 0.8em;
+line-height: 1;
+}
+
+/* ═══════════════════════════════════════
+   TRUST BADGES
+   ═══════════════════════════════════════ */
+   .noyona-trust-badges {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+    gap: 0.75rem;
+    margin-top: 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--noyona-cart-line, #efefef);
+  }
+  
+  .noyona-trust-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    text-align: center;
+    min-width: 0;
+  }
+  
+  .noyona-trust-badge i {
+    display: block;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  
+  /* Per-badge icon colors */
+  .noyona-trust-badge:nth-child(1) i { color: #66bb6a; }
+  .noyona-trust-badge:nth-child(2) i { color: #4a9ede; }
+  .noyona-trust-badge:nth-child(3) i { color: var(--noyona-cart-pink, #e199a4); }
+  
+  .noyona-trust-badge span {
+    display: block;
+    margin: 0;
+    font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+    font-size: 0.68rem;
+    line-height: 1.2;
+    font-weight: 600;
+    color: #888;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+/* ═══════════════════════════════════════
+   RIGHT COLUMN — ORDER NOTES
+   ═══════════════════════════════════════ */
+.noyona-checkout-card--notes .woocommerce-additional-fields__field-wrapper {
+  display: block;
+}
+
+.noyona-checkout-card--notes #order_comments {
+  min-height: 90px;
+}
+
+/* ═══════════════════════════════════════
+   RIGHT COLUMN — ORDER SUMMARY ITEMS
+   ═══════════════════════════════════════ */
+.noyona-order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.noyona-order-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.noyona-order-item__image {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--noyona-cart-pink-soft, #fef0f2);
+}
+
+.noyona-order-item__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.noyona-order-item__details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.noyona-order-item__name {
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.35;
+  /* Allow multi-line wrap instead of ellipsis truncation */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+}
+
+.noyona-order-item__qty {
+  font-size: 0.8rem;
+  color: #999;
+  font-weight: 500;
+}
+
+.noyona-order-item__details dl {
+  margin: 2px 0 0;
+  padding: 0;
+  font-size: 0.78rem;
+  color: #888;
+  line-height: 1.45;
+}
+
+.noyona-order-item__details dl dt {
+  display: inline;
+  font-weight: 600;
+  color: #777;
+}
+
+.noyona-order-item__details dl dd {
+  display: inline;
+  margin: 0 8px 0 2px;
+  font-weight: 400;
+}
+
+.noyona-order-item__details dl dd p {
+  display: inline;
+  margin: 0;
+}
+
+.noyona-order-item__details > br,
+.noyona-order-item__details dl br {
+  display: none !important;
+}
+
+.noyona-order-totals__row > br,
+.noyona-order-totals__value > br {
+  display: none !important;
+}
+
+/* Remove injected <br> inside CTA */
+.noyona-checkout-actions br {
+  display: none !important;
+}
+
+/* Remove all unwanted <br> inside checkout UI */
+.noyona-checkout-actions br,
+.noyona-trust-badge br {
+  display: none !important;
+}
+
+/* Kill ALL injected <br> inside checkout UI */
+.noyona-checkout-form br,
+.noyona-checkout-card__title br {
+  display: none !important;
+}
+
+.noyona-order-item__total {
+  flex-shrink: 0;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════
+   RIGHT COLUMN — TOTALS
+   ═══════════════════════════════════════ */
+.noyona-order-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.noyona-order-totals__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+}
+
+.noyona-order-totals__label {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.noyona-order-totals__value {
+  color: #1a1a1a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.noyona-order-totals__value--free {
+  color: #66bb6a;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.noyona-order-totals__row--discount .noyona-order-totals__value {
+  color: #66bb6a;
+}
+
+.noyona-order-totals__row--total {
+  margin-top: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1.5px solid rgba(0, 0, 0, 0.08);
+}
+
+.noyona-order-totals__row--total .noyona-order-totals__label {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.noyona-order-totals__row--total .noyona-order-totals__value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--noyona-cart-pink, #e199a4);
+}
+
+/* ═══════════════════════════════════════
+   HIDE DEFAULT REVIEW TABLE
+   ═══════════════════════════════════════ */
+.noyona-checkout-form .woocommerce-checkout-review-order-table {
+  display: none;
+}
+
+/* ═══════════════════════════════════════
+   WOOCOMMERCE NOTICES
+   ═══════════════════════════════════════ */
+.noyona-checkout-shell .woocommerce-NoticeGroup,
+.noyona-checkout-shell .woocommerce-notices-wrapper {
+  margin-bottom: 1rem;
+}
+
+.noyona-checkout-shell .woocommerce-message,
+.noyona-checkout-shell .woocommerce-error,
+.noyona-checkout-shell .woocommerce-info {
+  border-radius: 12px;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.9rem;
+  list-style: none;
+}
+
+.noyona-checkout-shell .woocommerce-message {
+  background: #f1f8f1;
+  border-left: 3px solid #66bb6a;
+  color: #2e7d32;
+}
+
+.noyona-checkout-shell .woocommerce-error {
+  background: #fef5f4;
+  border-left: 3px solid #e8838e;
+  color: #c62828;
+}
+
+.noyona-checkout-shell .woocommerce-info {
+  background: #f4f8fc;
+  border-left: 3px solid #90caf9;
+  color: #1565c0;
+}
+
+/* Hide coupon prompt on checkout — coupons handled on cart page */
+.noyona-checkout-shell .woocommerce-form-coupon-toggle,
+.noyona-checkout-shell .checkout_coupon {
+  display: none;
+}
+
+/* Login toggle notices */
+.noyona-checkout-shell .woocommerce-form-login-toggle {
+  margin-bottom: 0.75rem;
+}
+
+.noyona-checkout-shell .woocommerce-form-login-toggle .woocommerce-info,
+.noyona-checkout-shell .woocommerce-form-coupon-toggle .woocommerce-info {
+  background: var(--noyona-cart-pink-soft, #fef0f2);
+  border-left: 3px solid var(--noyona-cart-pink, #e199a4);
+  color: #1a1a1a;
+}
+
+.noyona-checkout-shell .woocommerce-info a {
+  color: var(--noyona-cart-pink, #e199a4);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.noyona-checkout-shell .woocommerce-info a:hover {
+  text-decoration: underline;
+}
+
+/* Login & coupon forms */
+.noyona-checkout-shell .woocommerce-form-login,
+.noyona-checkout-shell .checkout_coupon {
+  background: #fff;
+  border: 1px solid var(--noyona-cart-line, #efefef);
+  border-radius: 16px;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  margin-bottom: 1rem;
+}
+
+.noyona-checkout-shell .checkout_coupon .form-row-first {
+  width: 100%;
+}
+
+.noyona-checkout-shell .checkout_coupon p:not(.form-row-last) {
+  margin-bottom: 0;
+}
+
+.noyona-checkout-shell .checkout_coupon input.input-text {
+  width: 100%;
+  height: 48px;
+  padding: 0 1rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fafafa;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.noyona-checkout-shell .checkout_coupon input.input-text:focus {
+  border-color: var(--noyona-cart-pink, #e199a4);
+  box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.12);
+  background: #fff;
+}
+
+.noyona-checkout-shell .checkout_coupon .button {
+  height: 48px;
+  padding: 0 1.5rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--noyona-cart-pink, #e199a4);
+  color: #fff;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-top: 10px;
+}
+
+.noyona-checkout-shell .checkout_coupon .button:hover {
+  background: var(--noyona-cart-pink-dark, #cc848f);
+}
+
+/* ═══════════════════════════════════════
+   DONE STEP (ORDER RECEIVED)
+   ═══════════════════════════════════════ */
+body.noyona-done-step .woocommerce-order {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+body.noyona-done-step .noyona-done-hero {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+body.noyona-done-step .noyona-done-hero__icon {
+  width: 74px;
+  height: 74px;
+  border-radius: 999px;
+  margin: 0 auto 1rem;
+  display: grid;
+  place-items: center;
+  background: #e9fff1;
+  color: #16b364;
+  box-shadow: inset 0 0 0 10px rgba(34, 197, 94, 0.12);
+}
+
+body.noyona-done-step .noyona-done-hero__icon i {
+  font-size: 1.55rem;
+}
+
+body.noyona-done-step .noyona-done-hero__title {
+  margin: 0 0 0.25rem;
+  font-size: clamp(1.8rem, 3vw, 2.2rem);
+  line-height: 1.1;
+}
+
+body.noyona-done-step .noyona-done-hero__subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+body.noyona-done-step .noyona-done-order-number {
+  margin: 1.25rem auto 1.5rem;
+  max-width: 560px;
+  background: #fdeef2;
+  border: 1px solid #f8d8e0;
+  border-radius: 14px;
+  padding: 0.95rem 1rem;
+  text-align: center;
+}
+
+body.noyona-done-step .noyona-done-order-number__label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6e6e6e;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+body.noyona-done-step .noyona-done-order-number__value {
+  display: block;
+  font-size: 1.65rem;
+  line-height: 1;
+  color: #d88695;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+body.noyona-done-step .noyona-done-summary-card {
+  background: #fff;
+}
+
+body.noyona-done-step .noyona-done-summary-card .noyona-order-items {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.noyona-done-step .noyona-done-meta-grid {
+  margin-top: 1.1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+body.noyona-done-step .noyona-done-info-card {
+  margin-bottom: 0;
+  padding: 0.95rem 1rem;
+}
+
+body.noyona-done-step .noyona-done-info-card--delivery {
+  background: #eef6ff;
+  border-color: #d9ebff;
+}
+
+body.noyona-done-step .noyona-done-meta-grid .noyona-done-info-card:not(.noyona-done-info-card--delivery) {
+  background: #fff8fb;
+  border-color: #f4e4ea;
+}
+
+body.noyona-done-step .noyona-done-info-card__icon {
+  display: inline-block;
+  color: #3f97f0;
+  font-size: 1.2rem;
+  line-height: 1;
+  margin-bottom: 0.45rem;
+}
+
+body.noyona-done-step .noyona-done-meta-grid .noyona-done-info-card:not(.noyona-done-info-card--delivery) .noyona-done-info-card__icon {
+  color: #e199a4;
+}
+
+body.noyona-done-step .noyona-done-info-card__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.65rem;
+  line-height: 1.1;
+}
+
+body.noyona-done-step .noyona-done-info-card__primary {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+body.noyona-done-step .noyona-done-info-card__text {
+  margin: 0.4rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #666;
+}
+
+body.noyona-done-step .noyona-done-actions {
+  margin-top: 0.9rem;
+  display: flex;
+  align-items: stretch;
+  gap: 0.95rem;
+  flex-wrap: nowrap;
+}
+
+body.noyona-done-step .noyona-done-actions__btn {
+  flex: 1 1 0;
+  min-height: 60px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 1.25rem;
+  text-decoration: none;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  text-align: center;
+}
+
+body.noyona-done-step .noyona-done-actions__label {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+body.noyona-done-step .noyona-done-actions__btn--primary {
+  background: #e7a6b3;
+  color: #fff;
+  border: 1px solid #e7a6b3;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+body.noyona-done-step .noyona-done-actions__btn--primary:hover {
+  background: #d996a3;
+  border-color: #d996a3;
+}
+
+body.noyona-done-step .noyona-done-actions__btn--outline {
+  background: #fff;
+  color: #3b3b3b;
+  border: 2px solid #a5a5a5;
+}
+
+body.noyona-done-step .noyona-done-actions__btn--outline i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.92em;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+body.noyona-done-step .noyona-done-actions__btn--outline:hover {
+  border-color: #bfbfbf;
+  color: #1a1a1a;
+  background: #fafafa;
+}
+
+body.noyona-done-step .woocommerce-customer-details,
+body.noyona-done-step .woocommerce-order-details,
+body.noyona-done-step .woocommerce-thankyou-order-details,
+body.noyona-done-step .woocommerce-thankyou-order-received {
+  display: none;
+}
+
+/* ═══════════════════════════════════════
+   WOOCOMMERCE STRUCTURE OVERRIDES
+   ═══════════════════════════════════════ */
+/* Reset every WooCommerce wrapper that could interfere with layout */
+.noyona-checkout-form .col2-set,
+.noyona-checkout-form .col2-set .col-1,
+.noyona-checkout-form .col2-set .col-2 {
+  display: block;
+  width: 100%;
+  float: none;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+/* Protective wrapper around WooCommerce hook output */
+.noyona-checkout-fields-wrap {
+  display: block;
+  width: 100%;
+}
+
+.noyona-checkout-form #order_review_heading {
+  display: none;
+}
+
+/* ═══════════════════════════════════════
+   STICKY RIGHT COLUMN
+   ═══════════════════════════════════════ */
+.noyona-checkout-col-right {
+  position: sticky;
+  top: 100px;
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — TABLET (≤ 900px)
+   ═══════════════════════════════════════ */
+@media (max-width: 900px) {
+  .noyona-checkout-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .noyona-checkout-col-left {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .noyona-checkout-col-right {
+    grid-column: 1;
+    grid-row: auto;
+    position: static;
+    order: -1;
+  }
+
+  .noyona-checkout-card {
+    border-radius: 14px;
+  }
+
+  /* Collapse notes on mobile */
+  .noyona-checkout-card--notes {
+    border: 1px dashed var(--noyona-cart-line, #efefef);
+    padding: clamp(0.75rem, 2vw, 1rem);
+    background: #fafafa;
+  }
+
+  .noyona-checkout-card--notes .noyona-checkout-card__title {
+    margin-bottom: 0;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+
+  .noyona-checkout-card--notes .noyona-checkout-card__title::after {
+    content: "\f078";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 0.65em;
+    margin-left: auto;
+    color: #aaa;
+    transition: transform 0.2s ease;
+  }
+
+  .noyona-checkout-card--notes .noyona-checkout-card__subtitle,
+  .noyona-checkout-card--notes .woocommerce-additional-fields__field-wrapper,
+  .noyona-checkout-card--notes .noyona-checkout-card__hint,
+  .noyona-checkout-card--notes .noyona-checkout-optin {
+    display: none;
+  }
+
+  .noyona-checkout-card--notes.is-open .noyona-checkout-card__title {
+    margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  }
+
+  .noyona-checkout-card--notes.is-open .noyona-checkout-card__title::after {
+    transform: rotate(180deg);
+  }
+
+  .noyona-checkout-card--notes.is-open .noyona-checkout-card__subtitle,
+  .noyona-checkout-card--notes.is-open .woocommerce-additional-fields__field-wrapper,
+  .noyona-checkout-card--notes.is-open .noyona-checkout-card__hint,
+  .noyona-checkout-card--notes.is-open .noyona-checkout-optin {
+    display: block;
+  }
+
+  .noyona-checkout-card--notes.is-open .noyona-checkout-optin {
+    display: block;
+  }
+
+  /* Action buttons responsive */
+  .noyona-checkout-actions__back {
+    flex: 0 0 auto;
+    min-width: 100px;
+  }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — PHONE (≤ 600px)
+   ═══════════════════════════════════════ */
+@media (max-width: 600px) {
+  body.noyona-done-step .noyona-done-meta-grid,
+  body.noyona-done-step .noyona-done-actions {
+    grid-template-columns: 1fr;
+  }
+
+  body.noyona-done-step .noyona-done-actions {
+    display: grid;
+  }
+
+  body.noyona-done-step .noyona-done-order-number__value {
+    font-size: 1.3rem;
+  }
+
+  .noyona-review-meta {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .noyona-checkout-form .woocommerce-billing-fields__field-wrapper,
+  .noyona-checkout-form .woocommerce-shipping-fields__field-wrapper,
+  .noyona-checkout-form .woocommerce-additional-fields__field-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .noyona-checkout-card {
+    padding: clamp(1rem, 3vw, 1.25rem);
+    border-radius: 12px;
+  }
+
+  .noyona-order-item__image {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+  }
+
+  /* Larger touch targets */
+  .noyona-checkout-form .form-row input.input-text,
+  .noyona-checkout-form .form-row select,
+  .noyona-checkout-form .select2-container--default .select2-selection--single {
+    height: 52px;
+    font-size: 1rem;
+  }
+
+  .noyona-checkout-form .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 52px;
+  }
+
+  .noyona-checkout-form .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 52px;
+  }
+
+  .noyona-checkout-form .wc_payment_method > label {
+    padding: 16px !important;
+    gap: 12px;
+  }
+
+  /* Card header stacks on small screens */
+  .noyona-checkout-card__header {
+    flex-wrap: wrap;
+  }
+
+  .noyona-use-location {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Action buttons stack slightly tighter */
+  .noyona-checkout-actions {
+    gap: 10px;
+    margin-bottom: 0.65rem;
+  }
+
+  .noyona-checkout-actions__back,
+  .noyona-checkout-actions__submit {
+    min-height: 50px;
+  }
+  
+  /* Trust badges tighter */
+  .noyona-trust-badges {
+    gap: 0.5rem;
+    padding-top: 0.65rem;
+  }
+  
+  .noyona-trust-badge span {
+    font-size: 0.64rem;
+  }
+
+  /* Stepper — smaller on phone */
+  .noyona-checkout-steps ol {
+    gap: 0.5rem;
+  }
+
+  .noyona-checkout-steps li {
+    font-size: 11px;
+    padding: 0.45rem 0.75rem;
+  }
+}

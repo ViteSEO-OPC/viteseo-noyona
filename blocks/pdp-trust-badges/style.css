@@ -1,0 +1,45 @@
+.noyona-pdp-trust {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin: 1.25rem 0 0;
+}
+
+@media (max-width: 600px) {
+  .noyona-pdp-trust {
+    grid-template-columns: 1fr;
+  }
+}
+
+.noyona-pdp-trust__card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.noyona-pdp-trust__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--noyona-trust-icon-color, #E199A4) 18%, transparent);
+  color: var(--noyona-trust-icon-color, #E199A4);
+  font-size: 0.9rem;
+}
+
+.noyona-pdp-trust__label {
+  line-height: 1.25;
+}

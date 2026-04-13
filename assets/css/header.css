@@ -418,6 +418,15 @@ body.has-scrolled-header .site-logo-text {
   order: 3;
 }
 
+/*
+ * WooCommerce Mini Cart applies inline visibility:hidden on cart/checkout pages.
+ * That hides the header cart icon; we still want the icon visible in the header.
+ */
+.site-header .header-icons .wc-block-mini-cart.wp-block-woocommerce-mini-cart,
+.site-header .header-icons .header-mini-cart.wc-block-mini-cart {
+  visibility: visible !important;
+}
+
 .header-icons .header-cart-fallback {
   order: 3;
   font-size: 18px;
@@ -563,6 +572,7 @@ body:not(.logged-in) .header-account--logged-out {
   justify-content: center;
   line-height: 1;
   vertical-align: middle;
+  position: relative;
 }
 
 .header-mini-cart .wc-block-mini-cart__badge {
@@ -576,6 +586,31 @@ body:not(.logged-in) .header-account--logged-out {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.header-icons .header-cart-fallback {
+  position: relative;
+}
+
+.noyona-cart-count-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #e199a4;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.noyona-cart-count-badge.is-hidden {
+  display: none;
 }
 
 /* Wishlist button */
@@ -892,6 +927,13 @@ body:not(.logged-in) .header-account--logged-out {
   display: inline-block;
 }
 
+.wc-block-mini-cart__drawer .noyona-mini-cart-selected-shade {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #7c4a57;
+}
+
 /* Use wrap-contained price; hide separate right-side total column. */
 .wc-block-mini-cart__drawer .wc-block-cart-item__total {
   display: none !important;
@@ -1074,6 +1116,279 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button .noyona-mini-cart-checkout-arrow {
   font-size: 22px;
   line-height: 1;
+}
+
+.noyona-mini-cart-login-open {
+  overflow: hidden;
+}
+
+.noyona-mini-cart-login-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.noyona-mini-cart-login-modal[hidden] {
+  display: none !important;
+}
+
+.noyona-mini-cart-login-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(10, 14, 24, 0.52);
+  cursor: pointer;
+}
+
+.noyona-mini-cart-login-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 440px);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 24px;
+  background: #fff;
+  padding: 1.35rem 1.35rem 1.25rem;
+  box-shadow: 0 28px 64px rgba(10, 14, 24, 0.22);
+  text-align: center;
+}
+
+.noyona-mini-cart-login-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  color: #71809a;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.noyona-mini-cart-login-close:hover {
+  background: #f1f4f8;
+}
+
+.noyona-mini-cart-login-icon {
+  width: 74px;
+  height: 74px;
+  margin: 0 auto 0.95rem;
+  border-radius: 999px;
+  background: #ffe6ef;
+  color: #e199a4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.noyona-mini-cart-login-title {
+  margin: 0 0 0.45rem;
+  color: #0f1728;
+  font-size: clamp(1.6rem, 3.2vw, 2rem);
+  line-height: 1.15;
+  font-weight: 700;
+  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+}
+
+.noyona-mini-cart-login-copy {
+  margin: 0 0 1rem;
+  color: #6e7a91;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+}
+
+.noyona-mini-cart-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.noyona-mini-cart-login-form label {
+  color: #101828;
+  font-size: 0.96rem;
+  font-weight: 700;
+  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+}
+
+.noyona-mini-cart-login-form input {
+  width: 100%;
+  min-height: 52px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.75rem 0.95rem;
+  font-size: 1rem;
+  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+.noyona-mini-cart-login-form input::placeholder {
+  color: #b4bfd2;
+}
+
+.noyona-mini-cart-login-submit {
+  width: 100%;
+  min-height: 56px;
+  border: 0;
+  border-radius: 999px;
+  background: #e199a4;
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+}
+
+.noyona-mini-cart-login-separator {
+  margin: 0.95rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.noyona-mini-cart-login-separator span {
+  flex: 1 1 auto;
+  height: 1px;
+  background: #e3e8f0;
+}
+
+.noyona-mini-cart-login-separator em {
+  font-style: normal;
+  color: #8e9ab0;
+  font-size: 0.92rem;
+}
+
+.noyona-mini-cart-login-google,
+.noyona-mini-cart-login-register {
+  min-height: 54px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  text-decoration: none;
+  box-sizing: border-box;
+  font-weight: 700;
+  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+}
+
+.noyona-mini-cart-login-google {
+  border: 1.5px solid #d9e2ef;
+  color: #111;
+  background: #fff;
+}
+
+.noyona-mini-cart-login-google i {
+  font-size: 1.15rem;
+  background: conic-gradient(
+    from 180deg,
+    #ea4335 0deg 90deg,
+    #fbbc05 90deg 180deg,
+    #34a853 180deg 270deg,
+    #4285f4 270deg 360deg
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.noyona-mini-cart-login-register {
+  margin-top: 0.65rem;
+  border: 2px solid #111;
+  color: #111;
+  background: #fff;
+}
+
+.noyona-mini-cart-login-note {
+  margin: 0.85rem 0 0;
+  color: #97a3b8;
+  font-size: 0.95rem;
+  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+}
+
+/* ── Selective checkout: checkboxes ── */
+/* Checkbox lives inside .wc-block-cart-item__wrap (NOT the image cell,
+   which has aria-hidden="true" and would block focus/interaction). */
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 4px;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-select {
+  width: 18px;
+  height: 18px;
+  accent-color: #E199A4;
+  cursor: pointer;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-select-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7c4a57;
+  line-height: 1;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-row--deselected .wc-block-cart-item__image img,
+.wc-block-mini-cart__drawer .noyona-mini-cart-row--deselected .wc-block-components-product-image img {
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-row--deselected .noyona-mini-cart-title-price-row,
+.wc-block-mini-cart__drawer .noyona-mini-cart-row--deselected .noyona-mini-cart-selected-shade,
+.wc-block-mini-cart__drawer .noyona-mini-cart-row--deselected .wc-block-cart-item__quantity {
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-select-all {
+  padding: 4px 16px 0;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-select-all-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #253042;
+  cursor: pointer;
+  user-select: none;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-select-all-cb {
+  width: 16px;
+  height: 16px;
+  accent-color: #E199A4;
+  cursor: pointer;
+  margin: 0;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-message--warning {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.wc-block-mini-cart__drawer .wc-block-components-button.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 @media (max-width: 1400px) {

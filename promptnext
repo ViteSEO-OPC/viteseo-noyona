@@ -1,0 +1,103 @@
+ISSUE: Unselected cart items are lost after visiting checkout (abandoned checkout bug)
+
+Current behavior:
+- Cart has multiple items (e.g. 4 products)
+- User selects only 1 product in the mini cart
+- Clicks “Go to checkout”
+- Checkout page correctly shows ONLY the selected product (this part is working)
+
+BUT:
+- If the user does NOT complete checkout (goes back to home or reopens mini cart),
+- The cart now only contains the selected product
+- All other unselected products are gone from the cart
+
+This is WRONG.
+
+---
+
+EXPECTED BEHAVIOR:
+
+1. Abandoned checkout:
+- If the user does NOT place the order:
+  - The cart must remain unchanged
+  - ALL original items (selected + unselected) must still be present
+  - Checkout must NOT permanently modify the cart
+
+2. Successful checkout:
+- If the user completes the order:
+  - Only the purchased (selected) items should be removed
+  - The unselected items should remain in the cart
+
+---
+
+ROOT PROBLEM (LIKELY):
+The implementation is modifying the actual WooCommerce cart instead of only filtering it for checkout.
+
+---
+
+REQUIREMENT:
+
+Checkout must behave as a "filtered view" of the cart, NOT a mutation of the cart.
+
+Meaning:
+- The full cart (WC()->cart->cart_contents) must stay intact
+- Only woocommerce_get_cart_contents (or equivalent filter) should be used to limit what checkout sees
+
+---
+
+THINGS TO FIX / VERIFY:
+
+1. Do NOT remove unselected items before order is placed
+   - No WC()->cart->remove_cart_item() before checkout completion
+   - No overwriting cart_contents permanently
+
+2. During checkout:
+   - Only filter cart items using selected keys (virtual filtering)
+   - Do NOT mutate the actual cart data
+
+3. After successful order only:
+   - Remove purchased (selected) items
+   - Keep unselected items
+
+4. On abandoned checkout:
+   - Clear selective checkout session state
+   - Ensure full cart is restored automatically
+
+5. Ensure no logic runs like:
+   - "replace cart with selected items"
+   - "rebuild cart from selected items"
+   BEFORE order completion
+
+---
+
+DEBUG TASK:
+
+Add logging to confirm:
+- cart count before checkout
+- cart count after visiting checkout (without ordering)
+- cart count after returning to homepage
+
+We should see:
+- before checkout: 4 items
+- after visiting checkout (no order): still 4 items ❗
+- after successful order: only unselected items remain
+
+---
+
+IMPORTANT RULE:
+
+DO NOT modify the real cart until the order is successfully completed.
+
+Checkout must only FILTER what is displayed, not change the underlying cart.
+
+---
+
+Please fix the implementation so:
+- unselected items are never lost on abandoned checkout
+- cart integrity is preserved
+- only purchased items are removed after successful order
+
+Also explain:
+- what part of the code was mutating the cart
+- how it was fixed
+- how cart state is now preserved correctly

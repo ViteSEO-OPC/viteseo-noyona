@@ -1,0 +1,15 @@
+.noyona-pdp-social-proof {
+  margin: 0 0 0.75rem;
+}
+
+.noyona-pdp-social-proof__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(225, 26, 99, 0.08);
+  color: #E199A4;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}

@@ -1,11 +1,33 @@
 <!-- wp:template-part {"slug":"header","tagName":"header"} /-->
-<!-- wp:woocommerce/page-content-wrapper {"page":"cart"} -->
-<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group">
-	<!-- wp:woocommerce/store-notices /-->
-	<!-- wp:post-title {"align":"wide","level":1} /-->
-	<!-- wp:post-content {"align":"wide"} /-->
-</main>
+
+<!-- wp:group {"className":"noyona-cart-shell","layout":{"type":"constrained"}} -->
+<div class="wp-block-group noyona-cart-shell">
+	<!-- wp:html -->
+	<nav class="noyona-checkout-steps" aria-label="Checkout progress">
+		<ol>
+			<li class="is-active"><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-bag-shopping"></i></span> Cart</li>
+			<li><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-truck"></i></span> Details</li>
+			<li><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-box"></i></span> Reviews</li>
+			<li><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-check"></i></span> Done</li>
+		</ol>
+	</nav>
+	<!-- /wp:html -->
+
+	<!-- wp:group {"tagName":"main","layout":{"type":"constrained"},"className":"noyona-cart-main"} -->
+	<main class="wp-block-group noyona-cart-main">
+		<!-- wp:group {"className":"noyona-cart-summary-card","layout":{"type":"default"}} -->
+		<div class="wp-block-group noyona-cart-summary-card">
+			<!-- wp:heading {"level":1,"className":"noyona-cart-page-title"} -->
+			<h1 class="wp-block-heading noyona-cart-page-title">Order Summary</h1>
+			<!-- /wp:heading -->
+			<!-- wp:shortcode -->
+			[woocommerce_cart]
+			<!-- /wp:shortcode -->
+		</div>
+		<!-- /wp:group -->
+	</main>
+	<!-- /wp:group -->
+</div>
 <!-- /wp:group -->
-<!-- /wp:woocommerce/page-content-wrapper -->
+
 <!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

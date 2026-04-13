@@ -1,0 +1,90 @@
+.noyona-pdp-tabs {
+  margin: 1.75rem 0 0;
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  padding: 1rem 1.15rem 1.25rem;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.noyona-pdp-tabs__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 0;
+  padding: 0 0 0.65rem;
+}
+
+.noyona-pdp-tabs__tab {
+  position: relative;
+  padding: 0.35rem 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #888;
+  cursor: pointer;
+}
+
+.noyona-pdp-tabs__tab:hover {
+  color: #E199A4;
+}
+
+.noyona-pdp-tabs__tab.is-active {
+  color: #E199A4;
+}
+
+.noyona-pdp-tabs__tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.55rem;
+  height: 2px;
+  background: #E199A4;
+  border-radius: 1px;
+}
+
+.noyona-pdp-tabs__panel {
+  margin-top: 1rem;
+  padding: 1.1rem 0 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+}
+
+.noyona-pdp-tabs__panel[hidden] {
+  display: none !important;
+}
+
+.noyona-pdp-tabs__panel.is-active {
+  display: block;
+}
+
+.noyona-pdp-tabs__panel-inner {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+.noyona-pdp-tabs__panel-inner > *:first-child {
+  margin-top: 0;
+}
+
+.noyona-pdp-tabs__panel-inner > *:last-child {
+  margin-bottom: 0;
+}
+
+.noyona-pdp-tabs__empty {
+  margin: 0;
+  color: #888;
+  font-size: 0.875rem;
+}

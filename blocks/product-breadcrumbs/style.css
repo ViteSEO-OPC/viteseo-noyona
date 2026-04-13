@@ -1,0 +1,31 @@
+.noyona-pdp-breadcrumbs__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  font-size: 0.875rem;
+}
+
+.noyona-pdp-breadcrumbs__link {
+  color: #888;
+  text-decoration: none;
+}
+
+.noyona-pdp-breadcrumbs__link:hover {
+  color: #E199A4;
+  text-decoration: underline;
+}
+
+.noyona-pdp-breadcrumbs__current {
+  color: #E199A4;
+  font-weight: 600;
+}
+
+.noyona-pdp-breadcrumbs__sep {
+  color: #ccc;
+  list-style: none;
+  user-select: none;
+}

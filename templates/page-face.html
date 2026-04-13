@@ -28,9 +28,15 @@
                         <label><input type="radio" name="noyona-stock-status"> Out of Stock</label>
                     </section>
 
-                    <section class="noyona-shop-filter-section">
-                        <h5>Price</h5>
-                        <div class="noyona-shop-filter-price" data-min="0" data-step="150">
+                    <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
+                        <h5 class="noyona-shop-filter-price-title">Price</h5>
+                        <div class="noyona-shop-filter-price" data-min="0" data-step="50">
+                            <div class="noyona-shop-filter-price-slider" role="group" aria-label="Price range">
+                                <div class="noyona-shop-filter-price-track"></div>
+                                <div class="noyona-shop-filter-price-track-fill"></div>
+                                <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="Minimum price handle"></button>
+                                <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="Maximum price handle"></button>
+                            </div>
                             <div class="noyona-shop-filter-price-inputs">
                                 <label class="noyona-shop-filter-price-input">
                                     <span aria-hidden="true">₱</span>
@@ -42,16 +48,11 @@
                                     <input type="number" inputmode="numeric" min="0" step="1" value="0" name="noyona-price-max" aria-label="Maximum price">
                                 </label>
                             </div>
-                            <div class="noyona-shop-filter-price-slider" role="group" aria-label="Price range">
-                                <div class="noyona-shop-filter-price-track"></div>
-                                <div class="noyona-shop-filter-price-track-fill"></div>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="Minimum price handle"></button>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="Maximum price handle"></button>
-                            </div>
+                            
                             <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
                         </div>
                     </section>
-
+<!-- 
                     <section class="noyona-shop-filter-section">
                         <h5>Star Rating</h5>
                         <label><input type="radio" name="noyona-star-rating"> Bestsellers</label>
@@ -59,7 +60,7 @@
                         <label><input type="radio" name="noyona-star-rating"> High Volume</label>
                         <label><input type="radio" name="noyona-star-rating"> Customer Favorites</label>
                         <label><input type="radio" name="noyona-star-rating"> Community Verified</label>
-                    </section>
+                    </section> -->
                 </div>
                 <!-- /wp:html -->
 
@@ -86,7 +87,7 @@
                 <div class="wp-block-group noyona-shop-toolbar-right">
                     <!-- wp:html -->
                     <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
-                        <span class="noyona-shop-view-label" style="color: #e11a63; font-weight: 600; font-size: 14px;">View As</span>
+                        <span class="noyona-shop-view-label" style="color: #E199A4; font-weight: 600; font-size: 14px;">View As</span>
                         <div class="noyona-shop-view-toggle" aria-label="View">
                             <button type="button" class="is-active" data-shop-view="grid" aria-pressed="true">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
@@ -108,7 +109,32 @@
             </div>
             <!-- /wp:group -->
 
-            <!-- wp:woocommerce/product-collection {"queryId":1,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","outofstock","onbackorder"],"taxQuery":[{"taxonomy":"product_cat","field":"slug","terms":["face"],"operator":"IN"}],"isProductCollectionBlock":true,"perPage":4,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false},"tagName":"div","dimensions":{"widthType":"fill","fixedWidth":""},"displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},"convertedFromProducts":false,"queryContextIncludes":["collection"],"className":"noyona-shop-products"} -->
+            <!-- wp:woocommerce/product-collection {
+                "queryId":1,
+                "query":{
+                    "woocommerceAttributes":[],
+                    "woocommerceStockStatus":["instock","outofstock","onbackorder"],
+                    "taxQuery":[{"taxonomy":"product_cat","field":"slug","terms":["face"],"operator":"IN"}],
+                    "isProductCollectionBlock":true,
+                    "perPage":4,
+                    "pages":0,
+                    "offset":0,
+                    "postType":"product",
+                    "order":"asc",
+                    "orderBy":"title",
+                    "author":"",
+                    "search":"",
+                    "exclude":[],
+                    "sticky":"",
+                    "inherit":false
+                },
+                "tagName":"div",
+                "dimensions":{"widthType":"fill","fixedWidth":""},
+                "displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},
+                "convertedFromProducts":false,
+                "queryContextIncludes":["collection"],
+                "className":"noyona-shop-products"
+            } -->
             <div class="wp-block-woocommerce-product-collection noyona-shop-products">
                 <!-- wp:woocommerce/product-template -->
                 <!-- wp:woocommerce/product-image {"showSaleBadge":true,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
@@ -198,151 +224,7 @@
       ]
     } /-->
 
-    <!-- wp:noyona/customer-reviews {
-      "align":"wide",
-      "heading":"Customer Reviews",
-      "writeReviewText":"Write a Review",
-      "writeReviewUrl":"/coming-soon/",
-      "readMoreText":"Read More Reviews",
-      "readMoreUrl":"/coming-soon/",
-      "reviews":[
-        {
-          "name":"Lorem L.",
-          "timeAgo":"2 days ago",
-          "title":"Stays on all day!",
-          "content":"Absolutely love this lipstick! The color is vibrant and it really stays on all day without drying my lips. I wore it to a wedding and didn't have to touch up once.",
-          "rating":5,
-          "verified":true,
-          "helpfulText":"Yes",
-          "mediaCount":2,
-          "mediaUrls":[
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/dewylipcolor.webp",
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/liquideyelinerpen.webp"
-          ],
-          "avatarUrl":""
-        },
-        {
-          "name":"Pat C.",
-          "timeAgo":"3 days ago",
-          "title":"Blendable and lightweight",
-          "content":"Coverage is buildable without looking cakey. It lasts through commute and office aircon, and still looks smooth by end of day.",
-          "rating":4,
-          "verified":true,
-          "helpfulText":"Yes",
-          "mediaCount":2,
-          "mediaUrls":[
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/dual-poweder-foundaditon.webp",
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/velvet-matte-lipstic.webp"
-          ],
-          "avatarUrl":""
-        },
-        {
-          "name":"Mia R.",
-          "timeAgo":"5 days ago",
-          "title":"Perfect for morena skin",
-          "content":"The shade match is surprisingly good and oxidation is minimal. I used it from morning until dinner and it held up really well.",
-          "rating":5,
-          "verified":true,
-          "helpfulText":"Yes",
-          "mediaCount":2,
-          "mediaUrls":[
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/dewylipcolor.webp",
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/dual-poweder-foundaditon.webp"
-          ],
-          "avatarUrl":""
-        },
-        {
-          "name":"Ari V.",
-          "timeAgo":"1 week ago",
-          "title":"No flashback in photos",
-          "content":"Used this at an event and photos looked great even with direct flash. Texture is soft and skin still looks natural.",
-          "rating":5,
-          "verified":true,
-          "helpfulText":"Yes",
-          "mediaCount":2,
-          "mediaUrls":[
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/liquideyelinerpen.webp",
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/velvet-matte-lipstic.webp"
-          ],
-          "avatarUrl":""
-        },
-        {
-          "name":"Kris T.",
-          "timeAgo":"1 week ago",
-          "title":"Great everyday formula",
-          "content":"I have combination skin and this sits nicely after skincare. I only needed one quick touch-up after lunch.",
-          "rating":4,
-          "verified":true,
-          "helpfulText":"Yes",
-          "mediaCount":2,
-          "mediaUrls":[
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/dual-poweder-foundaditon.webp",
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/dewylipcolor.webp"
-          ],
-          "avatarUrl":""
-        },
-        {
-          "name":"Jin D.",
-          "timeAgo":"8 days ago",
-          "title":"Shade range is nice",
-          "content":"Love that it works with warm undertones. Easy to blend using sponge or brush, and it doesn't cling on dry patches.",
-          "rating":5,
-          "verified":true,
-          "helpfulText":"Yes",
-          "mediaCount":2,
-          "mediaUrls":[
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/velvet-matte-lipstic.webp",
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/liquideyelinerpen.webp"
-          ],
-          "avatarUrl":""
-        },
-        {
-          "name":"Lia N.",
-          "timeAgo":"10 days ago",
-          "title":"Worth the price",
-          "content":"Performance is close to high-end products. The finish looks polished and doesn't feel heavy on humid days.",
-          "rating":5,
-          "verified":true,
-          "helpfulText":"Yes",
-          "mediaCount":2,
-          "mediaUrls":[
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/dewylipcolor.webp",
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/velvet-matte-lipstic.webp"
-          ],
-          "avatarUrl":""
-        },
-        {
-          "name":"Sela P.",
-          "timeAgo":"11 days ago",
-          "title":"Easy for beginners",
-          "content":"Application is beginner-friendly and forgiving even when I rush. The finish still looks clean and put together.",
-          "rating":4,
-          "verified":true,
-          "helpfulText":"Yes",
-          "mediaCount":2,
-          "mediaUrls":[
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/liquideyelinerpen.webp",
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/dual-poweder-foundaditon.webp"
-          ],
-          "avatarUrl":""
-        },
-        {
-          "name":"Tina G.",
-          "timeAgo":"2 weeks ago",
-          "title":"Repurchasing this one",
-          "content":"I've tried many local options and this one is consistently reliable. Great hold, flattering finish, and comfy wear.",
-          "rating":5,
-          "verified":true,
-          "helpfulText":"Yes",
-          "mediaCount":2,
-          "mediaUrls":[
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/dual-poweder-foundaditon.webp",
-            "https://noyonacosmetics.com/wp-content/uploads/2026/02/dewylipcolor.webp"
-          ],
-          "avatarUrl":""
-        }
-      ]
-    } /-->
+    <!-- wp:noyona/customer-reviews {"align":"wide","heading":"Customer Reviews","readMoreText":"Read More Reviews","dataSource":"category","sourceCategories":["face"],"showWriteReviewCta":false,"showReviewForm":false,"showReadMore":true,"postsPerPage":9,"initialVisible":3} /-->
 
     <!-- wp:noyona/discover-face-banner {
       "align":"wide",

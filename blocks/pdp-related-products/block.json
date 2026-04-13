@@ -1,0 +1,39 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/pdp-related-products",
+  "version": "1.0.8",
+  "title": "PDP Related Products",
+  "category": "woocommerce",
+  "icon": "products",
+  "description": "Custom related products section for PDP.",
+  "supports": {
+    "align": ["wide", "full"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "You Might Also Like"
+    },
+    "subheading": {
+      "type": "string",
+      "default": "Complete your look with these favorites"
+    },
+    "viewAllText": {
+      "type": "string",
+      "default": "View All"
+    },
+    "viewAllUrl": {
+      "type": "string",
+      "default": "/shop/"
+    },
+    "limit": {
+      "type": "number",
+      "default": 3
+    }
+  },
+  "style": "file:./style.css",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php",
+  "textdomain": "viteseo-noyona-childtheme"
+}

@@ -1,0 +1,13 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/pdp-trust-badges",
+  "version": "1.0.0",
+  "title": "PDP trust badges",
+  "category": "woocommerce",
+  "icon": "shield",
+  "description": "Secure checkout, shipping, returns — same on every PDP.",
+  "supports": { "html": false },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "viteseo-noyona-childtheme"
+}

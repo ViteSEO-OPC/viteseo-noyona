@@ -1,0 +1,35 @@
+.noyona-pdp-stock-shipping {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin: 0.5rem 0 1rem;
+  font-size: 0.8125rem;
+}
+
+.noyona-pdp-stock-shipping__stock--in {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(34, 160, 80, 0.12);
+  color: #1a7a3e;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 0.7rem;
+}
+
+.noyona-pdp-stock-shipping__stock--out {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(120, 120, 120, 0.12);
+  color: #555;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.noyona-pdp-stock-shipping__ship {
+  color: #777;
+}

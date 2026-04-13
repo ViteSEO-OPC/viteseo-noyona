@@ -85,8 +85,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Global button/CTA radius standard */
-button,
+/* Global CTA/button radius standard (skip raw <button> controls like modal backdrops) */
 input[type="button"],
 input[type="submit"],
 input[type="reset"],
@@ -169,8 +168,8 @@ body.woocommerce-account .entry-title {
 .noyona-register {
   display: flex;
   justify-content: center;
-  padding: 64px 16px;
-  background: linear-gradient(135deg, #e8f1f6 0%, #f4f7fb 100%);
+  padding: 56px 16px;
+  background: transparent;
 }
 
 .noyona-register,
@@ -179,30 +178,61 @@ body.woocommerce-account .entry-title {
 }
 
 .noyona-register-card {
-  width: min(546px, 100%);
+  width: min(460px, 100%);
   background: #fff;
-  border: 1px solid #e6eaf0;
-  border-radius: 12px;
-  box-shadow: 0 14px 40px rgba(35, 50, 70, 0.12);
-  padding: 32px 28px;
+  border: 1px solid #e7edf4;
+  border-radius: 24px;
+  box-shadow: 0 18px 44px rgba(14, 26, 46, 0.14);
+  padding: 1.35rem 1.35rem 1.2rem;
   text-align: center;
   font-family: var(--wp--preset--font-family--proxima-nova, sans-serif);
 }
 
+.noyona-register-back {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  color: #1f2937;
+  font-size: 1.05rem;
+  font-weight: 600;
+  width: max-content;
+  margin-right: auto;
+  margin-bottom: 0.45rem;
+}
+
+.noyona-register-brand {
+  width: 78px;
+  height: 78px;
+  margin: 0.1rem auto 0.4rem;
+}
+
+.noyona-register-brand img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .noyona-register-title {
-  margin: 0 0 12px 0;
-  font-size: 1rem;
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 2.4rem);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #2f3a45;
+  line-height: 1.1;
+  color: #0f1728;
+}
+
+.noyona-register-subtitle {
+  margin: 0.45rem 0 0.95rem;
+  color: #6c7891;
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 
 .noyona-register-message {
-  margin: 12px 0 0 0;
+  margin: 0 0 0.8rem 0;
   padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
   text-align: left;
   background: #f0f4ff;
   color: #2d3b5f;
@@ -222,14 +252,9 @@ body.woocommerce-account .entry-title {
 
 .noyona-register-form {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 14px;
-  margin-top: 18px;
-}
-
-.noyona-register-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  text-align: left;
 }
 
 .noyona-register-field {
@@ -237,14 +262,23 @@ body.woocommerce-account .entry-title {
   min-width: 0;
 }
 
+.noyona-register-field label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #101828;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .noyona-register-field input {
   width: 100%;
-  padding: 12px 14px;
-  border: 1px solid #e1e6ed;
-  border-radius: 6px;
+  min-height: 50px;
+  padding: 0.7rem 0.92rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
   background: #f8fafc;
-  font-size: 0.95rem;
-  color: #2f3a45;
+  font-size: 0.96rem;
+  color: #111827;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
@@ -254,9 +288,9 @@ body.woocommerce-account .entry-title {
 }
 
 .noyona-register-field input:focus {
-  border-color: #8fb3f4;
+  border-color: #9cb4da;
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(143, 179, 244, 0.25);
+  box-shadow: 0 0 0 3px rgba(156, 180, 218, 0.22);
 }
 
 
@@ -264,9 +298,10 @@ body.woocommerce-account .entry-title {
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  font-size: 0.75rem;
-  color: #6b7681;
+  font-size: 0.88rem;
+  color: #6f7d95;
   text-align: left;
+  margin-bottom: 0.5rem;
 }
 
 .noyona-register-terms input {
@@ -275,153 +310,603 @@ body.woocommerce-account .entry-title {
 }
 
 .noyona-register-terms a {
-  color: #2f3a45;
-  font-weight: 600;
+  color: #e199a4;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .noyona-register-submit {
   width: 100%;
-  padding: 12px 16px;
+  min-height: 54px;
+  padding: 0.6rem 1rem;
   border: none;
-  border-radius: 6px;
-  background: linear-gradient(90deg, #7f95e6 0%, #66e1d8 100%);
+  border-radius: 999px;
+  background: #e199a4;
   color: #fff;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  font-size: 1rem;
   cursor: pointer;
-  transition: filter 0.2s, transform 0.2s;
+  transition: filter 0.2s;
 }
 
 .noyona-register-submit:hover {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
+  filter: brightness(0.97);
 }
 
-.noyona-register-submit:active {
-  transform: translateY(0);
+.noyona-register-google {
+  /* margin-top: 0.85rem; */
+  min-height: 52px;
+  border-radius: 999px;
+  border: 1.5px solid #d9e2ef;
+  background: #fff;
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.noyona-register-google-wrap {
+  margin-top: 0.85rem;
+}
+
+.noyona-register-google i {
+  font-size: 1.1rem;
+  background: conic-gradient(
+    from 180deg,
+    #ea4335 0deg 90deg,
+    #fbbc05 90deg 180deg,
+    #34a853 180deg 270deg,
+    #4285f4 270deg 360deg
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .noyona-register-login {
-  margin-top: 18px;
-  font-size: 0.85rem;
-  color: #6a7580;
+  margin-top: 0.9rem;
+  font-size: 0.88rem;
+  color: #8a96ac;
 }
 
 .noyona-register-login a {
-  color: #2f3a45;
-  font-weight: 600;
+  color: #e199a4;
+  font-weight: 700;
   text-decoration: underline;
 }
 
 @media (max-width: 640px) {
-  .noyona-register-row {
-    grid-template-columns: 1fr;
+  .noyona-register {
+    margin-top: 34px;
+    padding: 0 12px 24px;
+  }
+
+  .noyona-register-card {
+    border-radius: 18px;
+    padding: 1.2rem 1rem 1rem;
   }
 }
 
-.woocommerce form.woocommerce-form-login {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "username username"
-    "password password"
-    "remember remember"
-    "login register"
-    "lost lost";
-  column-gap: 16px;
-  row-gap: 16px;
-  align-items: center;
+body.woocommerce-account:not(.logged-in) .woocommerce .u-columns {
+  max-width: min(460px, 100%);
+  margin: 56px auto;
+  float: none;
 }
 
-.woocommerce form.woocommerce-form-login>p {
+body.woocommerce-account:not(.logged-in) .woocommerce .u-column1 {
+  float: none;
+  width: 100%;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce .u-column2 {
+  display: none;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce .u-column1 h2 {
+  display: none;
+}
+
+/* Some page content still prints a top "Login" heading outside the card. */
+body.woocommerce-account:not(.logged-in) .wp-block-post-content > h1,
+body.woocommerce-account:not(.logged-in) .wp-block-post-content > h2,
+body.woocommerce-account:not(.logged-in) .wp-block-post-content > .wp-block-heading {
+  display: none;
+}
+
+body.woocommerce-account:not(.logged-in) .wp-block-post-content h1,
+body.woocommerce-account:not(.logged-in) .wp-block-post-content h2 {
+  display: none;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce-notices-wrapper {
+  max-width: min(460px, 100%);
+  margin: 18px auto 0;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 0.72rem;
+  width: min(460px, 100%);
+  max-width: min(460px, 100%);
+  margin-inline: auto;
+  background: #fff;
+  border: 1px solid #e7edf4;
+  border-radius: 24px;
+  box-shadow: 0 18px 44px rgba(14, 26, 46, 0.14);
+  padding: 1.7rem 1.7rem 1.35rem;
+  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login > p {
   margin: 0;
 }
 
-.woocommerce form.woocommerce-form-login>p.woocommerce-form-row:nth-of-type(1) {
-  grid-area: username;
+.noyona-account-login-brand-wrap {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.7rem;
 }
 
-.woocommerce form.woocommerce-form-login>p.woocommerce-form-row:nth-of-type(2) {
-  grid-area: password;
+.noyona-account-login-brand {
+  width: 82px;
+  height: 82px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* border: 2px solid #f2d4dc; */
+  background: #fff;
 }
 
-.woocommerce form.woocommerce-form-login>p.form-row:not(.woocommerce-form-row) {
+.noyona-account-login-brand .custom-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.noyona-account-login-brand img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.noyona-account-login-brand-fallback {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #e199a4;
+}
+
+.noyona-account-login-badge {
+  position: absolute;
+  right: calc(50% - 52px);
+  top: -1px;
+  min-width: 45px;
+  height: 25px;
+  border-radius: 999px;
+  border: 1px solid #dde6f1;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #19aeb1;
+  letter-spacing: 0.03em;
+}
+
+.noyona-account-login-intro {
+  grid-row: 3;
+  grid-column: 1 / -1;
+  margin: 0 0 0.95rem;
+  text-align: center;
+  color: #6c7891;
+  font-size: 0.94rem;
+  line-height: 1.4;
+}
+
+.noyona-account-login-title {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  margin: 0 0 0.4rem;
+  text-align: center;
+  color: #0f1728;
+  font-size: clamp(1.8rem, 4vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-row {
+  grid-column: 1 / -1;
+  margin-bottom: 0.72rem;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login label {
+  display: block;
+  margin-bottom: 0.32rem;
+  color: #101828;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .input-text {
+  width: 100%;
+  max-width: 100% !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  float: none !important;
+  margin: 0 !important;
+  min-height: 46px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 0.58rem 0.92rem;
+  font-size: 0.96rem;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .password-input {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .password-input .input-text {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding-right: 2.9rem;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .noyona-password-toggle {
+  position: absolute !important;
+  top: 50% !important;
+  right: 0.74rem !important;
+  left: auto !important;
+  transform: translateY(-50%) !important;
+  width: 22px !important;
+  height: 22px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #71809a;
+  cursor: pointer;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .noyona-password-toggle i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .show-password-input {
+  display: none !important;
+}
+
+/* Hide password-manager injected inline controls in username field. */
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-row input[name="username"] ~ [data-lastpass-icon-root],
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-row input[name="username"] ~ [data-lastpass-root],
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-row input[name="username"] ~ .show-password-input {
+  display: none !important;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .noyona-login-row--username [data-lastpass-icon-root],
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .noyona-login-row--username [data-lastpass-root],
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .noyona-login-row--password [data-lastpass-icon-root],
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .noyona-login-row--password [data-lastpass-root] {
+  display: none !important;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login p.form-row:not(.woocommerce-form-row) {
   display: contents;
 }
 
-.woocommerce form.woocommerce-form-login .woocommerce-form-login__rememberme {
-  grid-area: remember;
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__rememberme {
+  grid-row: 6;
+  grid-column: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.88rem;
+  color: #6f7d95;
   justify-self: start;
   align-self: center;
 }
 
-.woocommerce form.woocommerce-form-login .woocommerce-form-login__submit {
-  grid-area: login;
-  justify-self: start;
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__rememberme input {
+  margin: 0;
 }
 
-.woocommerce form.woocommerce-form-login>.noyona-login-register-link {
-  grid-area: register;
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit {
+  grid-row: 7;
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 54px;
+  border: 0;
+  border-radius: 999px;
+  background: #e199a4;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+  line-height: 1;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit:hover {
+  filter: brightness(0.97);
+}
+
+/* Some plugins/extensions inject extra mini buttons near remember row. */
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login p.form-row:not(.woocommerce-form-row) > button:not(.woocommerce-form-login__submit):not(.show-password-input) {
+  display: none !important;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-LostPassword {
+  grid-row: 6;
+  grid-column: 2;
+  margin: 0;
   text-align: right;
+  font-size: 0.86rem;
   justify-self: end;
   align-self: center;
 }
 
-.woocommerce form.woocommerce-form-login>.woocommerce-LostPassword {
-  grid-area: lost;
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-LostPassword a {
+  color: #e199a4;
+  text-decoration: underline;
+  font-weight: 600;
 }
 
-.woocommerce form.woocommerce-form-login>.noyona-login-register-link a {
+.noyona-login-form-footer {
+  grid-row: 8;
+  grid-column: 1 / -1;
+  margin-top: 0.3rem;
+  display: grid;
+  row-gap: 0.72rem;
+}
+
+.noyona-login-google-btn {
+  min-height: 52px;
+  border-radius: 999px;
+  border: 1.5px solid #d9e2ef;
+  background: #fff;
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 24px;
-  border-radius: 0;
-  background: #1f5eff;
-  border: 1px solid #1f5eff;
-  color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-  line-height: 1;
-  transition: filter 0.2s;
+  gap: 0.5rem;
 }
 
-.woocommerce form.woocommerce-form-login>.noyona-login-register-link a:hover {
-  filter: brightness(1.05);
+.noyona-login-google-btn i {
+  font-size: 1.1rem;
+  background: conic-gradient(
+    from 180deg,
+    #ea4335 0deg 90deg,
+    #fbbc05 90deg 180deg,
+    #34a853 180deg 270deg,
+    #4285f4 270deg 360deg
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.woocommerce form.woocommerce-form-login .woocommerce-form-login__submit {
-  background: #e53935;
-  border-color: #e53935;
-  color: #fff;
-  border-radius: 0;
-  padding: 12px 24px;
+.noyona-login-register-link {
+  margin: 0;
+  text-align: center;
+  color: #8a96ac;
+  font-size: 0.88rem;
 }
 
-.woocommerce form.woocommerce-form-login .woocommerce-form-login__submit:hover {
-  filter: brightness(1.05);
+.noyona-login-register-link a {
+  color: #e199a4;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 @media (max-width: 640px) {
-  .woocommerce form.woocommerce-form-login {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "username"
-      "password"
-      "remember"
-      "login"
-      "register"
-      "lost";
+  body.woocommerce-account:not(.logged-in) .woocommerce .u-columns {
+    margin-top: 34px;
   }
 
-  .woocommerce form.woocommerce-form-login>p.form-row:not(.woocommerce-form-row),
-  .woocommerce form.woocommerce-form-login>.woocommerce-LostPassword,
-  .woocommerce form.woocommerce-form-login>.noyona-login-register-link {
+  body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login {
+    padding: 1.2rem 1rem 1rem;
+    border-radius: 18px;
+    grid-template-columns: 1fr;
+  }
+
+  .noyona-account-login-badge {
+    right: calc(50% - 45px);
+  }
+
+  body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-LostPassword {
+    grid-row: auto;
     grid-column: 1 / -1;
-    text-align: left;
     justify-self: start;
-    align-self: start;
+    text-align: left;
+  }
+
+  body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__rememberme,
+  body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit,
+  .noyona-login-form-footer {
+    grid-row: auto;
+    grid-column: 1 / -1;
+  }
+}
+
+/* Lost-password page (guest): custom card layout */
+body.woocommerce-account.woocommerce-lost-password {
+  min-height: 100vh;
+  background: #fff;
+}
+
+body.woocommerce-account.woocommerce-lost-password .wp-site-blocks {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body.woocommerce-account.woocommerce-lost-password .wp-site-blocks > main.wp-block-group {
+  flex: 1 0 auto;
+}
+
+body.woocommerce-account.woocommerce-lost-password .wp-site-blocks > footer.wp-block-template-part {
+  margin-top: auto;
+}
+
+body.woocommerce-account.woocommerce-lost-password .woocommerce {
+  max-width: min(460px, 100%);
+  margin: 40px auto 24px;
+}
+
+body.woocommerce-account.woocommerce-lost-password .woocommerce-notices-wrapper {
+  max-width: min(460px, 100%);
+  margin: 18px auto 0;
+}
+
+body.woocommerce-account.woocommerce-lost-password form.noyona-lost-password-form {
+  background: #fff;
+  border: 1px solid #e7edf4;
+  border-radius: 24px;
+  box-shadow: 0 18px 44px rgba(14, 26, 46, 0.14);
+  padding: 1.7rem 1.7rem 1.35rem;
+  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+}
+
+.noyona-lost-password-head {
+  margin-bottom: 0.8rem;
+}
+
+.noyona-lost-password-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #101828;
+  text-decoration: none;
+  font-size: clamp(1.6rem, 3.5vw, 2rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.noyona-lost-password-back i {
+  font-size: 0.92em;
+}
+
+.noyona-lost-password-copy {
+  margin: 0 0 1rem;
+  color: #6c7891;
+  font-size: 0.94rem;
+  line-height: 1.4;
+}
+
+body.woocommerce-account.woocommerce-lost-password form.noyona-lost-password-form .woocommerce-form-row {
+  margin-bottom: 0.95rem;
+  width: 100%;
+  float: none;
+  clear: both;
+}
+
+body.woocommerce-account.woocommerce-lost-password form.noyona-lost-password-form label {
+  display: block;
+  margin-bottom: 0.32rem;
+  color: #101828;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+body.woocommerce-account.woocommerce-lost-password form.noyona-lost-password-form .input-text {
+  width: 100%;
+  min-height: 50px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 0.7rem 0.92rem;
+  font-size: 0.96rem;
+}
+
+.noyona-lost-password-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  width: 100%;
+  clear: both;
+}
+
+.noyona-lost-password-cancel,
+.noyona-lost-password-submit {
+  min-height: 52px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.noyona-lost-password-cancel {
+  border: 1.5px solid #e199a4;
+  color: #e199a4;
+  background: #fff;
+}
+
+body.woocommerce-account.woocommerce-lost-password .noyona-lost-password-submit.woocommerce-Button.button {
+  width: 100%;
+  border: 1.5px solid #e199a4;
+  background: #e199a4;
+  color: #fff;
+  margin: 0;
+  padding: 0.6rem 1rem;
+}
+
+.noyona-lost-password-try {
+  margin: 0.95rem 0 0;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.noyona-lost-password-try a {
+  color: #e199a4;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  body.woocommerce-account.woocommerce-lost-password .woocommerce {
+    margin-top: 34px;
+  }
+
+  body.woocommerce-account.woocommerce-lost-password form.noyona-lost-password-form {
+    padding: 1.2rem 1rem 1rem;
+    border-radius: 18px;
+  }
+
+  .noyona-lost-password-actions {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -460,7 +945,7 @@ body.woocommerce-account .entry-title {
 }
 
 .noyona-shop-title.wp-block-query-title {
-  color: #e11a63;
+  color: #E199A4;
   font-size: clamp(48px, 6vw, 72px);
   line-height: 1;
   letter-spacing: -0.04em;
@@ -508,8 +993,8 @@ body.woocommerce-account .entry-title {
 body.woocommerce-shop .noyona-shop-category-all,
 body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 .noyona-shop-category-all.is-active {
-  border-color: #e11a63;
-  background: #e11a63;
+  border-color: #E199A4;
+  background: #E199A4;
   color: #fff;
 }
 
@@ -521,8 +1006,8 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 .noyona-shop-categories .wc-block-product-categories-list-item--current>a,
 .noyona-shop-categories .wc-block-product-categories-list-item>a[aria-current="page"],
 .noyona-shop-categories .wc-block-product-categories-list-item>a.is-active {
-  border-color: #e11a63;
-  background: #e11a63;
+  border-color: #E199A4;
+  background: #E199A4;
   color: #fff;
 }
 
@@ -565,16 +1050,16 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 
 .noyona-shop-filter-section h5 {
   margin: 0 0 16px;
-  font-size: 16px;
+  font-size: clamp(24px, 1.8vw, 32px);
   font-weight: 600;
-  color: #e11a63;
+  color: #E199A4;
 }
 
 .noyona-shop-filter-section label {
   display: flex;
   align-items: center;
   margin: 0 0 10px;
-  font-size: 14px;
+  font-size: clamp(16px, 1.2vw, 18px);
   color: #222;
   cursor: pointer;
 }
@@ -583,7 +1068,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   appearance: none;
   width: 16px;
   height: 16px;
-  border: 1px solid #e11a63;
+  border: 1px solid #E199A4;
   border-radius: 50%;
   margin: 0 10px 0 0;
   position: relative;
@@ -598,7 +1083,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   left: 3px;
   width: 8px;
   height: 8px;
-  background: #e11a63;
+  background: #E199A4;
   border-radius: 50%;
 }
 
@@ -619,14 +1104,14 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   flex: 1;
   margin: 0;
   min-height: 42px;
-  border: 1px solid #e11a63;
+  border: 1px solid #E199A4;
   border-radius: 999px;
   background: #fff;
   padding: 0 14px;
 }
 
 .noyona-shop-filter-price-input > span {
-  color: #e11a63;
+  color: #E199A4;
   font-size: 18px;
   line-height: 1;
   margin-right: 8px;
@@ -656,7 +1141,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 }
 
 .noyona-shop-filter-price-separator {
-  color: #e11a63;
+  color: #E199A4;
   font-size: 26px;
   font-weight: 700;
   line-height: 1;
@@ -706,7 +1191,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 }
 
 .noyona-shop-filter-price-thumb:focus-visible {
-  outline: 2px solid #e11a63;
+  outline: 2px solid #E199A4;
   outline-offset: 2px;
 }
 
@@ -725,6 +1210,84 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   letter-spacing: -0.02em;
 }
 
+/* Archive product page: match reference UI for price range block */
+.noyona-shop-filter-section-price .noyona-shop-filter-price-title {
+  margin: 0 0 14px;
+  color: #e5a0ac;
+  font-size: clamp(24px, 1.8vw, 32px);
+  font-weight: 600;
+  font-weight: 600;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price {
+  gap: 18px;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-slider {
+  height: 46px;
+  margin: 0 2px;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-track,
+.noyona-shop-filter-section-price .noyona-shop-filter-price-track-fill {
+  height: 8px;
+  border-radius: 999px;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-track {
+  background: #fde5ea;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-track-fill {
+  background: #efc3cc;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-thumb {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #111;
+  border-radius: 50%;
+  background: #f4c3cd;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-inputs {
+  gap: 14px;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-input {
+  min-height: 54px;
+  border-width: 2px;
+  border-color: #e9a3af;
+  padding: 0 16px;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-input > span {
+  margin-right: 12px;
+  color: #e9a3af;
+  font-size: clamp(24px, 1.8vw, 34px);
+  font-weight: 600;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-input input {
+  font-size: clamp(20px, 1.5vw, 38px);
+  font-weight: 700;
+  text-align: right;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-separator {
+  color: #e9a3af;
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.noyona-shop-filter-section-price .noyona-shop-filter-price-labels {
+  display: none;
+}
+
 .noyona-shop-filter-blocks {
   display: none;
 }
@@ -737,7 +1300,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   margin: 0;
   font-size: 15px;
   font-weight: 700;
-  color: #e11a63;
+  color: #E199A4;
 }
 
 .noyona-shop-toolbar-right {
@@ -762,11 +1325,11 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 }
 
 .noyona-shop-view-toggle button.is-active {
-  color: #e11a63;
+  color: #E199A4;
 }
 
 .noyona-shop-view-toggle button:hover {
-  color: #e11a63;
+  color: #E199A4;
 }
 
 .noyona-shop-sort {
@@ -788,7 +1351,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 
 .noyona-shop-sort select:focus {
   outline: none;
-  border-color: #e11a63;
+  border-color: #E199A4;
 }
 
 .noyona-shop-filter-toggle,
@@ -818,66 +1381,75 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   overflow: hidden;
 }
 
+/* Product title */
 .noyona-shop-products .wc-block-product .wp-block-post-title {
   font-size: 16px;
   font-weight: 700;
   color: #111;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   line-height: 1.3;
 }
 
+/* Product excerpt */
 .noyona-shop-products .wc-block-product .wp-block-post-excerpt {
   font-size: 13px;
   color: #666;
   line-height: 1.4;
-  margin: 0 0 16px;
+  margin: 0 0 12px;
 }
 
-.noyona-shop-products .wc-block-product .wc-block-components-product-price {
+.noyona-shop-products .wc-block-product .wp-block-post-excerpt p {
+  margin: 0;
+}
+
+/* Footer row: price left, buy-now right */
+.noyona-product-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.noyona-product-card-footer .wc-block-components-product-price {
   font-size: 15px;
   font-weight: 700;
   color: #111;
   margin: 0;
-  margin-top: auto;
-  padding-bottom: 8px;
 }
 
-.noyona-shop-products .wc-block-product .wp-block-button {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  margin: 0;
+.noyona-product-card-footer .noyona-buy-now-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 14px;
+  background: #e199a4;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: none;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
-.noyona-shop-products .wc-block-product .wp-block-button__link,
-.noyona-shop-products .wc-block-product .add_to_cart_button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background-color: #fff;
-  border: 1px solid #f4f4f4;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  color: transparent !important;
-  padding: 0;
-  min-height: auto;
-  display: block;
-  font-size: 0;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23e11a63" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>');
-  background-size: 20px;
-  background-position: center;
-  background-repeat: no-repeat;
-  transition: all 0.2s ease;
-}
-
-.noyona-shop-products .wc-block-product .wp-block-button__link:hover,
-.noyona-shop-products .wc-block-product .add_to_cart_button:hover {
-  background-color: #fff;
-  border-color: #e11a63;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(225, 26, 99, 0.15);
+.noyona-product-card-footer .noyona-buy-now-btn:hover {
+  background: #cc848f;
+  transform: translateY(-1px);
 }
 
 .noyona-shop-product-actions {
+  display: none;
+}
+
+/* Hide native WC add-to-cart buttons in product cards (we use .noyona-buy-now-btn instead) */
+.noyona-shop-products .wc-block-product .wp-block-button,
+.noyona-shop-products .wc-block-product .wc-block-components-product-button,
+.noyona-shop-products .wc-block-product .add_to_cart_button {
   display: none;
 }
 
@@ -895,17 +1467,17 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   font-size: 16px;
   font-weight: 600;
   color: #fff;
-  background: #e11a63;
-  border: 2px solid #e11a63;
+  background: #E199A4;
+  border: 2px solid #E199A4;
   border-radius: 999px;
   text-decoration: none;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .noyona-landing-show-more-btn:hover {
-  color: #e11a63;
+  color: #E199A4;
   background: #fff;
-  border-color: #e11a63;
+  border-color: #E199A4;
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product-template {
@@ -916,15 +1488,17 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product-template {
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product {
   display: grid;
   grid-template-columns: 156px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-rows: auto auto 1fr auto;
+  column-gap: 18px;
+  row-gap: 8px;
   align-items: start;
   border-radius: 22px;
   padding: 10px 16px 14px 10px;
-  min-height: 162px;
+  min-height: 176px;
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product > .wc-block-components-product-image {
-  grid-row: 1 / 5;
+  grid-row: 1 / -1;
   margin: 0;
   border-radius: 16px;
   overflow: hidden;
@@ -941,20 +1515,36 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-components-product-im
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product .wp-block-post-title {
+  grid-column: 2;
+  grid-row: 1;
   margin: 4px 0 6px;
   font-size: 24px;
   font-size: clamp(18px, 1.35vw, 24px);
   line-height: 1.05;
-  max-width: calc(100% - 210px);
+  max-width: none;
+  min-width: 0;
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product .wp-block-post-excerpt {
+  grid-column: 2;
+  grid-row: 2 / 4;
   margin: 0;
   font-size: 17px;
   font-size: clamp(13px, 1vw, 17px);
   line-height: 1.26;
   color: #555;
-  max-width: calc(100% - 210px);
+  max-width: none;
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+}
+
+body.noyona-shop-view-list .noyona-shop-products .wc-block-product .wp-block-post-excerpt p {
+  margin: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product .wc-block-components-product-price {
@@ -965,6 +1555,31 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .wc-block-com
   font-size: clamp(20px, 1.5vw, 30px);
   line-height: 1;
   font-weight: 800;
+}
+
+body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-product-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  grid-column: 2;
+  grid-row: 4;
+  width: 100%;
+  min-width: 0;
+  gap: 16px;
+  margin-top: 8px;
+  align-self: end;
+}
+
+body.noyona-shop-view-list .noyona-shop-products .noyona-product-card-footer .wc-block-components-product-price {
+  margin: 0;
+}
+
+body.noyona-shop-view-list .noyona-shop-products .noyona-product-card-footer .noyona-buy-now-btn {
+  min-width: 124px;
+  height: 42px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 14px;
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-native-add-to-cart {
@@ -1001,7 +1616,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-wishlist-btn[aria-pressed="true"] {
-  color: #e11a63;
+  color: #E199A4;
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-card-footer-actions {
@@ -1040,7 +1655,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   height: 42px;
   padding: 0 22px;
   border-radius: 999px;
-  background: #e11a63;
+  background: #E199A4;
   color: #fff;
   text-decoration: none;
   display: inline-flex;
@@ -1063,7 +1678,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   height: 46px;
   border: 0;
   border-radius: 999px;
-  background: #e11a63;
+  background: #E199A4;
   color: #fff;
   font-size: 24px;
   font-weight: 700;
@@ -1119,13 +1734,13 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 .noyona-shop-products .wp-block-query-pagination .page-numbers.current {
-  background: #e11a63;
+  background: #E199A4;
   color: #fff;
   box-shadow: 0 10px 18px rgba(225, 26, 99, 0.34);
 }
 
 .noyona-shop-products .wp-block-query-pagination a.page-numbers:hover {
-  color: #e11a63;
+  color: #E199A4;
 }
 
 .noyona-shop-products .wp-block-query-pagination .wp-block-query-pagination-next,
@@ -1160,7 +1775,36 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 
 .noyona-shop-products .wp-block-query-pagination .wp-block-query-pagination-next:hover,
 .noyona-shop-products .wp-block-query-pagination .wp-block-query-pagination-previous:hover {
-  color: #e11a63;
+  color: #E199A4;
+}
+
+.noyona-buy-now-wrap {
+	margin-top: 10px;
+}
+
+.noyona-buy-now-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 140px;
+	height: 38px;
+	padding: 0 18px;
+	border-radius: 14px;
+	background: #e199a4;
+	color: #fff !important;
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1;
+	text-transform: uppercase;
+	border: none;
+	box-shadow: none;
+	transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.noyona-buy-now-btn:hover {
+	background: #cc848f;
+	transform: translateY(-1px);
 }
 
 @media (max-width: 999px) {
@@ -1292,5 +1936,1234 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
     justify-content: flex-end;
     margin-top: 10px;
   }
+
+  .noyona-product-card-footer .noyona-buy-now-btn {
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+}
+
+.noyona-account-page {
+	max-width: 1180px;
+	width: min(1180px, calc(100vw - 56px));
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	font-family: var(--wp--preset--font-family--proxima-nova), system-ui, -apple-system, "Segoe UI", sans-serif;
+	font-size: var(--wp--preset--font-size--body);
+	font-weight: 400;
+	line-height: 1.35;
+	color: #333;
+}
+
+.noyona-account-hero,
+.noyona-account-profile-card {
+	background: #fff;
+	border: 1px solid #f2dce0;
+	border-radius: 18px;
+	box-shadow: 0 10px 32px rgba(188, 116, 132, 0.14);
+}
+
+.noyona-account-hero {
+	padding: 26px 30px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+}
+
+.noyona-account-hero__identity {
+	display: inline-flex;
+	align-items: center;
+	gap: 18px;
+}
+
+.noyona-account-avatar {
+	width: 108px;
+	height: 108px;
+	aspect-ratio: 1 / 1;
+	display: block;
+	border-radius: 50% !important;
+	clip-path: circle(50%);
+	object-fit: cover;
+	object-position: center;
+	border: 4px solid #f5d8df;
+}
+
+.noyona-account-hero__meta h2 {
+	margin: 0;
+	font-family: var(--wp--preset--font-family--proxima-nova), system-ui, -apple-system, "Segoe UI", sans-serif;
+	font-size: var(--wp--preset--font-size--h-2);
+	line-height: 1.1;
+	font-weight: 700;
+	color: #1a1a1a;
+}
+
+.noyona-account-hero__meta p {
+	margin: 4px 0 0;
+	font-size: var(--wp--preset--font-size--body);
+	font-weight: 400;
+	color: #6f6f6f;
+}
+
+.noyona-account-hero__actions {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 10px;
+	min-width: 210px;
+}
+
+.noyona-account-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 46px;
+	padding: 0 20px;
+	border-radius: 999px;
+	border: 1px solid #eba7b4;
+	text-decoration: none !important;
+	font-size: var(--wp--preset--font-size--body);
+	font-weight: 600;
+	line-height: 1;
+	transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.noyona-account-btn--primary {
+	background: linear-gradient(180deg, #e8a4b2 0%, #dd93a2 100%);
+	color: #fff !important;
+	border-color: #dd93a2;
+}
+
+.noyona-account-btn--primary:hover {
+	background: linear-gradient(180deg, #df95a5 0%, #d57f91 100%);
+	border-color: #d57f91;
+	transform: translateY(-1px);
+}
+
+.noyona-account-btn--ghost {
+	background: #fff;
+	color: #dd93a2 !important;
+	border-color: #edbcc5;
+}
+
+.noyona-account-btn--ghost:hover {
+	background: #fff5f8;
+	color: #ce7f90 !important;
+	border-color: #e39daa;
+}
+
+.noyona-account-tabs {
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: 1fr;
+	gap: 14px;
+	width: 100%;
+}
+
+.noyona-account-tab {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	min-height: 52px;
+	padding: 0 18px;
+	border-radius: 14px;
+	background: #fff;
+	border: 1px solid #f2dce0;
+	box-shadow: 0 4px 14px rgba(188, 116, 132, 0.08);
+	color: #1d1d1d;
+	text-decoration: none !important;
+	font-size: var(--wp--preset--font-size--h-3);
+	font-weight: 600;
+	line-height: 1;
+}
+
+.noyona-account-tab i {
+	font-size: 17px;
+	color: #e39cab;
+}
+
+.noyona-account-tab.is-active {
+	background: #fff7f9;
+	border-color: #e8adb9;
+	color: #d78d9c;
+}
+
+.noyona-account-profile-card {
+	padding: 26px 28px 30px;
+}
+
+.noyona-account-orders-card {
+	padding: 22px 28px 26px;
+}
+
+.noyona-account-orders-card__head {
+	padding-bottom: 12px;
+	margin-bottom: 10px;
+}
+
+.noyona-account-orders-table-wrap {
+	overflow-x: auto;
+}
+
+.noyona-account-orders-table {
+	width: 100%;
+	min-width: 900px;
+	border-collapse: collapse;
+}
+
+.noyona-account-orders-table thead th {
+	padding: 12px 10px;
+	border-bottom: 1px solid #ece8ea;
+	text-align: left;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 600;
+	color: #4c4c4c;
+	white-space: nowrap;
+}
+
+.noyona-account-orders-table tbody td {
+	padding: 13px 10px;
+	border-bottom: 1px solid #f1eef0;
+	vertical-align: middle;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 600;
+	color: #2a2a2a;
+}
+
+.noyona-account-orders-table__order {
+	color: #e39cab;
+	letter-spacing: 0.06em;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.62);
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.noyona-account-order-product {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 180px;
+}
+
+.noyona-account-order-product__media {
+	flex: 0 0 auto;
+	width: 34px;
+	height: 34px;
+	border-radius: 9px;
+	overflow: hidden;
+	background: #f8f8f8;
+}
+
+.noyona-account-order-product-thumb {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.noyona-account-order-product__name,
+.noyona-account-order-product__name a {
+	color: #1d1d1d;
+	text-decoration: none;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 600;
+}
+
+.noyona-account-order-status {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 22px;
+	padding: 0 10px;
+	border-radius: 999px;
+	border: 1px solid transparent;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.62);
+	font-weight: 600;
+	line-height: 1;
+	white-space: nowrap;
+}
+
+.noyona-account-order-status--completed {
+	background: #ecfaf1;
+	border-color: #ccebd8;
+	color: #24814f;
+}
+
+.noyona-account-order-status--cancelled,
+.noyona-account-order-status--failed {
+	background: #fff1f1;
+	border-color: #f3cccc;
+	color: #bb4040;
+}
+
+.noyona-account-order-status--processing {
+	background: #fff7e9;
+	border-color: #f4ddb4;
+	color: #9a6a14;
+}
+
+.noyona-account-order-status--on-hold {
+	background: #f5f2ff;
+	border-color: #ddd3ff;
+	color: #6350a5;
+}
+
+.noyona-account-order-status--pending {
+	background: #f2f5ff;
+	border-color: #d3defd;
+	color: #3e5fa9;
+}
+
+.noyona-account-order-status--refunded {
+	background: #f3f3f3;
+	border-color: #dbdbdb;
+	color: #5d5d5d;
+}
+
+.noyona-account-orders-table__price {
+	color: #e39cab;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.noyona-account-orders-table__empty {
+	text-align: center;
+	color: #707070;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.78);
+	padding: 26px 12px !important;
+}
+
+.noyona-account-orders-pagination {
+	margin-top: 18px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+}
+
+.noyona-account-orders-pagination .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 30px;
+	padding: 0 8px;
+	border-radius: 999px;
+	border: 1px solid transparent;
+	color: #d6909f;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.noyona-account-orders-pagination .page-numbers.current {
+	background: #e39cab;
+	border-color: #e39cab;
+	color: #fff;
+	box-shadow: 0 8px 16px rgba(227, 156, 171, 0.32);
+}
+
+.noyona-account-orders-pagination a.page-numbers:hover {
+	border-color: #efc0cb;
+	background: #fff5f8;
+}
+
+.noyona-account-addresses-card {
+	padding: 24px 30px 30px;
+	overflow: hidden;
+}
+
+.noyona-account-addresses-card__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 18px;
+}
+
+.noyona-account-addresses-card__new-btn {
+	max-width: 208px;
+	min-width: 208px;
+	min-height: 44px;
+}
+
+.noyona-account-addresses-card__head h3 {
+	font-family: var(--wp--preset--font-family--proxima-nova), system-ui, -apple-system, "Segoe UI", sans-serif;
+	font-size: var(--wp--preset--font-size--h-2);
+	font-weight: 700;
+	line-height: 1.1;
+}
+
+.noyona-account-addresses-card__head p {
+	font-size: var(--wp--preset--font-size--body);
+	font-weight: 400;
+	margin-top: 6px;
+}
+
+.noyona-account-addresses-notice {
+	margin: 14px 0 0;
+	padding: 10px 14px;
+	border-radius: 12px;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 600;
+}
+
+.noyona-account-addresses-notice.is-success {
+	background: #edf9f1;
+	color: #256743;
+	border: 1px solid #cde9d7;
+}
+
+.noyona-account-addresses-notice.is-error {
+	background: #fff1f2;
+	color: #9f3f4d;
+	border: 1px solid #f2ccd3;
+}
+
+.noyona-account-address-form {
+	margin-top: 14px;
+	border-top: 1px solid #ece8ea;
+	border-bottom: 1px solid #ece8ea;
+	overflow: hidden;
+}
+
+.noyona-account-address-form__grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(168px, 194px);
+	align-items: stretch;
+}
+
+.noyona-account-address-form__fields {
+	padding: 16px 0 16px;
+	padding-right: 18px;
+	min-width: 0;
+}
+
+.noyona-account-address-form__fields label {
+	display: block;
+	margin: 0 0 6px;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 600;
+	line-height: 1.3;
+	color: #1f1f1f;
+}
+
+.noyona-account-address-form__fields input[type="text"] {
+	display: block;
+	width: 100%;
+	max-width: none;
+	height: 38px;
+	padding: 8px 12px;
+	margin: 0 0 10px;
+	border: 1px solid #ececec;
+	border-radius: 10px;
+	background: #f7f7f7;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.8);
+	font-weight: 400;
+	color: #222;
+	box-sizing: border-box;
+}
+
+.noyona-account-address-form__row {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	column-gap: 12px;
+	row-gap: 0;
+}
+
+.noyona-account-address-form__col {
+	min-width: 0;
+}
+
+.noyona-account-address-form__default {
+	display: inline-flex !important;
+	align-items: center;
+	gap: 8px;
+	margin: 2px 0 0 !important;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72) !important;
+	font-weight: 400 !important;
+	color: #666 !important;
+}
+
+.noyona-account-address-form__default input {
+	margin: 0 !important;
+}
+
+.noyona-account-address-form__actions {
+	padding: 16px 0 16px 24px;
+	border-left: 1px solid #ece8ea;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.noyona-account-address-form__actions .noyona-account-btn {
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.noyona-account-address-list {
+	padding-top: 4px;
+}
+
+.noyona-account-address-item {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 14px;
+	padding: 16px 0;
+	border-bottom: 1px solid #f0ecee;
+}
+
+.noyona-account-address-item h4 {
+	margin: 0;
+	font-family: var(--wp--preset--font-family--proxima-nova), system-ui, -apple-system, "Segoe UI", sans-serif;
+	font-size: var(--wp--preset--font-size--h-3);
+	font-weight: 600;
+	line-height: 1.1;
+	color: #111;
+}
+
+.noyona-account-address-item__phone,
+.noyona-account-address-item__line {
+	margin: 3px 0 0;
+	font-size: var(--wp--preset--font-size--body);
+	font-weight: 400;
+	line-height: 1.35;
+	color: #1f1f1f;
+}
+
+.noyona-account-address-item__badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 20px;
+	margin-top: 6px;
+	padding: 0 10px;
+	border-radius: 999px;
+	background: #fbe5ea;
+	color: #d68698;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.62);
+	font-weight: 600;
+	line-height: 1;
+}
+
+.noyona-account-address-item__actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.noyona-account-address-item__actions a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border-radius: 999px;
+	border: 1px solid #f0ccd4;
+	background: #fff;
+	color: #dc8ea0;
+	text-decoration: none !important;
+	transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.noyona-account-address-item__actions a:hover {
+	transform: translateY(-1px);
+	background: #fff5f7;
+	border-color: #e9b4bf;
+}
+
+.noyona-account-addresses-empty {
+	margin: 16px 0 6px;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.78);
+	font-weight: 400;
+	color: #747474;
+}
+
+.noyona-account-payments-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.noyona-account-payment-card {
+	padding: 22px 28px 24px;
+}
+
+.noyona-account-payment-card__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 18px;
+}
+
+.noyona-account-payment-card__new-btn {
+	max-width: 230px;
+	min-width: 230px;
+}
+
+.noyona-account-payment-form {
+	margin-top: 12px;
+	border-top: 1px solid #ece8ea;
+	border-bottom: 1px solid #ece8ea;
+	overflow: hidden;
+}
+
+.noyona-account-payment-form__grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(168px, 194px);
+	align-items: stretch;
+}
+
+.noyona-account-payment-form__fields {
+	padding: 14px 18px 14px 0;
+	min-width: 0;
+}
+
+.noyona-account-payment-form__fields label {
+	display: block;
+	margin: 0 0 6px;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 600;
+	line-height: 1.3;
+	color: #1f1f1f;
+}
+
+.noyona-account-payment-form__fields input[type="text"] {
+	display: block;
+	width: 100%;
+	max-width: none;
+	height: 38px;
+	padding: 8px 12px;
+	margin: 0 0 10px;
+	border: 1px solid #ececec;
+	border-radius: 10px;
+	background: #f7f7f7;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.8);
+	font-weight: 400;
+	color: #222;
+	box-sizing: border-box;
+}
+
+.noyona-account-payment-form__row {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	column-gap: 12px;
+	row-gap: 0;
+}
+
+.noyona-account-payment-form__col {
+	min-width: 0;
+}
+
+.noyona-account-payment-form__actions {
+	padding: 14px 0 14px 24px;
+	border-left: 1px solid #ece8ea;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.noyona-account-payment-form__actions .noyona-account-btn {
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.noyona-account-payment-list {
+	padding-top: 4px;
+}
+
+.noyona-account-payment-item {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 14px;
+	padding: 13px 0;
+	border-bottom: 1px solid #f0ecee;
+}
+
+.noyona-account-payment-item__meta h4 {
+	margin: 0;
+	font-size: var(--wp--preset--font-size--body);
+	font-weight: 600;
+	line-height: 1.2;
+	color: #111;
+}
+
+.noyona-account-payment-item__meta p {
+	margin: 3px 0 0;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.78);
+	font-weight: 400;
+	line-height: 1.35;
+	color: #1f1f1f;
+}
+
+.noyona-account-payment-item__meta p > span + span {
+	margin-left: 12px;
+}
+
+.noyona-account-payment-item__actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.noyona-account-payment-item__actions a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border-radius: 999px;
+	border: 1px solid #f0ccd4;
+	background: #fff;
+	color: #dc8ea0;
+	text-decoration: none !important;
+	transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.noyona-account-payment-item__actions a:hover {
+	transform: translateY(-1px);
+	background: #fff5f7;
+	border-color: #e9b4bf;
+}
+
+.noyona-account-card-brand {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 20px;
+	padding: 0 8px;
+	border-radius: 999px;
+	background: #f2f4ff;
+	color: #4d5ea7;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.62);
+	font-weight: 600;
+	line-height: 1;
+}
+
+.noyona-account-profile-card__head {
+	padding-bottom: 14px;
+	border-bottom: 1px solid #efefef;
+}
+
+.noyona-account-profile-card__head h3 {
+	margin: 0;
+	font-family: var(--wp--preset--font-family--proxima-nova), system-ui, -apple-system, "Segoe UI", sans-serif;
+	font-size: var(--wp--preset--font-size--h-2);
+	font-weight: 700;
+	line-height: 1.1;
+	color: #111;
+}
+
+.noyona-account-profile-card__head p {
+	margin: 6px 0 0;
+	font-size: var(--wp--preset--font-size--body);
+	font-weight: 400;
+	color: #6e6e6e;
+}
+
+.noyona-account-profile-card__body {
+	padding-top: 20px;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 260px;
+	gap: 28px;
+	align-items: start;
+}
+
+.noyona-account-profile-fields {
+	padding-right: 22px;
+	border-right: 1px solid #efefef;
+}
+
+.noyona-account-field {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 12px;
+	width: 100%;
+}
+
+.noyona-account-field label {
+	margin: 0;
+	font-size: var(--wp--preset--font-size--body);
+	font-weight: 600;
+	color: #555;
+	flex: 0 0 120px;
+}
+
+.noyona-account-field input {
+	display: block !important;
+	width: 100% !important;
+	max-width: none !important;
+	min-width: 0 !important;
+	flex: 1 1 auto;
+	height: 42px;
+	padding: 10px 16px;
+	border-radius: 999px;
+	border: 1px solid #e3e3e3;
+	background: #f5f5f5;
+	color: #333;
+	font-size: var(--wp--preset--font-size--body);
+	box-sizing: border-box;
+}
+
+.noyona-account-page .noyona-account-field [data-lastpass-icon-root],
+.noyona-account-page .noyona-account-field [data-lastpass-root],
+.noyona-account-page .noyona-account-field .show-password-input {
+	display: none !important;
+}
+
+.noyona-account-profile-actions {
+	margin-top: 14px;
+	display: flex;
+	gap: 12px;
+	width: 100%;
+}
+
+.noyona-account-profile-actions > .noyona-account-btn {
+	flex: 1 1 0;
+}
+
+.noyona-account-profile-avatar {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	max-width: 260px;
+}
+
+.noyona-account-avatar-upload {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	line-height: 1;
+}
+
+.noyona-account-avatar-input {
+	display: none !important;
+}
+
+.noyona-account-avatar-upload .noyona-account-btn {
+	cursor: pointer;
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.noyona-account-profile-avatar img {
+	width: 156px;
+	height: 156px;
+	aspect-ratio: 1 / 1;
+	display: block;
+	object-fit: cover;
+	object-position: center;
+	border-radius: 50% !important;
+	clip-path: circle(50%);
+	border: 4px solid #f5d8df;
+	margin-bottom: 4px;
+}
+
+.noyona-account-profile-avatar p {
+	margin: 0;
+	width: 100%;
+	text-align: center;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.68);
+	font-weight: 400;
+	line-height: 1.35;
+	color: #888;
+}
+
+.noyona-account-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 9998;
+	padding: 24px;
+	display: none;
+	align-items: center;
+	justify-content: center;
+}
+
+.noyona-account-modal:target,
+.noyona-account-modal.is-open {
+	display: flex;
+}
+
+.noyona-account-modal-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(25, 18, 24, 0.28);
+	backdrop-filter: blur(8px);
+}
+
+.noyona-account-modal-dialog {
+	position: relative;
+	z-index: 1;
+	width: min(560px, 100%);
+	background: #fff;
+	border: 1px solid #f3dbe0;
+	border-top: 4px solid #efb4c0;
+	border-radius: 20px;
+	box-shadow: 0 18px 45px rgba(15, 18, 26, 0.2);
+	padding: 20px 22px 24px;
+}
+
+.noyona-account-modal-back {
+	position: absolute;
+	top: 20px;
+	left: 18px;
+	width: 26px;
+	height: 26px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #2a3038;
+	text-decoration: none;
+}
+
+.noyona-account-modal-title {
+	margin: 0 0 14px;
+	padding-left: 30px;
+	font-size: var(--wp--preset--font-size--h-3);
+	line-height: 1.2;
+	font-weight: 600;
+	color: #121212;
+}
+
+.noyona-account-modal-notice {
+	margin: 0 0 12px;
+	padding: 10px 12px;
+	border-radius: 12px;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.78);
+	font-weight: 400;
+	line-height: 1.35;
+}
+
+.noyona-account-modal-notice.is-success {
+	background: #ecfaf1;
+	color: #236744;
+	border: 1px solid #caebd8;
+}
+
+.noyona-account-modal-notice.is-error {
+	background: #fff1f1;
+	color: #a23232;
+	border: 1px solid #f0c9c9;
+}
+
+.noyona-account-modal-form {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 8px;
+}
+
+.noyona-account-modal-form label {
+	margin-top: 8px;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.78);
+	font-weight: 600;
+	color: #343a44;
+}
+
+.noyona-account-modal-form label span {
+	color: #ea5d75;
+}
+
+.noyona-account-modal-form input {
+	/* width: 100%;
+	max-width: 100%; */
+	height: 44px;
+	border-radius: 10px;
+	border: 1px solid #e9eef4;
+	background: #fafcfe;
+	padding: 0 12px;
+	box-sizing: border-box;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.8);
+	font-weight: 400;
+	color: #202938;
+}
+
+.noyona-account-modal-form input::placeholder {
+	color: #aab5c6;
+}
+
+.noyona-account-modal-form__row {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.noyona-account-modal-form__col {
+	min-width: 0;
+}
+
+.noyona-account-modal-password-wrap {
+	position: relative;
+}
+
+.noyona-account-modal-password-wrap input {
+	padding-right: 42px;
+}
+
+.noyona-account-modal-password-toggle {
+	position: absolute;
+	top: 50%;
+	right: 12px;
+	transform: translateY(-50%);
+	width: 22px;
+	height: 22px;
+	border: 0;
+	background: transparent;
+	color: #7a8597;
+	padding: 0;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 5;
+}
+
+.noyona-account-modal-password-toggle i {
+	pointer-events: none;
+}
+
+.noyona-account-modal-form small {
+	margin-top: -3px;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.68);
+	font-weight: 400;
+	color: #727d8b;
+}
+
+.noyona-account-modal-actions {
+	margin-top: 10px;
+	display: flex !important;
+	flex-wrap: nowrap;
+	gap: 12px;
+	width: 100%;
+}
+
+.noyona-account-modal-actions .noyona-account-btn,
+.noyona-account-modal-actions button.noyona-account-btn {
+	width: 100%;
+	flex: 1 1 0;
+	border-radius: 14px;
+	min-height: 42px;
+}
+
+.noyona-account-modal-actions p {
+	margin: 0 !important;
+	display: contents !important;
+}
+
+.noyona-account-modal-dialog br {
+	display: none !important;
+}
+
+.noyona-account-modal-dialog [data-lastpass-icon-root],
+.noyona-account-modal-dialog [data-lastpass-root] {
+	pointer-events: none !important;
+	opacity: 0 !important;
+	visibility: hidden !important;
+	width: 0 !important;
+	height: 0 !important;
+	overflow: hidden !important;
+}
+
+@media (max-width: 720px) {
+	.noyona-account-modal {
+		padding: 16px;
+	}
+
+	.noyona-account-modal-dialog {
+		padding: 18px 14px 16px;
+	}
+
+	.noyona-account-modal-title {
+		padding-left: 26px;
+	}
+
+	.noyona-account-modal-actions {
+		flex-direction: column;
+	}
+}
+
+@media (max-width: 920px) {
+	.noyona-account-page {
+		width: min(1120px, calc(100vw - 28px));
+	}
+
+	.noyona-account-hero {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.noyona-account-hero__actions {
+		flex-direction: row;
+		width: 100%;
+		align-items: center;
+	}
+
+	.noyona-account-profile-card__body {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.noyona-account-profile-fields {
+		padding-right: 0;
+		border-right: none;
+		border-bottom: 1px solid #efefef;
+		padding-bottom: 18px;
+	}
+
+	.noyona-account-address-form__grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.noyona-account-payment-form__grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.noyona-account-address-form__actions {
+		padding: 14px 0 14px;
+		border-left: none;
+		border-top: 1px solid #ece8ea;
+		flex-direction: row;
+		justify-content: flex-start;
+	}
+
+	.noyona-account-payment-form__actions {
+		padding: 14px 0 14px;
+		border-left: none;
+		border-top: 1px solid #ece8ea;
+		flex-direction: row;
+		justify-content: flex-start;
+	}
+
+	.noyona-account-address-form__actions .noyona-account-btn {
+		width: auto;
+		min-width: 120px;
+	}
+
+	.noyona-account-payment-form__actions .noyona-account-btn {
+		width: auto;
+		min-width: 120px;
+	}
+
+	.noyona-account-address-item {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.noyona-account-payment-card__head {
+		flex-direction: column;
+	}
+
+	.noyona-account-payment-card__new-btn {
+		width: 100%;
+		max-width: none;
+		min-width: 0;
+	}
+
+	.noyona-account-tabs {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 640px) {
+	.noyona-account-page {
+		width: min(1120px, calc(100vw - 18px));
+	}
+
+	.noyona-account-hero {
+		padding: 20px;
+	}
+
+	.noyona-account-hero__identity {
+		width: 100%;
+	}
+
+	.noyona-account-avatar {
+		width: 88px;
+		height: 88px;
+	}
+
+	.noyona-account-profile-card {
+		padding: 18px;
+	}
+
+	.noyona-account-addresses-card__head {
+		flex-direction: column;
+	}
+
+	.noyona-account-addresses-card__new-btn {
+		width: 100%;
+		max-width: none;
+		min-width: 0;
+	}
+
+	.noyona-account-field {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+	}
+
+	.noyona-account-field label {
+		flex: initial;
+	}
+
+	.noyona-account-profile-actions {
+		flex-direction: column;
+	}
+
+	.noyona-account-address-form__row {
+		grid-template-columns: minmax(0, 1fr);
+		column-gap: 0;
+		row-gap: 0;
+	}
+
+	.noyona-account-payment-form__row {
+		grid-template-columns: minmax(0, 1fr);
+		column-gap: 0;
+		row-gap: 0;
+	}
+
+	.noyona-account-address-form__actions {
+		flex-direction: column;
+	}
+
+	.noyona-account-payment-form__actions {
+		flex-direction: column;
+	}
+
+	.noyona-account-address-form__actions .noyona-account-btn {
+		width: 100%;
+	}
+
+	.noyona-account-payment-form__actions .noyona-account-btn {
+		width: 100%;
+	}
+
+	.noyona-account-payment-item {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.noyona-account-modal-form__row {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.noyona-account-tabs {
+		grid-template-columns: minmax(0, 1fr);
+	}
 }
 
