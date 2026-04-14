@@ -494,6 +494,86 @@ function noyona_get_account_page_url() {
     return (string) $account_url;
 }
 
+/**
+ * Frontend lost-password URL (Woo endpoint when available).
+ *
+ * @return string
+ */
+function noyona_get_lost_password_page_url() {
+    $lost_url = function_exists( 'wc_lostpassword_url' )
+        ? wc_lostpassword_url()
+        : home_url( '/my-account/lost-password/' );
+
+    if ( '' === trim( (string) $lost_url ) ) {
+        $lost_url = home_url( '/my-account/lost-password/' );
+    }
+
+    return (string) $lost_url;
+}
+
+/**
+ * Redirect public requests away from wp-login.php to branded auth pages.
+ * Keep POST requests untouched so existing login submissions still work.
+ */
+add_action( 'login_init', 'noyona_redirect_wp_login_to_frontend_auth', 1 );
+function noyona_redirect_wp_login_to_frontend_auth() {
+    if ( is_admin() || wp_doing_ajax() ) {
+        return;
+    }
+
+    $method = strtoupper( (string) ( $_SERVER['REQUEST_METHOD'] ?? 'GET' ) );
+    if ( 'GET' !== $method ) {
+        return;
+    }
+
+    // Keep iframe/modal login flows intact.
+    if ( isset( $_GET['interim-login'] ) ) {
+        return;
+    }
+
+    $redirect_to = isset( $_REQUEST['redirect_to'] ) ? (string) wp_unslash( $_REQUEST['redirect_to'] ) : '';
+
+    $action = isset( $_REQUEST['action'] ) ? sanitize_key( (string) wp_unslash( $_REQUEST['action'] ) ) : 'login';
+
+    // Preserve core logout and post-password behavior.
+    if ( in_array( $action, array( 'logout', 'postpass' ), true ) ) {
+        return;
+    }
+
+    $target_url = noyona_get_login_page_url();
+
+    if ( in_array( $action, array( 'lostpassword', 'retrievepassword', 'rp', 'resetpass' ), true ) ) {
+        $target_url = noyona_get_lost_password_page_url();
+
+        $forward_keys = array( 'checkemail', 'key', 'login', 'id', 'error' );
+        foreach ( $forward_keys as $query_key ) {
+            if ( ! isset( $_GET[ $query_key ] ) ) {
+                continue;
+            }
+
+            $raw_value = wp_unslash( $_GET[ $query_key ] );
+            if ( ! is_scalar( $raw_value ) ) {
+                continue;
+            }
+
+            $target_url = add_query_arg(
+                $query_key,
+                sanitize_text_field( (string) $raw_value ),
+                $target_url
+            );
+        }
+    } elseif ( '' !== $redirect_to ) {
+        $target_url = add_query_arg(
+            'redirect_to',
+            $redirect_to,
+            $target_url
+        );
+    }
+
+    wp_safe_redirect( $target_url, 302 );
+    exit;
+}
+
 add_filter( 'woocommerce_login_redirect', 'noyona_force_woo_login_redirect_to_account', 20, 2 );
 function noyona_force_woo_login_redirect_to_account( $redirect, $user ) {
     if ( is_wp_error( $user ) ) {
