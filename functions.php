@@ -4654,13 +4654,36 @@ function noyona_handle_contact_form() {
  * SEO / CRAWL CONTROL
  * ================================================= */
 function noyona_is_site_under_development() {
-    return (bool) apply_filters( 'noyona_site_under_development', true );
+    $is_dev = false;
+
+    if ( function_exists( 'wp_get_environment_type' ) ) {
+        $env_type = (string) wp_get_environment_type();
+        if ( in_array( $env_type, array( 'local', 'development', 'staging' ), true ) ) {
+            $is_dev = true;
+        }
+    }
+
+    // Respect core "Discourage search engines" setting.
+    if ( '0' === (string) get_option( 'blog_public', '1' ) ) {
+        $is_dev = true;
+    }
+
+    return (bool) apply_filters( 'noyona_site_under_development', $is_dev );
 }
 
 /**
  * Disable WordPress core XML sitemaps.
  */
-add_filter( 'wp_sitemaps_enabled', '__return_false' );
+add_filter(
+    'wp_sitemaps_enabled',
+    function( $enabled ) {
+        if ( noyona_is_site_under_development() ) {
+            return false;
+        }
+
+        return $enabled;
+    }
+);
 
 /**
  * Force a restrictive robots.txt from WordPress.
@@ -4669,10 +4692,8 @@ add_filter( 'wp_sitemaps_enabled', '__return_false' );
 add_filter( 'robots_txt', 'noyona_custom_robots_txt', 999, 2 );
 function noyona_custom_robots_txt( $output, $public ) {
     if ( ! noyona_is_site_under_development() ) {
-        return implode( "\n", array(
-            'User-agent: *',
-            'Allow: /',
-        ) );
+        // In production, do not override plugin/core robots.txt output.
+        return $output;
     }
 
     return implode( "\n", array(
@@ -4696,12 +4717,12 @@ function noyona_custom_robots_txt( $output, $public ) {
  */
 add_action( 'wp_head', 'noyona_output_robots_meta', 1 );
 function noyona_output_robots_meta() {
-    if ( noyona_is_site_under_development() ) {
-        echo '<meta name="robots" content="index, follow, archive, snippet, imageindex, videoindex">' . "\n";
+    // In production, allow SEO plugins/core to manage robots directives.
+    if ( ! noyona_is_site_under_development() ) {
         return;
     }
 
-    echo '<meta name="robots" content="index, follow">' . "\n";
+    echo '<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">' . "\n";
 }
 
 /**
@@ -4709,12 +4730,12 @@ function noyona_output_robots_meta() {
  */
 add_action( 'send_headers', 'noyona_send_robots_headers', 1 );
 function noyona_send_robots_headers() {
-    if ( noyona_is_site_under_development() ) {
-        header( 'X-Robots-Tag: index, follow, archive, snippet, imageindex, videoindex', true );
+    // In production, avoid overriding robots headers set by SEO plugins/server.
+    if ( ! noyona_is_site_under_development() ) {
         return;
     }
 
-    header( 'X-Robots-Tag: index, follow, archive, snippet', true );
+    header( 'X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex', true );
 }
 
 
