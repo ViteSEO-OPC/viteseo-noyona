@@ -29,29 +29,59 @@ if ( ! function_exists( 'noyona_checkout_is_local_env' ) ) {
 
 /* ─── Assets ──────────────────────────────────────── */
 
-add_action( 'wp_enqueue_scripts', 'noyona_checkout_enqueue_assets', 20 );
-function noyona_checkout_enqueue_assets() {
-	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() ) {
-		return;
+/**
+ * Detect checkout UI contexts for both Woo checkout page and custom review step.
+ *
+ * @return bool
+ */
+function noyona_is_checkout_ui_context() {
+	if ( function_exists( 'is_checkout' ) && is_checkout() ) {
+		return true;
 	}
 
-	$css_path = get_stylesheet_directory() . '/assets/css/noyona-checkout.css';
+	if ( is_page( array( 'checkout', 'reviews' ) ) ) {
+		return true;
+	}
+
+	$request_path = (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH );
+	$request_lc   = trim( strtolower( untrailingslashit( $request_path ) ), '/' );
+	if ( '' === $request_lc ) {
+		return false;
+	}
+
+	$checkout_path = (string) wp_parse_url(
+		function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' ),
+		PHP_URL_PATH
+	);
+	$checkout_lc = trim( strtolower( untrailingslashit( $checkout_path ) ), '/' );
+	if ( '' !== $checkout_lc && ( $request_lc === $checkout_lc || 0 === strpos( $request_lc, $checkout_lc . '/' ) ) ) {
+		return true;
+	}
+
+	$reviews_path = (string) wp_parse_url( home_url( '/reviews/' ), PHP_URL_PATH );
+	$reviews_lc   = trim( strtolower( untrailingslashit( $reviews_path ) ), '/' );
+	if ( '' !== $reviews_lc && ( $request_lc === $reviews_lc || 0 === strpos( $request_lc, $reviews_lc . '/' ) ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Enqueue checkout UI styles.
+ *
+ * @return void
+ */
+function noyona_enqueue_checkout_ui_styles() {
+	$checkout_css_path = get_stylesheet_directory() . '/assets/css/noyona-checkout.css';
+	$cart_css_path     = get_stylesheet_directory() . '/assets/css/noyona-cart.css';
 
 	wp_enqueue_style(
 		'noyona-checkout',
 		get_stylesheet_directory_uri() . '/assets/css/noyona-checkout.css',
 		array( 'woocom-ct-style', 'woocom-ct-header' ),
-		file_exists( $css_path ) ? (string) filemtime( $css_path ) : wp_get_theme()->get( 'Version' )
+		file_exists( $checkout_css_path ) ? (string) filemtime( $checkout_css_path ) : wp_get_theme()->get( 'Version' )
 	);
-}
-
-add_action( 'wp_enqueue_scripts', 'noyona_checkout_enqueue_cart_css', 21 );
-function noyona_checkout_enqueue_cart_css() {
-	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() ) {
-		return;
-	}
-
-	$cart_css_path = get_stylesheet_directory() . '/assets/css/noyona-cart.css';
 
 	wp_enqueue_style(
 		'noyona-cart',
@@ -59,6 +89,29 @@ function noyona_checkout_enqueue_cart_css() {
 		array( 'woocom-ct-style', 'woocom-ct-header' ),
 		file_exists( $cart_css_path ) ? (string) filemtime( $cart_css_path ) : wp_get_theme()->get( 'Version' )
 	);
+}
+
+add_action( 'wp_enqueue_scripts', 'noyona_checkout_enqueue_styles', 20 );
+function noyona_checkout_enqueue_styles() {
+	if ( ! noyona_is_checkout_ui_context() ) {
+		return;
+	}
+
+	noyona_enqueue_checkout_ui_styles();
+}
+
+// Safety net for environments/plugins that alter checkout detection or dequeue styles later.
+add_action( 'wp_enqueue_scripts', 'noyona_checkout_force_styles_late', 999 );
+function noyona_checkout_force_styles_late() {
+	if ( ! noyona_is_checkout_ui_context() ) {
+		return;
+	}
+
+	if ( wp_style_is( 'noyona-checkout', 'enqueued' ) && wp_style_is( 'noyona-cart', 'enqueued' ) ) {
+		return;
+	}
+
+	noyona_enqueue_checkout_ui_styles();
 }
 
 /* ─── Field customisations ────────────────────────── */
