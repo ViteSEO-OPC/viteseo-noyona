@@ -27,6 +27,45 @@ if ( ! function_exists( 'noyona_checkout_is_local_env' ) ) {
 	}
 }
 
+/**
+ * Guard against external/plugin redirects to generic /thank-you page.
+ *
+ * If we receive /thank-you/?order_id=...&key=..., route back to Woo's native
+ * order-received endpoint so our checkout thankyou override drives the UI.
+ */
+add_action( 'template_redirect', 'noyona_route_generic_thankyou_to_wc_order_received', 4 );
+function noyona_route_generic_thankyou_to_wc_order_received() {
+	if ( is_admin() || wp_doing_ajax() ) {
+		return;
+	}
+
+	if ( ! is_page( array( 'thank-you', 'thankyou' ) ) ) {
+		return;
+	}
+
+	$order_id  = isset( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+	if ( $order_id <= 0 || '' === $order_key ) {
+		return;
+	}
+
+	$order = wc_get_order( $order_id );
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return;
+	}
+
+	if ( $order->get_order_key() !== $order_key ) {
+		return;
+	}
+
+	$target = $order->get_checkout_order_received_url();
+	if ( $target ) {
+		wp_safe_redirect( $target );
+		exit;
+	}
+}
+
 /* ─── Assets ──────────────────────────────────────── */
 
 /**
