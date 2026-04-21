@@ -388,9 +388,17 @@ function noyona_checkout_inline_js() {
 		if (!isAwaitingPayment && isOrderReceivedPath) {
 			var paymentOverviewNode = document.querySelector('.woocommerce-order-overview__payment-method');
 			var paymentOverviewText = paymentOverviewNode ? String(paymentOverviewNode.textContent || '').toLowerCase() : '';
-			var looksLikePayMongoQr = paymentOverviewText.indexOf('paymongo') !== -1 && paymentOverviewText.indexOf('qr') !== -1;
 			var bodyText = String((document.body && document.body.textContent) || '').toLowerCase();
-			var hasQrWaitingCopy = bodyText.indexOf('scan qr code to pay') !== -1 || bodyText.indexOf('waiting for payment') !== -1;
+			var looksLikePayMongoQr = (
+				(paymentOverviewText.indexOf('paymongo') !== -1 && paymentOverviewText.indexOf('qr') !== -1) ||
+				(bodyText.indexOf('paymongo') !== -1 && bodyText.indexOf('qr') !== -1)
+			);
+			var hasQrWaitingCopy = (
+				bodyText.indexOf('scan qr code to pay') !== -1 ||
+				bodyText.indexOf('waiting for payment') !== -1 ||
+				bodyText.indexOf('open your banking app') !== -1 ||
+				bodyText.indexOf('scan the qr code below') !== -1
+			);
 			if (looksLikePayMongoQr && hasQrWaitingCopy) {
 				isAwaitingPayment = true;
 			}
