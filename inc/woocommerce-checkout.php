@@ -257,6 +257,20 @@ function noyona_place_order_button_text( $text ) {
 }
 
 /**
+ * Remove WooCommerce privacy paragraph copy on checkout UI.
+ *
+ * The custom checkout keeps only our compact terms consent row.
+ */
+add_filter( 'woocommerce_checkout_privacy_policy_text', 'noyona_hide_checkout_privacy_policy_text', 20 );
+function noyona_hide_checkout_privacy_policy_text( $text ) {
+	if ( function_exists( 'noyona_is_checkout_ui_context' ) && noyona_is_checkout_ui_context() ) {
+		return '';
+	}
+
+	return $text;
+}
+
+/**
  * Always ship to a separate address (we show shipping fields directly).
  */
 add_filter( 'woocommerce_ship_to_different_address_checked', '__return_true' );

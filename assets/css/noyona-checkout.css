@@ -617,18 +617,21 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
    ═══════════════════════════════════════ */
 .noyona-checkout-form .wc_payment_methods {
   list-style: none;
-  margin: 0;
+  margin: 0 0 0.25rem;
   padding: 0;
+  display: grid;
+  gap: 10px;
 }
 
 .noyona-checkout-form .wc_payment_method {
-  margin-bottom: 10px;
-  border: 1px solid #e8e8e8;
-  border-radius: 12px;
+  margin-bottom: 0;
+  border: 1px solid #eceff3;
+  border-radius: 14px;
   overflow: hidden;
   background: #fff;
   position: relative;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .noyona-checkout-form .wc_payment_method:last-child {
@@ -638,7 +641,8 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 .noyona-checkout-form .wc_payment_method.payment_method_selected,
 .noyona-checkout-form .wc_payment_method:has(input:checked) {
   border-color: var(--noyona-cart-pink, #e199a4);
-  box-shadow: 0 0 0 1px var(--noyona-cart-pink, #e199a4);
+  box-shadow: 0 0 0 2px rgba(225, 153, 164, 0.18), 0 6px 18px rgba(225, 153, 164, 0.12);
+  transform: translateY(-1px);
 }
 
 .noyona-checkout-form .wc_payment_method > input.input-radio {
@@ -651,11 +655,11 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   display: flex !important;
   align-items: center;
   gap: 10px;
-  padding: 14px 16px 14px 46px;
+  padding: 15px 16px 15px 46px;
   margin: 0 !important;
   cursor: pointer;
-  font-weight: 600 !important;
-  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
   color: #1a1a1a !important;
   position: relative;
   line-height: 1.35;
@@ -713,19 +717,28 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   width: auto;
   object-fit: contain;
   flex-shrink: 0;
+  margin-left: 2px;
 }
 
 .noyona-checkout-form .payment_box {
-  padding: 16px 18px;
-  background: var(--noyona-cart-pink-soft, #fef0f2);
-  border-top: 1px solid #f0e0e3;
-  font-size: 0.875rem;
-  color: #666;
-  line-height: 1.55;
+  display: none !important;
 }
 
 .noyona-checkout-form .payment_box p {
   margin: 0;
+}
+
+/* Hide legal helper paragraph copy for cleaner payment card. */
+.noyona-checkout-form .woocommerce-privacy-policy-text,
+.noyona-checkout-form .woocommerce-privacy-policy-link + br {
+  display: none !important;
+}
+
+/* Keep terms row but simplify visual noise. */
+.noyona-checkout-form .woocommerce-terms-and-conditions-wrapper {
+  background: #fff;
+  border-color: #eceff3;
+  box-shadow: 0 1px 6px rgba(16, 24, 40, 0.04);
 }
 
 /* No-payment-methods empty state */
