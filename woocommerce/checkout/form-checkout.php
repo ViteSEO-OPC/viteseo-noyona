@@ -83,11 +83,74 @@ $is_review_step = ( '' !== $reviews_path && $request_path === $reviews_path );
 						ob_start();
 						do_action( 'woocommerce_checkout_shipping' );
 						$shipping_markup = (string) ob_get_clean();
+						$has_shipping_inputs = (bool) preg_match( '/name=(["\'])shipping_[^"\']+\1/i', $shipping_markup );
 
-						if ( '' !== trim( wp_strip_all_tags( $shipping_markup ) ) ) {
+						if ( $has_shipping_inputs ) {
 							echo $shipping_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						} else {
 							$shipping_fields = (array) $checkout->get_checkout_fields( 'shipping' );
+
+							// Server fallback: if Woo suppresses shipping fields, render a minimal address set.
+							if ( empty( $shipping_fields ) ) {
+								$default_country = (string) $checkout->get_value( 'shipping_country' );
+								if ( '' === $default_country ) {
+									$default_country = (string) $checkout->get_value( 'billing_country' );
+								}
+								if ( '' === $default_country && function_exists( 'WC' ) && WC()->countries ) {
+									$default_country = (string) WC()->countries->get_base_country();
+								}
+
+								$states = array();
+								if ( function_exists( 'WC' ) && WC()->countries && '' !== $default_country ) {
+									$states = (array) WC()->countries->get_states( $default_country );
+								}
+
+								$shipping_fields = array(
+									'shipping_address_1' => array(
+										'type'         => 'text',
+										'label'        => __( 'Address', 'noyona' ),
+										'required'     => true,
+										'class'        => array( 'form-row-wide' ),
+										'priority'     => 10,
+										'autocomplete' => 'address-line1',
+									),
+									'shipping_city' => array(
+										'type'         => 'text',
+										'label'        => __( 'City', 'noyona' ),
+										'required'     => true,
+										'class'        => array( 'form-row-first' ),
+										'priority'     => 20,
+										'autocomplete' => 'address-level2',
+									),
+									'shipping_state' => array(
+										'type'         => ! empty( $states ) ? 'select' : 'text',
+										'label'        => __( 'State / Province', 'noyona' ),
+										'required'     => true,
+										'class'        => array( 'form-row-last' ),
+										'priority'     => 30,
+										'options'      => ! empty( $states ) ? array( '' => __( 'Select an option&hellip;', 'woocommerce' ) ) + $states : array(),
+										'autocomplete' => 'address-level1',
+									),
+									'shipping_postcode' => array(
+										'type'         => 'text',
+										'label'        => __( 'ZIP Code', 'noyona' ),
+										'required'     => true,
+										'class'        => array( 'form-row-wide' ),
+										'priority'     => 40,
+										'autocomplete' => 'postal-code',
+									),
+								);
+							}
+
+							uasort(
+								$shipping_fields,
+								static function ( $a, $b ) {
+									$priority_a = isset( $a['priority'] ) ? (int) $a['priority'] : 0;
+									$priority_b = isset( $b['priority'] ) ? (int) $b['priority'] : 0;
+									return $priority_a <=> $priority_b;
+								}
+							);
+
 							foreach ( $shipping_fields as $field_key => $field_args ) {
 								woocommerce_form_field( $field_key, $field_args, $checkout->get_value( $field_key ) );
 							}
