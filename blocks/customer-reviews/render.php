@@ -614,6 +614,9 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
         $product_id           = get_the_ID();
         $redirect_after_login = get_permalink( $product_id ) . '#reviews';
         $login_action_url     = wp_login_url();
+        $google_login_url     = function_exists( 'noyona_get_google_login_url' )
+            ? noyona_get_google_login_url( $redirect_after_login )
+            : wp_login_url( $redirect_after_login );
         $register_url         = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : wp_registration_url();
         ?>
 
@@ -645,7 +648,7 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                         <span></span><em><?php esc_html_e( 'or', 'noyona-childtheme' ); ?></em><span></span>
                     </div>
 
-                    <a class="customer-reviews-grid__login-google" href="<?php echo esc_url( $login_action_url ); ?>">
+                    <a class="customer-reviews-grid__login-google" href="<?php echo esc_url( $google_login_url ); ?>">
                         <i class="fa-brands fa-google" aria-hidden="true"></i>
                         <span><?php esc_html_e( 'Login with Google', 'noyona-childtheme' ); ?></span>
                     </a>

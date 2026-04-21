@@ -512,6 +512,33 @@ function noyona_get_lost_password_page_url() {
 }
 
 /**
+ * Resolve Google social login URL (Nextend) with fallback.
+ *
+ * @param string $redirect_to Optional post-login redirect URL.
+ * @return string
+ */
+function noyona_get_google_login_url( $redirect_to = '' ) {
+    $redirect_to = is_string( $redirect_to ) ? trim( $redirect_to ) : '';
+    $fallback    = wp_login_url( $redirect_to );
+
+    if ( ! class_exists( 'NextendSocialLogin' ) || ! method_exists( 'NextendSocialLogin', 'getProviderByProviderID' ) ) {
+        return $fallback;
+    }
+
+    $provider = NextendSocialLogin::getProviderByProviderID( 'google' );
+    if ( ! $provider || ! method_exists( $provider, 'getLoginUrl' ) ) {
+        return $fallback;
+    }
+
+    $google_url = (string) $provider->getLoginUrl();
+    if ( '' !== $redirect_to ) {
+        $google_url = add_query_arg( 'redirect', $redirect_to, $google_url );
+    }
+
+    return $google_url;
+}
+
+/**
  * Redirect public requests away from wp-login.php to branded auth pages.
  * Keep POST requests untouched so existing login submissions still work.
  */
@@ -527,7 +554,12 @@ function noyona_redirect_wp_login_to_frontend_auth() {
     }
 
     // Keep iframe/modal login flows intact.
-    if ( isset( $_GET['interim-login'] ) ) {
+    if ( isset( $_GET['interim-login'] ) || isset( $_GET['interim_login'] ) ) {
+        return;
+    }
+
+    // Allow social login providers (e.g. Nextend) to complete callback on wp-login.php.
+    if ( isset( $_REQUEST['loginSocial'] ) ) {
         return;
     }
 
@@ -721,11 +753,11 @@ function woocom_ct_add_register_link_to_login() {
     $account_url = function_exists( 'wc_get_page_permalink' )
         ? wc_get_page_permalink( 'myaccount' )
         : home_url( '/my-account/' );
-    $login_url   = wp_login_url( $account_url );
+    $google_login_url = noyona_get_google_login_url( $account_url );
     $register_url = home_url( '/register/' );
 
     echo '<div class="noyona-login-form-footer">';
-    echo '<a class="noyona-login-google-btn" href="' . esc_url( $login_url ) . '"><i class="fa-brands fa-google" aria-hidden="true"></i><span>' . esc_html__( 'Sign In with Google', 'noyona-childtheme' ) . '</span></a>';
+    echo '<a class="noyona-login-google-btn" href="' . esc_url( $google_login_url ) . '"><i class="fa-brands fa-google" aria-hidden="true"></i><span>' . esc_html__( 'Sign In with Google', 'noyona-childtheme' ) . '</span></a>';
     echo '<p class="noyona-login-register-link">' . esc_html__( "Don't have an account?", 'noyona-childtheme' ) . ' <a href="' . esc_url( $register_url ) . '">' . esc_html__( 'Create an Account', 'noyona-childtheme' ) . '</a></p>';
     echo '</div>';
 }
@@ -1747,7 +1779,7 @@ function woocom_ct_register_form_shortcode() {
     $account_url = function_exists( 'wc_get_page_permalink' )
         ? wc_get_page_permalink( 'myaccount' )
         : home_url( '/my-account/' );
-    $login_url = wp_login_url( $account_url );
+    $google_login_url = noyona_get_google_login_url( $account_url );
     $logo_url = trailingslashit( get_stylesheet_directory_uri() ) . 'assets/images/noyona-mobile-logo.webp';
 
     if ( is_user_logged_in() ) {
@@ -1848,7 +1880,7 @@ function woocom_ct_register_form_shortcode() {
             </form>
 
             <div class="noyona-register-google-wrap">
-                <a class="noyona-register-google" href="<?php echo esc_url( $login_url ); ?>">
+                <a class="noyona-register-google" href="<?php echo esc_url( $google_login_url ); ?>">
                     <i class="fa-brands fa-google" aria-hidden="true"></i>
                     <span><?php esc_html_e( 'Sign Up with Google', 'noyona-childtheme' ); ?></span>
                 </a>
@@ -4978,6 +5010,7 @@ function noyona_render_global_checkout_login_modal() {
     $login_action_url = wp_login_url();
     $register_url     = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : wp_registration_url();
     $redirect_to      = function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' );
+    $google_login_url = noyona_get_google_login_url( $redirect_to );
     ?>
     <div
         id="noyona-global-checkout-login-modal"
@@ -5012,7 +5045,7 @@ function noyona_render_global_checkout_login_modal() {
                 <span></span><em><?php esc_html_e( 'or', 'noyona-childtheme' ); ?></em><span></span>
             </div>
 
-            <a class="noyona-mini-cart-login-google" data-mini-cart-login-action href="<?php echo esc_url( $login_action_url ); ?>">
+            <a class="noyona-mini-cart-login-google" data-mini-cart-login-action href="<?php echo esc_url( $google_login_url ); ?>">
                 <i class="fa-brands fa-google" aria-hidden="true"></i>
                 <span><?php esc_html_e( 'Login with Google', 'noyona-childtheme' ); ?></span>
             </a>
