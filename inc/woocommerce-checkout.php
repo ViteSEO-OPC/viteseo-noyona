@@ -226,8 +226,11 @@ function noyona_checkout_inline_js() {
 	?>
 	<script>
 	(function() {
-		var body = document.querySelector('body.woocommerce-checkout');
+		var body = document.body;
 		if (!body) return;
+		var form = document.querySelector('.noyona-checkout-form');
+		var isOrderReceivedPath = window.location.pathname.indexOf('/order-received/') !== -1;
+		if (!form && !isOrderReceivedPath) return;
 
 		/* 1. Scroll to validation errors */
 		var observer = new MutationObserver(function() {
@@ -240,8 +243,7 @@ function noyona_checkout_inline_js() {
 				}
 			}
 		});
-		var form = document.querySelector('.noyona-checkout-form');
-		if (form) {
+		if (form && form.parentElement) {
 			observer.observe(form.parentElement, { childList: true, subtree: true });
 		}
 
