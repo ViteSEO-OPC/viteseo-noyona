@@ -100,6 +100,33 @@ function noyona_checkout_enqueue_styles() {
 	noyona_enqueue_checkout_ui_styles();
 }
 
+/**
+ * Ensure WooCommerce checkout runtime scripts are available on custom review step.
+ *
+ * The /reviews/ URL is outside Woo's default is_checkout() detection, so we
+ * proactively enqueue checkout scripts there to keep place-order flow working.
+ *
+ * @return void
+ */
+add_action( 'wp_enqueue_scripts', 'noyona_checkout_enqueue_runtime_scripts', 25 );
+function noyona_checkout_enqueue_runtime_scripts() {
+	if ( ! noyona_is_checkout_ui_context() ) {
+		return;
+	}
+
+	$handles = array(
+		'wc-country-select',
+		'wc-address-i18n',
+		'wc-checkout',
+	);
+
+	foreach ( $handles as $handle ) {
+		if ( wp_script_is( $handle, 'registered' ) ) {
+			wp_enqueue_script( $handle );
+		}
+	}
+}
+
 // Safety net for environments/plugins that alter checkout detection or dequeue styles later.
 add_action( 'wp_enqueue_scripts', 'noyona_checkout_force_styles_late', 999 );
 function noyona_checkout_force_styles_late() {

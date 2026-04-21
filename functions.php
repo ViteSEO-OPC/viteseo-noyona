@@ -259,7 +259,13 @@ function noyona_trim_noncommerce_assets() {
         return;
     }
 
-    if ( is_cart() || is_checkout() || is_account_page() || is_woocommerce() ) {
+    if (
+        is_cart()
+        || is_checkout()
+        || is_account_page()
+        || is_woocommerce()
+        || ( function_exists( 'noyona_is_checkout_ui_context' ) && noyona_is_checkout_ui_context() )
+    ) {
         return;
     }
 
