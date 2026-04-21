@@ -350,6 +350,38 @@ function noyona_checkout_inline_js() {
 		} catch (e) {
 			reviewPath = '/reviews';
 		}
+
+		function ensureCheckoutStepper() {
+			var existing = document.querySelector('.noyona-checkout-steps');
+			if (existing) return existing;
+
+			var nav = document.createElement('nav');
+			nav.className = 'noyona-checkout-steps';
+			nav.setAttribute('aria-label', 'Checkout progress');
+			nav.innerHTML =
+				'<ol>' +
+					'<li><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-bag-shopping"></i></span> Cart</li>' +
+					'<li><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-truck"></i></span> Details</li>' +
+					'<li><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-box"></i></span> Reviews</li>' +
+					'<li><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-qrcode"></i></span> Payment</li>' +
+					'<li><span class="noyona-checkout-steps__icon" aria-hidden="true"><i class="fa-solid fa-check"></i></span> Done</li>' +
+				'</ol>';
+
+			var shell = document.querySelector('.noyona-checkout-shell');
+			if (shell) {
+				shell.insertBefore(nav, shell.firstChild);
+				return nav;
+			}
+
+			var mainNode = document.querySelector('.noyona-checkout-main') || document.querySelector('main') || document.querySelector('.woocommerce-order');
+			if (mainNode && mainNode.parentElement) {
+				mainNode.parentElement.insertBefore(nav, mainNode);
+				return nav;
+			}
+
+			return null;
+		}
+
 		var isReviewStep = currentPath === reviewPath;
 		var isAwaitingPayment = !!document.querySelector('[data-noyona-awaiting-payment="1"]');
 
@@ -695,6 +727,7 @@ function noyona_checkout_inline_js() {
 			body.classList.remove('noyona-done-step');
 			body.classList.remove('noyona-review-step');
 			body.classList.remove('noyona-details-step');
+			ensureCheckoutStepper();
 			ensurePendingQrFallbackShell();
 			window.setTimeout(function() {
 				window.location.reload();
@@ -707,18 +740,27 @@ function noyona_checkout_inline_js() {
 				ensureStepLink(payStepItems[2], reviewUrl);
 				payStepItems.forEach(function (item) {
 					item.classList.remove('is-active');
+					item.classList.remove('is-complete');
+					item.classList.remove('is-pending');
 				});
-				payStepItems[0].classList.add('is-complete');
-				payStepItems[1].classList.add('is-complete');
-				payStepItems[2].classList.add('is-complete');
-				payStepItems[3].classList.remove('is-complete');
-				payStepItems[3].classList.add('is-pending');
+				if (payStepItems.length >= 5) {
+					payStepItems[0].classList.add('is-complete');
+					payStepItems[1].classList.add('is-complete');
+					payStepItems[2].classList.add('is-complete');
+					payStepItems[3].classList.add('is-active');
+				} else {
+					payStepItems[0].classList.add('is-complete');
+					payStepItems[1].classList.add('is-complete');
+					payStepItems[2].classList.add('is-complete');
+					payStepItems[3].classList.add('is-active');
+				}
 			}
 		} else if (isDoneStep) {
 			body.classList.add('noyona-done-step');
 			body.classList.remove('noyona-pay-step');
 			body.classList.remove('noyona-review-step');
 			body.classList.remove('noyona-details-step');
+			ensureCheckoutStepper();
 
 			var doneStepItems = document.querySelectorAll('.noyona-checkout-steps li');
 			if (doneStepItems.length >= 4) {
@@ -729,17 +771,25 @@ function noyona_checkout_inline_js() {
 					item.classList.remove('is-active');
 					item.classList.remove('is-pending');
 				});
-				doneStepItems[0].classList.add('is-complete');
-				doneStepItems[1].classList.add('is-complete');
-				doneStepItems[2].classList.add('is-complete');
-				doneStepItems[3].classList.remove('is-pending');
-				doneStepItems[3].classList.add('is-active');
+				if (doneStepItems.length >= 5) {
+					doneStepItems[0].classList.add('is-complete');
+					doneStepItems[1].classList.add('is-complete');
+					doneStepItems[2].classList.add('is-complete');
+					doneStepItems[3].classList.add('is-complete');
+					doneStepItems[4].classList.add('is-active');
+				} else {
+					doneStepItems[0].classList.add('is-complete');
+					doneStepItems[1].classList.add('is-complete');
+					doneStepItems[2].classList.add('is-complete');
+					doneStepItems[3].classList.add('is-active');
+				}
 			}
 		} else if (isReviewStep) {
 			body.classList.add('noyona-review-step');
 			body.classList.remove('noyona-pay-step');
 			body.classList.remove('noyona-details-step');
 			body.classList.remove('noyona-done-step');
+			ensureCheckoutStepper();
 			restoreCheckoutDraft(form);
 			syncReviewSnapshot(form);
 			wireReviewTerms(form);
@@ -752,7 +802,12 @@ function noyona_checkout_inline_js() {
 			if (stepItems.length >= 3) {
 				ensureStepLink(stepItems[0], cartUrl);
 				ensureStepLink(stepItems[1], detailsUrl);
-				stepItems[1].classList.remove('is-active');
+				stepItems.forEach(function (item) {
+					item.classList.remove('is-active');
+					item.classList.remove('is-complete');
+					item.classList.remove('is-pending');
+				});
+				stepItems[0].classList.add('is-complete');
 				stepItems[1].classList.add('is-complete');
 				stepItems[2].classList.add('is-active');
 			}
@@ -761,6 +816,19 @@ function noyona_checkout_inline_js() {
 			body.classList.remove('noyona-pay-step');
 			body.classList.remove('noyona-review-step');
 			body.classList.remove('noyona-done-step');
+			ensureCheckoutStepper();
+
+			var detailsStepItems = document.querySelectorAll('.noyona-checkout-steps li');
+			if (detailsStepItems.length >= 2) {
+				ensureStepLink(detailsStepItems[0], cartUrl);
+				detailsStepItems.forEach(function (item) {
+					item.classList.remove('is-active');
+					item.classList.remove('is-complete');
+					item.classList.remove('is-pending');
+				});
+				detailsStepItems[0].classList.add('is-complete');
+				detailsStepItems[1].classList.add('is-active');
+			}
 		}
 
 		/* 3. Review Order button → go to reviews step, then place order */
