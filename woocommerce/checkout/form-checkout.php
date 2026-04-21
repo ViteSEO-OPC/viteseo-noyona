@@ -79,7 +79,20 @@ $is_review_step = ( '' !== $reviews_path && $request_path === $reviews_path );
 						</button>
 					</div>
 					<div class="noyona-checkout-fields-wrap">
-						<?php do_action( 'woocommerce_checkout_shipping' ); ?>
+						<?php
+						ob_start();
+						do_action( 'woocommerce_checkout_shipping' );
+						$shipping_markup = (string) ob_get_clean();
+
+						if ( '' !== trim( wp_strip_all_tags( $shipping_markup ) ) ) {
+							echo $shipping_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						} else {
+							$shipping_fields = (array) $checkout->get_checkout_fields( 'shipping' );
+							foreach ( $shipping_fields as $field_key => $field_args ) {
+								woocommerce_form_field( $field_key, $field_args, $checkout->get_value( $field_key ) );
+							}
+						}
+						?>
 					</div>
 					<div class="noyona-delivery-bar">
 						<i class="fa-solid fa-truck-fast" aria-hidden="true"></i>

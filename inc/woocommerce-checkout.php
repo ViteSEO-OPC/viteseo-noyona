@@ -204,6 +204,19 @@ function noyona_place_order_button_text( $text ) {
  */
 add_filter( 'woocommerce_ship_to_different_address_checked', '__return_true' );
 
+/**
+ * Ensure checkout uses shipping-address mode in our custom flow.
+ * This avoids server setting mismatches where shipping fields disappear.
+ */
+add_filter( 'woocommerce_ship_to_destination', 'noyona_force_ship_to_destination_mode', 20 );
+function noyona_force_ship_to_destination_mode( $destination ) {
+	if ( function_exists( 'noyona_is_checkout_ui_context' ) && noyona_is_checkout_ui_context() ) {
+		return 'shipping';
+	}
+
+	return $destination;
+}
+
 /* ─── Save custom checkout fields ─────────────────── */
 
 add_action( 'woocommerce_checkout_update_order_meta', 'noyona_save_custom_checkout_fields' );
