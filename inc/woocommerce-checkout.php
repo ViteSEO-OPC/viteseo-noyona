@@ -321,7 +321,12 @@ function noyona_checkout_inline_js() {
 			reviewPath = '/reviews';
 		}
 		var isReviewStep = currentPath === reviewPath;
-		var isDoneStep = body.classList.contains('woocommerce-order-received') || window.location.pathname.indexOf('/order-received/') !== -1 || (window.location.search.indexOf('noyona_preview_done=1') !== -1);
+		var isAwaitingPayment = !!document.querySelector('[data-noyona-awaiting-payment="1"]');
+		var isDoneStep = !isAwaitingPayment && (
+			body.classList.contains('woocommerce-order-received') ||
+			window.location.pathname.indexOf('/order-received/') !== -1 ||
+			(window.location.search.indexOf('noyona_preview_done=1') !== -1)
+		);
 
 		var draftStorageKey = 'noyonaCheckoutDraft';
 		if (window.location.pathname.indexOf('/order-received/') !== -1 && window.sessionStorage) {
@@ -443,6 +448,62 @@ function noyona_checkout_inline_js() {
 			return String(label.textContent || '').replace(/\s+/g, ' ').trim();
 		}
 
+		function isQrPayMongoSelected(checkoutForm) {
+			if (!checkoutForm) return false;
+			var selected = checkoutForm.querySelector('input[name="payment_method"]:checked');
+			if (!selected) return false;
+
+			var methodItem = selected.closest('.wc_payment_method');
+			var labelText = methodItem ? String(methodItem.textContent || '') : '';
+			var haystack = (String(selected.value || '') + ' ' + labelText).toLowerCase();
+
+			return haystack.indexOf('paymongo') !== -1 && haystack.indexOf('qr') !== -1;
+		}
+
+		var payConfirmModal = document.getElementById('noyona-pay-confirm-modal');
+		var payConfirmProceed = document.getElementById('noyona-pay-confirm-proceed');
+		var payConfirmCloseNodes = payConfirmModal ? payConfirmModal.querySelectorAll('[data-pay-confirm-close]') : [];
+		var payConfirmContinueCallback = null;
+
+		function closePayConfirmModal() {
+			if (!payConfirmModal) return;
+			payConfirmModal.hidden = true;
+			payConfirmContinueCallback = null;
+			body.classList.remove('noyona-pay-confirm-open');
+		}
+
+		function openPayConfirmModal(onContinue) {
+			if (!payConfirmModal) return false;
+			payConfirmContinueCallback = (typeof onContinue === 'function') ? onContinue : null;
+			payConfirmModal.hidden = false;
+			body.classList.add('noyona-pay-confirm-open');
+			return true;
+		}
+
+		if (payConfirmCloseNodes && payConfirmCloseNodes.length) {
+			payConfirmCloseNodes.forEach(function (node) {
+				node.addEventListener('click', function () {
+					closePayConfirmModal();
+				});
+			});
+		}
+
+		if (payConfirmProceed) {
+			payConfirmProceed.addEventListener('click', function () {
+				var callback = payConfirmContinueCallback;
+				closePayConfirmModal();
+				if (typeof callback === 'function') {
+					callback();
+				}
+			});
+		}
+
+		document.addEventListener('keydown', function (event) {
+			if (event.key === 'Escape' && payConfirmModal && !payConfirmModal.hidden) {
+				closePayConfirmModal();
+			}
+		});
+
 		function syncReviewSnapshot(checkoutForm) {
 			if (!isReviewStep || !checkoutForm) return;
 
@@ -534,8 +595,29 @@ function noyona_checkout_inline_js() {
 			checkoutForm.submit();
 		}
 
-		if (isDoneStep) {
+		if (isAwaitingPayment) {
+			body.classList.add('noyona-pay-step');
+			body.classList.remove('noyona-done-step');
+			body.classList.remove('noyona-review-step');
+			body.classList.remove('noyona-details-step');
+
+			var payStepItems = document.querySelectorAll('.noyona-checkout-steps li');
+			if (payStepItems.length >= 4) {
+				ensureStepLink(payStepItems[0], cartUrl);
+				ensureStepLink(payStepItems[1], detailsUrl);
+				ensureStepLink(payStepItems[2], reviewUrl);
+				payStepItems.forEach(function (item) {
+					item.classList.remove('is-active');
+				});
+				payStepItems[0].classList.add('is-complete');
+				payStepItems[1].classList.add('is-complete');
+				payStepItems[2].classList.add('is-complete');
+				payStepItems[3].classList.remove('is-complete');
+				payStepItems[3].classList.add('is-pending');
+			}
+		} else if (isDoneStep) {
 			body.classList.add('noyona-done-step');
+			body.classList.remove('noyona-pay-step');
 			body.classList.remove('noyona-review-step');
 			body.classList.remove('noyona-details-step');
 
@@ -546,14 +628,17 @@ function noyona_checkout_inline_js() {
 				ensureStepLink(doneStepItems[2], reviewUrl);
 				doneStepItems.forEach(function (item) {
 					item.classList.remove('is-active');
+					item.classList.remove('is-pending');
 				});
 				doneStepItems[0].classList.add('is-complete');
 				doneStepItems[1].classList.add('is-complete');
 				doneStepItems[2].classList.add('is-complete');
+				doneStepItems[3].classList.remove('is-pending');
 				doneStepItems[3].classList.add('is-active');
 			}
 		} else if (isReviewStep) {
 			body.classList.add('noyona-review-step');
+			body.classList.remove('noyona-pay-step');
 			body.classList.remove('noyona-details-step');
 			body.classList.remove('noyona-done-step');
 			restoreCheckoutDraft(form);
@@ -574,6 +659,7 @@ function noyona_checkout_inline_js() {
 			}
 		} else {
 			body.classList.add('noyona-details-step');
+			body.classList.remove('noyona-pay-step');
 			body.classList.remove('noyona-review-step');
 			body.classList.remove('noyona-done-step');
 		}
@@ -582,6 +668,7 @@ function noyona_checkout_inline_js() {
 		var reviewBtn = document.getElementById('noyona-review-order');
 		var placeOrder = document.getElementById('place_order');
 		if (reviewBtn) {
+			var qrPaymentConfirmed = false;
 			if (isReviewStep) {
 				reviewBtn.innerHTML = '<i class="fa-solid fa-lock" aria-hidden="true"></i> PLACE ORDER';
 				reviewBtn.addEventListener('click', function() {
@@ -597,6 +684,16 @@ function noyona_checkout_inline_js() {
 							nativeTerms.dispatchEvent(new Event('change', { bubbles: true }));
 						}
 					}
+
+					if (isQrPayMongoSelected(form) && !qrPaymentConfirmed) {
+						if (openPayConfirmModal(function () {
+							qrPaymentConfirmed = true;
+							reviewBtn.click();
+						})) {
+							return;
+						}
+					}
+					qrPaymentConfirmed = false;
 
 					// Local/dev temporary bypass to preview the "Done" page without payment gateway validation.
 					if (allowDonePreviewBypass && donePreviewUrl) {

@@ -415,6 +415,39 @@ $is_review_step = ( '' !== $reviews_path && $request_path === $reviews_path );
 				</button>
 			</div>
 
+			<div class="noyona-pay-confirm-modal" id="noyona-pay-confirm-modal" hidden>
+				<button
+					type="button"
+					class="noyona-pay-confirm-modal__backdrop"
+					data-pay-confirm-close
+					aria-label="<?php esc_attr_e( 'Close payment reminder', 'noyona' ); ?>"
+				></button>
+				<div class="noyona-pay-confirm-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="noyona-pay-confirm-title">
+					<button
+						type="button"
+						class="noyona-pay-confirm-modal__close"
+						data-pay-confirm-close
+						aria-label="<?php esc_attr_e( 'Close payment reminder', 'noyona' ); ?>"
+					>
+						<i class="fa-solid fa-xmark" aria-hidden="true"></i>
+					</button>
+					<h3 id="noyona-pay-confirm-title" class="noyona-pay-confirm-modal__title">
+						<?php esc_html_e( 'Complete payment to finish your order', 'noyona' ); ?>
+					</h3>
+					<p class="noyona-pay-confirm-modal__copy">
+						<?php esc_html_e( 'After clicking Place Order, you will see a QR payment page. Please scan and complete payment (GCash, Maya, GoTyme, and other supported wallets). Your order will be marked Done after payment succeeds.', 'noyona' ); ?>
+					</p>
+					<div class="noyona-pay-confirm-modal__actions">
+						<button type="button" class="noyona-pay-confirm-modal__btn noyona-pay-confirm-modal__btn--ghost" data-pay-confirm-close>
+							<?php esc_html_e( 'Cancel', 'noyona' ); ?>
+						</button>
+						<button type="button" class="noyona-pay-confirm-modal__btn noyona-pay-confirm-modal__btn--primary" id="noyona-pay-confirm-proceed">
+							<?php esc_html_e( 'Continue to payment', 'noyona' ); ?>
+						</button>
+					</div>
+				</div>
+			</div>
+
 			<?php if ( $is_review_step ) : ?>
 				<?php
 				$terms_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'terms' ) : '';
