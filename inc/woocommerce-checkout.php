@@ -98,6 +98,36 @@ function noyona_force_checkout_templates( $template, $template_name, $template_p
 }
 
 /**
+ * Final safeguard: force checkout templates at wc_get_template stage.
+ *
+ * This runs after template location and helps when other code overrides the
+ * located path late in the stack.
+ *
+ * @param string $located       Located template absolute path.
+ * @param string $template_name Template name.
+ * @param array  $args          Template args.
+ * @return string
+ */
+add_filter( 'wc_get_template', 'noyona_force_wc_get_checkout_templates', 999, 3 );
+function noyona_force_wc_get_checkout_templates( $located, $template_name, $args ) {
+	$forced_templates = array(
+		'checkout/form-checkout.php',
+		'checkout/thankyou.php',
+	);
+
+	if ( ! in_array( $template_name, $forced_templates, true ) ) {
+		return $located;
+	}
+
+	$forced = trailingslashit( get_stylesheet_directory() ) . 'woocommerce/' . $template_name;
+	if ( file_exists( $forced ) ) {
+		return $forced;
+	}
+
+	return $located;
+}
+
+/**
  * Enqueue checkout UI styles.
  *
  * @return void
