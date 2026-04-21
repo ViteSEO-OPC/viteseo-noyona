@@ -220,7 +220,7 @@ function noyona_save_custom_checkout_fields( $order_id ) {
 
 add_action( 'wp_footer', 'noyona_checkout_inline_js' );
 function noyona_checkout_inline_js() {
-	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() ) {
+	if ( ! function_exists( 'noyona_is_checkout_ui_context' ) || ! noyona_is_checkout_ui_context() ) {
 		return;
 	}
 	?>
