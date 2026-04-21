@@ -68,6 +68,36 @@ function noyona_is_checkout_ui_context() {
 }
 
 /**
+ * Force WooCommerce to use child-theme checkout template overrides.
+ *
+ * Some environments/plugins can short-circuit template resolution and fall back
+ * to core templates; this guarantees our custom checkout flow is rendered.
+ *
+ * @param string $template      Located template path.
+ * @param string $template_name Template name requested by WooCommerce.
+ * @param string $template_path Template base path.
+ * @return string
+ */
+add_filter( 'woocommerce_locate_template', 'noyona_force_checkout_templates', 50, 3 );
+function noyona_force_checkout_templates( $template, $template_name, $template_path ) {
+	$forced_templates = array(
+		'checkout/form-checkout.php',
+		'checkout/thankyou.php',
+	);
+
+	if ( ! in_array( $template_name, $forced_templates, true ) ) {
+		return $template;
+	}
+
+	$forced = trailingslashit( get_stylesheet_directory() ) . 'woocommerce/' . $template_name;
+	if ( file_exists( $forced ) ) {
+		return $forced;
+	}
+
+	return $template;
+}
+
+/**
  * Enqueue checkout UI styles.
  *
  * @return void
@@ -322,6 +352,18 @@ function noyona_checkout_inline_js() {
 		}
 		var isReviewStep = currentPath === reviewPath;
 		var isAwaitingPayment = !!document.querySelector('[data-noyona-awaiting-payment="1"]');
+
+		if (!isAwaitingPayment && isOrderReceivedPath) {
+			var paymentOverviewNode = document.querySelector('.woocommerce-order-overview__payment-method');
+			var paymentOverviewText = paymentOverviewNode ? String(paymentOverviewNode.textContent || '').toLowerCase() : '';
+			var looksLikePayMongoQr = paymentOverviewText.indexOf('paymongo') !== -1 && paymentOverviewText.indexOf('qr') !== -1;
+			var bodyText = String((document.body && document.body.textContent) || '').toLowerCase();
+			var hasQrWaitingCopy = bodyText.indexOf('scan qr code to pay') !== -1 || bodyText.indexOf('waiting for payment') !== -1;
+			if (looksLikePayMongoQr && hasQrWaitingCopy) {
+				isAwaitingPayment = true;
+			}
+		}
+
 		var isDoneStep = !isAwaitingPayment && (
 			body.classList.contains('woocommerce-order-received') ||
 			window.location.pathname.indexOf('/order-received/') !== -1 ||
@@ -595,11 +637,68 @@ function noyona_checkout_inline_js() {
 			checkoutForm.submit();
 		}
 
+		function findPendingQrGatewayBlock() {
+			var blockWithHeading = Array.prototype.find.call(
+				document.querySelectorAll('section, div, article'),
+				function (node) {
+					var text = String(node.textContent || '').toLowerCase();
+					if (text.indexOf('scan qr code to pay') === -1) return false;
+					return !!node.querySelector('img');
+				}
+			);
+			if (blockWithHeading) return blockWithHeading;
+
+			return document.querySelector('[class*="paymongo"]') || null;
+		}
+
+		function ensurePendingQrFallbackShell() {
+			if (!isAwaitingPayment || document.querySelector('[data-noyona-awaiting-payment="1"]')) {
+				return;
+			}
+			if (document.querySelector('.noyona-pay-fallback')) {
+				return;
+			}
+
+			var orderRoot = document.querySelector('.woocommerce-order');
+			var gatewayBlock = findPendingQrGatewayBlock();
+			if (!orderRoot || !gatewayBlock) {
+				return;
+			}
+
+			var shell = document.createElement('div');
+			shell.className = 'noyona-pay-fallback';
+			shell.innerHTML = '' +
+				'<section class="noyona-pay-hero">' +
+					'<div class="noyona-pay-hero__icon" aria-hidden="true"><i class="fa-solid fa-qrcode"></i></div>' +
+					'<h1 class="noyona-pay-hero__title">Complete Your Payment</h1>' +
+					'<p class="noyona-pay-hero__subtitle">Scan the QR code below to finish your order. The final Done page appears after payment succeeds.</p>' +
+				'</section>' +
+				'<section class="noyona-pay-card">' +
+					'<div class="noyona-pay-card__head">' +
+						'<h2 class="noyona-pay-card__title">Pay with QR Ph via PayMongo</h2>' +
+					'</div>' +
+					'<div class="noyona-pay-card__gateway"></div>' +
+					'<p class="noyona-pay-refresh-note">This page refreshes automatically while waiting for payment confirmation.</p>' +
+				'</section>';
+
+			var gatewayMount = shell.querySelector('.noyona-pay-card__gateway');
+			if (!gatewayMount) {
+				return;
+			}
+
+			gatewayMount.appendChild(gatewayBlock);
+			orderRoot.insertBefore(shell, orderRoot.firstChild);
+		}
+
 		if (isAwaitingPayment) {
 			body.classList.add('noyona-pay-step');
 			body.classList.remove('noyona-done-step');
 			body.classList.remove('noyona-review-step');
 			body.classList.remove('noyona-details-step');
+			ensurePendingQrFallbackShell();
+			window.setTimeout(function() {
+				window.location.reload();
+			}, 10000);
 
 			var payStepItems = document.querySelectorAll('.noyona-checkout-steps li');
 			if (payStepItems.length >= 4) {
