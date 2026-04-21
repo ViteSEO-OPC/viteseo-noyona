@@ -1,18 +1,17 @@
 @font-face {
   font-family: "Proxima Nova";
   src: local("Proxima Nova"), local("ProximaNova-Regular"),
-    url("../fonts/ProximaNova-Regular.woff2") format("woff2"),
-    url("../fonts/ProximaNova-Regular.woff") format("woff");
+    url("../../Proxima%20Nova/proximanova_regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
+/* No dedicated semibold file is available; use bold as the closest weight. */
 @font-face {
   font-family: "Proxima Nova";
   src: local("Proxima Nova Semibold"), local("ProximaNova-Semibold"),
-    url("../fonts/ProximaNova-Semibold.woff2") format("woff2"),
-    url("../fonts/ProximaNova-Semibold.woff") format("woff");
+    url("../../Proxima%20Nova/proximanova_bold.otf") format("opentype");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -21,9 +20,26 @@
 @font-face {
   font-family: "Proxima Nova";
   src: local("Proxima Nova Bold"), local("ProximaNova-Bold"),
-    url("../fonts/ProximaNova-Bold.woff2") format("woff2"),
-    url("../fonts/ProximaNova-Bold.woff") format("woff");
+    url("../../Proxima%20Nova/proximanova_bold.otf") format("opentype");
   font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Proxima Nova";
+  src: local("Proxima Nova ExtraBold"), local("ProximaNova-Extrabold"),
+    url("../../Proxima%20Nova/proximanova_extrabold.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Proxima Nova";
+  src: local("Proxima Nova Black"), local("ProximaNova-Black"),
+    url("../../Proxima%20Nova/proximanova_black.otf") format("opentype");
+  font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
@@ -31,7 +47,7 @@
 @font-face {
   font-family: "Proxima Nova Light";
   src: local("Proxima Nova Light"), local("ProximaNova-Light"),
-    url("../fonts/proximanova_light.otf") format("opentype");
+    url("../../Proxima%20Nova/proximanova_light.otf") format("opentype");
   font-weight: 300;
   font-style: normal;
   font-display: swap;

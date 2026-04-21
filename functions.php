@@ -521,6 +521,13 @@ function noyona_get_google_login_url( $redirect_to = '' ) {
     $redirect_to = is_string( $redirect_to ) ? trim( $redirect_to ) : '';
     $fallback    = wp_login_url( $redirect_to );
 
+    if ( class_exists( 'NextendSocialLogin' ) ) {
+        $fallback = add_query_arg( 'loginSocial', 'google', site_url( 'wp-login.php' ) );
+        if ( '' !== $redirect_to ) {
+            $fallback = add_query_arg( 'redirect', $redirect_to, $fallback );
+        }
+    }
+
     if ( ! class_exists( 'NextendSocialLogin' ) || ! method_exists( 'NextendSocialLogin', 'getProviderByProviderID' ) ) {
         return $fallback;
     }

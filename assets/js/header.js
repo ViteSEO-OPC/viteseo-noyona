@@ -477,6 +477,9 @@ console.log('🔥 HEADER JS LOADED — build', Date.now());
       const registerAction = modal.querySelector('[data-mini-cart-register-action]');
       const loginForm = modal.querySelector('form.noyona-mini-cart-login-form');
       const loginRedirect = modal.querySelector('[data-mini-cart-login-redirect]');
+      const googleLoginUrl = loginAction
+        ? (loginAction.getAttribute('href') || '')
+        : '';
 
       if (loginForm) {
         loginForm.setAttribute('action', loginUrl);
@@ -485,7 +488,8 @@ console.log('🔥 HEADER JS LOADED — build', Date.now());
         loginRedirect.setAttribute('value', cartUrl);
       }
       if (loginAction) {
-        loginAction.setAttribute('href', loginUrl);
+        // Keep dedicated OAuth URL for the Google button.
+        loginAction.setAttribute('href', googleLoginUrl || loginUrl);
       }
       if (registerAction) {
         registerAction.setAttribute('href', resolveRegisterUrl());
