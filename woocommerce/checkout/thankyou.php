@@ -24,6 +24,12 @@ defined( 'ABSPATH' ) || exit;
 		do_action( 'woocommerce_thankyou_' . $order->get_payment_method(), $order->get_id() );
 		do_action( 'woocommerce_thankyou', $order->get_id() );
 		$thankyou_hook_markup = trim( (string) ob_get_clean() );
+		$has_qr_markup        = (bool) preg_match( '/<(img|canvas|svg)\b/i', $thankyou_hook_markup );
+
+		// UX rule: once gateway QR is gone, treat order as done state in UI flow.
+		if ( $is_awaiting_payment && ! $has_qr_markup ) {
+			$is_awaiting_payment = false;
+		}
 		?>
 
 		<?php if ( $order->has_status( 'failed' ) ) : ?>
@@ -79,6 +85,20 @@ defined( 'ABSPATH' ) || exit;
 			$track_url = ( is_user_logged_in() && (int) $order->get_user_id() === (int) get_current_user_id() )
 				? $order->get_view_order_url()
 				: wc_get_page_permalink( 'myaccount' );
+			$done_redirect_url = '';
+			foreach ( array( 'thank-you', 'thankyou', 'done' ) as $done_slug ) {
+				$done_page = get_page_by_path( $done_slug );
+				if ( $done_page && 'publish' === $done_page->post_status ) {
+					$done_redirect_url = add_query_arg(
+						array(
+							'order_id' => (string) $order->get_id(),
+							'key'      => (string) $order->get_order_key(),
+						),
+						get_permalink( $done_page )
+					);
+					break;
+				}
+			}
 			?>
 
 			<?php if ( $is_awaiting_payment ) : ?>
@@ -117,6 +137,15 @@ defined( 'ABSPATH' ) || exit;
 
 				<script>
 				(function() {
+					var doneUrl = <?php echo wp_json_encode( $done_redirect_url ); ?>;
+					var gateway = document.querySelector('.noyona-pay-card__gateway');
+					if (gateway) {
+						var hasQrNode = !!gateway.querySelector('img, canvas, svg');
+						if (!hasQrNode && doneUrl) {
+							window.location.assign(doneUrl);
+							return;
+						}
+					}
 					var refreshMs = 10000;
 					window.setTimeout(function() {
 						window.location.reload();

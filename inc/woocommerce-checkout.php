@@ -339,6 +339,84 @@ function noyona_limit_checkout_payment_gateways( $gateways ) {
 	return $gateways;
 }
 
+/**
+ * Redirect paid order-received endpoint to custom Done page design.
+ *
+ * Flow:
+ * - Pending QR payment stays on order-received payment screen.
+ * - Once payment is confirmed (paid/processing/completed), redirect to
+ *   the themed Done page (/thank-you/) so users see the final design.
+ */
+add_action( 'template_redirect', 'noyona_redirect_paid_order_to_done_page', 20 );
+function noyona_redirect_paid_order_to_done_page() {
+	if ( is_admin() || wp_doing_ajax() ) {
+		return;
+	}
+
+	if ( ! function_exists( 'is_wc_endpoint_url' ) || ! is_wc_endpoint_url( 'order-received' ) ) {
+		return;
+	}
+
+	$order = null;
+
+	$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	if ( '' !== $order_key && function_exists( 'wc_get_order_id_by_order_key' ) ) {
+		$order_id = (int) wc_get_order_id_by_order_key( $order_key );
+		if ( $order_id > 0 ) {
+			$order = wc_get_order( $order_id );
+		}
+	}
+
+	if ( ! $order ) {
+		$order_id = absint( get_query_var( 'order-received' ) );
+		if ( $order_id > 0 ) {
+			$order = wc_get_order( $order_id );
+		}
+	}
+
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return;
+	}
+
+	if ( '' !== $order_key && $order->get_order_key() !== $order_key ) {
+		return;
+	}
+
+	$is_paid = $order->is_paid() || $order->has_status( array( 'processing', 'completed' ) );
+	if ( ! $is_paid ) {
+		return;
+	}
+
+	$done_page = null;
+	foreach ( array( 'thank-you', 'thankyou', 'done' ) as $slug ) {
+		$candidate = get_page_by_path( $slug );
+		if ( $candidate && 'publish' === $candidate->post_status ) {
+			$done_page = $candidate;
+			break;
+		}
+	}
+
+	if ( ! $done_page ) {
+		return;
+	}
+
+	$done_url = get_permalink( $done_page );
+	if ( ! $done_url ) {
+		return;
+	}
+
+	$done_url = add_query_arg(
+		array(
+			'order_id' => (string) $order->get_id(),
+			'key'      => (string) $order->get_order_key(),
+		),
+		$done_url
+	);
+
+	wp_safe_redirect( $done_url );
+	exit;
+}
+
 /*
  * Copy billing name → shipping name so WooCommerce doesn't
  * reject the order for missing shipping_first/last_name.
