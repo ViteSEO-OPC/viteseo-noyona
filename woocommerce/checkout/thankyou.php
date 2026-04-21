@@ -24,10 +24,18 @@ defined( 'ABSPATH' ) || exit;
 		do_action( 'woocommerce_thankyou_' . $order->get_payment_method(), $order->get_id() );
 		do_action( 'woocommerce_thankyou', $order->get_id() );
 		$thankyou_hook_markup = trim( (string) ob_get_clean() );
-		$has_qr_markup        = (bool) preg_match( '/<(img|canvas|svg)\b/i', $thankyou_hook_markup );
+		$thankyou_text_lc     = strtolower( wp_strip_all_tags( $thankyou_hook_markup ) );
+		$has_qr_markup        = (bool) preg_match( '/<img[^>]+(?:qr|qrcode|qrph|paymongo)[^>]*>|<canvas\b/i', $thankyou_hook_markup );
+		$has_pending_copy     = (
+			false !== strpos( $thankyou_text_lc, 'waiting for payment' )
+			|| false !== strpos( $thankyou_text_lc, 'scan qr code to pay' )
+			|| false !== strpos( $thankyou_text_lc, 'scan the qr code below' )
+			|| false !== strpos( $thankyou_text_lc, 'open your banking app' )
+		);
 
-		// UX rule: once gateway QR is gone, treat order as done state in UI flow.
-		if ( $is_awaiting_payment && ! $has_qr_markup ) {
+		// Show payment-required state only while there are real QR/pending signals.
+		// If QR/pending copy is gone, switch to Done state immediately.
+		if ( $is_awaiting_payment && ! ( $has_qr_markup || $has_pending_copy ) ) {
 			$is_awaiting_payment = false;
 		}
 		?>
@@ -125,8 +133,14 @@ defined( 'ABSPATH' ) || exit;
 				(function() {
 					var gateway = document.querySelector('.noyona-pay-card__gateway');
 					if (gateway) {
-						var hasQrNode = !!gateway.querySelector('img, canvas, svg');
-						if (!hasQrNode) {
+						var gatewayText = String(gateway.textContent || '').toLowerCase();
+						var hasPendingCopy =
+							gatewayText.indexOf('waiting for payment') !== -1 ||
+							gatewayText.indexOf('scan qr code to pay') !== -1 ||
+							gatewayText.indexOf('scan the qr code below') !== -1 ||
+							gatewayText.indexOf('open your banking app') !== -1;
+						var hasQrNode = !!gateway.querySelector('img[src*="qr" i], img[alt*="qr" i], img[src*="paymongo" i], canvas');
+						if (!hasQrNode && !hasPendingCopy) {
 							window.location.reload();
 							return;
 						}
