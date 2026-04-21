@@ -772,6 +772,21 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   margin-bottom: 0;
 }
 
+/* Collapse Woo's default place-order/terms block in details step.
+   We use the custom review button + custom review terms UI instead. */
+.noyona-checkout-form .place-order {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  border: 0 !important;
+}
+
+.noyona-checkout-form .place-order > noscript,
+.noyona-checkout-form .place-order .woocommerce-terms-and-conditions-wrapper,
+.noyona-checkout-form .place-order .woocommerce-privacy-policy-text {
+  display: none !important;
+}
+
 /* ═══════════════════════════════════════
    PLACE ORDER — hidden (relay via Review Order)
    ═══════════════════════════════════════ */

@@ -271,6 +271,24 @@ function noyona_hide_checkout_privacy_policy_text( $text ) {
 }
 
 /**
+ * Extra safety: strip Woo privacy text by getter filter too.
+ *
+ * This catches contexts where Woo fetches the text via wc_get_privacy_policy_text().
+ *
+ * @param string $text Privacy text.
+ * @param string $type Context type.
+ * @return string
+ */
+add_filter( 'woocommerce_get_privacy_policy_text', 'noyona_strip_woocommerce_privacy_copy', 20, 2 );
+function noyona_strip_woocommerce_privacy_copy( $text, $type ) {
+	if ( 'checkout' === $type && function_exists( 'noyona_is_checkout_ui_context' ) && noyona_is_checkout_ui_context() ) {
+		return '';
+	}
+
+	return $text;
+}
+
+/**
  * Always ship to a separate address (we show shipping fields directly).
  */
 add_filter( 'woocommerce_ship_to_different_address_checked', '__return_true' );
