@@ -117,19 +117,22 @@ function noyona_is_checkout_ui_context() {
  * @param string $template_path Template base path.
  * @return string
  */
-add_filter( 'woocommerce_locate_template', 'noyona_force_checkout_templates', 50, 3 );
+add_filter( 'woocommerce_locate_template', 'noyona_force_checkout_templates', 99999, 3 );
 function noyona_force_checkout_templates( $template, $template_name, $template_path ) {
-	$forced_templates = array(
-		'checkout/form-checkout.php',
-		'checkout/thankyou.php',
+	$template_name_lc = strtolower( (string) $template_name );
+	$is_target        = (
+		'checkout/form-checkout.php' === $template_name_lc
+		|| 'checkout/thankyou.php' === $template_name_lc
+		|| ( false !== strpos( $template_name_lc, 'checkout/' ) && false !== strpos( $template_name_lc, 'thankyou.php' ) )
 	);
 
-	if ( ! in_array( $template_name, $forced_templates, true ) ) {
+	if ( ! $is_target ) {
 		return $template;
 	}
 
-	$forced = trailingslashit( get_stylesheet_directory() ) . 'woocommerce/' . $template_name;
-	if ( file_exists( $forced ) ) {
+	$relative = false !== strpos( $template_name_lc, 'form-checkout.php' ) ? 'checkout/form-checkout.php' : 'checkout/thankyou.php';
+	$forced   = trailingslashit( get_stylesheet_directory() ) . 'woocommerce/' . $relative;
+	if ( is_readable( $forced ) ) {
 		return $forced;
 	}
 
@@ -147,19 +150,22 @@ function noyona_force_checkout_templates( $template, $template_name, $template_p
  * @param array  $args          Template args.
  * @return string
  */
-add_filter( 'wc_get_template', 'noyona_force_wc_get_checkout_templates', 999, 3 );
-function noyona_force_wc_get_checkout_templates( $located, $template_name, $args ) {
-	$forced_templates = array(
-		'checkout/form-checkout.php',
-		'checkout/thankyou.php',
+add_filter( 'wc_get_template', 'noyona_force_wc_get_checkout_templates', 99999, 5 );
+function noyona_force_wc_get_checkout_templates( $located, $template_name, $args, $template_path, $default_path ) {
+	$template_name_lc = strtolower( (string) $template_name );
+	$is_target        = (
+		'checkout/form-checkout.php' === $template_name_lc
+		|| 'checkout/thankyou.php' === $template_name_lc
+		|| ( false !== strpos( $template_name_lc, 'checkout/' ) && false !== strpos( $template_name_lc, 'thankyou.php' ) )
 	);
 
-	if ( ! in_array( $template_name, $forced_templates, true ) ) {
+	if ( ! $is_target ) {
 		return $located;
 	}
 
-	$forced = trailingslashit( get_stylesheet_directory() ) . 'woocommerce/' . $template_name;
-	if ( file_exists( $forced ) ) {
+	$relative = false !== strpos( $template_name_lc, 'form-checkout.php' ) ? 'checkout/form-checkout.php' : 'checkout/thankyou.php';
+	$forced   = trailingslashit( get_stylesheet_directory() ) . 'woocommerce/' . $relative;
+	if ( is_readable( $forced ) ) {
 		return $forced;
 	}
 
