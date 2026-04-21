@@ -240,6 +240,75 @@ function noyona_disable_coupons_on_checkout( $enabled ) {
 	return $enabled;
 }
 
+/**
+ * Restrict checkout payment methods to PayMongo QR and remove Check payments.
+ *
+ * - Always removes Woo's built-in "Check payments" gateway (`cheque`).
+ * - On checkout UI, keeps only gateway entries that look like PayMongo QR.
+ * - Falls back safely if a QR gateway cannot be detected.
+ *
+ * @param array<string, WC_Payment_Gateway> $gateways Available gateways.
+ * @return array<string, WC_Payment_Gateway>
+ */
+add_filter( 'woocommerce_available_payment_gateways', 'noyona_limit_checkout_payment_gateways', 30 );
+function noyona_limit_checkout_payment_gateways( $gateways ) {
+	if ( ! is_array( $gateways ) ) {
+		return $gateways;
+	}
+
+	// Remove the default "Check payments" option everywhere on frontend.
+	if ( isset( $gateways['cheque'] ) ) {
+		unset( $gateways['cheque'] );
+	}
+
+	// Do not alter non-checkout contexts further.
+	if ( ! function_exists( 'noyona_is_checkout_ui_context' ) || ! noyona_is_checkout_ui_context() ) {
+		return $gateways;
+	}
+
+	if ( empty( $gateways ) ) {
+		return $gateways;
+	}
+
+	$paymongo_qr_gateways = array();
+	$paymongo_gateways    = array();
+
+	foreach ( $gateways as $gateway_id => $gateway ) {
+		$gateway_title = '';
+		$method_title  = '';
+
+		if ( is_object( $gateway ) ) {
+			$gateway_title = isset( $gateway->title ) ? (string) $gateway->title : '';
+			$method_title  = isset( $gateway->method_title ) ? (string) $gateway->method_title : '';
+		}
+
+		$haystack = strtolower( trim( (string) $gateway_id . ' ' . $gateway_title . ' ' . $method_title ) );
+
+		$is_paymongo = ( false !== strpos( $haystack, 'paymongo' ) );
+		$is_qr       = ( false !== strpos( $haystack, 'qr' ) || false !== strpos( $haystack, 'qrph' ) || false !== strpos( $haystack, 'qr ph' ) );
+
+		if ( $is_paymongo && $is_qr ) {
+			$paymongo_qr_gateways[ $gateway_id ] = $gateway;
+			continue;
+		}
+
+		if ( $is_paymongo ) {
+			$paymongo_gateways[ $gateway_id ] = $gateway;
+		}
+	}
+
+	if ( ! empty( $paymongo_qr_gateways ) ) {
+		return $paymongo_qr_gateways;
+	}
+
+	if ( ! empty( $paymongo_gateways ) ) {
+		return $paymongo_gateways;
+	}
+
+	// Final fallback: keep current set (already without "cheque").
+	return $gateways;
+}
+
 /*
  * Copy billing name → shipping name so WooCommerce doesn't
  * reject the order for missing shipping_first/last_name.
