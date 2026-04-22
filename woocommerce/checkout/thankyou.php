@@ -128,10 +128,6 @@ defined( 'ABSPATH' ) || exit;
 				</section>
 
 				<section class="noyona-pay-card">
-					<div class="noyona-pay-card__head">
-						<h2 class="noyona-pay-card__title"><?php esc_html_e( 'Scan QR to Pay', 'noyona' ); ?></h2>
-						<p class="noyona-pay-card__copy"><?php esc_html_e( 'Open your banking app or e-wallet and scan the QR code below to complete your payment.', 'noyona' ); ?></p>
-					</div>
 					<div class="noyona-pay-card__gateway">
 						<?php if ( '' !== $thankyou_hook_markup ) : ?>
 							<?php echo $thankyou_hook_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -143,6 +139,53 @@ defined( 'ABSPATH' ) || exit;
 						<?php esc_html_e( 'This page refreshes automatically while waiting for payment confirmation.', 'noyona' ); ?>
 					</p>
 				</section>
+
+				<script>
+				(function() {
+					var gateway = document.querySelector('.noyona-pay-card__gateway');
+					if (!gateway) return;
+
+					var expiryLabelNodes = Array.prototype.filter.call(
+						gateway.querySelectorAll('p, span, div, small, strong'),
+						function(node) {
+							var text = String(node.textContent || '').toLowerCase();
+							return text.indexOf('this qr code expires in') !== -1;
+						}
+					);
+					if (!expiryLabelNodes.length) return;
+
+					var timePattern = /\b\d{1,2}:\d{2}\b/;
+					expiryLabelNodes.forEach(function(node) {
+						if (timePattern.test(String(node.textContent || ''))) {
+							return;
+						}
+						if (node.querySelector('.noyona-pay-expire-time')) {
+							return;
+						}
+
+						var totalSeconds = 30 * 60; // Standard fallback expiry window: 30 minutes.
+						var timerNode = document.createElement('strong');
+						timerNode.className = 'noyona-pay-expire-time';
+						node.appendChild(document.createTextNode(' '));
+						node.appendChild(timerNode);
+
+						function render() {
+							var minutes = Math.floor(totalSeconds / 60);
+							var seconds = totalSeconds % 60;
+							timerNode.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+						}
+
+						render();
+						var intervalId = window.setInterval(function() {
+							totalSeconds = Math.max(0, totalSeconds - 1);
+							render();
+							if (totalSeconds <= 0) {
+								window.clearInterval(intervalId);
+							}
+						}, 1000);
+					});
+				})();
+				</script>
 
 				<section class="noyona-checkout-card noyona-pay-order-details">
 					<h2 class="noyona-checkout-card__title"><?php esc_html_e( 'Order Details', 'noyona' ); ?></h2>
