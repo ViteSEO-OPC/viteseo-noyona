@@ -66,6 +66,61 @@ function noyona_route_generic_thankyou_to_wc_order_received() {
 	}
 }
 
+/**
+ * AJAX: lightweight order payment status probe for order-received polling.
+ *
+ * Uses order ID + order key validation so guests can safely query their own
+ * order status without forcing full-page refresh loops.
+ */
+add_action( 'wp_ajax_noyona_check_order_payment_status', 'noyona_check_order_payment_status' );
+add_action( 'wp_ajax_nopriv_noyona_check_order_payment_status', 'noyona_check_order_payment_status' );
+function noyona_check_order_payment_status() {
+	$order_id  = isset( $_REQUEST['order_id'] ) ? absint( wp_unslash( $_REQUEST['order_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$order_key = isset( $_REQUEST['order_key'] ) ? wc_clean( wp_unslash( $_REQUEST['order_key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+	if ( $order_id <= 0 || '' === $order_key ) {
+		wp_send_json_error(
+			array(
+				'message' => 'Missing order reference.',
+			),
+			400
+		);
+	}
+
+	$order = wc_get_order( $order_id );
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		wp_send_json_error(
+			array(
+				'message' => 'Order not found.',
+			),
+			404
+		);
+	}
+
+	if ( $order->get_order_key() !== $order_key ) {
+		wp_send_json_error(
+			array(
+				'message' => 'Invalid order key.',
+			),
+			403
+		);
+	}
+
+	$payment_context     = strtolower( trim( (string) $order->get_payment_method() . ' ' . (string) $order->get_payment_method_title() ) );
+	$is_paymongo_qr      = ( false !== strpos( $payment_context, 'paymongo' ) && false !== strpos( $payment_context, 'qr' ) );
+	$is_awaiting_payment = ( $is_paymongo_qr && ! $order->is_paid() && $order->has_status( array( 'pending', 'on-hold' ) ) );
+
+	wp_send_json_success(
+		array(
+			'order_id'          => (int) $order->get_id(),
+			'status'            => (string) $order->get_status(),
+			'is_paid'           => (bool) $order->is_paid(),
+			'is_paymongo_qr'    => (bool) $is_paymongo_qr,
+			'awaiting_payment'  => (bool) $is_awaiting_payment,
+		)
+	);
+}
+
 /* ─── Assets ──────────────────────────────────────── */
 
 /**
@@ -551,6 +606,7 @@ function noyona_checkout_inline_js() {
 		var reviewUrl = <?php echo wp_json_encode( home_url( '/reviews/' ) ); ?>;
 		var detailsUrl = <?php echo wp_json_encode( function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' ) ); ?>;
 		var cartUrl = <?php echo wp_json_encode( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) ); ?>;
+		var orderStatusProbeUrl = <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
 		var allowDonePreviewBypass = <?php echo wp_json_encode( noyona_checkout_is_local_env() ); ?>;
 		var donePreviewUrl = <?php
 			echo wp_json_encode(
@@ -1022,6 +1078,80 @@ function noyona_checkout_inline_js() {
 			orderRoot.insertBefore(shell, orderRoot.firstChild);
 		}
 
+		function getOrderIdFromPath() {
+			var match = window.location.pathname.match(/\/order-received\/(\d+)/);
+			if (!match || !match[1]) return 0;
+			var value = parseInt(match[1], 10);
+			return Number.isFinite(value) ? value : 0;
+		}
+
+		function getOrderKeyFromQuery() {
+			try {
+				var params = new URLSearchParams(window.location.search || '');
+				return String(params.get('key') || '').trim();
+			} catch (e) {
+				return '';
+			}
+		}
+
+		var paymentPollInFlight = false;
+		var paymentPollIntervalMs = 25000;
+
+		function schedulePaymentStatusPoll(delayMs) {
+			window.setTimeout(function () {
+				pollPaymentStatus();
+			}, delayMs);
+		}
+
+		function pollPaymentStatus() {
+			if (paymentPollInFlight) {
+				return;
+			}
+
+			var orderId = getOrderIdFromPath();
+			var orderKey = getOrderKeyFromQuery();
+			if (!orderId || !orderKey || !orderStatusProbeUrl) {
+				schedulePaymentStatusPoll(paymentPollIntervalMs);
+				return;
+			}
+
+			if (!window.fetch || !window.URLSearchParams) {
+				window.location.reload();
+				return;
+			}
+
+			paymentPollInFlight = true;
+			var payload = new URLSearchParams();
+			payload.set('action', 'noyona_check_order_payment_status');
+			payload.set('order_id', String(orderId));
+			payload.set('order_key', orderKey);
+
+			window.fetch(orderStatusProbeUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+				},
+				credentials: 'same-origin',
+				body: payload.toString()
+			}).then(function (response) {
+				if (!response.ok) {
+					throw new Error('status check failed');
+				}
+				return response.json();
+			}).then(function (json) {
+				var awaiting = !!(json && json.success && json.data && json.data.awaiting_payment);
+				if (!awaiting) {
+					window.location.reload();
+					return;
+				}
+				schedulePaymentStatusPoll(paymentPollIntervalMs);
+			}).catch(function () {
+				schedulePaymentStatusPoll(paymentPollIntervalMs);
+			}).finally(function () {
+				paymentPollInFlight = false;
+			});
+		}
+
 		if (isAwaitingPayment) {
 			body.classList.add('noyona-pay-step');
 			body.classList.remove('noyona-done-step');
@@ -1029,9 +1159,7 @@ function noyona_checkout_inline_js() {
 			body.classList.remove('noyona-details-step');
 			ensureCheckoutStepper();
 			ensurePendingQrFallbackShell();
-			window.setTimeout(function() {
-				window.location.reload();
-			}, 25000);
+			schedulePaymentStatusPoll(12000);
 
 			var payStepItems = document.querySelectorAll('.noyona-checkout-steps li');
 			if (payStepItems.length >= 4) {
