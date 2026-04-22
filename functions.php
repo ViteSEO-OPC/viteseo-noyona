@@ -2900,8 +2900,18 @@ function noyona_render_account_page_shortcode() {
                                 $review_url = ( '' !== trim( $item_permalink ) )
                                     ? $item_permalink . '#reviews'
                                     : $account_order->get_view_order_url();
-                                $contact_url = home_url( '/contact-us/' );
-                                $invoice_url = $account_order->get_view_order_url();
+                                $contact_url = home_url( '/contact/' );
+                                $invoice_url = wp_nonce_url(
+                                    add_query_arg(
+                                        array(
+                                            'action'   => 'noyona_download_einvoice',
+                                            'order_id' => (int) $account_order->get_id(),
+                                        ),
+                                        admin_url( 'admin-post.php' )
+                                    ),
+                                    'noyona_download_einvoice_' . (int) $account_order->get_id(),
+                                    'noyona_download_nonce'
+                                );
                                 $buy_again_url = '';
                                 if ( $item_product instanceof WC_Product ) {
                                     $buy_again_url = add_query_arg(
@@ -2947,6 +2957,7 @@ function noyona_render_account_page_shortcode() {
                                     <div class="noyona-account-modal-dialog noyona-account-order-modal__dialog" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr( $modal_title ); ?>">
                                         <a href="#noyona-account-orders-panel" class="noyona-account-modal-back" aria-label="<?php esc_attr_e( 'Close order details', 'noyona-childtheme' ); ?>">
                                             <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                                            <span><?php esc_html_e( 'Back', 'noyona-childtheme' ); ?></span>
                                         </a>
                                         <p class="noyona-account-order-modal__order-number"><?php echo esc_html( $modal_title ); ?></p>
 
@@ -3028,7 +3039,7 @@ function noyona_render_account_page_shortcode() {
 
                                         <div class="noyona-account-order-modal__actions">
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $review_url ); ?>"><?php esc_html_e( 'Write a Review', 'noyona-childtheme' ); ?></a>
-                                            <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $invoice_url ); ?>"><?php esc_html_e( 'Download E-invoice', 'noyona-childtheme' ); ?></a>
+                                            <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $invoice_url ); ?>" download><?php esc_html_e( 'Download E-invoice', 'noyona-childtheme' ); ?></a>
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $contact_url ); ?>"><?php esc_html_e( 'Contact Us', 'noyona-childtheme' ); ?></a>
                                             <a class="noyona-account-btn noyona-account-btn--primary" href="<?php echo esc_url( $buy_again_url ); ?>"><?php esc_html_e( 'Buy Again', 'noyona-childtheme' ); ?></a>
                                         </div>
@@ -4093,6 +4104,111 @@ function noyona_account_modal_runtime_script() {
         })();
     </script>
     <?php
+}
+
+add_action( 'admin_post_noyona_download_einvoice', 'noyona_download_einvoice_handler' );
+function noyona_download_einvoice_handler() {
+    if ( ! is_user_logged_in() ) {
+        wp_safe_redirect( noyona_get_login_page_url() );
+        exit;
+    }
+
+    $order_id = isset( $_GET['order_id'] ) ? absint( wp_unslash( $_GET['order_id'] ) ) : 0;
+    $nonce    = isset( $_GET['noyona_download_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['noyona_download_nonce'] ) ) : '';
+
+    if ( $order_id < 1 || '' === $nonce || ! wp_verify_nonce( $nonce, 'noyona_download_einvoice_' . $order_id ) ) {
+        wp_die( esc_html__( 'Invalid e-invoice request.', 'noyona-childtheme' ), esc_html__( 'Unauthorized', 'noyona-childtheme' ), array( 'response' => 403 ) );
+    }
+
+    if ( ! function_exists( 'wc_get_order' ) ) {
+        wp_die( esc_html__( 'WooCommerce is required to download invoices.', 'noyona-childtheme' ) );
+    }
+
+    $order = wc_get_order( $order_id );
+    if ( ! $order instanceof WC_Order ) {
+        wp_die( esc_html__( 'Order not found.', 'noyona-childtheme' ), esc_html__( 'Not found', 'noyona-childtheme' ), array( 'response' => 404 ) );
+    }
+
+    $current_user_id = get_current_user_id();
+    $can_manage      = current_user_can( 'manage_woocommerce' ) || current_user_can( 'edit_shop_orders' );
+    if ( ! $can_manage && (int) $order->get_user_id() !== (int) $current_user_id ) {
+        wp_die( esc_html__( 'You are not allowed to download this invoice.', 'noyona-childtheme' ), esc_html__( 'Unauthorized', 'noyona-childtheme' ), array( 'response' => 403 ) );
+    }
+
+    $order_created = $order->get_date_created();
+    $order_date    = ( $order_created instanceof WC_DateTime ) ? $order_created->date_i18n( get_option( 'date_format' ) ) : '';
+
+    $shipping_parts = array_filter(
+        array(
+            $order->get_shipping_address_1(),
+            $order->get_shipping_city(),
+            $order->get_shipping_state(),
+            $order->get_shipping_postcode(),
+        )
+    );
+    if ( empty( $shipping_parts ) ) {
+        $shipping_parts = array_filter(
+            array(
+                $order->get_billing_address_1(),
+                $order->get_billing_city(),
+                $order->get_billing_state(),
+                $order->get_billing_postcode(),
+            )
+        );
+    }
+    $shipping_text = implode( ', ', array_map( 'wc_clean', $shipping_parts ) );
+
+    $payment_label = trim( (string) $order->get_payment_method_title() );
+    if ( '' === $payment_label ) {
+        $payment_label = (string) $order->get_payment_method();
+    }
+
+    $items_html = '';
+    foreach ( $order->get_items( 'line_item' ) as $order_item ) {
+        if ( ! $order_item instanceof WC_Order_Item_Product ) {
+            continue;
+        }
+
+        $items_html .= '<tr>';
+        $items_html .= '<td style="padding:8px;border-bottom:1px solid #ececec;">' . esc_html( $order_item->get_name() ) . '</td>';
+        $items_html .= '<td style="padding:8px;border-bottom:1px solid #ececec;text-align:center;">' . esc_html( (string) $order_item->get_quantity() ) . '</td>';
+        $items_html .= '<td style="padding:8px;border-bottom:1px solid #ececec;text-align:right;">' . wp_kses_post( $order->get_formatted_line_subtotal( $order_item ) ) . '</td>';
+        $items_html .= '</tr>';
+    }
+
+    $totals_html = '';
+    foreach ( (array) $order->get_order_item_totals() as $total_row ) {
+        $label = isset( $total_row['label'] ) ? wp_strip_all_tags( (string) $total_row['label'] ) : '';
+        $value = isset( $total_row['value'] ) ? (string) $total_row['value'] : '';
+
+        $totals_html .= '<tr>';
+        $totals_html .= '<td style="padding:8px;border-bottom:1px solid #ececec;">' . esc_html( $label ) . '</td>';
+        $totals_html .= '<td style="padding:8px;border-bottom:1px solid #ececec;text-align:right;">' . wp_kses_post( $value ) . '</td>';
+        $totals_html .= '</tr>';
+    }
+
+    $invoice_html  = '<!doctype html><html><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '"><title>' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</title></head><body style="font-family:Arial,sans-serif;color:#1d1d1d;line-height:1.45;padding:28px;">';
+    $invoice_html .= '<h1 style="margin:0 0 4px;">' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</h1>';
+    $invoice_html .= '<p style="margin:0 0 16px;">' . esc_html__( 'Order', 'noyona-childtheme' ) . ' #' . esc_html( $order->get_order_number() ) . '</p>';
+    $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Order Date:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $order_date ) . '</p>';
+    $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Customer:', 'noyona-childtheme' ) . '</strong> ' . esc_html( trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() ) ) . '</p>';
+    $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Shipping Address:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $shipping_text ) . '</p>';
+    $invoice_html .= '<p style="margin:0 0 16px;"><strong>' . esc_html__( 'Payment Method:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $payment_label ) . '</p>';
+    $invoice_html .= '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;"><thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Item', 'noyona-childtheme' ) . '</th><th style="text-align:center;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Qty', 'noyona-childtheme' ) . '</th><th style="text-align:right;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Total', 'noyona-childtheme' ) . '</th></tr></thead><tbody>' . $items_html . '</tbody></table>';
+    $invoice_html .= '<table style="width:100%;max-width:420px;border-collapse:collapse;margin-left:auto;"><tbody>' . $totals_html . '</tbody></table>';
+    $invoice_html .= '</body></html>';
+
+    if ( function_exists( 'nocache_headers' ) ) {
+        nocache_headers();
+    }
+
+    $filename = sanitize_file_name( 'noyona-einvoice-order-' . $order->get_order_number() . '.html' );
+    header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) );
+    header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+    header( 'X-Content-Type-Options: nosniff' );
+
+    echo $invoice_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    exit;
 }
 
 add_action( 'admin_post_noyona_upload_account_avatar', 'noyona_upload_account_avatar_handler' );
