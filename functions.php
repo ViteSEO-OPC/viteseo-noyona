@@ -2979,17 +2979,23 @@ function noyona_render_account_page_shortcode() {
                                         'on-hold'    => 1,
                                         'failed'     => 1,
                                         'cancelled'  => 1,
-                                        'processing' => 4,
-                                        'completed'  => 5,
-                                        'refunded'   => 5,
+                                        'processing' => 2,
+                                        'to-ship'    => 2,
+                                        'to-receive' => 2,
+                                        'at-hub'     => 2,
+                                        'rider-assigned' => 3,
+                                        'out-for-delivery' => 3,
+                                        'shipped'    => 3,
+                                        'in-transit' => 3,
+                                        'completed'  => 4,
+                                        'refunded'   => 4,
                                     );
                                     $current_progress_step = isset( $status_progress_map[ $status_key ] ) ? (int) $status_progress_map[ $status_key ] : 2;
                                     $progress_steps = array(
                                         1 => __( 'Order has been placed', 'noyona-childtheme' ),
-                                        2 => __( 'Your parcel has arrived at the warehouse', 'noyona-childtheme' ),
-                                        3 => __( 'Delivery driver has been assigned', 'noyona-childtheme' ),
-                                        4 => __( 'Parcel is out for delivery', 'noyona-childtheme' ),
-                                        5 => __( 'Parcel has been delivered', 'noyona-childtheme' ),
+                                        2 => __( 'Your parcel has arrived at the hub', 'noyona-childtheme' ),
+                                        3 => __( 'Rider assigned / Out for delivery', 'noyona-childtheme' ),
+                                        4 => __( 'Parcel has been delivered', 'noyona-childtheme' ),
                                     );
 
                                     $placed_date_label = ( $order_date instanceof WC_DateTime )
