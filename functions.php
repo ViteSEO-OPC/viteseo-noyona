@@ -2955,11 +2955,13 @@ function noyona_render_account_page_shortcode() {
                                 <div id="<?php echo esc_attr( $modal_id ); ?>" class="noyona-account-modal noyona-account-order-modal" aria-hidden="true">
                                     <a href="#noyona-account-orders-panel" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close order details', 'noyona-childtheme' ); ?>"></a>
                                     <div class="noyona-account-modal-dialog noyona-account-order-modal__dialog" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr( $modal_title ); ?>">
-                                        <a href="#noyona-account-orders-panel" class="noyona-account-modal-back" aria-label="<?php esc_attr_e( 'Close order details', 'noyona-childtheme' ); ?>">
-                                            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
-                                            <span><?php esc_html_e( 'Back', 'noyona-childtheme' ); ?></span>
-                                        </a>
-                                        <p class="noyona-account-order-modal__order-number"><?php echo esc_html( $modal_title ); ?></p>
+                                        <div class="noyona-account-order-modal__header">
+                                            <a href="#noyona-account-orders-panel" class="noyona-account-modal-back" aria-label="<?php esc_attr_e( 'Close order details', 'noyona-childtheme' ); ?>">
+                                                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                                                <span><?php esc_html_e( 'Back', 'noyona-childtheme' ); ?></span>
+                                            </a>
+                                            <p class="noyona-account-order-modal__order-number"><?php echo esc_html( $modal_title ); ?></p>
+                                        </div>
 
                                         <div class="noyona-account-order-modal__top">
                                             <section class="noyona-account-order-modal__ship">
@@ -4187,7 +4189,7 @@ function noyona_download_einvoice_handler() {
         $totals_html .= '</tr>';
     }
 
-    $invoice_html  = '<!doctype html><html><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '"><title>' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</title></head><body style="font-family:Arial,sans-serif;color:#1d1d1d;line-height:1.45;padding:28px;">';
+    $invoice_html  = '<!doctype html><html><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '"><meta http-equiv="Content-Type" content="text/html; charset=' . esc_attr( get_bloginfo( 'charset' ) ) . '"><title>' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</title></head><body style="font-family:Arial,sans-serif;color:#1d1d1d;line-height:1.45;padding:28px;">';
     $invoice_html .= '<h1 style="margin:0 0 4px;">' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</h1>';
     $invoice_html .= '<p style="margin:0 0 16px;">' . esc_html__( 'Order', 'noyona-childtheme' ) . ' #' . esc_html( $order->get_order_number() ) . '</p>';
     $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Order Date:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $order_date ) . '</p>';
@@ -4202,8 +4204,8 @@ function noyona_download_einvoice_handler() {
         nocache_headers();
     }
 
-    $filename = sanitize_file_name( 'noyona-einvoice-order-' . $order->get_order_number() . '.html' );
-    header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) );
+    $filename = sanitize_file_name( 'noyona-einvoice-order-' . $order->get_order_number() . '.doc' );
+    header( 'Content-Type: application/msword; charset=' . get_bloginfo( 'charset' ) );
     header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
     header( 'X-Content-Type-Options: nosniff' );
 
