@@ -24,18 +24,11 @@ defined( 'ABSPATH' ) || exit;
 		do_action( 'woocommerce_thankyou_' . $order->get_payment_method(), $order->get_id() );
 		do_action( 'woocommerce_thankyou', $order->get_id() );
 		$thankyou_hook_markup = trim( (string) ob_get_clean() );
-		$thankyou_text_lc     = strtolower( wp_strip_all_tags( $thankyou_hook_markup ) );
 		$has_qr_markup        = (bool) preg_match( '/<img[^>]+(?:qr|qrcode|qrph|paymongo)[^>]*>|<canvas\b/i', $thankyou_hook_markup );
-		$has_pending_copy     = (
-			false !== strpos( $thankyou_text_lc, 'waiting for payment' )
-			|| false !== strpos( $thankyou_text_lc, 'scan qr code to pay' )
-			|| false !== strpos( $thankyou_text_lc, 'scan the qr code below' )
-			|| false !== strpos( $thankyou_text_lc, 'open your banking app' )
-		);
 
-		// Show payment-required state only while there are real QR/pending signals.
-		// If QR/pending copy is gone, switch to Done state immediately.
-		if ( $is_awaiting_payment && ! ( $has_qr_markup || $has_pending_copy ) ) {
+		// QR is the source of truth for the payment step.
+		// As soon as gateway QR markup is gone, move to Done view on next render.
+		if ( $is_awaiting_payment && ! $has_qr_markup ) {
 			$is_awaiting_payment = false;
 		}
 		?>
@@ -132,15 +125,30 @@ defined( 'ABSPATH' ) || exit;
 				<script>
 				(function() {
 					var gateway = document.querySelector('.noyona-pay-card__gateway');
+					function hasQrNode(root) {
+						if (!root) return false;
+						if (root.querySelector('canvas')) return true;
+						var imgs = root.querySelectorAll('img');
+						for (var i = 0; i < imgs.length; i++) {
+							var src = String(imgs[i].getAttribute('src') || '').toLowerCase();
+							var alt = String(imgs[i].getAttribute('alt') || '').toLowerCase();
+							if (
+								src.indexOf('qr') !== -1 ||
+								src.indexOf('qrcode') !== -1 ||
+								src.indexOf('qrph') !== -1 ||
+								src.indexOf('paymongo') !== -1 ||
+								alt.indexOf('qr') !== -1 ||
+								alt.indexOf('qrcode') !== -1 ||
+								alt.indexOf('paymongo') !== -1
+							) {
+								return true;
+							}
+						}
+						return false;
+					}
+
 					if (gateway) {
-						var gatewayText = String(gateway.textContent || '').toLowerCase();
-						var hasPendingCopy =
-							gatewayText.indexOf('waiting for payment') !== -1 ||
-							gatewayText.indexOf('scan qr code to pay') !== -1 ||
-							gatewayText.indexOf('scan the qr code below') !== -1 ||
-							gatewayText.indexOf('open your banking app') !== -1;
-						var hasQrNode = !!gateway.querySelector('img[src*="qr" i], img[alt*="qr" i], img[src*="paymongo" i], canvas');
-						if (!hasQrNode && !hasPendingCopy) {
+						if (!hasQrNode(gateway)) {
 							window.location.reload();
 							return;
 						}
