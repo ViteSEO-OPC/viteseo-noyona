@@ -562,20 +562,94 @@ function noyona_checkout_inline_js() {
 		var isAwaitingPayment = !!document.querySelector('[data-noyona-awaiting-payment="1"]');
 
 		if (!isAwaitingPayment && isOrderReceivedPath) {
+			function hasPendingQrCopy(text) {
+				if (!text) return false;
+				return (
+					text.indexOf('scan qr code to pay') !== -1 ||
+					text.indexOf('waiting for payment') !== -1 ||
+					text.indexOf('open your banking app') !== -1 ||
+					text.indexOf('scan the qr code below') !== -1
+				);
+			}
+
+			function isNodeVisible(node) {
+				if (!node) return false;
+				var style = window.getComputedStyle(node);
+				if (!style || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) {
+					return false;
+				}
+				var rect = node.getBoundingClientRect();
+				return rect.width > 0 && rect.height > 0;
+			}
+
+			function hasVisibleQrPayload(root) {
+				if (!root) return false;
+
+				var canvases = root.querySelectorAll('canvas');
+				for (var i = 0; i < canvases.length; i++) {
+					if (isNodeVisible(canvases[i])) {
+						return true;
+					}
+				}
+
+				var images = root.querySelectorAll('img');
+				for (var j = 0; j < images.length; j++) {
+					var img = images[j];
+					var src = String(img.getAttribute('src') || '').toLowerCase();
+					var alt = String(img.getAttribute('alt') || '').toLowerCase();
+					var cls = String(img.className || '').toLowerCase();
+					if (
+						src.indexOf('qr') !== -1 ||
+						src.indexOf('qrcode') !== -1 ||
+						src.indexOf('qrph') !== -1 ||
+						src.indexOf('paymongo') !== -1 ||
+						alt.indexOf('qr') !== -1 ||
+						alt.indexOf('qrcode') !== -1 ||
+						alt.indexOf('paymongo') !== -1 ||
+						cls.indexOf('qr') !== -1 ||
+						cls.indexOf('paymongo') !== -1
+					) {
+						if (isNodeVisible(img)) {
+							return true;
+						}
+					}
+				}
+
+				var paymongoBlocks = root.querySelectorAll('[class*="paymongo"], [id*="paymongo"], [class*="PayMongo"], [id*="PayMongo"]');
+				for (var k = 0; k < paymongoBlocks.length; k++) {
+					var block = paymongoBlocks[k];
+					if (!isNodeVisible(block)) {
+						continue;
+					}
+					if (block.querySelector('canvas')) {
+						return true;
+					}
+					var blockImgs = block.querySelectorAll('img');
+					for (var m = 0; m < blockImgs.length; m++) {
+						if (isNodeVisible(blockImgs[m])) {
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
+
 			var paymentOverviewNode = document.querySelector('.woocommerce-order-overview__payment-method');
 			var paymentOverviewText = paymentOverviewNode ? String(paymentOverviewNode.textContent || '').toLowerCase() : '';
-			var bodyText = String((document.body && document.body.textContent) || '').toLowerCase();
+			var bodyText = String((document.body && (document.body.innerText || document.body.textContent)) || '').toLowerCase();
+			var orderRoot = document.querySelector('.woocommerce-order') || document;
 			var looksLikePayMongoQr = (
 				(paymentOverviewText.indexOf('paymongo') !== -1 && paymentOverviewText.indexOf('qr') !== -1) ||
 				(bodyText.indexOf('paymongo') !== -1 && bodyText.indexOf('qr') !== -1)
 			);
-			var hasQrWaitingCopy = (
-				bodyText.indexOf('scan qr code to pay') !== -1 ||
-				bodyText.indexOf('waiting for payment') !== -1 ||
-				bodyText.indexOf('open your banking app') !== -1 ||
-				bodyText.indexOf('scan the qr code below') !== -1
+			var hasQrWaitingCopy = hasPendingQrCopy(bodyText);
+			var hasQrPayload = hasVisibleQrPayload(orderRoot);
+			var hasOrderReceivedCopy = (
+				bodyText.indexOf('order has been received') !== -1 ||
+				bodyText.indexOf('order received') !== -1
 			);
-			if (looksLikePayMongoQr && hasQrWaitingCopy) {
+			if (looksLikePayMongoQr && (hasQrPayload || (hasQrWaitingCopy && !hasOrderReceivedCopy))) {
 				isAwaitingPayment = true;
 			}
 		}
