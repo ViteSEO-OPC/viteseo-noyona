@@ -573,7 +573,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 .noyona-checkout-form .form-row select:focus {
   border-color: var(--noyona-cart-pink, #e199a4);
   box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.12);
-  background: #fff;
+  background-color: #fff;
 }
 
 .noyona-checkout-form .form-row input.input-text::placeholder,
