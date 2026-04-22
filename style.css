@@ -2103,6 +2103,61 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 .noyona-account-orders-card__head {
 	padding-bottom: 12px;
 	margin-bottom: 10px;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.noyona-account-orders-card__title-wrap h3 {
+	margin: 0;
+}
+
+.noyona-account-orders-card__title-wrap p {
+	margin: 6px 0 0;
+}
+
+.noyona-account-orders-filters {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.noyona-account-orders-filter {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 38px;
+	padding: 0 14px;
+	border-radius: 999px;
+	border: 1px solid #ebe6e8;
+	background: #fff;
+	color: #5a5a5a;
+	text-decoration: none !important;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.66);
+	font-weight: 600;
+	line-height: 1;
+	box-shadow: 0 4px 12px rgba(24, 24, 24, 0.09);
+	transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.noyona-account-orders-filter i {
+	font-size: 14px;
+	color: #e39cab;
+}
+
+.noyona-account-orders-filter.is-active {
+	border-color: #e6a6b4;
+	background: #fff6f8;
+	color: #c8778b;
+}
+
+.noyona-account-orders-filter:hover {
+	border-color: #efc4cd;
+	background: #fff8fa;
 }
 
 .noyona-account-orders-table-wrap {
@@ -2524,6 +2579,22 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 
 	.noyona-account-order-modal__actions {
 		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.noyona-account-orders-card__head {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.noyona-account-orders-filters {
+		justify-content: flex-start;
+		overflow-x: auto;
+		white-space: nowrap;
+		padding-bottom: 4px;
+	}
+
+	.noyona-account-orders-filter {
+		flex: 0 0 auto;
 	}
 }
 

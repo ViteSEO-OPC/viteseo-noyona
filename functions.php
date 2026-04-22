@@ -2689,13 +2689,76 @@ function noyona_render_account_page_shortcode() {
         $orders_page = 1;
     }
 
+    $order_status_filters = array(
+        'to-pay'        => array(
+            'label'    => __( 'To Pay', 'noyona-childtheme' ),
+            'icon'     => 'fa-regular fa-credit-card',
+            'statuses' => array( 'pending', 'on-hold', 'failed' ),
+        ),
+        'to-ship'       => array(
+            'label'    => __( 'To Ship', 'noyona-childtheme' ),
+            'icon'     => 'fa-solid fa-box-open',
+            'statuses' => array( 'processing', 'to-ship', 'to_ship' ),
+        ),
+        'to-receive'    => array(
+            'label'    => __( 'To Receive', 'noyona-childtheme' ),
+            'icon'     => 'fa-solid fa-truck-fast',
+            'statuses' => array( 'to-receive', 'to_receive', 'shipped', 'in-transit', 'in_transit', 'out-for-delivery', 'out_for_delivery' ),
+        ),
+        'complete'      => array(
+            'label'    => __( 'Complete', 'noyona-childtheme' ),
+            'icon'     => 'fa-regular fa-circle-check',
+            'statuses' => array( 'completed' ),
+        ),
+        'cancel-refund' => array(
+            'label'    => __( 'Cancel / Refund', 'noyona-childtheme' ),
+            'icon'     => 'fa-regular fa-circle-xmark',
+            'statuses' => array( 'cancelled', 'refunded' ),
+        ),
+    );
+    $selected_order_filter = isset( $_GET['order_filter'] ) ? sanitize_key( wp_unslash( $_GET['order_filter'] ) ) : 'to-pay';
+    if ( ! isset( $order_status_filters[ $selected_order_filter ] ) ) {
+        $selected_order_filter = 'to-pay';
+    }
+
+    $available_order_status_keys = function_exists( 'wc_get_order_statuses' ) ? array_keys( (array) wc_get_order_statuses() ) : array();
+    $available_order_statuses    = array_map(
+        static function ( $status_key ) {
+            $status_key = (string) $status_key;
+            return sanitize_key( 0 === strpos( $status_key, 'wc-' ) ? substr( $status_key, 3 ) : $status_key );
+        },
+        $available_order_status_keys
+    );
+    $selected_status_candidates = isset( $order_status_filters[ $selected_order_filter ]['statuses'] ) ? (array) $order_status_filters[ $selected_order_filter ]['statuses'] : array();
+    $selected_order_statuses    = array_values(
+        array_filter(
+            array_map(
+                static function ( $status_slug ) {
+                    return sanitize_key( (string) $status_slug );
+                },
+                $selected_status_candidates
+            ),
+            static function ( $status_slug ) use ( $available_order_statuses ) {
+                return in_array( $status_slug, $available_order_statuses, true );
+            }
+        )
+    );
+
+    // Fallback for stores without custom "to receive" statuses.
+    if ( 'to-receive' === $selected_order_filter && empty( $selected_order_statuses ) && in_array( 'processing', $available_order_statuses, true ) ) {
+        $selected_order_statuses = array( 'processing' );
+    }
+    if ( empty( $selected_order_statuses ) && in_array( 'pending', $available_order_statuses, true ) ) {
+        $selected_order_statuses = array( 'pending' );
+    }
+
     $account_orders      = array();
     $account_total_pages = 1;
     if ( 'orders' === $active_tab && function_exists( 'wc_get_orders' ) ) {
         $orders_result = wc_get_orders(
             array(
                 'customer_id' => (int) $current_user->ID,
-                'status'      => array_keys( wc_get_order_statuses() ),
+                'status'      => $selected_order_statuses,
                 'orderby'     => 'date',
                 'order'       => 'DESC',
                 'paginate'    => true,
@@ -2755,8 +2818,34 @@ function noyona_render_account_page_shortcode() {
         <?php if ( 'orders' === $active_tab ) : ?>
         <section id="noyona-account-orders-panel" class="noyona-account-profile-card noyona-account-orders-card">
             <header class="noyona-account-profile-card__head noyona-account-orders-card__head">
-                <h3><?php esc_html_e( 'My Orders', 'noyona-childtheme' ); ?></h3>
-                <p><?php esc_html_e( 'View and track recent orders', 'noyona-childtheme' ); ?></p>
+                <div class="noyona-account-orders-card__title-wrap">
+                    <h3><?php esc_html_e( 'My Orders', 'noyona-childtheme' ); ?></h3>
+                    <p><?php esc_html_e( 'View and track recent orders', 'noyona-childtheme' ); ?></p>
+                </div>
+                <nav class="noyona-account-orders-filters" aria-label="<?php esc_attr_e( 'Order status filters', 'noyona-childtheme' ); ?>">
+                    <?php foreach ( $order_status_filters as $filter_key => $filter_data ) : ?>
+                        <?php
+                        $is_filter_active = ( $filter_key === $selected_order_filter );
+                        $filter_url       = add_query_arg(
+                            array(
+                                'order_filter' => $filter_key,
+                                'orders_page'  => 1,
+                            ),
+                            $orders_url
+                        );
+                        $filter_icon = isset( $filter_data['icon'] ) ? (string) $filter_data['icon'] : 'fa-regular fa-circle';
+                        $filter_label = isset( $filter_data['label'] ) ? (string) $filter_data['label'] : ucfirst( str_replace( '-', ' ', (string) $filter_key ) );
+                        ?>
+                        <a
+                            class="noyona-account-orders-filter<?php echo $is_filter_active ? ' is-active' : ''; ?>"
+                            href="<?php echo esc_url( $filter_url ); ?>"
+                            <?php echo $is_filter_active ? 'aria-current="page"' : ''; ?>
+                        >
+                            <i class="<?php echo esc_attr( $filter_icon ); ?>" aria-hidden="true"></i>
+                            <span><?php echo esc_html( $filter_label ); ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </nav>
             </header>
 
             <div class="noyona-account-orders-table-wrap">
@@ -3074,7 +3163,7 @@ function noyona_render_account_page_shortcode() {
                         ?>
                         <tr>
                             <td colspan="6" class="noyona-account-orders-table__empty">
-                                <?php esc_html_e( 'No orders yet.', 'noyona-childtheme' ); ?>
+                                <?php esc_html_e( 'No orders in this status yet.', 'noyona-childtheme' ); ?>
                             </td>
                         </tr>
                         <?php
@@ -3091,7 +3180,13 @@ function noyona_render_account_page_shortcode() {
             if ( $account_total_pages > 1 ) :
                 $orders_pagination_links = paginate_links(
                     array(
-                        'base'      => add_query_arg( 'orders_page', '%#%', $orders_url ),
+                        'base'      => add_query_arg(
+                            array(
+                                'orders_page'  => '%#%',
+                                'order_filter' => $selected_order_filter,
+                            ),
+                            $orders_url
+                        ),
                         'format'    => '',
                         'current'   => $orders_page,
                         'total'     => $account_total_pages,
