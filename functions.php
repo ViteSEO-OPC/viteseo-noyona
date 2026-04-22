@@ -2481,6 +2481,8 @@ function noyona_render_account_page_shortcode() {
 
     $has_endpoint = false;
     $active_tab   = 'profile';
+    // Temporary product decision: hide saved bank/card management from account UI.
+    $show_payments_tab = false;
     if ( function_exists( 'WC' ) && WC() && isset( WC()->query ) && function_exists( 'is_wc_endpoint_url' ) ) {
         $endpoint_keys = array_keys( (array) WC()->query->get_query_vars() );
         foreach ( $endpoint_keys as $endpoint_key ) {
@@ -2493,13 +2495,19 @@ function noyona_render_account_page_shortcode() {
 
     $is_orders_endpoint    = function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'orders' );
     $is_addresses_endpoint = function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'edit-address' );
-    $is_payments_endpoint  = function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'payment-methods' );
+    $is_payment_methods_endpoint = function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'payment-methods' );
+    $is_payments_endpoint        = $show_payments_tab && $is_payment_methods_endpoint;
     if ( $is_orders_endpoint ) {
         $active_tab = 'orders';
     } elseif ( $is_addresses_endpoint ) {
         $active_tab = 'addresses';
     } elseif ( $is_payments_endpoint ) {
         $active_tab = 'payments';
+    }
+
+    // Keep /payment-methods reachable but render the profile tab while payments are disabled.
+    if ( $is_payment_methods_endpoint && ! $show_payments_tab ) {
+        $has_endpoint = false;
     }
 
     // Keep other Woo endpoint pages functional (addresses, payment methods, edit account, etc.).
@@ -2732,10 +2740,12 @@ function noyona_render_account_page_shortcode() {
                 <i class="fa-solid fa-house" aria-hidden="true"></i>
                 <span><?php esc_html_e( 'My Addresses', 'noyona-childtheme' ); ?></span>
             </a>
-            <a class="noyona-account-tab<?php echo ( 'payments' === $active_tab ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $payments_url ); ?>"<?php echo ( 'payments' === $active_tab ) ? ' aria-current="page"' : ''; ?>>
-                <i class="fa-regular fa-credit-card" aria-hidden="true"></i>
-                <span><?php esc_html_e( 'Banks & Cards', 'noyona-childtheme' ); ?></span>
-            </a>
+            <?php if ( $show_payments_tab ) : ?>
+                <a class="noyona-account-tab<?php echo ( 'payments' === $active_tab ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $payments_url ); ?>"<?php echo ( 'payments' === $active_tab ) ? ' aria-current="page"' : ''; ?>>
+                    <i class="fa-regular fa-credit-card" aria-hidden="true"></i>
+                    <span><?php esc_html_e( 'Banks & Cards', 'noyona-childtheme' ); ?></span>
+                </a>
+            <?php endif; ?>
             <a class="noyona-account-tab<?php echo ( 'profile' === $active_tab ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $account_url ); ?>"<?php echo ( 'profile' === $active_tab ) ? ' aria-current="page"' : ''; ?>>
                 <i class="fa-regular fa-user" aria-hidden="true"></i>
                 <span><?php esc_html_e( 'My Profile', 'noyona-childtheme' ); ?></span>
@@ -2743,7 +2753,7 @@ function noyona_render_account_page_shortcode() {
         </nav>
 
         <?php if ( 'orders' === $active_tab ) : ?>
-        <section class="noyona-account-profile-card noyona-account-orders-card">
+        <section id="noyona-account-orders-panel" class="noyona-account-profile-card noyona-account-orders-card">
             <header class="noyona-account-profile-card__head noyona-account-orders-card__head">
                 <h3><?php esc_html_e( 'My Orders', 'noyona-childtheme' ); ?></h3>
                 <p><?php esc_html_e( 'View and track recent orders', 'noyona-childtheme' ); ?></p>
@@ -2755,7 +2765,6 @@ function noyona_render_account_page_shortcode() {
                         <tr>
                             <th scope="col"><?php esc_html_e( 'Order #', 'noyona-childtheme' ); ?></th>
                             <th scope="col"><?php esc_html_e( 'Product Name', 'noyona-childtheme' ); ?></th>
-                            <th scope="col"><?php esc_html_e( 'Variation', 'noyona-childtheme' ); ?></th>
                             <th scope="col"><?php esc_html_e( 'Qty', 'noyona-childtheme' ); ?></th>
                             <th scope="col"><?php esc_html_e( 'Date', 'noyona-childtheme' ); ?></th>
                             <th scope="col"><?php esc_html_e( 'Status', 'noyona-childtheme' ); ?></th>
@@ -2764,7 +2773,8 @@ function noyona_render_account_page_shortcode() {
                     </thead>
                     <tbody>
                     <?php
-                    $has_order_rows = false;
+                    $has_order_rows    = false;
+                    $order_detail_modals = array();
                     if ( ! empty( $account_orders ) ) :
                         foreach ( $account_orders as $account_order ) :
                             if ( ! $account_order instanceof WC_Order ) {
@@ -2821,6 +2831,92 @@ function noyona_render_account_page_shortcode() {
                                     }
                                 }
                                 $variant_label = ! empty( $variant_parts ) ? implode( ', ', array_unique( $variant_parts ) ) : '&mdash;';
+                                $modal_id      = 'noyona-account-order-modal-' . absint( $account_order->get_id() ) . '-' . absint( $order_item->get_id() );
+                                $modal_title   = sprintf( __( 'Order #%s', 'noyona-childtheme' ), $order_number );
+
+                                $shipping_name = trim( (string) $account_order->get_shipping_first_name() . ' ' . (string) $account_order->get_shipping_last_name() );
+                                if ( '' === $shipping_name ) {
+                                    $shipping_name = trim( (string) $account_order->get_billing_first_name() . ' ' . (string) $account_order->get_billing_last_name() );
+                                }
+                                $shipping_phone = trim( (string) $account_order->get_billing_phone() );
+                                $shipping_parts = array_filter(
+                                    array(
+                                        $account_order->get_shipping_address_1(),
+                                        $account_order->get_shipping_city(),
+                                        $account_order->get_shipping_state(),
+                                        $account_order->get_shipping_postcode(),
+                                    )
+                                );
+                                if ( empty( $shipping_parts ) ) {
+                                    $shipping_parts = array_filter(
+                                        array(
+                                            $account_order->get_billing_address_1(),
+                                            $account_order->get_billing_city(),
+                                            $account_order->get_billing_state(),
+                                            $account_order->get_billing_postcode(),
+                                        )
+                                    );
+                                }
+                                $shipping_text = implode( ', ', array_map( 'wc_clean', $shipping_parts ) );
+
+                                $payment_label = trim( (string) $account_order->get_payment_method_title() );
+                                if ( '' === $payment_label ) {
+                                    $payment_label = (string) $account_order->get_payment_method();
+                                }
+
+                                $order_subtotal      = (float) $account_order->get_subtotal();
+                                $order_shipping_total = (float) $account_order->get_shipping_total() + (float) $account_order->get_shipping_tax();
+                                $order_discount_total = (float) $account_order->get_discount_total();
+
+                                $status_progress_map = array(
+                                    'pending'    => 1,
+                                    'on-hold'    => 1,
+                                    'failed'     => 1,
+                                    'cancelled'  => 1,
+                                    'processing' => 4,
+                                    'completed'  => 5,
+                                    'refunded'   => 5,
+                                );
+                                $current_progress_step = isset( $status_progress_map[ $status_key ] ) ? (int) $status_progress_map[ $status_key ] : 2;
+                                $progress_steps = array(
+                                    1 => __( 'Order has been placed', 'noyona-childtheme' ),
+                                    2 => __( 'Your parcel has arrived at the warehouse', 'noyona-childtheme' ),
+                                    3 => __( 'Delivery driver has been assigned', 'noyona-childtheme' ),
+                                    4 => __( 'Parcel is out for delivery', 'noyona-childtheme' ),
+                                    5 => __( 'Parcel has been delivered', 'noyona-childtheme' ),
+                                );
+
+                                $placed_date_label = ( $order_date instanceof WC_DateTime )
+                                    ? strtoupper( wp_date( 'M d, Y', $order_date->getTimestamp() ) )
+                                    : strtoupper( wp_date( 'M d, Y' ) );
+                                $status_date_obj = $account_order->get_date_completed();
+                                if ( ! $status_date_obj instanceof WC_DateTime ) {
+                                    $status_date_obj = $account_order->get_date_modified();
+                                }
+                                $status_date_label = ( $status_date_obj instanceof WC_DateTime )
+                                    ? strtoupper( wp_date( 'M d, Y', $status_date_obj->getTimestamp() ) )
+                                    : $placed_date_label;
+
+                                $review_url = ( '' !== trim( $item_permalink ) )
+                                    ? $item_permalink . '#reviews'
+                                    : $account_order->get_view_order_url();
+                                $contact_url = home_url( '/contact-us/' );
+                                $invoice_url = $account_order->get_view_order_url();
+                                $buy_again_url = '';
+                                if ( $item_product instanceof WC_Product ) {
+                                    $buy_again_url = add_query_arg(
+                                        array(
+                                            'add-to-cart' => (int) $item_product->get_id(),
+                                            'quantity'    => $item_qty,
+                                        ),
+                                        function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' )
+                                    );
+                                }
+                                if ( '' === trim( (string) $buy_again_url ) ) {
+                                    $buy_again_url = ( '' !== trim( $item_permalink ) )
+                                        ? $item_permalink
+                                        : ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' ) );
+                                }
 
                                 $item_thumb = '';
                                 if ( $item_product instanceof WC_Product ) {
@@ -2843,6 +2939,103 @@ function noyona_render_account_page_shortcode() {
                                         )
                                     );
                                 }
+
+                                ob_start();
+                                ?>
+                                <div id="<?php echo esc_attr( $modal_id ); ?>" class="noyona-account-modal noyona-account-order-modal" aria-hidden="true">
+                                    <a href="#noyona-account-orders-panel" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close order details', 'noyona-childtheme' ); ?>"></a>
+                                    <div class="noyona-account-modal-dialog noyona-account-order-modal__dialog" role="dialog" aria-modal="true" aria-label="<?php echo esc_attr( $modal_title ); ?>">
+                                        <a href="#noyona-account-orders-panel" class="noyona-account-modal-back" aria-label="<?php esc_attr_e( 'Close order details', 'noyona-childtheme' ); ?>">
+                                            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                                        </a>
+                                        <p class="noyona-account-order-modal__order-number"><?php echo esc_html( $modal_title ); ?></p>
+
+                                        <div class="noyona-account-order-modal__top">
+                                            <section class="noyona-account-order-modal__ship">
+                                                <h4><?php esc_html_e( 'Shipping Address', 'noyona-childtheme' ); ?></h4>
+                                                <?php if ( '' !== $shipping_name ) : ?>
+                                                    <p class="noyona-account-order-modal__ship-name"><?php echo esc_html( $shipping_name ); ?></p>
+                                                <?php endif; ?>
+                                                <?php if ( '' !== $shipping_phone ) : ?>
+                                                    <p class="noyona-account-order-modal__ship-phone"><?php echo esc_html( $shipping_phone ); ?></p>
+                                                <?php endif; ?>
+                                                <?php if ( '' !== trim( $shipping_text ) ) : ?>
+                                                    <p class="noyona-account-order-modal__ship-address"><?php echo esc_html( $shipping_text ); ?></p>
+                                                <?php endif; ?>
+                                            </section>
+
+                                            <section class="noyona-account-order-modal__progress">
+                                                <h4><?php esc_html_e( 'Order Progress', 'noyona-childtheme' ); ?></h4>
+                                                <ol class="noyona-account-order-modal__timeline">
+                                                    <?php foreach ( $progress_steps as $step_index => $step_label ) : ?>
+                                                        <?php
+                                                        $step_state = ( $step_index < $current_progress_step ) ? 'is-complete' : ( ( $step_index === $current_progress_step ) ? 'is-current' : 'is-pending' );
+                                                        $step_date  = '';
+                                                        if ( 1 === (int) $step_index ) {
+                                                            $step_date = $placed_date_label;
+                                                        } elseif ( (int) $step_index <= $current_progress_step ) {
+                                                            $step_date = $status_date_label;
+                                                        }
+                                                        ?>
+                                                        <li class="noyona-account-order-modal__timeline-item <?php echo esc_attr( $step_state ); ?>">
+                                                            <span class="noyona-account-order-modal__timeline-dot" aria-hidden="true"></span>
+                                                            <span class="noyona-account-order-modal__timeline-copy">
+                                                                <?php if ( '' !== $step_date ) : ?>
+                                                                    <small><?php echo esc_html( $step_date ); ?></small>
+                                                                <?php endif; ?>
+                                                                <strong><?php echo esc_html( $step_label ); ?></strong>
+                                                            </span>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                </ol>
+                                            </section>
+                                        </div>
+
+                                        <section class="noyona-account-order-modal__item-card">
+                                            <span class="noyona-account-order-modal__item-media"><?php echo $item_thumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                                            <div class="noyona-account-order-modal__item-meta">
+                                                <h5><?php echo esc_html( $item_name ); ?></h5>
+                                                <?php if ( ! empty( $variant_parts ) ) : ?>
+                                                    <p><?php printf( esc_html__( 'Variation: %s', 'noyona-childtheme' ), esc_html( $variant_label ) ); ?></p>
+                                                <?php endif; ?>
+                                                <p><?php printf( esc_html__( 'Qty: %d', 'noyona-childtheme' ), (int) $item_qty ); ?></p>
+                                            </div>
+                                            <strong class="noyona-account-order-modal__item-price"><?php echo wp_kses_post( $item_total ); ?></strong>
+                                        </section>
+
+                                        <section class="noyona-account-order-modal__totals">
+                                            <div class="noyona-account-order-modal__total-row">
+                                                <span><?php esc_html_e( 'Merchandise Subtotal', 'noyona-childtheme' ); ?></span>
+                                                <strong><?php echo wp_kses_post( wc_price( $order_subtotal ) ); ?></strong>
+                                            </div>
+                                            <div class="noyona-account-order-modal__total-row">
+                                                <span><?php esc_html_e( 'Shipping Fee', 'noyona-childtheme' ); ?></span>
+                                                <strong><?php echo wp_kses_post( wc_price( $order_shipping_total ) ); ?></strong>
+                                            </div>
+                                            <div class="noyona-account-order-modal__total-row">
+                                                <span><?php esc_html_e( 'Shop Voucher Applied', 'noyona-childtheme' ); ?></span>
+                                                <strong><?php echo wp_kses_post( $order_discount_total > 0 ? '-' . wc_price( $order_discount_total ) : wc_price( 0 ) ); ?></strong>
+                                            </div>
+                                            <div class="noyona-account-order-modal__total-row">
+                                                <span><?php esc_html_e( 'Payment Method', 'noyona-childtheme' ); ?></span>
+                                                <strong><?php echo esc_html( $payment_label ); ?></strong>
+                                            </div>
+                                            <div class="noyona-account-order-modal__total-row is-grand-total">
+                                                <span><?php esc_html_e( 'Order Total', 'noyona-childtheme' ); ?></span>
+                                                <strong><?php echo wp_kses_post( $account_order->get_formatted_order_total() ); ?></strong>
+                                            </div>
+                                        </section>
+
+                                        <div class="noyona-account-order-modal__actions">
+                                            <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $review_url ); ?>"><?php esc_html_e( 'Write a Review', 'noyona-childtheme' ); ?></a>
+                                            <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $invoice_url ); ?>"><?php esc_html_e( 'Download E-invoice', 'noyona-childtheme' ); ?></a>
+                                            <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $contact_url ); ?>"><?php esc_html_e( 'Contact Us', 'noyona-childtheme' ); ?></a>
+                                            <a class="noyona-account-btn noyona-account-btn--primary" href="<?php echo esc_url( $buy_again_url ); ?>"><?php esc_html_e( 'Buy Again', 'noyona-childtheme' ); ?></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php
+                                $order_detail_modals[] = (string) ob_get_clean();
                                 ?>
                                 <tr>
                                     <td class="noyona-account-orders-table__order"><?php echo esc_html( $order_number ); ?></td>
@@ -2850,15 +3043,10 @@ function noyona_render_account_page_shortcode() {
                                         <div class="noyona-account-order-product">
                                             <span class="noyona-account-order-product__media"><?php echo $item_thumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                             <span class="noyona-account-order-product__name">
-                                                <?php if ( '' !== $item_permalink ) : ?>
-                                                    <a href="<?php echo esc_url( $item_permalink ); ?>"><?php echo esc_html( $item_name ); ?></a>
-                                                <?php else : ?>
-                                                    <?php echo esc_html( $item_name ); ?>
-                                                <?php endif; ?>
+                                                <a class="noyona-account-order-product__open-modal" href="#<?php echo esc_attr( $modal_id ); ?>"><?php echo esc_html( $item_name ); ?></a>
                                             </span>
                                         </div>
                                     </td>
-                                    <td><?php echo wp_kses_post( $variant_label ); ?></td>
                                     <td><?php echo esc_html( (string) $item_qty ); ?></td>
                                     <td><?php echo wp_kses_post( $date_label ); ?></td>
                                     <td><span class="noyona-account-order-status <?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status_label ); ?></span></td>
@@ -2872,7 +3060,7 @@ function noyona_render_account_page_shortcode() {
                     if ( ! $has_order_rows ) :
                         ?>
                         <tr>
-                            <td colspan="7" class="noyona-account-orders-table__empty">
+                            <td colspan="6" class="noyona-account-orders-table__empty">
                                 <?php esc_html_e( 'No orders yet.', 'noyona-childtheme' ); ?>
                             </td>
                         </tr>
@@ -2882,6 +3070,9 @@ function noyona_render_account_page_shortcode() {
                     </tbody>
                 </table>
             </div>
+            <?php if ( ! empty( $order_detail_modals ) ) : ?>
+                <?php echo implode( '', $order_detail_modals ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <?php endif; ?>
 
             <?php
             if ( $account_total_pages > 1 ) :
@@ -3092,7 +3283,7 @@ function noyona_render_account_page_shortcode() {
                 </div>
             <?php endif; ?>
         </section>
-        <?php elseif ( 'payments' === $active_tab ) : ?>
+        <?php elseif ( $show_payments_tab && 'payments' === $active_tab ) : ?>
         <div class="noyona-account-payments-wrap">
             <?php if ( '' !== $notice_message && ! $is_bank_modal_open && ! $is_card_modal_open ) : ?>
                 <p class="noyona-account-addresses-notice<?php echo ( 'success' === $notice_type ) ? ' is-success' : ' is-error'; ?>">
