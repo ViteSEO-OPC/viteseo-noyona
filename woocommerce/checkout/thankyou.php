@@ -135,9 +135,6 @@ defined( 'ABSPATH' ) || exit;
 							<p class="woocommerce-info"><?php esc_html_e( 'If the QR does not load, use the payment button below.', 'noyona' ); ?></p>
 						<?php endif; ?>
 					</div>
-					<p class="noyona-pay-refresh-note">
-						<?php esc_html_e( 'This page refreshes automatically while waiting for payment confirmation.', 'noyona' ); ?>
-					</p>
 				</section>
 
 				<script>
@@ -145,25 +142,19 @@ defined( 'ABSPATH' ) || exit;
 					var gateway = document.querySelector('.noyona-pay-card__gateway');
 					if (!gateway) return;
 
-					var expiryLabelNodes = Array.prototype.filter.call(
-						gateway.querySelectorAll('p, span, div, small, strong'),
-						function(node) {
-							var text = String(node.textContent || '').toLowerCase();
-							return text.indexOf('this qr code expires in') !== -1;
-						}
-					);
-					if (!expiryLabelNodes.length) return;
-
 					var timePattern = /\b\d{1,2}:\d{2}\b/;
-					expiryLabelNodes.forEach(function(node) {
+					var defaultExpirySeconds = 30 * 60; // Standard fallback expiry window: 30 minutes.
+					var activeTimers = [];
+
+					function startCountdown(node) {
+						if (!node || node.querySelector('.noyona-pay-expire-time')) {
+							return;
+						}
 						if (timePattern.test(String(node.textContent || ''))) {
 							return;
 						}
-						if (node.querySelector('.noyona-pay-expire-time')) {
-							return;
-						}
 
-						var totalSeconds = 30 * 60; // Standard fallback expiry window: 30 minutes.
+						var totalSeconds = defaultExpirySeconds;
 						var timerNode = document.createElement('strong');
 						timerNode.className = 'noyona-pay-expire-time';
 						node.appendChild(document.createTextNode(' '));
@@ -183,6 +174,47 @@ defined( 'ABSPATH' ) || exit;
 								window.clearInterval(intervalId);
 							}
 						}, 1000);
+						activeTimers.push(intervalId);
+					}
+
+					function applyFallbackExpiryTime() {
+						var expiryLabelNodes = Array.prototype.filter.call(
+							gateway.querySelectorAll('p, span, div, small, strong'),
+							function(node) {
+								var text = String(node.textContent || '').toLowerCase();
+								return text.indexOf('this qr code expires in') !== -1;
+							}
+						);
+						if (!expiryLabelNodes.length) return false;
+
+						expiryLabelNodes.forEach(function(node) {
+							startCountdown(node);
+						});
+						return true;
+					}
+
+					var foundExpiryLabel = applyFallbackExpiryTime();
+					if (!foundExpiryLabel && window.MutationObserver) {
+						var observer = new MutationObserver(function() {
+							var applied = applyFallbackExpiryTime();
+							if (applied) {
+								window.setTimeout(function() {
+									observer.disconnect();
+								}, 2000);
+							}
+						});
+						observer.observe(gateway, { childList: true, subtree: true, characterData: true });
+
+						// Stop watching eventually to avoid long-lived observers.
+						window.setTimeout(function() {
+							observer.disconnect();
+						}, 45000);
+					}
+
+					window.addEventListener('beforeunload', function() {
+						activeTimers.forEach(function(id) {
+							window.clearInterval(id);
+						});
 					});
 				})();
 				</script>
