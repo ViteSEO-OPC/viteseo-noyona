@@ -81,6 +81,10 @@ defined( 'ABSPATH' ) || exit;
 			$subtotal       = (float) $order->get_subtotal();
 			$discount_total = (float) $order->get_discount_total();
 			$shipping_total = (float) $order->get_shipping_total() + (float) $order->get_shipping_tax();
+			$payment_label  = (string) $order->get_payment_method_title();
+			if ( '' === trim( $payment_label ) ) {
+				$payment_label = (string) $order->get_payment_method();
+			}
 
 			$shop_url  = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
 			$track_url = ( is_user_logged_in() && (int) $order->get_user_id() === (int) get_current_user_id() )
@@ -90,25 +94,43 @@ defined( 'ABSPATH' ) || exit;
 
 			<?php if ( $is_awaiting_payment ) : ?>
 				<div data-noyona-awaiting-payment="1"></div>
-				<section class="noyona-pay-hero">
+				<section class="noyona-pay-hero noyona-pay-hero--received">
 					<div class="noyona-pay-hero__icon" aria-hidden="true">
-						<i class="fa-solid fa-qrcode"></i>
+						<i class="fa-solid fa-check"></i>
 					</div>
-					<h1 class="noyona-pay-hero__title"><?php esc_html_e( 'Complete Your Payment', 'noyona' ); ?></h1>
+					<h1 class="noyona-pay-hero__title"><?php esc_html_e( 'Order Received!', 'noyona' ); ?></h1>
 					<p class="noyona-pay-hero__subtitle">
-						<?php esc_html_e( 'Scan the QR code below to finish your order. The final Done page appears after payment succeeds.', 'noyona' ); ?>
+						<?php esc_html_e( 'Thank you! Order has been received!', 'noyona' ); ?>
 					</p>
 				</section>
 
-				<section class="noyona-done-order-number" aria-label="<?php esc_attr_e( 'Order number', 'noyona' ); ?>">
-					<span class="noyona-done-order-number__label"><?php esc_html_e( 'Order Number', 'noyona' ); ?></span>
-					<strong class="noyona-done-order-number__value"><?php echo esc_html( $order->get_order_number() ); ?></strong>
+				<section class="noyona-pay-meta" aria-label="<?php esc_attr_e( 'Order summary', 'noyona' ); ?>">
+					<div class="noyona-pay-meta__item">
+						<span class="noyona-pay-meta__label"><?php esc_html_e( 'Order Number', 'noyona' ); ?></span>
+						<strong class="noyona-pay-meta__value"><?php echo esc_html( $order->get_order_number() ); ?></strong>
+					</div>
+					<div class="noyona-pay-meta__item">
+						<span class="noyona-pay-meta__label"><?php esc_html_e( 'Date', 'noyona' ); ?></span>
+						<strong class="noyona-pay-meta__value"><?php echo esc_html( date_i18n( 'M j, Y', $order_created ) ); ?></strong>
+					</div>
+					<div class="noyona-pay-meta__item">
+						<span class="noyona-pay-meta__label"><?php esc_html_e( 'Total', 'noyona' ); ?></span>
+						<strong class="noyona-pay-meta__value"><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></strong>
+					</div>
+					<div class="noyona-pay-meta__item">
+						<span class="noyona-pay-meta__label"><?php esc_html_e( 'Email', 'noyona' ); ?></span>
+						<strong class="noyona-pay-meta__value"><?php echo esc_html( (string) $order->get_billing_email() ); ?></strong>
+					</div>
+					<div class="noyona-pay-meta__item">
+						<span class="noyona-pay-meta__label"><?php esc_html_e( 'Payment', 'noyona' ); ?></span>
+						<strong class="noyona-pay-meta__value"><?php echo esc_html( $payment_label ); ?></strong>
+					</div>
 				</section>
 
 				<section class="noyona-pay-card">
 					<div class="noyona-pay-card__head">
-						<h2 class="noyona-pay-card__title"><?php esc_html_e( 'Pay with QR Ph via PayMongo', 'noyona' ); ?></h2>
-						<p class="noyona-pay-card__copy"><?php esc_html_e( 'Use GCash, Maya, GoTyme, or any supported banking app.', 'noyona' ); ?></p>
+						<h2 class="noyona-pay-card__title"><?php esc_html_e( 'Scan QR to Pay', 'noyona' ); ?></h2>
+						<p class="noyona-pay-card__copy"><?php esc_html_e( 'Open your banking app or e-wallet and scan the QR code below to complete your payment.', 'noyona' ); ?></p>
 					</div>
 					<div class="noyona-pay-card__gateway">
 						<?php if ( '' !== $thankyou_hook_markup ) : ?>
@@ -120,6 +142,59 @@ defined( 'ABSPATH' ) || exit;
 					<p class="noyona-pay-refresh-note">
 						<?php esc_html_e( 'This page refreshes automatically while waiting for payment confirmation.', 'noyona' ); ?>
 					</p>
+				</section>
+
+				<section class="noyona-checkout-card noyona-pay-order-details">
+					<h2 class="noyona-checkout-card__title"><?php esc_html_e( 'Order Details', 'noyona' ); ?></h2>
+
+					<div class="noyona-order-items">
+						<?php foreach ( $order->get_items( 'line_item' ) as $item_id => $item ) : ?>
+							<?php
+							$product = $item->get_product();
+							if ( ! $product ) {
+								continue;
+							}
+							$thumbnail = $product->get_image( 'woocommerce_gallery_thumbnail' );
+							$item_meta = wc_display_item_meta(
+								$item,
+								array(
+									'before'    => '<dl class="variation">',
+									'after'     => '</dl>',
+									'separator' => '',
+									'echo'      => false,
+								)
+							);
+							?>
+							<div class="noyona-order-item">
+								<div class="noyona-order-item__image">
+									<?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</div>
+								<div class="noyona-order-item__details">
+									<span class="noyona-order-item__name"><?php echo esc_html( $item->get_name() ); ?></span>
+									<?php if ( ! empty( trim( wp_strip_all_tags( (string) $item_meta ) ) ) ) : ?>
+										<?php echo wp_kses_post( $item_meta ); ?>
+									<?php endif; ?>
+									<span class="noyona-order-item__qty">&times; <?php echo esc_html( (string) $item->get_quantity() ); ?></span>
+								</div>
+								<div class="noyona-order-item__total">
+									<?php echo wp_kses_post( $order->get_formatted_line_subtotal( $item ) ); ?>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					</div>
+
+					<div class="noyona-order-totals">
+						<div class="noyona-order-totals__row">
+							<span class="noyona-order-totals__label"><?php esc_html_e( 'Shipping', 'noyona' ); ?></span>
+							<span class="noyona-order-totals__value <?php echo $shipping_total <= 0 ? 'noyona-order-totals__value--free' : ''; ?>">
+								<?php echo $shipping_total > 0 ? wp_kses_post( wc_price( $shipping_total ) ) : esc_html__( 'FREE', 'woocommerce' ); ?>
+							</span>
+						</div>
+						<div class="noyona-order-totals__row noyona-order-totals__row--total">
+							<span class="noyona-order-totals__label"><?php esc_html_e( 'Total', 'noyona' ); ?></span>
+							<span class="noyona-order-totals__value"><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></span>
+						</div>
+					</div>
 				</section>
 
 				<script>
