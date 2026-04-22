@@ -173,6 +173,48 @@ function noyona_force_wc_get_checkout_templates( $located, $template_name, $args
 }
 
 /**
+ * Fallback: on order-received endpoint, replace block-based order confirmation
+ * content with classic checkout shortcode output.
+ *
+ * This guarantees our `woocommerce/checkout/thankyou.php` override is used
+ * even when Woo block templates are active or DB-overridden.
+ *
+ * @param string $block_content Rendered block output.
+ * @param array  $block         Parsed block data.
+ * @return string
+ */
+add_filter( 'render_block', 'noyona_force_classic_thankyou_on_order_received', 5, 2 );
+function noyona_force_classic_thankyou_on_order_received( $block_content, $block ) {
+	if ( is_admin() && ! wp_doing_ajax() ) {
+		return $block_content;
+	}
+
+	if ( ! function_exists( 'is_wc_endpoint_url' ) || ! is_wc_endpoint_url( 'order-received' ) ) {
+		return $block_content;
+	}
+
+	$block_name = isset( $block['blockName'] ) ? (string) $block['blockName'] : '';
+	if ( '' === $block_name || 0 !== strpos( $block_name, 'woocommerce/order-confirmation' ) ) {
+		return $block_content;
+	}
+
+	static $has_injected_classic_thankyou = false;
+	static $classic_thankyou_markup       = null;
+
+	if ( ! $has_injected_classic_thankyou ) {
+		// Inject once at the first order-confirmation block encountered.
+		if ( null === $classic_thankyou_markup ) {
+			$classic_thankyou_markup = do_shortcode( '[woocommerce_checkout]' );
+		}
+		$has_injected_classic_thankyou = true;
+		return (string) $classic_thankyou_markup;
+	}
+
+	// Suppress remaining order-confirmation blocks.
+	return '';
+}
+
+/**
  * Enqueue checkout UI styles.
  *
  * @return void
