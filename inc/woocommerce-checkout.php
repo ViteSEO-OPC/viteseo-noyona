@@ -490,6 +490,60 @@ function noyona_copy_billing_name_to_shipping( $order, $data ) {
 	$order->set_shipping_first_name( $order->get_billing_first_name() );
 	$order->set_shipping_last_name( $order->get_billing_last_name() );
 	$order->set_shipping_country( $order->get_billing_country() ?: 'PH' );
+
+	$get_value = static function( $key, $posted_data = array() ) {
+		if ( is_array( $posted_data ) && isset( $posted_data[ $key ] ) ) {
+			return wc_clean( (string) $posted_data[ $key ] );
+		}
+
+		if ( isset( $_POST[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return wc_clean( wp_unslash( (string) $_POST[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		}
+
+		return '';
+	};
+
+	$shipping_address_1 = $get_value( 'shipping_address_1', $data );
+	$shipping_city      = $get_value( 'shipping_city', $data );
+	$shipping_state     = $get_value( 'shipping_state', $data );
+	$shipping_postcode  = $get_value( 'shipping_postcode', $data );
+
+	// Fallback: recover shipping values from customer session if request payload is sparse.
+	if ( function_exists( 'WC' ) && WC()->customer ) {
+		if ( '' === $shipping_address_1 ) {
+			$shipping_address_1 = wc_clean( (string) WC()->customer->get_shipping_address_1() );
+		}
+		if ( '' === $shipping_city ) {
+			$shipping_city = wc_clean( (string) WC()->customer->get_shipping_city() );
+		}
+		if ( '' === $shipping_state ) {
+			$shipping_state = wc_clean( (string) WC()->customer->get_shipping_state() );
+		}
+		if ( '' === $shipping_postcode ) {
+			$shipping_postcode = wc_clean( (string) WC()->customer->get_shipping_postcode() );
+		}
+	}
+
+	if ( '' !== $shipping_address_1 ) {
+		$order->set_shipping_address_1( $shipping_address_1 );
+	}
+	if ( '' !== $shipping_city ) {
+		$order->set_shipping_city( $shipping_city );
+	}
+	if ( '' !== $shipping_state ) {
+		$order->set_shipping_state( $shipping_state );
+	}
+	if ( '' !== $shipping_postcode ) {
+		$order->set_shipping_postcode( $shipping_postcode );
+	}
+
+	$order_comments = $get_value( 'order_comments', $data );
+	if ( '' === $order_comments && function_exists( 'WC' ) && WC()->customer ) {
+		$order_comments = wc_clean( (string) WC()->customer->get_meta( 'order_comments', true ) );
+	}
+	if ( '' !== $order_comments && '' === trim( (string) $order->get_customer_note() ) ) {
+		$order->set_customer_note( $order_comments );
+	}
 }
 
 add_filter( 'woocommerce_order_button_text', 'noyona_place_order_button_text' );

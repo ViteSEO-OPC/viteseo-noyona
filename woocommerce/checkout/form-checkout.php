@@ -41,6 +41,7 @@ $is_review_step = ( '' !== $reviews_path && $request_path === $reviews_path );
 <form name="checkout" method="post" class="checkout woocommerce-checkout noyona-checkout-form"
       action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data"
       aria-label="<?php echo esc_attr__( 'Checkout', 'woocommerce' ); ?>">
+	<input type="hidden" name="ship_to_different_address" value="1" />
 
 	<div class="noyona-checkout-columns">
 
