@@ -1031,7 +1031,7 @@ function noyona_checkout_inline_js() {
 			ensurePendingQrFallbackShell();
 			window.setTimeout(function() {
 				window.location.reload();
-			}, 10000);
+			}, 25000);
 
 			var payStepItems = document.querySelectorAll('.noyona-checkout-steps li');
 			if (payStepItems.length >= 4) {

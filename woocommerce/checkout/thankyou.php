@@ -197,43 +197,6 @@ defined( 'ABSPATH' ) || exit;
 					</div>
 				</section>
 
-				<script>
-				(function() {
-					var gateway = document.querySelector('.noyona-pay-card__gateway');
-					function hasQrNode(root) {
-						if (!root) return false;
-						if (root.querySelector('canvas')) return true;
-						var imgs = root.querySelectorAll('img');
-						for (var i = 0; i < imgs.length; i++) {
-							var src = String(imgs[i].getAttribute('src') || '').toLowerCase();
-							var alt = String(imgs[i].getAttribute('alt') || '').toLowerCase();
-							if (
-								src.indexOf('qr') !== -1 ||
-								src.indexOf('qrcode') !== -1 ||
-								src.indexOf('qrph') !== -1 ||
-								src.indexOf('paymongo') !== -1 ||
-								alt.indexOf('qr') !== -1 ||
-								alt.indexOf('qrcode') !== -1 ||
-								alt.indexOf('paymongo') !== -1
-							) {
-								return true;
-							}
-						}
-						return false;
-					}
-
-					if (gateway) {
-						if (!hasQrNode(gateway)) {
-							window.location.reload();
-							return;
-						}
-					}
-					var refreshMs = 10000;
-					window.setTimeout(function() {
-						window.location.reload();
-					}, refreshMs);
-				})();
-				</script>
 			<?php else : ?>
 				<section class="noyona-done-hero">
 					<div class="noyona-done-hero__icon" aria-hidden="true">
