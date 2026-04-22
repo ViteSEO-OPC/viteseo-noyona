@@ -2981,21 +2981,23 @@ function noyona_render_account_page_shortcode() {
                                         'cancelled'  => 1,
                                         'processing' => 2,
                                         'to-ship'    => 2,
-                                        'to-receive' => 2,
-                                        'at-hub'     => 2,
-                                        'rider-assigned' => 3,
-                                        'out-for-delivery' => 3,
-                                        'shipped'    => 3,
-                                        'in-transit' => 3,
-                                        'completed'  => 4,
-                                        'refunded'   => 4,
+                                        'to-receive' => 3,
+                                        'at-hub'     => 4,
+                                        'rider-assigned' => 5,
+                                        'out-for-delivery' => 5,
+                                        'shipped'    => 5,
+                                        'in-transit' => 5,
+                                        'completed'  => 6,
+                                        'refunded'   => 6,
                                     );
                                     $current_progress_step = isset( $status_progress_map[ $status_key ] ) ? (int) $status_progress_map[ $status_key ] : 2;
                                     $progress_steps = array(
                                         1 => __( 'Order has been placed', 'noyona-childtheme' ),
-                                        2 => __( 'Your parcel has arrived at the hub', 'noyona-childtheme' ),
-                                        3 => __( 'Rider assigned / Out for delivery', 'noyona-childtheme' ),
-                                        4 => __( 'Parcel has been delivered', 'noyona-childtheme' ),
+                                        2 => __( 'Noyona is preparing to ship your order', 'noyona-childtheme' ),
+                                        3 => __( 'Courier has picked up your order', 'noyona-childtheme' ),
+                                        4 => __( 'Order arrived at delivery hub', 'noyona-childtheme' ),
+                                        5 => __( 'Out for delivery', 'noyona-childtheme' ),
+                                        6 => __( 'Parcel has been delivered', 'noyona-childtheme' ),
                                     );
 
                                     $placed_date_label = ( $order_date instanceof WC_DateTime )
