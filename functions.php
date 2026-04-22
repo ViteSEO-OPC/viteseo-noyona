@@ -3054,6 +3054,9 @@ function noyona_render_account_page_shortcode() {
                                 $pay_now_url      = '';
                                 if ( method_exists( $account_order, 'get_checkout_payment_url' ) ) {
                                     $pay_now_url = (string) $account_order->get_checkout_payment_url();
+                                    if ( '' !== trim( $pay_now_url ) ) {
+                                        $pay_now_url = add_query_arg( 'noyona_auto_pay', '1', $pay_now_url );
+                                    }
                                 }
                                 $show_pay_now = ( $is_to_pay_status && ! $account_order->is_paid() && '' !== trim( $pay_now_url ) );
 
@@ -5419,6 +5422,171 @@ add_filter('pre_get_document_title', function ($title) {
 add_filter( 'woocommerce_get_checkout_url', function ( $url ) {
     return esc_url_raw( home_url( '/checkout/' ) );
 }, 99 );
+
+/**
+ * Detect "order-pay" pages opened via our My Account "Pay Now" CTA.
+ *
+ * @return bool
+ */
+function noyona_is_order_pay_autostart_request() {
+    if ( is_admin() || wp_doing_ajax() ) {
+        return false;
+    }
+
+    if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
+        return false;
+    }
+
+    if ( ! is_wc_endpoint_url( 'order-pay' ) ) {
+        return false;
+    }
+
+    $auto_flag = isset( $_GET['noyona_auto_pay'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['noyona_auto_pay'] ) ) : '';
+    if ( '1' !== $auto_flag ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Hide order-pay page chrome while we auto-submit payment form.
+ */
+add_action( 'wp_head', 'noyona_render_order_pay_autostart_head', 99 );
+function noyona_render_order_pay_autostart_head() {
+    if ( ! noyona_is_order_pay_autostart_request() ) {
+        return;
+    }
+    ?>
+    <script>
+    document.documentElement.classList.add('noyona-order-pay-autostart');
+    </script>
+    <style>
+    html.noyona-order-pay-autostart body.woocommerce-order-pay .wp-site-blocks main,
+    html.noyona-order-pay-autostart body.woocommerce-order-pay .wp-site-blocks .noyona-checkout-shell,
+    html.noyona-order-pay-autostart body.woocommerce-order-pay .wp-site-blocks .woocommerce {
+        opacity: 0;
+        pointer-events: none;
+    }
+    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready .wp-site-blocks main,
+    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready .wp-site-blocks .noyona-checkout-shell,
+    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready .wp-site-blocks .woocommerce {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    html.noyona-order-pay-autostart body.woocommerce-order-pay::before {
+        content: "Opening payment...";
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.96);
+        color: #1f2933;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready::before {
+        display: none;
+    }
+    </style>
+    <?php
+}
+
+/**
+ * Auto-submit WooCommerce order-pay form so users skip manual "Pay for order".
+ */
+add_action( 'wp_footer', 'noyona_render_order_pay_autostart_script', 120 );
+function noyona_render_order_pay_autostart_script() {
+    if ( ! noyona_is_order_pay_autostart_request() ) {
+        return;
+    }
+    ?>
+    <script>
+    (function () {
+        function revealManualScreen() {
+            if (document.body) {
+                document.body.classList.add('noyona-order-pay-autostart-ready');
+            }
+        }
+
+        function autoSubmitOrderPay() {
+            var form = document.querySelector('form#order_review, form.woocommerce-order-pay, form.woocommerce-checkout');
+            if (!form) {
+                revealManualScreen();
+                return;
+            }
+
+            var orderMatch = window.location.pathname.match(/\/order-pay\/(\d+)/);
+            var orderId = orderMatch && orderMatch[1] ? String(orderMatch[1]) : 'unknown';
+            var orderKey = '';
+            try {
+                orderKey = String(new URLSearchParams(window.location.search || '').get('key') || '');
+            } catch (e) {
+                orderKey = '';
+            }
+
+            var storageKey = 'noyonaOrderPayAutoSubmit:' + orderId + ':' + orderKey;
+            if (window.sessionStorage) {
+                try {
+                    if (window.sessionStorage.getItem(storageKey) === '1') {
+                        revealManualScreen();
+                        return;
+                    }
+                    window.sessionStorage.setItem(storageKey, '1');
+                } catch (e) {
+                    // Ignore storage failures.
+                }
+            }
+
+            var methodRadios = form.querySelectorAll('input[name="payment_method"]');
+            var checkedMethod = form.querySelector('input[name="payment_method"]:checked');
+            if (!checkedMethod && methodRadios.length > 0) {
+                methodRadios[0].checked = true;
+                methodRadios[0].dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            var terms = form.querySelector('#terms');
+            if (terms && !terms.checked) {
+                terms.checked = true;
+                terms.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            var payButton = form.querySelector('#place_order, button[name="woocommerce_pay"], input[type="submit"][name="woocommerce_pay"], .form-row button[type="submit"]');
+            if (!payButton || payButton.disabled) {
+                revealManualScreen();
+                return;
+            }
+
+            window.setTimeout(function () {
+                try {
+                    if (window.jQuery) {
+                        window.jQuery(form).trigger('submit');
+                    } else if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit(payButton);
+                    } else {
+                        payButton.click();
+                    }
+                } catch (error) {
+                    revealManualScreen();
+                }
+            }, 180);
+
+            window.setTimeout(function () {
+                // If still on this page after a short delay, allow manual fallback.
+                revealManualScreen();
+            }, 4500);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', autoSubmitOrderPay);
+        } else {
+            autoSubmitOrderPay();
+        }
+    })();
+    </script>
+    <?php
+}
 
 /* =================================================
  * SEO: META DESCRIPTIONS

@@ -826,12 +826,20 @@ function noyona_checkout_inline_js() {
 				return;
 			}
 
+			var hasNoyonaAutoPay = false;
 			var hasPayForOrderParam = false;
 			try {
 				var params = new URLSearchParams(window.location.search || '');
+				hasNoyonaAutoPay = String(params.get('noyona_auto_pay') || '') === '1';
 				hasPayForOrderParam = String(params.get('pay_for_order') || '') === 'true';
 			} catch (e) {
+				hasNoyonaAutoPay = window.location.search.indexOf('noyona_auto_pay=1') !== -1;
 				hasPayForOrderParam = window.location.search.indexOf('pay_for_order=true') !== -1;
+			}
+
+			// My Account autopay route is handled in functions.php (dedicated script).
+			if (hasNoyonaAutoPay) {
+				return;
 			}
 
 			if (!hasPayForOrderParam) {
