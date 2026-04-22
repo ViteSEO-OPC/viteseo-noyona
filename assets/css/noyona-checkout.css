@@ -1710,11 +1710,10 @@ body.noyona-pay-step .noyona-pay-meta__value {
 body.noyona-pay-step .noyona-pay-card {
   margin: 0 auto;
   max-width: 100%;
-  border-radius: 18px;
-  border: 1px solid #eceff3;
-  background: #fff;
-  padding: 1.15rem 1.15rem 1rem;
-  box-shadow: 0 2px 10px rgba(16, 24, 40, 0.04);
+  border: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
 }
 
 body.noyona-pay-step .noyona-pay-card__head {
@@ -1738,11 +1737,11 @@ body.noyona-pay-step .noyona-pay-card__copy {
 body.noyona-pay-step .noyona-pay-card__gateway {
   background: transparent;
   border: 0;
-  border-radius: 14px;
-  padding: 0.5rem 0.25rem;
+  border-radius: 0;
+  padding: 0;
   display: grid;
   place-items: center;
-  min-height: 280px;
+  min-height: 0;
 }
 
 body.noyona-pay-step .noyona-pay-card__gateway > * {
@@ -1854,13 +1853,13 @@ body.noyona-pay-step h1.wp-block-post-title {
   }
 
   body.noyona-pay-step .noyona-pay-card {
-    padding: 0.9rem 0.75rem 0.75rem;
-    border-radius: 14px;
+    padding: 0;
+    border-radius: 0;
   }
 
   body.noyona-pay-step .noyona-pay-card__gateway {
-    min-height: 220px;
-    padding: 0.7rem 0.45rem;
+    min-height: 0;
+    padding: 0;
   }
 
   body.noyona-pay-step .noyona-pay-card__gateway img {
