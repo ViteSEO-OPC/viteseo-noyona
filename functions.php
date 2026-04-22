@@ -3051,6 +3051,11 @@ function noyona_render_account_page_shortcode() {
                                         : ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' ) );
                                 }
                                 $is_to_pay_status = in_array( $status_key, array( 'pending', 'on-hold', 'failed', 'to-pay' ), true );
+                                $pay_now_url      = '';
+                                if ( method_exists( $account_order, 'get_checkout_payment_url' ) ) {
+                                    $pay_now_url = (string) $account_order->get_checkout_payment_url();
+                                }
+                                $show_pay_now = ( $is_to_pay_status && ! $account_order->is_paid() && '' !== trim( $pay_now_url ) );
 
                                 $item_thumb = '';
                                 if ( $item_product instanceof WC_Product ) {
@@ -3160,6 +3165,9 @@ function noyona_render_account_page_shortcode() {
                                         </section>
 
                                         <div class="noyona-account-order-modal__actions">
+                                            <?php if ( $show_pay_now ) : ?>
+                                                <a class="noyona-account-btn noyona-account-btn--primary" href="<?php echo esc_url( $pay_now_url ); ?>"><?php esc_html_e( 'Pay Now', 'noyona-childtheme' ); ?></a>
+                                            <?php endif; ?>
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $review_url ); ?>"><?php esc_html_e( 'Write a Review', 'noyona-childtheme' ); ?></a>
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $invoice_url ); ?>" download><?php esc_html_e( 'Download E-invoice', 'noyona-childtheme' ); ?></a>
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $contact_url ); ?>"><?php esc_html_e( 'Contact Us', 'noyona-childtheme' ); ?></a>
