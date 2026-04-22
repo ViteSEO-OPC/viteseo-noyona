@@ -1824,7 +1824,10 @@ body.noyona-pay-step h1.wp-block-post-title {
 }
 
 .paymongo-qrph-container {
-  padding: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
 }
 
 @media (max-width: 600px) {
