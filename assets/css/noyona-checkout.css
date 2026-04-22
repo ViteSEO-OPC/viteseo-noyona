@@ -1823,6 +1823,10 @@ body.noyona-pay-step h1.wp-block-post-title {
   display: none;
 }
 
+.paymongo-qrph-container {
+  padding: 0 !important;
+}
+
 @media (max-width: 600px) {
   .noyona-pay-confirm-modal__dialog {
     width: min(560px, calc(100vw - 20px));

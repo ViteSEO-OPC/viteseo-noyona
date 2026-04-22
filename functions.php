@@ -4690,6 +4690,26 @@ function noyona_force_minicart_checkout_link( $block_content, $block ) {
     );
 }
 
+add_filter( 'render_block', 'noyona_strip_checkout_pay_meta_breaks', 35, 2 );
+function noyona_strip_checkout_pay_meta_breaks( $block_content, $block ) {
+    if ( is_admin() || '' === trim( (string) $block_content ) ) {
+        return $block_content;
+    }
+
+    if ( false === strpos( (string) $block_content, 'noyona-pay-meta' ) ) {
+        return $block_content;
+    }
+
+    return preg_replace_callback(
+        '/(<section\b[^>]*class=(["\'])[^"\']*\bnoyona-pay-meta\b[^"\']*\2[^>]*>)(.*?)(<\/section>)/is',
+        function ( $matches ) {
+            $inner = preg_replace( '/\s*<br\s*\/?>\s*/i', '', (string) $matches[3] );
+            return $matches[1] . $inner . $matches[4];
+        },
+        (string) $block_content
+    );
+}
+
 /* =================================================
  * UX / MISC
  * ================================================= */
