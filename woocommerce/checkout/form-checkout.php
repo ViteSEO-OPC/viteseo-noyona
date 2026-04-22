@@ -59,7 +59,6 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 
 		$summary_parts = array_filter(
 			array(
-				$address_line,
 				$city,
 				$province,
 				$zip_code,
@@ -69,6 +68,14 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 			}
 		);
 		$summary       = implode( ', ', $summary_parts );
+		if ( '' === trim( $summary ) ) {
+			$summary = $address_line;
+		}
+		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) && mb_strlen( $summary ) > 42 ) {
+			$summary = rtrim( mb_substr( $summary, 0, 42 ) ) . '...';
+		} elseif ( strlen( $summary ) > 42 ) {
+			$summary = rtrim( substr( $summary, 0, 42 ) ) . '...';
+		}
 		$label_prefix  = $is_default
 			? __( 'Default', 'noyona' )
 			: sprintf(
@@ -137,7 +144,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 						</button>
 					</div>
 					<?php if ( ! empty( $saved_checkout_addresses ) ) : ?>
-						<div class="noyona-saved-address-picker">
+						<div class="noyona-saved-address-picker form-row form-row-wide">
 							<label for="noyona-saved-address-select"><?php esc_html_e( 'Saved addresses', 'noyona' ); ?></label>
 							<select id="noyona-saved-address-select" class="noyona-saved-address-picker__select">
 								<option value=""><?php esc_html_e( 'Choose saved address', 'noyona' ); ?></option>
@@ -145,6 +152,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 									<option value="<?php echo esc_attr( (string) $saved_address_option['id'] ); ?>"><?php echo esc_html( (string) $saved_address_option['label'] ); ?></option>
 								<?php endforeach; ?>
 							</select>
+							<p class="noyona-saved-address-picker__hint"><?php esc_html_e( 'Select one address to auto-fill shipping fields.', 'noyona' ); ?></p>
 						</div>
 						<script id="noyona-saved-addresses-data" type="application/json"><?php echo wp_json_encode( $saved_checkout_payload ); ?></script>
 					<?php endif; ?>
