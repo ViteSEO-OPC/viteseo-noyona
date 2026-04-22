@@ -428,6 +428,63 @@ function noyona_one_time_reset_header_template_part_override() {
     update_option( $option_key, $safeguard_version, false );
 }
 
+/**
+ * One-time safeguard:
+ * Remove stale DB-saved order confirmation templates so the theme file
+ * templates/order-confirmation.html is used consistently.
+ */
+add_action( 'init', 'noyona_one_time_reset_order_confirmation_template_override', 31 );
+function noyona_one_time_reset_order_confirmation_template_override() {
+    $safeguard_version = '1';
+    $option_key        = 'noyona_order_confirmation_template_safeguard_version';
+    if ( $safeguard_version === get_option( $option_key, '' ) ) {
+        return;
+    }
+
+    if ( ! post_type_exists( 'wp_template' ) ) {
+        update_option( $option_key, $safeguard_version, false );
+        return;
+    }
+
+    $theme_terms = array_values(
+        array_unique(
+            array_filter(
+                array(
+                    get_stylesheet(),
+                    get_template(),
+                )
+            )
+        )
+    );
+
+    $query_args = array(
+        'post_type'      => 'wp_template',
+        'post_status'    => 'any',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'name'           => 'order-confirmation',
+    );
+
+    if ( ! empty( $theme_terms ) ) {
+        $query_args['tax_query'] = array(
+            array(
+                'taxonomy' => 'wp_theme',
+                'field'    => 'name',
+                'terms'    => $theme_terms,
+            ),
+        );
+    }
+
+    $template_ids = get_posts( $query_args );
+    if ( ! empty( $template_ids ) ) {
+        foreach ( $template_ids as $template_id ) {
+            wp_delete_post( (int) $template_id, true );
+        }
+    }
+
+    update_option( $option_key, $safeguard_version, false );
+}
+
 add_action( 'init', 'noyona_maybe_flush_shop_category_rewrites', 20 );
 function noyona_maybe_flush_shop_category_rewrites() {
     $version = get_option( 'noyona_shop_category_rewrite_version', '' );
