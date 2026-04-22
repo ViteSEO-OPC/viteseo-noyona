@@ -2261,6 +2261,12 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	color: #9a6a14;
 }
 
+.noyona-account-order-status--to-ship {
+	background: #fff7e9;
+	border-color: #f4ddb4;
+	color: #9a6a14;
+}
+
 .noyona-account-order-status--on-hold {
 	background: #f5f2ff;
 	border-color: #ddd3ff;
@@ -2277,6 +2283,15 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	background: #f3f3f3;
 	border-color: #dbdbdb;
 	color: #5d5d5d;
+}
+
+.noyona-account-order-status--to-receive,
+.noyona-account-order-status--at-hub,
+.noyona-account-order-status--rider-assigned,
+.noyona-account-order-status--out-for-delivery {
+	background: #e9f6ff;
+	border-color: #cae4f8;
+	color: #2b6d99;
 }
 
 .noyona-account-orders-table__price {

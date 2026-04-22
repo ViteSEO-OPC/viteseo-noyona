@@ -2689,67 +2689,80 @@ function noyona_render_account_page_shortcode() {
         $orders_page = 1;
     }
 
-    $order_status_filters = array(
-        'to-pay'        => array(
-            'label'    => __( 'To Pay', 'noyona-childtheme' ),
-            'icon'     => 'fa-regular fa-credit-card',
-            'statuses' => array( 'pending', 'on-hold', 'failed' ),
-        ),
-        'to-ship'       => array(
-            'label'    => __( 'To Ship', 'noyona-childtheme' ),
-            'icon'     => 'fa-solid fa-box-open',
-            'statuses' => array( 'processing', 'to-ship', 'to_ship' ),
-        ),
-        'to-receive'    => array(
-            'label'    => __( 'To Receive', 'noyona-childtheme' ),
-            'icon'     => 'fa-solid fa-truck-fast',
-            'statuses' => array( 'to-receive', 'to_receive', 'shipped', 'in-transit', 'in_transit', 'out-for-delivery', 'out_for_delivery' ),
-        ),
-        'complete'      => array(
-            'label'    => __( 'Complete', 'noyona-childtheme' ),
-            'icon'     => 'fa-regular fa-circle-check',
-            'statuses' => array( 'completed' ),
-        ),
-        'cancel-refund' => array(
-            'label'    => __( 'Cancel / Refund', 'noyona-childtheme' ),
-            'icon'     => 'fa-regular fa-circle-xmark',
-            'statuses' => array( 'cancelled', 'refunded' ),
-        ),
-    );
-    $selected_order_filter = isset( $_GET['order_filter'] ) ? sanitize_key( wp_unslash( $_GET['order_filter'] ) ) : 'to-pay';
-    if ( ! isset( $order_status_filters[ $selected_order_filter ] ) ) {
-        $selected_order_filter = 'to-pay';
-    }
-
-    $available_order_status_keys = function_exists( 'wc_get_order_statuses' ) ? array_keys( (array) wc_get_order_statuses() ) : array();
-    $available_order_statuses    = array_map(
-        static function ( $status_key ) {
-            $status_key = (string) $status_key;
-            return sanitize_key( 0 === strpos( $status_key, 'wc-' ) ? substr( $status_key, 3 ) : $status_key );
-        },
-        $available_order_status_keys
-    );
-    $selected_status_candidates = isset( $order_status_filters[ $selected_order_filter ]['statuses'] ) ? (array) $order_status_filters[ $selected_order_filter ]['statuses'] : array();
-    $selected_order_statuses    = array_values(
-        array_filter(
-            array_map(
-                static function ( $status_slug ) {
-                    return sanitize_key( (string) $status_slug );
-                },
-                $selected_status_candidates
+    if ( function_exists( 'noyona_ot_get_order_status_filters' ) ) {
+        $order_status_filters = (array) noyona_ot_get_order_status_filters();
+    } else {
+        $order_status_filters = array(
+            'to-pay'        => array(
+                'label'    => __( 'To Pay', 'noyona-childtheme' ),
+                'icon'     => 'fa-regular fa-credit-card',
+                'statuses' => array( 'pending', 'on-hold', 'failed' ),
             ),
-            static function ( $status_slug ) use ( $available_order_statuses ) {
-                return in_array( $status_slug, $available_order_statuses, true );
-            }
-        )
-    );
-
-    // Fallback for stores without custom "to receive" statuses.
-    if ( 'to-receive' === $selected_order_filter && empty( $selected_order_statuses ) && in_array( 'processing', $available_order_statuses, true ) ) {
-        $selected_order_statuses = array( 'processing' );
+            'to-ship'       => array(
+                'label'    => __( 'To Ship', 'noyona-childtheme' ),
+                'icon'     => 'fa-solid fa-box-open',
+                'statuses' => array( 'processing', 'to-ship', 'to_ship' ),
+            ),
+            'to-receive'    => array(
+                'label'    => __( 'To Receive', 'noyona-childtheme' ),
+                'icon'     => 'fa-solid fa-truck-fast',
+                'statuses' => array( 'to-receive', 'to_receive', 'shipped', 'in-transit', 'in_transit', 'out-for-delivery', 'out_for_delivery' ),
+            ),
+            'complete'      => array(
+                'label'    => __( 'Complete', 'noyona-childtheme' ),
+                'icon'     => 'fa-regular fa-circle-check',
+                'statuses' => array( 'completed' ),
+            ),
+            'cancel-refund' => array(
+                'label'    => __( 'Cancel / Refund', 'noyona-childtheme' ),
+                'icon'     => 'fa-regular fa-circle-xmark',
+                'statuses' => array( 'cancelled', 'refunded' ),
+            ),
+        );
     }
-    if ( empty( $selected_order_statuses ) && in_array( 'pending', $available_order_statuses, true ) ) {
-        $selected_order_statuses = array( 'pending' );
+
+    if ( function_exists( 'noyona_ot_get_selected_filter' ) ) {
+        $selected_order_filter = (string) noyona_ot_get_selected_filter( 'to-pay' );
+    } else {
+        $selected_order_filter = isset( $_GET['order_filter'] ) ? sanitize_key( wp_unslash( $_GET['order_filter'] ) ) : 'to-pay';
+        if ( ! isset( $order_status_filters[ $selected_order_filter ] ) ) {
+            $selected_order_filter = 'to-pay';
+        }
+    }
+
+    if ( function_exists( 'noyona_ot_get_query_statuses_for_filter' ) ) {
+        $selected_order_statuses = (array) noyona_ot_get_query_statuses_for_filter( $selected_order_filter );
+    } else {
+        $available_order_status_keys = function_exists( 'wc_get_order_statuses' ) ? array_keys( (array) wc_get_order_statuses() ) : array();
+        $available_order_statuses    = array_map(
+            static function ( $status_key ) {
+                $status_key = (string) $status_key;
+                return sanitize_key( 0 === strpos( $status_key, 'wc-' ) ? substr( $status_key, 3 ) : $status_key );
+            },
+            $available_order_status_keys
+        );
+        $selected_status_candidates = isset( $order_status_filters[ $selected_order_filter ]['statuses'] ) ? (array) $order_status_filters[ $selected_order_filter ]['statuses'] : array();
+        $selected_order_statuses    = array_values(
+            array_filter(
+                array_map(
+                    static function ( $status_slug ) {
+                        return sanitize_key( (string) $status_slug );
+                    },
+                    $selected_status_candidates
+                ),
+                static function ( $status_slug ) use ( $available_order_statuses ) {
+                    return in_array( $status_slug, $available_order_statuses, true );
+                }
+            )
+        );
+
+        // Fallback for stores without custom "to receive" statuses.
+        if ( 'to-receive' === $selected_order_filter && empty( $selected_order_statuses ) && in_array( 'processing', $available_order_statuses, true ) ) {
+            $selected_order_statuses = array( 'processing' );
+        }
+        if ( empty( $selected_order_statuses ) && in_array( 'pending', $available_order_statuses, true ) ) {
+            $selected_order_statuses = array( 'pending' );
+        }
     }
 
     $account_orders      = array();
@@ -2956,35 +2969,56 @@ function noyona_render_account_page_shortcode() {
                                 $order_subtotal      = (float) $account_order->get_subtotal();
                                 $order_shipping_total = (float) $account_order->get_shipping_total() + (float) $account_order->get_shipping_tax();
                                 $order_discount_total = (float) $account_order->get_discount_total();
-
-                                $status_progress_map = array(
-                                    'pending'    => 1,
-                                    'on-hold'    => 1,
-                                    'failed'     => 1,
-                                    'cancelled'  => 1,
-                                    'processing' => 4,
-                                    'completed'  => 5,
-                                    'refunded'   => 5,
-                                );
-                                $current_progress_step = isset( $status_progress_map[ $status_key ] ) ? (int) $status_progress_map[ $status_key ] : 2;
-                                $progress_steps = array(
-                                    1 => __( 'Order has been placed', 'noyona-childtheme' ),
-                                    2 => __( 'Your parcel has arrived at the warehouse', 'noyona-childtheme' ),
-                                    3 => __( 'Delivery driver has been assigned', 'noyona-childtheme' ),
-                                    4 => __( 'Parcel is out for delivery', 'noyona-childtheme' ),
-                                    5 => __( 'Parcel has been delivered', 'noyona-childtheme' ),
-                                );
-
-                                $placed_date_label = ( $order_date instanceof WC_DateTime )
-                                    ? strtoupper( wp_date( 'M d, Y', $order_date->getTimestamp() ) )
-                                    : strtoupper( wp_date( 'M d, Y' ) );
-                                $status_date_obj = $account_order->get_date_completed();
-                                if ( ! $status_date_obj instanceof WC_DateTime ) {
-                                    $status_date_obj = $account_order->get_date_modified();
+                                $timeline_rows = array();
+                                if ( function_exists( 'noyona_ot_get_timeline_rows' ) ) {
+                                    $timeline_rows = (array) noyona_ot_get_timeline_rows( $account_order );
                                 }
-                                $status_date_label = ( $status_date_obj instanceof WC_DateTime )
-                                    ? strtoupper( wp_date( 'M d, Y', $status_date_obj->getTimestamp() ) )
-                                    : $placed_date_label;
+                                if ( empty( $timeline_rows ) ) {
+                                    $status_progress_map = array(
+                                        'pending'    => 1,
+                                        'on-hold'    => 1,
+                                        'failed'     => 1,
+                                        'cancelled'  => 1,
+                                        'processing' => 4,
+                                        'completed'  => 5,
+                                        'refunded'   => 5,
+                                    );
+                                    $current_progress_step = isset( $status_progress_map[ $status_key ] ) ? (int) $status_progress_map[ $status_key ] : 2;
+                                    $progress_steps = array(
+                                        1 => __( 'Order has been placed', 'noyona-childtheme' ),
+                                        2 => __( 'Your parcel has arrived at the warehouse', 'noyona-childtheme' ),
+                                        3 => __( 'Delivery driver has been assigned', 'noyona-childtheme' ),
+                                        4 => __( 'Parcel is out for delivery', 'noyona-childtheme' ),
+                                        5 => __( 'Parcel has been delivered', 'noyona-childtheme' ),
+                                    );
+
+                                    $placed_date_label = ( $order_date instanceof WC_DateTime )
+                                        ? strtoupper( wp_date( 'M d, Y', $order_date->getTimestamp() ) )
+                                        : strtoupper( wp_date( 'M d, Y' ) );
+                                    $status_date_obj = $account_order->get_date_completed();
+                                    if ( ! $status_date_obj instanceof WC_DateTime ) {
+                                        $status_date_obj = $account_order->get_date_modified();
+                                    }
+                                    $status_date_label = ( $status_date_obj instanceof WC_DateTime )
+                                        ? strtoupper( wp_date( 'M d, Y', $status_date_obj->getTimestamp() ) )
+                                        : $placed_date_label;
+
+                                    foreach ( $progress_steps as $step_index => $step_label ) {
+                                        $step_state = ( $step_index < $current_progress_step ) ? 'is-complete' : ( ( $step_index === $current_progress_step ) ? 'is-current' : 'is-pending' );
+                                        $step_date  = '';
+                                        if ( 1 === (int) $step_index ) {
+                                            $step_date = $placed_date_label;
+                                        } elseif ( (int) $step_index <= $current_progress_step ) {
+                                            $step_date = $status_date_label;
+                                        }
+
+                                        $timeline_rows[] = array(
+                                            'label'      => (string) $step_label,
+                                            'date_label' => (string) $step_date,
+                                            'state'      => (string) $step_state,
+                                        );
+                                    }
+                                }
 
                                 $review_url = ( '' !== trim( $item_permalink ) )
                                     ? $item_permalink . '#reviews'
@@ -3016,6 +3050,7 @@ function noyona_render_account_page_shortcode() {
                                         ? $item_permalink
                                         : ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' ) );
                                 }
+                                $is_to_pay_status = in_array( $status_key, array( 'pending', 'on-hold', 'failed', 'to-pay' ), true );
 
                                 $item_thumb = '';
                                 if ( $item_product instanceof WC_Product ) {
@@ -3069,15 +3104,11 @@ function noyona_render_account_page_shortcode() {
                                             <section class="noyona-account-order-modal__progress">
                                                 <h4><?php esc_html_e( 'Order Progress', 'noyona-childtheme' ); ?></h4>
                                                 <ol class="noyona-account-order-modal__timeline">
-                                                    <?php foreach ( $progress_steps as $step_index => $step_label ) : ?>
+                                                    <?php foreach ( $timeline_rows as $timeline_row ) : ?>
                                                         <?php
-                                                        $step_state = ( $step_index < $current_progress_step ) ? 'is-complete' : ( ( $step_index === $current_progress_step ) ? 'is-current' : 'is-pending' );
-                                                        $step_date  = '';
-                                                        if ( 1 === (int) $step_index ) {
-                                                            $step_date = $placed_date_label;
-                                                        } elseif ( (int) $step_index <= $current_progress_step ) {
-                                                            $step_date = $status_date_label;
-                                                        }
+                                                        $step_state = isset( $timeline_row['state'] ) ? sanitize_html_class( (string) $timeline_row['state'] ) : 'is-pending';
+                                                        $step_date  = isset( $timeline_row['date_label'] ) ? (string) $timeline_row['date_label'] : '';
+                                                        $step_label = isset( $timeline_row['label'] ) ? (string) $timeline_row['label'] : '';
                                                         ?>
                                                         <li class="noyona-account-order-modal__timeline-item <?php echo esc_attr( $step_state ); ?>">
                                                             <span class="noyona-account-order-modal__timeline-dot" aria-hidden="true"></span>
@@ -3132,7 +3163,9 @@ function noyona_render_account_page_shortcode() {
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $review_url ); ?>"><?php esc_html_e( 'Write a Review', 'noyona-childtheme' ); ?></a>
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $invoice_url ); ?>" download><?php esc_html_e( 'Download E-invoice', 'noyona-childtheme' ); ?></a>
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $contact_url ); ?>"><?php esc_html_e( 'Contact Us', 'noyona-childtheme' ); ?></a>
-                                            <a class="noyona-account-btn noyona-account-btn--primary" href="<?php echo esc_url( $buy_again_url ); ?>"><?php esc_html_e( 'Buy Again', 'noyona-childtheme' ); ?></a>
+                                            <?php if ( ! $is_to_pay_status ) : ?>
+                                                <a class="noyona-account-btn noyona-account-btn--primary" href="<?php echo esc_url( $buy_again_url ); ?>"><?php esc_html_e( 'Buy Again', 'noyona-childtheme' ); ?></a>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
