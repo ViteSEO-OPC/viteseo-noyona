@@ -451,8 +451,7 @@ $is_review_step = ( '' !== $reviews_path && $request_path === $reviews_path );
 
 			<?php if ( $is_review_step ) : ?>
 				<?php
-				$terms_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'terms' ) : '';
-				$privacy_url = function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '';
+				$terms_url = home_url( '/terms-of-services/' );
 				?>
 				<div class="noyona-review-terms">
 					<label class="noyona-review-terms__label" for="noyona-review-terms">
@@ -460,15 +459,9 @@ $is_review_step = ( '' !== $reviews_path && $request_path === $reviews_path );
 						<span class="noyona-review-terms__text">
 							<?php esc_html_e( 'I agree to the', 'noyona' ); ?>
 							<?php if ( ! empty( $terms_url ) ) : ?>
-								<a href="<?php echo esc_url( $terms_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Terms of Service', 'noyona' ); ?></a>
+								<a href="<?php echo esc_url( $terms_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?></a>
 							<?php else : ?>
-								<?php esc_html_e( 'Terms of Service', 'noyona' ); ?>
-							<?php endif; ?>
-							<?php esc_html_e( 'and', 'noyona' ); ?>
-							<?php if ( ! empty( $privacy_url ) ) : ?>
-								<a href="<?php echo esc_url( $privacy_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Privacy Policy', 'noyona' ); ?></a>
-							<?php else : ?>
-								<?php esc_html_e( 'Privacy Policy', 'noyona' ); ?>
+								<?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?>
 							<?php endif; ?>
 							<?php esc_html_e( '. I understand that this order is final.', 'noyona' ); ?>
 						</span>
