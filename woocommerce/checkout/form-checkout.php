@@ -36,6 +36,63 @@ $request_uri    = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUE
 $request_path   = trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' );
 $reviews_path   = trim( (string) wp_parse_url( home_url( '/reviews/' ), PHP_URL_PATH ), '/' );
 $is_review_step = ( '' !== $reviews_path && $request_path === $reviews_path );
+$saved_checkout_addresses = array();
+$saved_checkout_payload   = array();
+if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses' ) ) {
+	$stored_addresses = (array) noyona_get_account_saved_addresses( (int) get_current_user_id() );
+	$address_index    = 1;
+	foreach ( $stored_addresses as $stored_address ) {
+		if ( ! is_array( $stored_address ) ) {
+			continue;
+		}
+
+		$address_id   = isset( $stored_address['id'] ) ? sanitize_key( (string) $stored_address['id'] ) : sanitize_key( 'address_' . $address_index );
+		$address_line = isset( $stored_address['address'] ) ? sanitize_text_field( (string) $stored_address['address'] ) : '';
+		$city         = isset( $stored_address['city'] ) ? sanitize_text_field( (string) $stored_address['city'] ) : '';
+		$province     = isset( $stored_address['province'] ) ? sanitize_text_field( (string) $stored_address['province'] ) : '';
+		$zip_code     = isset( $stored_address['zip_code'] ) ? sanitize_text_field( (string) $stored_address['zip_code'] ) : '';
+		$is_default   = ! empty( $stored_address['is_default'] );
+
+		if ( '' === trim( $address_line . $city . $province . $zip_code ) ) {
+			continue;
+		}
+
+		$summary_parts = array_filter(
+			array(
+				$address_line,
+				$city,
+				$province,
+				$zip_code,
+			),
+			static function ( $value ) {
+				return '' !== trim( (string) $value );
+			}
+		);
+		$summary       = implode( ', ', $summary_parts );
+		$label_prefix  = $is_default
+			? __( 'Default', 'noyona' )
+			: sprintf(
+				/* translators: %d = address index */
+				__( 'Address %d', 'noyona' ),
+				$address_index
+			);
+		$option_label  = '' !== trim( $summary ) ? $label_prefix . ' - ' . $summary : $label_prefix;
+
+		$saved_checkout_addresses[] = array(
+			'id'    => $address_id,
+			'label' => $option_label,
+		);
+		$saved_checkout_payload[] = array(
+			'id'         => $address_id,
+			'address'    => $address_line,
+			'city'       => $city,
+			'province'   => $province,
+			'zip_code'   => $zip_code,
+			'is_default' => $is_default ? 1 : 0,
+		);
+		$address_index++;
+	}
+}
 ?>
 
 <form name="checkout" method="post" class="checkout woocommerce-checkout noyona-checkout-form"
@@ -79,6 +136,18 @@ $is_review_step = ( '' !== $reviews_path && $request_path === $reviews_path );
 							<?php esc_html_e( 'Use current address', 'noyona' ); ?>
 						</button>
 					</div>
+					<?php if ( ! empty( $saved_checkout_addresses ) ) : ?>
+						<div class="noyona-saved-address-picker">
+							<label for="noyona-saved-address-select"><?php esc_html_e( 'Saved addresses', 'noyona' ); ?></label>
+							<select id="noyona-saved-address-select" class="noyona-saved-address-picker__select">
+								<option value=""><?php esc_html_e( 'Choose saved address', 'noyona' ); ?></option>
+								<?php foreach ( $saved_checkout_addresses as $saved_address_option ) : ?>
+									<option value="<?php echo esc_attr( (string) $saved_address_option['id'] ); ?>"><?php echo esc_html( (string) $saved_address_option['label'] ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+						<script id="noyona-saved-addresses-data" type="application/json"><?php echo wp_json_encode( $saved_checkout_payload ); ?></script>
+					<?php endif; ?>
 					<div class="noyona-checkout-fields-wrap">
 						<?php
 						ob_start();

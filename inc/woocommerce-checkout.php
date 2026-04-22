@@ -1473,31 +1473,198 @@ function noyona_checkout_inline_js() {
 			}
 		}
 
-		/* 4. "Use current address" — browser geolocation stub */
+		/* 4. Shipping address helpers (saved addresses + geolocation) */
+		function triggerCheckoutRefresh() {
+			if (window.jQuery) {
+				window.jQuery(document.body).trigger('update_checkout');
+			}
+			if (isReviewStep && form) {
+				syncReviewSnapshot(form);
+			}
+		}
+
+		function setCheckoutFieldValue(fieldName, rawValue) {
+			var value = String(rawValue || '').trim();
+			var selector = '[name="' + fieldName + '"]';
+			var field = (form && form.querySelector(selector)) || document.querySelector(selector);
+			if (!field) return false;
+
+			function dispatchFieldEvents(target) {
+				target.dispatchEvent(new Event('input', { bubbles: true }));
+				target.dispatchEvent(new Event('change', { bubbles: true }));
+			}
+
+			if (field.tagName === 'SELECT') {
+				var normalized = value.toLowerCase();
+				var matched = false;
+				for (var i = 0; i < field.options.length; i++) {
+					var option = field.options[i];
+					var optionValue = String(option.value || '').trim();
+					var optionLabel = String(option.textContent || option.innerText || '').trim();
+					if (optionValue.toLowerCase() === normalized || optionLabel.toLowerCase() === normalized) {
+						field.value = optionValue;
+						matched = true;
+						break;
+					}
+				}
+
+				if (!matched && value) {
+					for (var j = 0; j < field.options.length; j++) {
+						var fuzzyLabel = String(field.options[j].textContent || field.options[j].innerText || '').trim().toLowerCase();
+						if (fuzzyLabel && (fuzzyLabel.indexOf(normalized) !== -1 || normalized.indexOf(fuzzyLabel) !== -1)) {
+							field.value = String(field.options[j].value || '');
+							matched = true;
+							break;
+						}
+					}
+				}
+
+				if (!matched && value && field.querySelector('option[value=""]')) {
+					var customOption = document.createElement('option');
+					customOption.value = value;
+					customOption.textContent = value;
+					field.appendChild(customOption);
+					field.value = value;
+				}
+				dispatchFieldEvents(field);
+				return true;
+			}
+
+			field.value = value;
+			dispatchFieldEvents(field);
+			return true;
+		}
+
+		function applyShippingAddress(addressPayload) {
+			if (!addressPayload) return;
+			setCheckoutFieldValue('shipping_address_1', addressPayload.address);
+			setCheckoutFieldValue('shipping_city', addressPayload.city);
+			setCheckoutFieldValue('shipping_state', addressPayload.province);
+			setCheckoutFieldValue('shipping_postcode', addressPayload.zip_code);
+			triggerCheckoutRefresh();
+		}
+
+		var savedAddressNode = document.getElementById('noyona-saved-addresses-data');
+		var savedAddressSelect = document.getElementById('noyona-saved-address-select');
+		var savedAddressMap = {};
+		if (savedAddressNode && savedAddressSelect) {
+			try {
+				var parsedAddresses = JSON.parse(savedAddressNode.textContent || '[]');
+				if (Array.isArray(parsedAddresses)) {
+					parsedAddresses.forEach(function(item) {
+						if (!item || !item.id) return;
+						savedAddressMap[String(item.id)] = item;
+					});
+				}
+			} catch (e) {
+				savedAddressMap = {};
+			}
+
+			savedAddressSelect.addEventListener('change', function() {
+				var selectedId = String(savedAddressSelect.value || '').trim();
+				if (!selectedId || !savedAddressMap[selectedId]) return;
+				applyShippingAddress(savedAddressMap[selectedId]);
+			});
+		}
+
+		function setLocationButtonState(locBtn, state) {
+			if (!locBtn) return;
+			if (state === 'loading') {
+				locBtn.classList.add('is-loading');
+				locBtn.classList.remove('is-done');
+				locBtn.innerHTML = '<i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i> Locating...';
+				return;
+			}
+			if (state === 'done') {
+				locBtn.classList.remove('is-loading');
+				locBtn.classList.add('is-done');
+				locBtn.innerHTML = '<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Address applied';
+				window.setTimeout(function() {
+					locBtn.classList.remove('is-done');
+					locBtn.innerHTML = '<i class="fa-solid fa-location-dot" aria-hidden="true"></i> Use current address';
+				}, 2200);
+				return;
+			}
+			locBtn.classList.remove('is-loading');
+			locBtn.classList.remove('is-done');
+			locBtn.innerHTML = '<i class="fa-solid fa-location-dot" aria-hidden="true"></i> Use current address';
+		}
+
+		function buildAddressFromReverseGeocode(payload) {
+			var addressData = (payload && payload.address) ? payload.address : {};
+			var streetParts = [];
+			var houseNo = String(addressData.house_number || '').trim();
+			var road = String(addressData.road || addressData.pedestrian || addressData.neighbourhood || '').trim();
+			if (houseNo) streetParts.push(houseNo);
+			if (road) streetParts.push(road);
+			var addressLine = streetParts.join(' ').trim();
+			if (!addressLine) {
+				addressLine = String(addressData.suburb || addressData.village || addressData.hamlet || payload.display_name || '').split(',')[0].trim();
+			}
+
+			var city = String(
+				addressData.city ||
+				addressData.town ||
+				addressData.municipality ||
+				addressData.village ||
+				addressData.suburb ||
+				''
+			).trim();
+			var province = String(addressData.state || addressData.region || addressData.county || '').trim();
+			var zipCode = String(addressData.postcode || '').trim();
+
+			return {
+				address: addressLine,
+				city: city,
+				province: province,
+				zip_code: zipCode
+			};
+		}
+
 		var locBtn = document.getElementById('noyona-use-location');
 		if (locBtn) {
 			locBtn.addEventListener('click', function() {
-				if (!navigator.geolocation) return;
-				locBtn.classList.add('is-loading');
-				locBtn.textContent = 'Locating…';
+				if (!navigator.geolocation || !window.fetch) {
+					return;
+				}
+
+				setLocationButtonState(locBtn, 'loading');
 				navigator.geolocation.getCurrentPosition(
 					function(pos) {
-						/* Reverse geocoding requires an API (Google / Mapbox / Nominatim).
-						   For now, fill coordinates as proof-of-concept. Replace with
-						   your preferred geocoding service. */
-						locBtn.textContent = 'Location found';
-						locBtn.classList.remove('is-loading');
-						locBtn.classList.add('is-done');
-						setTimeout(function() {
-							locBtn.innerHTML = '<i class="fa-solid fa-location-dot"></i> Use current address';
-							locBtn.classList.remove('is-done');
-						}, 2000);
+						var lat = Number(pos && pos.coords ? pos.coords.latitude : 0);
+						var lng = Number(pos && pos.coords ? pos.coords.longitude : 0);
+						if (!Number.isFinite(lat) || !Number.isFinite(lng) || (!lat && !lng)) {
+							setLocationButtonState(locBtn, 'reset');
+							return;
+						}
+
+						var reverseUrl = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&lat=' + encodeURIComponent(String(lat)) + '&lon=' + encodeURIComponent(String(lng));
+						window.fetch(reverseUrl, {
+							method: 'GET',
+							headers: {
+								'Accept': 'application/json'
+							},
+							credentials: 'omit'
+						}).then(function(response) {
+							if (!response.ok) {
+								throw new Error('reverse geocode failed');
+							}
+							return response.json();
+						}).then(function(payload) {
+							var fromGeo = buildAddressFromReverseGeocode(payload);
+							if (!fromGeo.address && !fromGeo.city && !fromGeo.province && !fromGeo.zip_code) {
+								throw new Error('empty geocode payload');
+							}
+							applyShippingAddress(fromGeo);
+							setLocationButtonState(locBtn, 'done');
+						}).catch(function() {
+							setLocationButtonState(locBtn, 'reset');
+						});
 					},
 					function() {
-						locBtn.innerHTML = '<i class="fa-solid fa-location-dot"></i> Use current address';
-						locBtn.classList.remove('is-loading');
+						setLocationButtonState(locBtn, 'reset');
 					},
-					{ timeout: 8000 }
+					{ timeout: 10000, enableHighAccuracy: true, maximumAge: 0 }
 				);
 			});
 		}

@@ -205,6 +205,30 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   margin-bottom: 0;
 }
 
+.noyona-saved-address-picker {
+  margin: 0.85rem 0 1rem;
+}
+
+.noyona-saved-address-picker label {
+  display: block;
+  margin: 0 0 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a5a5a;
+}
+
+.noyona-saved-address-picker__select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--noyona-cart-line, #efefef);
+  border-radius: 10px;
+  background: #fff;
+  padding: 8px 12px;
+  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-size: 0.9rem;
+  color: #1f2933;
+}
+
 /* Card title */
 .noyona-checkout-card__title {
   display: flex;
