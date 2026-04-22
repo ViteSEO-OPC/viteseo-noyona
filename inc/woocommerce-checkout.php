@@ -627,7 +627,9 @@ function noyona_checkout_inline_js() {
 		if (!body) return;
 		var form = document.querySelector('.noyona-checkout-form');
 		var isOrderReceivedPath = window.location.pathname.indexOf('/order-received/') !== -1;
-		if (!form && !isOrderReceivedPath) return;
+		var isOrderPayPath = window.location.pathname.indexOf('/order-pay/') !== -1;
+		var orderPayForm = document.querySelector('form#order_review, form.woocommerce-order-pay, form.woocommerce-checkout');
+		if (!form && !isOrderReceivedPath && !isOrderPayPath && !orderPayForm) return;
 
 		/* 1. Scroll to validation errors */
 		var observer = new MutationObserver(function() {
@@ -811,6 +813,63 @@ function noyona_checkout_inline_js() {
 			window.location.pathname.indexOf('/order-received/') !== -1 ||
 			(window.location.search.indexOf('noyona_preview_done=1') !== -1)
 		);
+
+		function getOrderIdFromOrderPayPath() {
+			var match = window.location.pathname.match(/\/order-pay\/(\d+)/);
+			if (!match || !match[1]) return 0;
+			var value = parseInt(match[1], 10);
+			return Number.isFinite(value) ? value : 0;
+		}
+
+		function autoSubmitOrderPayForm() {
+			if (!isOrderPayPath || !orderPayForm) {
+				return;
+			}
+
+			var hasPayForOrderParam = false;
+			try {
+				var params = new URLSearchParams(window.location.search || '');
+				hasPayForOrderParam = String(params.get('pay_for_order') || '') === 'true';
+			} catch (e) {
+				hasPayForOrderParam = window.location.search.indexOf('pay_for_order=true') !== -1;
+			}
+
+			if (!hasPayForOrderParam) {
+				return;
+			}
+
+			var payButton = orderPayForm.querySelector('#place_order, button[name="woocommerce_pay"], input[name="woocommerce_pay"]');
+			if (!payButton || payButton.disabled) {
+				return;
+			}
+
+			var selectedGateway = orderPayForm.querySelector('input[name="payment_method"]:checked');
+			var availableGateways = orderPayForm.querySelectorAll('input[name="payment_method"]');
+			if (availableGateways.length > 0 && !selectedGateway) {
+				return;
+			}
+
+			var orderId = getOrderIdFromOrderPayPath();
+			var autoPayKey = 'noyonaOrderPayAutoSubmitted:' + String(orderId || 'unknown');
+			if (window.sessionStorage) {
+				try {
+					if (window.sessionStorage.getItem(autoPayKey) === '1') {
+						return;
+					}
+					window.sessionStorage.setItem(autoPayKey, '1');
+				} catch (e) {
+					// Ignore storage failures.
+				}
+			}
+
+			window.setTimeout(function () {
+				if (typeof orderPayForm.requestSubmit === 'function') {
+					orderPayForm.requestSubmit(payButton);
+				} else {
+					payButton.click();
+				}
+			}, 450);
+		}
 
 		var draftStorageKey = 'noyonaCheckoutDraft';
 		if (window.location.pathname.indexOf('/order-received/') !== -1 && window.sessionStorage) {
@@ -1206,7 +1265,37 @@ function noyona_checkout_inline_js() {
 			});
 		}
 
-		if (isAwaitingPayment) {
+		if (isOrderPayPath) {
+			body.classList.add('noyona-pay-step');
+			body.classList.remove('noyona-done-step');
+			body.classList.remove('noyona-review-step');
+			body.classList.remove('noyona-details-step');
+			ensureCheckoutStepper();
+			autoSubmitOrderPayForm();
+
+			var orderPayStepItems = document.querySelectorAll('.noyona-checkout-steps li');
+			if (orderPayStepItems.length >= 4) {
+				ensureStepLink(orderPayStepItems[0], cartUrl);
+				ensureStepLink(orderPayStepItems[1], detailsUrl);
+				ensureStepLink(orderPayStepItems[2], reviewUrl);
+				orderPayStepItems.forEach(function (item) {
+					item.classList.remove('is-active');
+					item.classList.remove('is-complete');
+					item.classList.remove('is-pending');
+				});
+				if (orderPayStepItems.length >= 5) {
+					orderPayStepItems[0].classList.add('is-complete');
+					orderPayStepItems[1].classList.add('is-complete');
+					orderPayStepItems[2].classList.add('is-complete');
+					orderPayStepItems[3].classList.add('is-active');
+				} else {
+					orderPayStepItems[0].classList.add('is-complete');
+					orderPayStepItems[1].classList.add('is-complete');
+					orderPayStepItems[2].classList.add('is-complete');
+					orderPayStepItems[3].classList.add('is-active');
+				}
+			}
+		} else if (isAwaitingPayment) {
 			body.classList.add('noyona-pay-step');
 			body.classList.remove('noyona-done-step');
 			body.classList.remove('noyona-review-step');
