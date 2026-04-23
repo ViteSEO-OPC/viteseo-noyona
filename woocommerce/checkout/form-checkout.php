@@ -296,7 +296,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 					<?php if ( ! $is_review_step ) : ?>
 						<i class="fa-solid fa-receipt" aria-hidden="true"></i>
 					<?php endif; ?>
-					<?php echo $is_review_step ? esc_html__( 'Review Your Order', 'noyona' ) : esc_html__( 'Order Summary', 'noyona' ); ?>
+					<?php echo $is_review_step ? esc_html__( 'Preview Your Order', 'noyona' ) : esc_html__( 'Order Summary', 'noyona' ); ?>
 				</h2>
 				<div class="noyona-order-items">
 					<?php
@@ -488,7 +488,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 					<?php esc_html_e( 'Back', 'noyona' ); ?>
 				</a>
 				<button type="button" class="noyona-checkout-actions__submit" id="noyona-review-order">
-					<?php esc_html_e( 'REVIEW ORDER', 'noyona' ); ?>
+					<?php esc_html_e( 'PREVIEW ORDER', 'noyona' ); ?>
 					<i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
 				</button>
 			</div>
