@@ -3120,6 +3120,34 @@ function noyona_render_account_page_shortcode() {
                                                 <?php if ( '' !== trim( $shipping_text ) ) : ?>
                                                     <p class="noyona-account-order-modal__ship-address"><?php echo esc_html( $shipping_text ); ?></p>
                                                 <?php endif; ?>
+
+                                                <?php
+                                                $noyona_carrier_info = function_exists( 'noyona_ot_get_carrier_info' ) ? (array) noyona_ot_get_carrier_info( $account_order ) : array();
+                                                $noyona_has_tracking = ! empty( $noyona_carrier_info['has_tracking'] );
+                                                ?>
+                                                <?php if ( $noyona_has_tracking ) : ?>
+                                                    <div class="noyona-account-order-modal__track">
+                                                        <p class="noyona-account-order-modal__track-label"><?php esc_html_e( 'Package Tracking', 'noyona-childtheme' ); ?></p>
+                                                        <p class="noyona-account-order-modal__track-meta">
+                                                            <?php
+                                                            $noyona_carrier_label  = trim( (string) $noyona_carrier_info['label'] );
+                                                            $noyona_carrier_number = trim( (string) $noyona_carrier_info['number'] );
+                                                            $noyona_meta_parts     = array_filter( array( $noyona_carrier_label, $noyona_carrier_number ) );
+                                                            echo esc_html( implode( ' — ', $noyona_meta_parts ) );
+                                                            ?>
+                                                        </p>
+                                                        <a class="noyona-account-btn noyona-account-btn--primary noyona-account-order-modal__track-btn"
+                                                            href="<?php echo esc_url( (string) $noyona_carrier_info['url'] ); ?>"
+                                                            target="_blank" rel="noopener noreferrer">
+                                                            <?php esc_html_e( 'Track Package', 'noyona-childtheme' ); ?>
+                                                        </a>
+                                                        <?php if ( ! empty( $noyona_carrier_info['note'] ) ) : ?>
+                                                            <p class="noyona-account-order-modal__track-note">
+                                                                <?php echo esc_html( (string) $noyona_carrier_info['note'] ); ?>
+                                                            </p>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php endif; ?>
                                             </section>
 
                                             <section class="noyona-account-order-modal__progress">

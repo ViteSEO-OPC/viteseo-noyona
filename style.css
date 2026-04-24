@@ -2405,6 +2405,48 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	color: #404040;
 }
 
+.noyona-account-order-modal__track {
+	margin-top: 16px;
+	padding-top: 14px;
+	border-top: 1px dashed #efd6dc;
+	display: grid;
+	gap: 6px;
+}
+
+.noyona-account-order-modal__track-label {
+	margin: 0;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.78);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #666;
+}
+
+.noyona-account-order-modal__track-meta {
+	margin: 0;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.85);
+	font-weight: 600;
+	color: #1b1b1b;
+	word-break: break-word;
+}
+
+.noyona-account-order-modal__track-note {
+	margin: 0;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.75);
+	font-weight: 500;
+	color: #6a6a6a;
+	font-style: italic;
+}
+
+.noyona-account-btn.noyona-account-order-modal__track-btn {
+	width: auto;
+	max-width: 220px;
+	min-height: 38px;
+	padding: 0 18px;
+	margin-top: 4px;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.85);
+}
+
 .noyona-account-order-modal__timeline {
 	margin: 0;
 	padding: 0;
