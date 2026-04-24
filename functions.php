@@ -14,6 +14,11 @@ if ( is_readable( $noyona_checkout_inc ) ) {
 	require_once $noyona_checkout_inc;
 }
 
+$noyona_shipping_inc = get_stylesheet_directory() . '/inc/woocommerce-shipping.php';
+if ( is_readable( $noyona_shipping_inc ) ) {
+	require_once $noyona_shipping_inc;
+}
+
 // Load parent + child styles and our custom assets
 add_action( 'wp_enqueue_scripts', 'woocom_ct_enqueue_assets' );
 function woocom_ct_enqueue_assets() {
@@ -3137,6 +3142,39 @@ function noyona_render_account_page_shortcode() {
                                                         </li>
                                                     <?php endforeach; ?>
                                                 </ol>
+                                                <?php
+                                                $noyona_carrier_info = function_exists( 'noyona_ot_get_carrier_info' ) ? (array) noyona_ot_get_carrier_info( $account_order ) : array();
+                                                $noyona_has_tracking = ! empty( $noyona_carrier_info['has_tracking'] );
+                                                ?>
+                                                <?php if ( $noyona_has_tracking ) : ?>
+                                                    <div class="noyona-account-order-modal__track">
+                                                        <a class="noyona-account-btn noyona-account-btn--primary noyona-account-order-modal__track-btn"
+                                                            href="<?php echo esc_url( (string) $noyona_carrier_info['url'] ); ?>"
+                                                            target="_blank" rel="noopener noreferrer">
+                                                            <?php esc_html_e( 'Track Package', 'noyona-childtheme' ); ?>
+                                                        </a>
+                                                        <p class="noyona-account-order-modal__track-meta">
+                                                            <?php
+                                                            echo esc_html(
+                                                                trim(
+                                                                    sprintf(
+                                                                        /* translators: 1: carrier label, 2: tracking number */
+                                                                        __( '%1$s — %2$s', 'noyona-childtheme' ),
+                                                                        (string) $noyona_carrier_info['label'],
+                                                                        (string) $noyona_carrier_info['number']
+                                                                    ),
+                                                                    ' —'
+                                                                )
+                                                            );
+                                                            ?>
+                                                        </p>
+                                                        <?php if ( ! empty( $noyona_carrier_info['note'] ) ) : ?>
+                                                            <p class="noyona-account-order-modal__track-note">
+                                                                <?php echo esc_html( (string) $noyona_carrier_info['note'] ); ?>
+                                                            </p>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php endif; ?>
                                             </section>
                                         </div>
 
