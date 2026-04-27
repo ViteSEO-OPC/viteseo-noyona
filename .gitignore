@@ -9,6 +9,10 @@ test-results/
 playwright-report/
 trace.zip
 
+# Screenshots
+tests/responsive/screenshots/
+screenshots/
+
 # Environment
 .env
 .env.local

@@ -18,11 +18,7 @@ test('all navigation links work', async ({ page }) => {
     if (!href || href === '#') continue;
     if (tested.has(href)) continue;
 
-    // skip unwanted
-    if (
-      href.includes('logout') ||
-      href.includes('wp-login')
-    ) continue;
+    if (href.includes('logout') || href.includes('wp-login')) continue;
 
     tested.add(href);
 
@@ -30,13 +26,16 @@ test('all navigation links work', async ({ page }) => {
 
     console.log(`Testing link: ${href}`);
 
-    await page.goto(url);
+    const response = await page.goto(url);
+    expect(response.status()).toBeLessThan(400);
 
     if (href.includes('my-account')) {
       await expect(page).toHaveURL(/login/);
     } else {
-      await expect(page).toHaveURL(new RegExp(url.replace(/\//g, '\\/')));
+      await expect(page).toHaveURL(url);
     }
+
+    console.log(`✔ Passed: ${href}`);
 
     await page.goto(baseURL);
   }
