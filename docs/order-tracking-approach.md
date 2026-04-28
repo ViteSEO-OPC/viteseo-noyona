@@ -3,7 +3,6 @@
 **Project:** Noyona (WooCommerce, child theme `viteseo-noyona`)
 **Tracking plugin:** `noyona-order-tracking` (MU-plugin, currently live)
 **Example carriers referenced:** J&T Express PH, LBC Express
-**Last updated:** 2026-04-24
 
 ---
 
@@ -18,7 +17,7 @@ The site ships orders manually. The `noyona-order-tracking` MU-plugin adds:
 
 There is **no outbound HTTP call to any carrier** — the plugin has zero `wp_remote_*` / cURL calls. Every status line a customer sees was typed by a human.
 
-The `woo-advanced-shipment-tracking` (Zorem AST) free plugin is also installed — it lets admin paste a carrier + tracking number per order and auto-builds the public tracking link. It is not yet wired into the customer-facing timeline.
+The plugin also supports **native carrier tracking links**. Per-order meta keys `_noyona_tracking_carrier`, `_noyona_tracking_number`, `_noyona_tracking_url`, `_noyona_tracking_note` are edited from either the order edit screen (Noyona metabox) or the Order Tracking Manager quick-update form. The public tracker URL is auto-built for J&T Express and LBC Express; admin can paste a manual URL to override. A **Track Package** button renders in the customer's My Account order modal whenever tracking data is present.
 
 ---
 
@@ -35,17 +34,19 @@ The `woo-advanced-shipment-tracking` (Zorem AST) free plugin is also installed �
 4. Admin opens the WooCommerce order in WP admin and types that status into the Noyona Tracking metabox ("At Hub", "Rider Assigned", "Out for Delivery", etc.).
 5. Customer refreshes their My Account page and sees the updated timeline.
 
-### 2b. Enhanced manual — paste tracking link / QR (recommended refinement)
+### 2b. Enhanced manual — carrier tracking link (implemented natively)
 
 **How it works:**
 1. Same booking step as above.
-2. Admin copies the tracking number or shareable tracking URL that J&T / LBC give after booking (e.g. `https://www.jtexpress.ph/track?billCode=XXXXXXXX`, `https://www.lbcexpress.com/track/?tracking_no=XXXXXXXX`).
-3. Admin pastes that number once into WooCommerce (the installed Zorem AST plugin already has this field).
-4. Customer sees a "Track your package" button on My Account that opens the carrier's own tracker page. No further admin action per order.
+2. After booking, admin gets the tracking number (AWB) from J&T or LBC.
+3. Admin opens the WooCommerce order and uses the **Carrier Tracking** section of the Noyona metabox (or the Quick Update form on WooCommerce → Order Tracking): pick carrier, paste the tracking number, save. The URL auto-builds from the carrier's public tracker format — `https://www.jtexpress.ph/track?billCode=XXXX` for J&T, `https://www.lbcexpress.com/track/?tracking_no=XXXX` for LBC. Admin can paste a manual URL to override.
+4. Customer sees a compact pink **Track Package** button in the My Account order modal, directly under the shipping address, with the carrier name and tracking number beside it. Button hides automatically when no tracking data is saved.
 
-**Cost:** Free. Both J&T PH and LBC PH publish public tracking pages that accept the tracking number in the URL — no API key, no contract, no per-shipment fee. You confirmed this and you're correct.
+**Implementation:** lives entirely inside `noyona-order-tracking` (`class-noyona-order-tracking.php`) + theme modal in `functions.php`. No third-party plugin dependency. See §5 for the concrete state.
 
-**Caveat:** the customer leaves your site to view status on the carrier's page. The WooCommerce order status itself (e.g. auto-mark Complete when delivered) still won't advance on its own — a human still has to close the order.
+**Cost:** Free. Both J&T PH and LBC PH publish public tracking pages that accept the tracking number in the URL — no API key, no contract, no per-shipment fee.
+
+**Caveat:** the customer leaves our site to view live status on the carrier's page. The WooCommerce order status itself (e.g. auto-mark Complete when delivered) still won't advance on its own — a human still has to close the order. Our in-site timeline remains the source of truth; the carrier link is a supplemental convenience.
 
 ### Pros — manual
 
@@ -88,7 +89,6 @@ Aggregators already have integrations with J&T, LBC, Ninja Van, Flash, etc. You 
 
 Common options:
 - **AfterShip** — global, covers J&T PH + LBC. Has an official WooCommerce plugin. Free tier: ~50 shipments/month, paid tiers from ~USD 11/month at the time of writing.
-- **Zorem AST Pro + Trackship** — the paid upgrade of the plugin already installed on this site. ~USD 89/yr for AST Pro, Trackship add-on ~USD 9–49/month depending on volume.
 - **Shipmates / Locad / Parcels.ph** — PH-focused aggregators that also handle booking + label printing, not just tracking. Usually per-shipment fee baked into shipping cost.
 
 ### Pricing — is it free?
@@ -100,7 +100,6 @@ Common options:
 | Direct J&T PH API | Free in dollars but gated by contract / volume | Usually no per-call fee, but requires business agreement | Only practical if you have enough volume that J&T assigns you an account manager |
 | Direct LBC API | Same as above | Same as above | Same gating |
 | AfterShip | Free to USD ~11/mo | Tiered by shipment count | Free tier ≈ 50 shipments/mo. Drop-in WC plugin. Easiest starter. |
-| Zorem AST Pro + Trackship | USD ~89/yr (AST Pro) | USD 9–49/mo (Trackship) | Already partly installed (free tier). Pro unlocks carrier sync. |
 | Shipmates / Locad | Free signup | Per-shipment fee (often bundled into label cost) | Also handle booking, not just tracking |
 
 Plus **engineering time** — building the WC ↔ API glue (status mapping, retry logic, webhook endpoint, admin UI), ~2–5 days of dev work depending on path.
@@ -137,7 +136,7 @@ Plus **engineering time** — building the WC ↔ API glue (status mapping, retr
 | WC Completed fires automatically | No | No | Yes |
 | Works for any carrier | Yes | Yes, if carrier has public tracker | Only carriers the API / aggregator supports |
 | Scales to 100+ orders/day | Painful | OK for display, painful for WC automation | Yes |
-| Setup effort | Already done | ~1 hr (wire Zorem AST into our timeline) | 2–5 dev days |
+| Setup effort | Already done | Already done (native plugin fields + customer-modal button) | 2–5 dev days |
 | Failure mode | Staff forgets | Staff forgets tracking # | Silent webhook outage |
 | Vendor dependency | None | None | Aggregator / carrier |
 
@@ -150,15 +149,15 @@ Plus **engineering time** — building the WC ↔ API glue (status mapping, retr
 Reasoning:
 
 1. **Today we don't even have carrier accounts set up.** Direct J&T / LBC API access typically requires an existing merchant relationship and volume — it isn't an option yet. Paying for an aggregator before we have meaningful shipments would mean spending money on idle integration.
-2. **The tracking-link approach (2b) is free, already 80% installed** (Zorem AST is in `wp-content/plugins/`), and removes the biggest pain of the current setup: staff manually copying status stages. Wiring the AST tracking number into our Noyona timeline is ~1 hour of theme work.
+2. **The tracking-link approach (2b) is already implemented natively** in the `noyona-order-tracking` plugin — carrier + number meta fields, auto-built URL for J&T / LBC, and the customer-facing Track Package button. No third-party plugin dependency, no monthly fee, admin now has a single place to enter tracking info.
 3. **Graduate to API when any of these is true:**
    - We're doing >~50 orders/day and admin time on status updates exceeds ~1 hr/day.
    - Customer support tickets about "where's my order?" become a regular load.
    - We want post-purchase automation (review requests, loyalty points on delivery) to fire at the right time — that needs a real "Delivered" signal.
    - We onboard a second carrier and the manual work doubles.
-4. **When we graduate, start with AfterShip** (free tier → USD ~11/mo) or Zorem AST Pro + Trackship (since AST free is already on-site and the Pro upgrade path is linear). Skip direct J&T / LBC API unless carrier reps approach us — the effort/reward is poor for our stage.
+4. **When we graduate, start with AfterShip** (free tier → USD ~11/mo). Skip direct J&T / LBC API unless carrier reps approach us — the effort/reward is poor for our stage.
 
-**Concrete next step if we stay manual:** wire the `woo-advanced-shipment-tracking` tracking number into the `noyona-order-tracking` timeline so the customer sees the "Track package" button inside our own My Account page instead of on a separate tab. This is a small change in `class-noyona-order-tracking.php` — read the AST meta (`_wc_shipment_tracking_items`) and render it as a final timeline row.
+**Current status:** enhanced-manual tracking (§2b) is live. Admin enters carrier + tracking number from the Noyona metabox on the order edit screen OR the Quick Update form on the Order Tracking Manager page. The `_noyona_tracking_carrier`, `_noyona_tracking_number`, `_noyona_tracking_url`, and `_noyona_tracking_note` meta keys are the canonical source. Customer sees the Track Package button in the My Account order modal under Shipping Address.
 
 ---
 

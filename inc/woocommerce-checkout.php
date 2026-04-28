@@ -413,11 +413,13 @@ function noyona_disable_coupons_on_checkout( $enabled ) {
 }
 
 /**
- * Restrict checkout payment methods to PayMongo QR and remove Check payments.
+ * Restrict checkout payment methods to PayMongo channels and remove Check payments.
  *
  * - Always removes Woo's built-in "Check payments" gateway (`cheque`).
- * - On checkout UI, keeps only gateway entries that look like PayMongo QR.
- * - Falls back safely if a QR gateway cannot be detected.
+ * - On checkout UI, keeps every PayMongo gateway that's enabled (QR Ph, GCash, Maya, etc.).
+ *   QR Ph entries are listed first so they remain the primary option.
+ * - If no PayMongo gateways are detected, returns the original set (minus `cheque`) so the
+ *   site doesn't end up with an empty payment list.
  *
  * @param array<string, WC_Payment_Gateway> $gateways Available gateways.
  * @return array<string, WC_Payment_Gateway>
@@ -442,8 +444,8 @@ function noyona_limit_checkout_payment_gateways( $gateways ) {
 		return $gateways;
 	}
 
-	$paymongo_qr_gateways = array();
-	$paymongo_gateways    = array();
+	$paymongo_qr_gateways    = array();
+	$paymongo_other_gateways = array();
 
 	foreach ( $gateways as $gateway_id => $gateway ) {
 		$gateway_title = '';
@@ -457,27 +459,26 @@ function noyona_limit_checkout_payment_gateways( $gateways ) {
 		$haystack = strtolower( trim( (string) $gateway_id . ' ' . $gateway_title . ' ' . $method_title ) );
 
 		$is_paymongo = ( false !== strpos( $haystack, 'paymongo' ) );
-		$is_qr       = ( false !== strpos( $haystack, 'qr' ) || false !== strpos( $haystack, 'qrph' ) || false !== strpos( $haystack, 'qr ph' ) );
-
-		if ( $is_paymongo && $is_qr ) {
-			$paymongo_qr_gateways[ $gateway_id ] = $gateway;
+		if ( ! $is_paymongo ) {
 			continue;
 		}
 
-		if ( $is_paymongo ) {
-			$paymongo_gateways[ $gateway_id ] = $gateway;
+		$is_qr = ( false !== strpos( $haystack, 'qr' ) || false !== strpos( $haystack, 'qrph' ) || false !== strpos( $haystack, 'qr ph' ) );
+
+		if ( $is_qr ) {
+			$paymongo_qr_gateways[ $gateway_id ] = $gateway;
+		} else {
+			$paymongo_other_gateways[ $gateway_id ] = $gateway;
 		}
 	}
 
-	if ( ! empty( $paymongo_qr_gateways ) ) {
-		return $paymongo_qr_gateways;
+	$merged = $paymongo_qr_gateways + $paymongo_other_gateways;
+	if ( ! empty( $merged ) ) {
+		return $merged;
 	}
 
-	if ( ! empty( $paymongo_gateways ) ) {
-		return $paymongo_gateways;
-	}
-
-	// Final fallback: keep current set (already without "cheque").
+	// Final fallback: keep current set (already without "cheque") so checkout never goes
+	// completely empty if no PayMongo gateway is enabled yet.
 	return $gateways;
 }
 
@@ -756,12 +757,9 @@ function noyona_checkout_inline_js() {
 						src.indexOf('qr') !== -1 ||
 						src.indexOf('qrcode') !== -1 ||
 						src.indexOf('qrph') !== -1 ||
-						src.indexOf('paymongo') !== -1 ||
 						alt.indexOf('qr') !== -1 ||
 						alt.indexOf('qrcode') !== -1 ||
-						alt.indexOf('paymongo') !== -1 ||
-						cls.indexOf('qr') !== -1 ||
-						cls.indexOf('paymongo') !== -1
+						cls.indexOf('qr') !== -1
 					) {
 						if (isNodeVisible(img)) {
 							return true;
@@ -769,6 +767,9 @@ function noyona_checkout_inline_js() {
 					}
 				}
 
+				// Treat a paymongo-classed block as a QR payload only if it actually contains
+				// a <canvas> or a qr-tagged <img>. Bare paymongo branding (logos, footers used
+				// on GCash/Maya order-received pages) must NOT count as a QR payload.
 				var paymongoBlocks = root.querySelectorAll('[class*="paymongo"], [id*="paymongo"], [class*="PayMongo"], [id*="PayMongo"]');
 				for (var k = 0; k < paymongoBlocks.length; k++) {
 					var block = paymongoBlocks[k];
@@ -780,7 +781,19 @@ function noyona_checkout_inline_js() {
 					}
 					var blockImgs = block.querySelectorAll('img');
 					for (var m = 0; m < blockImgs.length; m++) {
-						if (isNodeVisible(blockImgs[m])) {
+						var bImg = blockImgs[m];
+						var bSrc = String(bImg.getAttribute('src') || '').toLowerCase();
+						var bAlt = String(bImg.getAttribute('alt') || '').toLowerCase();
+						var bCls = String(bImg.className || '').toLowerCase();
+						var looksLikeQrImg = (
+							bSrc.indexOf('qr') !== -1 ||
+							bSrc.indexOf('qrcode') !== -1 ||
+							bSrc.indexOf('qrph') !== -1 ||
+							bAlt.indexOf('qr') !== -1 ||
+							bAlt.indexOf('qrcode') !== -1 ||
+							bCls.indexOf('qr') !== -1
+						);
+						if (looksLikeQrImg && isNodeVisible(bImg)) {
 							return true;
 						}
 					}
@@ -793,9 +806,13 @@ function noyona_checkout_inline_js() {
 			var paymentOverviewText = paymentOverviewNode ? String(paymentOverviewNode.textContent || '').toLowerCase() : '';
 			var bodyText = String((document.body && (document.body.innerText || document.body.textContent)) || '').toLowerCase();
 			var orderRoot = document.querySelector('.woocommerce-order') || document;
+			// Use the displayed payment-method label as the source of truth. The label reflects
+			// the chosen gateway (e.g. "QR Ph via PayMongo" vs "GCash via PayMongo"), so it
+			// cleanly separates QR Ph from GCash/Maya. Do NOT scan whole-body text — branded
+			// PayMongo markup on GCash/Maya pages can falsely contain "paymongo" + "qr".
 			var looksLikePayMongoQr = (
-				(paymentOverviewText.indexOf('paymongo') !== -1 && paymentOverviewText.indexOf('qr') !== -1) ||
-				(bodyText.indexOf('paymongo') !== -1 && bodyText.indexOf('qr') !== -1)
+				paymentOverviewText.indexOf('paymongo') !== -1 &&
+				paymentOverviewText.indexOf('qr') !== -1
 			);
 			var hasQrWaitingCopy = hasPendingQrCopy(bodyText);
 			var hasQrPayload = hasVisibleQrPayload(orderRoot);
@@ -1157,7 +1174,33 @@ function noyona_checkout_inline_js() {
 			);
 			if (blockWithHeading) return blockWithHeading;
 
-			return document.querySelector('[class*="paymongo"]') || null;
+			// Fallback: only return a paymongo-classed block that actually contains a QR
+			// payload (canvas or qr-tagged image). This prevents grabbing GCash/Maya
+			// branding blocks that share the "paymongo" class.
+			var candidates = document.querySelectorAll('[class*="paymongo"], [id*="paymongo"], [class*="PayMongo"], [id*="PayMongo"]');
+			for (var i = 0; i < candidates.length; i++) {
+				var cand = candidates[i];
+				if (cand.querySelector('canvas')) {
+					return cand;
+				}
+				var imgs = cand.querySelectorAll('img');
+				for (var j = 0; j < imgs.length; j++) {
+					var src = String(imgs[j].getAttribute('src') || '').toLowerCase();
+					var alt = String(imgs[j].getAttribute('alt') || '').toLowerCase();
+					var cls = String(imgs[j].className || '').toLowerCase();
+					if (
+						src.indexOf('qr') !== -1 ||
+						src.indexOf('qrcode') !== -1 ||
+						src.indexOf('qrph') !== -1 ||
+						alt.indexOf('qr') !== -1 ||
+						alt.indexOf('qrcode') !== -1 ||
+						cls.indexOf('qr') !== -1
+					) {
+						return cand;
+					}
+				}
+			}
+			return null;
 		}
 
 		function ensurePendingQrFallbackShell() {
