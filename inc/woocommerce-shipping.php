@@ -191,7 +191,7 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 			}
 
 			if ( '' === $country ) {
-				return; // Genuinely nothing to seed — let template show "Calculated at checkout".
+				return; // Genuinely nothing to seed — let template show "Calculated at checkout later".
 			}
 
 			$customer->set_shipping_country( $country );
