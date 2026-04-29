@@ -164,6 +164,24 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 		 *   5. Fallback — return the original input. WC validation will surface the
 		 *      mismatch so a maintainer can extend the alias list.
 		 */
+		/**
+		 * Return the WooCommerce-published display label for a PH state code,
+		 * or the original input when no match exists. Used by the saved-address
+		 * card and the checkout dropdown summary so the UI shows "Metro Manila"
+		 * even though storage and zone matching use the code "00".
+		 */
+		public static function ph_state_label_for( $code ) {
+			$code = trim( (string) $code );
+			if ( '' === $code ) {
+				return '';
+			}
+			if ( ! function_exists( 'WC' ) || ! WC()->countries ) {
+				return $code;
+			}
+			$states = (array) WC()->countries->get_states( 'PH' );
+			return isset( $states[ $code ] ) ? (string) $states[ $code ] : $code;
+		}
+
 		public static function normalize_ph_state( $input ) {
 			$input = trim( (string) $input );
 			if ( '' === $input ) {
@@ -305,6 +323,32 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 					$zone    = WC_Shipping_Zones::get_zone_matching_package( $pkg );
 					$lines[] = "package[{$i}] matched zone    : " . $zone->get_zone_name() . ' (zone_id ' . $zone->get_id() . ')';
 				}
+
+				if ( ! empty( $pkg['contents'] ) && is_array( $pkg['contents'] ) ) {
+					$lines[] = "package[{$i}] cart items:";
+					foreach ( $pkg['contents'] as $line_item ) {
+						$prod = isset( $line_item['data'] ) ? $line_item['data'] : null;
+						if ( ! is_object( $prod ) ) {
+							continue;
+						}
+						$prod_id    = method_exists( $prod, 'get_id' ) ? (int) $prod->get_id() : 0;
+						$parent_id  = method_exists( $prod, 'get_parent_id' ) ? (int) $prod->get_parent_id() : 0;
+						$weight     = method_exists( $prod, 'get_weight' ) ? (float) $prod->get_weight() : 0.0;
+						$class_id   = method_exists( $prod, 'get_shipping_class_id' ) ? (int) $prod->get_shipping_class_id() : 0;
+						$class_slug = method_exists( $prod, 'get_shipping_class' ) ? (string) $prod->get_shipping_class() : '';
+						$bucket     = $weight > 0 ? self::weight_to_class_slug( $weight ) : '(no weight set)';
+						$lines[]    = sprintf(
+							"  prod_id %d  parent_id %d  weight %skg  class_id %d  class_slug %s  bucket %s",
+							$prod_id,
+							$parent_id,
+							number_format( $weight, 3 ),
+							$class_id,
+							'' === $class_slug ? '(empty → no_class_cost)' : $class_slug,
+							$bucket
+						);
+					}
+				}
+
 				if ( ! empty( $pkg['rates'] ) && is_array( $pkg['rates'] ) ) {
 					foreach ( $pkg['rates'] as $rate ) {
 						$lines[] = "package[{$i}] rate            : " . $rate->get_id() . ' — ' . $rate->get_label() . ' — ' . wc_format_localized_price( (float) $rate->get_cost() );
@@ -322,16 +366,19 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 		/**
 		 * Dynamically assign the right shipping class based on product weight.
 		 * Admin only needs to set weight — no manual class dropdown per product.
+		 *
+		 * Weight resolution: $product->get_weight() in 'view' context, which means
+		 * a variation with no weight inherits the parent's. If both are empty the
+		 * filter still returns a real class (the lightest bucket) so the cart never
+		 * falls back to `no_class_cost` and gets surprise-billed the heaviest rate.
 		 */
 		public static function auto_assign_class( $class_id, $product ) {
 			if ( ! is_object( $product ) || ! method_exists( $product, 'get_weight' ) ) {
 				return $class_id;
 			}
 			$weight = (float) $product->get_weight();
-			if ( $weight <= 0 ) {
-				return $class_id;
-			}
-			$slug = self::weight_to_class_slug( $weight );
+			$slug   = $weight > 0 ? self::weight_to_class_slug( $weight ) : 'weight-0-1kg';
+
 			$term = get_term_by( 'slug', $slug, 'product_shipping_class' );
 			if ( $term && ! is_wp_error( $term ) ) {
 				return (int) $term->term_id;
@@ -734,15 +781,21 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 			$settings['cost']       = '0';
 			$settings['type']       = 'class';
 
-			$max_in_zone = 0.0;
+			$min_in_zone = null;
 			foreach ( $rates as $class_slug => $cost ) {
-				$max_in_zone = max( $max_in_zone, (float) $cost );
+				$cost_f = (float) $cost;
+				if ( $cost_f > 0 && ( null === $min_in_zone || $cost_f < $min_in_zone ) ) {
+					$min_in_zone = $cost_f;
+				}
 				if ( ! isset( $class_ids[ $class_slug ] ) ) {
 					continue;
 				}
-				$settings[ 'class_cost_' . $class_ids[ $class_slug ] ] = number_format( (float) $cost, 2, '.', '' );
+				$settings[ 'class_cost_' . $class_ids[ $class_slug ] ] = number_format( $cost_f, 2, '.', '' );
 			}
-			$settings['no_class_cost'] = number_format( $max_in_zone, 2, '.', '' );
+			// Lightest bucket as the safety net for any cart item that somehow lands without
+			// a shipping class. Pairs with auto_assign_class()'s lightest-bucket fallback so
+			// a misconfigured product never hits the heaviest cell.
+			$settings['no_class_cost'] = number_format( null === $min_in_zone ? 0.0 : (float) $min_in_zone, 2, '.', '' );
 
 			update_option( $option_key, $settings );
 		}

@@ -57,10 +57,14 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 			continue;
 		}
 
+		// Province is stored as a WC state code; show the human label in the picker label/summary.
+		$province_label = class_exists( 'Noyona_Shipping' )
+			? Noyona_Shipping::ph_state_label_for( $province )
+			: $province;
 		$summary_parts = array_filter(
 			array(
 				$city,
-				$province,
+				$province_label,
 				$zip_code,
 			),
 			static function ( $value ) {

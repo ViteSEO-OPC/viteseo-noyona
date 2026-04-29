@@ -3378,10 +3378,16 @@ function noyona_render_account_page_shortcode() {
                             continue;
                         }
 
+                        // Province is stored as a WC state code (e.g. "00"); render the human label ("Metro Manila").
+                        $province_code = isset( $account_address['province'] ) ? (string) $account_address['province'] : '';
+                        $province_disp = class_exists( 'Noyona_Shipping' )
+                            ? Noyona_Shipping::ph_state_label_for( $province_code )
+                            : $province_code;
+
                         $address_parts = array(
                             isset( $account_address['address'] ) ? (string) $account_address['address'] : '',
                             isset( $account_address['city'] ) ? (string) $account_address['city'] : '',
-                            isset( $account_address['province'] ) ? (string) $account_address['province'] : '',
+                            $province_disp,
                             isset( $account_address['zip_code'] ) ? (string) $account_address['zip_code'] : '',
                         );
                         $address_parts = array_filter(
