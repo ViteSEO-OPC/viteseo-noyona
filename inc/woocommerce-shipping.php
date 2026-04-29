@@ -141,6 +141,7 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 
 			add_action( 'admin_menu', array( __CLASS__, 'register_admin_page' ) );
 			add_action( 'admin_post_noyona_shipping_setup', array( __CLASS__, 'handle_setup' ) );
+			add_action( 'admin_post_noyona_shipping_cleanup_legacy', array( __CLASS__, 'handle_cleanup_legacy' ) );
 		}
 
 		/**
@@ -192,10 +193,12 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 			$log            = (array) get_option( self::OPTION_RUN_LOG, array() );
 			$is_placeholder = self::rates_are_placeholder();
 			$done_flag      = isset( $_GET['done'] );
+			$cleaned_flag   = isset( $_GET['cleaned'] );
 			$notice         = get_transient( 'noyona_shipping_notice' );
 			if ( $notice ) {
 				delete_transient( 'noyona_shipping_notice' );
 			}
+			$legacy_zone = self::detect_legacy_zone();
 			?>
 			<div class="wrap">
 				<h1>Noyona Shipping Setup</h1>
@@ -209,9 +212,24 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 				<?php if ( $done_flag && ! $notice ) : ?>
 					<div class="notice notice-success"><p>Setup completed.</p></div>
 				<?php endif; ?>
+				<?php if ( $cleaned_flag && ! $notice ) : ?>
+					<div class="notice notice-success"><p>Legacy ₱50 flat-rate zone removed.</p></div>
+				<?php endif; ?>
 				<?php if ( $is_placeholder ) : ?>
 					<div class="notice notice-warning">
 						<p><strong>Rate matrix is still all zeroes.</strong> Edit <code>inc/woocommerce-shipping.php</code> → <code>RATE_MATRIX</code> with real J&amp;T and LBC rates before clicking Run Setup. The runner refuses to apply placeholder values.</p>
+					</div>
+				<?php endif; ?>
+				<?php if ( $legacy_zone ) : ?>
+					<div class="notice notice-warning">
+						<p>
+							<strong>Legacy shipping zone detected:</strong>
+							"<?php echo esc_html( $legacy_zone['zone_name'] ); ?>"
+							(zone_id <?php echo (int) $legacy_zone['zone_id']; ?>) with a <strong>₱<?php echo esc_html( number_format( (float) $legacy_zone['cost'], 2 ) ); ?></strong> flat-rate method
+							"<?php echo esc_html( $legacy_zone['method_title'] ); ?>"
+							and zero location filters — this zone matches every customer and shadows the J&amp;T zones.
+							Click <em>Remove legacy zone</em> below to delete it (zone + its single flat-rate method + saved settings only). The form is intentionally separate from Run Setup.
+						</p>
 					</div>
 				<?php endif; ?>
 
@@ -264,8 +282,116 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 						</button>
 					</p>
 				</form>
+
+				<?php if ( $legacy_zone ) : ?>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-top:8px" onsubmit="return confirm('Delete the legacy zone &quot;<?php echo esc_js( $legacy_zone['zone_name'] ); ?>&quot; and its ₱<?php echo esc_js( number_format( (float) $legacy_zone['cost'], 2 ) ); ?> flat-rate method? This cannot be undone.');">
+						<input type="hidden" name="action" value="noyona_shipping_cleanup_legacy">
+						<input type="hidden" name="zone_id" value="<?php echo (int) $legacy_zone['zone_id']; ?>">
+						<?php wp_nonce_field( 'noyona_shipping_cleanup_legacy' ); ?>
+						<p>
+							<button type="submit" class="button button-secondary">
+								Remove legacy ₱<?php echo esc_html( number_format( (float) $legacy_zone['cost'], 2 ) ); ?> zone
+							</button>
+						</p>
+					</form>
+				<?php endif; ?>
 			</div>
 			<?php
+		}
+
+		/**
+		 * Identify a legacy "matches everyone" zone from before the J&T matrix existed.
+		 *
+		 * Strict checks (deliberately conservative — never deletes a zone the admin
+		 * has actually configured for something specific):
+		 *   - Zone has zero location filters (matches all customers via WC's
+		 *     `locations.num_zones IS NULL` clause).
+		 *   - Zone is not one of our managed zones (NCR / Luzon / Visayas / Mindanao).
+		 *   - Zone has exactly one shipping method, and it is `flat_rate`.
+		 *   - That flat_rate method has no per-class costs configured.
+		 *
+		 * Returns null when no such zone exists. Returns the zone summary array when
+		 * one is found — caller renders a confirm prompt before deleting.
+		 */
+		private static function detect_legacy_zone() {
+			if ( ! class_exists( 'WC_Shipping_Zones' ) || ! class_exists( 'WC_Shipping_Zone' ) ) {
+				return null;
+			}
+			$managed_names = array_column( self::ZONES, 'name' );
+			foreach ( WC_Shipping_Zones::get_zones() as $zone_data ) {
+				$zone_id   = isset( $zone_data['zone_id'] ) ? (int) $zone_data['zone_id'] : 0;
+				$zone_name = isset( $zone_data['zone_name'] ) ? (string) $zone_data['zone_name'] : '';
+				if ( $zone_id <= 0 ) {
+					continue;
+				}
+				if ( in_array( $zone_name, $managed_names, true ) ) {
+					continue;
+				}
+				$zone = new WC_Shipping_Zone( $zone_id );
+				if ( ! empty( $zone->get_zone_locations() ) ) {
+					continue;
+				}
+				$methods = $zone->get_shipping_methods();
+				if ( 1 !== count( $methods ) ) {
+					continue;
+				}
+				$method = reset( $methods );
+				if ( 'flat_rate' !== $method->id ) {
+					continue;
+				}
+				$instance_id = (int) $method->instance_id;
+				$settings    = get_option( "woocommerce_flat_rate_{$instance_id}_settings", array() );
+				if ( ! is_array( $settings ) ) {
+					$settings = array();
+				}
+				foreach ( array_keys( $settings ) as $key ) {
+					if ( 0 === strpos( (string) $key, 'class_cost_' ) && '' !== (string) $settings[ $key ] ) {
+						continue 2; // Has per-class costs → not the legacy fixed-rate.
+					}
+				}
+				return array(
+					'zone_id'      => $zone_id,
+					'zone_name'    => $zone_name,
+					'instance_id'  => $instance_id,
+					'method_title' => isset( $settings['title'] ) ? (string) $settings['title'] : '',
+					'cost'         => isset( $settings['cost'] ) ? (float) $settings['cost'] : 0.0,
+				);
+			}
+			return null;
+		}
+
+		public static function handle_cleanup_legacy() {
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				wp_die( 'Forbidden' );
+			}
+			check_admin_referer( 'noyona_shipping_cleanup_legacy' );
+
+			$zone_id = isset( $_POST['zone_id'] ) ? (int) $_POST['zone_id'] : 0;
+			$legacy  = self::detect_legacy_zone();
+			if ( ! $legacy || (int) $legacy['zone_id'] !== $zone_id ) {
+				set_transient( 'noyona_shipping_notice', 'Legacy zone could not be confirmed — refresh and try again.', 60 );
+				wp_safe_redirect( admin_url( 'tools.php?page=noyona-shipping-setup' ) );
+				exit;
+			}
+
+			$zone = new WC_Shipping_Zone( (int) $legacy['zone_id'] );
+			$zone->delete(); // WC removes the zone, its zone_methods rows, and locations.
+			delete_option( 'woocommerce_flat_rate_' . (int) $legacy['instance_id'] . '_settings' );
+
+			$log   = (array) get_option( self::OPTION_RUN_LOG, array() );
+			$log[] = sprintf(
+				'[%s] Legacy zone removed: "%s" (zone_id %d) with %s ₱%s flat-rate (instance_id %d).',
+				current_time( 'mysql' ),
+				$legacy['zone_name'],
+				$legacy['zone_id'],
+				$legacy['method_title'],
+				number_format( (float) $legacy['cost'], 2 ),
+				$legacy['instance_id']
+			);
+			update_option( self::OPTION_RUN_LOG, $log );
+
+			wp_safe_redirect( admin_url( 'tools.php?page=noyona-shipping-setup&cleaned=1' ) );
+			exit;
 		}
 
 		public static function handle_setup() {

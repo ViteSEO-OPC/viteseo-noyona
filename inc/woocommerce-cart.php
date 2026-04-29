@@ -3,9 +3,11 @@
  * Cart page logic for Noyona.
  *
  * - Enqueues cart-only stylesheet
- * - Adjusts shipping costs based on subtotal threshold
  * - Removes cross-sells from the cart page
  * - Auto-submits the cart form on quantity change (small inline script)
+ *
+ * Shipping costs are computed by Noyona_Shipping (J&T zone × weight matrix) in
+ * inc/woocommerce-shipping.php. No filter here overrides them.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,36 +31,6 @@ function noyona_cart_enqueue_assets() {
 		array( 'woocom-ct-style', 'woocom-ct-header' ),
 		file_exists( $cart_css_path ) ? (string) filemtime( $cart_css_path ) : wp_get_theme()->get( 'Version' )
 	);
-}
-
-/**
- * Shipping:
- * - P50 if subtotal is 500 or below
- * - Free shipping if subtotal is above 500
- */
-add_filter( 'woocommerce_package_rates', 'noyona_cart_adjust_shipping_costs', 20, 2 );
-function noyona_cart_adjust_shipping_costs( $rates, $package ) {
-	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
-		return $rates;
-	}
-
-	$subtotal  = (float) WC()->cart->get_subtotal();
-	$threshold = 500;
-	$is_free   = $subtotal > $threshold;
-	$new_cost  = $is_free ? 0 : 50;
-
-	foreach ( $rates as $rate_id => $rate ) {
-		$rates[ $rate_id ]->cost  = $new_cost;
-		$rates[ $rate_id ]->label = $is_free ? 'Free shipping' : 'Shipping';
-
-		if ( isset( $rates[ $rate_id ]->taxes ) && is_array( $rates[ $rate_id ]->taxes ) ) {
-			foreach ( $rates[ $rate_id ]->taxes as $tax_key => $tax_value ) {
-				$rates[ $rate_id ]->taxes[ $tax_key ] = 0;
-			}
-		}
-	}
-
-	return $rates;
 }
 
 /**

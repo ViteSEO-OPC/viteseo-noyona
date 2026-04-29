@@ -1,6 +1,6 @@
 <?php
 /**
- * Stock status + free shipping note row.
+ * Stock status + shipping note row.
  *
  * @package viteseo-noyona
  */
@@ -22,8 +22,8 @@ if ( $product->is_in_stock() ) {
 }
 
 $shipping_note = apply_filters(
-	'noyona_pdp_free_shipping_note',
-	__( 'Free shipping on orders over ₱500', 'viteseo-noyona-childtheme' )
+	'noyona_pdp_shipping_note',
+	__( 'Shipping calculated at checkout', 'viteseo-noyona-childtheme' )
 );
 
 ?>

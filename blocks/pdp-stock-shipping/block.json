@@ -5,7 +5,7 @@
   "title": "PDP stock & shipping note",
   "category": "woocommerce",
   "icon": "cart",
-  "description": "Stock badge and free shipping message.",
+  "description": "Stock badge and shipping note row.",
   "supports": { "html": false },
   "style": "file:./style.css",
   "render": "file:./render.php",

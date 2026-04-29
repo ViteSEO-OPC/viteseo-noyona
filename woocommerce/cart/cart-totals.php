@@ -18,12 +18,14 @@ $discount   = (float) $cart->get_discount_total();
 $coupons    = $cart->get_applied_coupons();
 $has_coupon = ! empty( $coupons ) && $discount > 0;
 
-// Shipping — mirrors the woocommerce_package_rates filter in inc/woocommerce-cart.php.
-$shipping_threshold = 500;
-$shipping_cost      = $subtotal > $shipping_threshold ? 0 : 50;
-$is_free_shipping   = 0 === $shipping_cost;
+// Shipping — read directly from cart totals (driven by Noyona_Shipping J&T matrix in inc/woocommerce-shipping.php).
+$needs_shipping   = WC()->cart->needs_shipping();
+$shipping_cost    = $needs_shipping ? (float) $cart->get_shipping_total() : 0.0;
+$chosen_methods   = ( WC()->session && $needs_shipping ) ? WC()->session->get( 'chosen_shipping_methods' ) : array();
+$has_chosen_rate  = $needs_shipping && ! empty( $chosen_methods );
+$is_free_shipping = ! $needs_shipping;
 
-// Total = subtotal - discount + shipping.
+// Total = subtotal - discount + shipping (zero when no rate is chosen yet so we don't show a fake total).
 $total = $subtotal - $discount + $shipping_cost;
 ?>
 
@@ -87,7 +89,15 @@ $total = $subtotal - $discount + $shipping_cost;
 		<div class="noyona-summary-row noyona-summary-row--shipping">
 			<span class="noyona-summary-row__label">Shipping</span>
 			<span class="noyona-summary-row__value <?php echo $is_free_shipping ? 'noyona-summary-row__value--free' : ''; ?>">
-				<?php echo $is_free_shipping ? esc_html__( 'Free', 'woocommerce' ) : wp_kses_post( wc_price( $shipping_cost ) ); ?>
+				<?php
+				if ( ! $needs_shipping ) {
+					esc_html_e( 'Free', 'woocommerce' );
+				} elseif ( ! $has_chosen_rate ) {
+					esc_html_e( 'Calculated at checkout', 'viteseo-noyona-childtheme' );
+				} else {
+					echo wp_kses_post( wc_price( $shipping_cost ) );
+				}
+				?>
 			</span>
 		</div>
 	</div>

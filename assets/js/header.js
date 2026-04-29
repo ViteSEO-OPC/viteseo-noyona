@@ -582,38 +582,21 @@ console.log('🔥 HEADER JS LOADED — build', Date.now());
       if (!root) return;
 
       const shippingBar = root.querySelector('.noyona-mini-cart-shipping');
-      const progressBar = root.querySelector('.noyona-mini-cart-progress-bar');
       const subtotalEl = root.querySelector('.noyona-mini-cart-subtotal');
       const shippingEl = root.querySelector('.noyona-mini-cart-shipping-fee');
       const totalEl = root.querySelector('.noyona-mini-cart-total');
 
-      const threshold = shippingBar ? Number(shippingBar.dataset.freeShippingThreshold || 500) : 500;
-      const defaultShippingFee = shippingBar ? Number(shippingBar.dataset.defaultShippingFee || 50) : 50;
-
-      const safeThreshold = Number.isFinite(threshold) && threshold > 0 ? threshold : 500;
-      const safeShippingFee = Number.isFinite(defaultShippingFee) && defaultShippingFee >= 0 ? defaultShippingFee : 50;
       const safeSubtotal = Math.max(0, Number(subtotal) || 0);
 
-      const remaining = Math.max(0, safeThreshold - safeSubtotal);
-      const shippingFee = safeSubtotal > 0 && safeSubtotal < safeThreshold ? safeShippingFee : 0;
-      const total = safeSubtotal + shippingFee;
-      const progress = safeThreshold > 0 ? Math.min(100, (safeSubtotal / safeThreshold) * 100) : 0;
-
+      // Mini-cart cannot know real shipping (no destination yet) — show neutral copy
+      // and let WooCommerce compute the actual J&T rate at checkout.
       if (shippingBar) {
-        if (safeSubtotal <= 0 || remaining > 0) {
-          shippingBar.textContent = 'Add ' + formatPeso(remaining > 0 ? remaining : safeThreshold) + ' for Free Shipping';
-        } else {
-          shippingBar.textContent = 'You unlocked Free Shipping';
-        }
-      }
-
-      if (progressBar) {
-        progressBar.style.width = progress.toFixed(2) + '%';
+        shippingBar.textContent = 'Shipping calculated at checkout';
       }
 
       if (subtotalEl) subtotalEl.textContent = formatPeso(safeSubtotal);
-      if (shippingEl) shippingEl.textContent = formatPeso(shippingFee);
-      if (totalEl) totalEl.textContent = formatPeso(total);
+      if (shippingEl) shippingEl.textContent = '—';
+      if (totalEl) totalEl.textContent = formatPeso(safeSubtotal);
     };
 
     const fetchStoreCart = () => fetch('/wp-json/wc/store/cart?_t=' + Date.now(), {
