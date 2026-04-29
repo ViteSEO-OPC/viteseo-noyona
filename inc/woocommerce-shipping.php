@@ -139,9 +139,124 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 			add_filter( 'woocommerce_product_get_shipping_class_id', array( __CLASS__, 'auto_assign_class' ), 10, 2 );
 			add_filter( 'woocommerce_product_variation_get_shipping_class_id', array( __CLASS__, 'auto_assign_class' ), 10, 2 );
 
+			// Seed a usable shipping destination on every front-end request so the cart and
+			// mini-cart can compute a J&T rate without waiting for the customer to reach
+			// the address form. Runs on `wp_loaded` (after WC has built WC()->customer).
+			add_action( 'wp_loaded', array( __CLASS__, 'seed_customer_shipping_address' ), 20 );
+
+			// Admin-gated debug block on the cart page — append `?noyona_shipping_debug=1`.
+			add_action( 'woocommerce_after_cart_totals', array( __CLASS__, 'maybe_render_debug_block' ) );
+
 			add_action( 'admin_menu', array( __CLASS__, 'register_admin_page' ) );
 			add_action( 'admin_post_noyona_shipping_setup', array( __CLASS__, 'handle_setup' ) );
 			add_action( 'admin_post_noyona_shipping_cleanup_legacy', array( __CLASS__, 'handle_cleanup_legacy' ) );
+		}
+
+		/**
+		 * Make sure WC()->customer has a shipping country/state so zone matching can
+		 * find a J&T rate before the customer reaches the address form.
+		 *
+		 * Priority:
+		 *   1. Already-set shipping fields → leave alone.
+		 *   2. Billing fields (typically populated from WC's `default_customer_address` /
+		 *      shop-base settings, since our checkout strips billing inputs).
+		 *   3. Shop base address (PH:00 = NCR).
+		 *
+		 * Writes to WC()->customer's session-level state only. For logged-in users this
+		 * does NOT call ->save(), so the user's stored profile is never overwritten.
+		 */
+		public static function seed_customer_shipping_address() {
+			if ( is_admin() && ! wp_doing_ajax() ) {
+				return;
+			}
+			if ( ! function_exists( 'WC' ) || ! WC()->customer ) {
+				return;
+			}
+
+			$customer = WC()->customer;
+			if ( '' !== (string) $customer->get_shipping_country() ) {
+				return; // Already known — don't overwrite.
+			}
+
+			$country  = (string) $customer->get_billing_country();
+			$state    = (string) $customer->get_billing_state();
+			$postcode = (string) $customer->get_billing_postcode();
+			$city     = (string) $customer->get_billing_city();
+
+			if ( '' === $country && function_exists( 'WC' ) && WC()->countries ) {
+				$country  = (string) WC()->countries->get_base_country();
+				$state    = (string) WC()->countries->get_base_state();
+				$postcode = (string) WC()->countries->get_base_postcode();
+				$city     = (string) WC()->countries->get_base_city();
+			}
+
+			if ( '' === $country ) {
+				return; // Genuinely nothing to seed — let template show "Calculated at checkout".
+			}
+
+			$customer->set_shipping_country( $country );
+			$customer->set_shipping_state( $state );
+			$customer->set_shipping_postcode( $postcode );
+			$customer->set_shipping_city( $city );
+		}
+
+		/**
+		 * Append `?noyona_shipping_debug=1` on the cart page (or any page rendering
+		 * `woocommerce_after_cart_totals`) to dump the shipping calculation context.
+		 * Visible to manage_woocommerce capability only.
+		 */
+		public static function maybe_render_debug_block() {
+			if ( empty( $_GET['noyona_shipping_debug'] ) ) {
+				return;
+			}
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				return;
+			}
+			if ( ! function_exists( 'WC' ) || ! WC()->customer || ! WC()->cart ) {
+				return;
+			}
+			$customer  = WC()->customer;
+			$ship_to   = apply_filters( 'woocommerce_ship_to_destination', get_option( 'woocommerce_ship_to_destination' ) );
+			$ship_to_db = (string) get_option( 'woocommerce_ship_to_destination' );
+			$packages  = WC()->shipping() ? WC()->shipping()->get_packages() : array();
+			$chosen    = WC()->session ? WC()->session->get( 'chosen_shipping_methods' ) : null;
+
+			$lines = array();
+			$lines[] = '— Noyona shipping debug —';
+			$lines[] = 'ship_to_destination (DB)        : ' . $ship_to_db;
+			$lines[] = 'ship_to_destination (filtered)  : ' . (string) $ship_to;
+			$lines[] = 'default_customer_address        : ' . (string) get_option( 'woocommerce_default_customer_address' );
+			$lines[] = 'default_country                 : ' . (string) get_option( 'woocommerce_default_country' );
+			$lines[] = '';
+			$lines[] = 'customer billing  country/state : ' . $customer->get_billing_country() . ' / ' . $customer->get_billing_state();
+			$lines[] = 'customer billing  postcode/city : ' . $customer->get_billing_postcode() . ' / ' . $customer->get_billing_city();
+			$lines[] = 'customer shipping country/state : ' . $customer->get_shipping_country() . ' / ' . $customer->get_shipping_state();
+			$lines[] = 'customer shipping postcode/city : ' . $customer->get_shipping_postcode() . ' / ' . $customer->get_shipping_city();
+			$lines[] = '';
+			$lines[] = 'cart->needs_shipping()          : ' . ( WC()->cart->needs_shipping() ? 'yes' : 'no' );
+			$lines[] = 'cart->get_shipping_total()      : ' . wc_format_localized_price( (float) WC()->cart->get_shipping_total() );
+			$lines[] = 'chosen_shipping_methods         : ' . wp_json_encode( $chosen );
+			$lines[] = '';
+
+			foreach ( $packages as $i => $pkg ) {
+				$dest    = isset( $pkg['destination'] ) ? $pkg['destination'] : array();
+				$lines[] = "package[{$i}] destination     : " . wp_json_encode( $dest );
+				if ( class_exists( 'WC_Shipping_Zones' ) ) {
+					$zone    = WC_Shipping_Zones::get_zone_matching_package( $pkg );
+					$lines[] = "package[{$i}] matched zone    : " . $zone->get_zone_name() . ' (zone_id ' . $zone->get_id() . ')';
+				}
+				if ( ! empty( $pkg['rates'] ) && is_array( $pkg['rates'] ) ) {
+					foreach ( $pkg['rates'] as $rate ) {
+						$lines[] = "package[{$i}] rate            : " . $rate->get_id() . ' — ' . $rate->get_label() . ' — ' . wc_format_localized_price( (float) $rate->get_cost() );
+					}
+				} else {
+					$lines[] = "package[{$i}] rates           : (none)";
+				}
+			}
+
+			echo '<pre style="background:#f6f7f7;padding:12px;font-size:12px;line-height:1.5;margin-top:16px;border:1px solid #dcdcde;max-width:820px;overflow:auto">';
+			echo esc_html( implode( "\n", $lines ) );
+			echo '</pre>';
 		}
 
 		/**

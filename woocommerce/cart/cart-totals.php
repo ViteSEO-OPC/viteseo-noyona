@@ -19,14 +19,17 @@ $coupons    = $cart->get_applied_coupons();
 $has_coupon = ! empty( $coupons ) && $discount > 0;
 
 // Shipping — read directly from cart totals (driven by Noyona_Shipping J&T matrix in inc/woocommerce-shipping.php).
+//
+// `chosen_shipping_methods` can contain array(0 => '') even when no rate matched, so we
+// gate display on the actual cost being > 0 instead. With J&T-only there is no genuine
+// free-shipping path: a real rate is always non-zero, so 0.00 ⇔ no rate yet → "Calculated at checkout".
 $needs_shipping   = WC()->cart->needs_shipping();
 $shipping_cost    = $needs_shipping ? (float) $cart->get_shipping_total() : 0.0;
-$chosen_methods   = ( WC()->session && $needs_shipping ) ? WC()->session->get( 'chosen_shipping_methods' ) : array();
-$has_chosen_rate  = $needs_shipping && ! empty( $chosen_methods );
+$has_real_rate    = $needs_shipping && $shipping_cost > 0;
 $is_free_shipping = ! $needs_shipping;
 
-// Total = subtotal - discount + shipping (zero when no rate is chosen yet so we don't show a fake total).
-$total = $subtotal - $discount + $shipping_cost;
+// Total — only include shipping when a real rate is present.
+$total = $subtotal - $discount + ( $has_real_rate ? $shipping_cost : 0.0 );
 ?>
 
 <div class="noyona-cart-summary">
@@ -92,10 +95,10 @@ $total = $subtotal - $discount + $shipping_cost;
 				<?php
 				if ( ! $needs_shipping ) {
 					esc_html_e( 'Free', 'woocommerce' );
-				} elseif ( ! $has_chosen_rate ) {
-					esc_html_e( 'Calculated at checkout', 'viteseo-noyona-childtheme' );
-				} else {
+				} elseif ( $has_real_rate ) {
 					echo wp_kses_post( wc_price( $shipping_cost ) );
+				} else {
+					esc_html_e( 'Calculated at checkout', 'viteseo-noyona-childtheme' );
 				}
 				?>
 			</span>

@@ -578,7 +578,9 @@ console.log('🔥 HEADER JS LOADED — build', Date.now());
       }
     };
 
-    const applySummaryFromSubtotal = (root, subtotal) => {
+    // shipping is the real Store API total_shipping in major units (e.g. PHP),
+    // or null when no rate has been computed for the customer's address yet.
+    const applyMiniCartSummary = (root, subtotal, shipping) => {
       if (!root) return;
 
       const shippingBar = root.querySelector('.noyona-mini-cart-shipping');
@@ -587,16 +589,17 @@ console.log('🔥 HEADER JS LOADED — build', Date.now());
       const totalEl = root.querySelector('.noyona-mini-cart-total');
 
       const safeSubtotal = Math.max(0, Number(subtotal) || 0);
+      const hasRealRate = Number.isFinite(shipping) && shipping > 0;
 
-      // Mini-cart cannot know real shipping (no destination yet) — show neutral copy
-      // and let WooCommerce compute the actual J&T rate at checkout.
       if (shippingBar) {
-        shippingBar.textContent = 'Shipping calculated at checkout';
+        shippingBar.textContent = hasRealRate
+          ? 'Shipping: ' + formatPeso(shipping)
+          : 'Shipping calculated at checkout';
       }
 
       if (subtotalEl) subtotalEl.textContent = formatPeso(safeSubtotal);
-      if (shippingEl) shippingEl.textContent = '—';
-      if (totalEl) totalEl.textContent = formatPeso(safeSubtotal);
+      if (shippingEl) shippingEl.textContent = hasRealRate ? formatPeso(shipping) : '—';
+      if (totalEl) totalEl.textContent = formatPeso(safeSubtotal + (hasRealRate ? shipping : 0));
     };
 
     const fetchStoreCart = () => fetch('/wp-json/wc/store/cart?_t=' + Date.now(), {
@@ -741,13 +744,16 @@ console.log('🔥 HEADER JS LOADED — build', Date.now());
         syncTermsGate(root);
         bindMiniCartLoginModal();
 
-        // Fallback: full cart totals from Store API.
+        // Read full totals (subtotal + real shipping) from the Store API response.
         const totals = cart && cart.totals ? cart.totals : null;
         const subtotalMinor = totals
           ? (parseMinorAmount(totals.total_items) || parseMinorAmount(totals.subtotal_price) || parseMinorAmount(totals.total_price))
           : 0;
+        const shippingMinor = totals ? parseMinorAmount(totals.total_shipping) : 0;
+        const subtotalMajor = subtotalMinor > 0 ? subtotalMinor / 100 : readSubtotalFallback(root);
+        const shippingMajor = shippingMinor > 0 ? shippingMinor / 100 : null;
 
-        applySummaryFromSubtotal(root, subtotalMinor > 0 ? subtotalMinor / 100 : readSubtotalFallback(root));
+        applyMiniCartSummary(root, subtotalMajor, shippingMajor);
       });
     };
 

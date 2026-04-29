@@ -590,16 +590,19 @@ function noyona_strip_woocommerce_privacy_copy( $text, $type ) {
 add_filter( 'woocommerce_ship_to_different_address_checked', '__return_true' );
 
 /**
- * Ensure checkout uses shipping-address mode in our custom flow.
- * This avoids server setting mismatches where shipping fields disappear.
+ * Always compute shipping from the *shipping* address.
+ *
+ * We strip every billing-address field in noyona_customise_checkout_fields(),
+ * so a billing-based destination would always be empty → no zone match → no
+ * rates → ₱0 in cart and "Please enter an address" at checkout.
+ *
+ * Forced unconditionally (cart, mini-cart, checkout, admin) so zone matching
+ * is consistent everywhere. The DB option `woocommerce_ship_to_destination`
+ * may still read 'billing'; this filter wins at runtime.
  */
 add_filter( 'woocommerce_ship_to_destination', 'noyona_force_ship_to_destination_mode', 20 );
 function noyona_force_ship_to_destination_mode( $destination ) {
-	if ( function_exists( 'noyona_is_checkout_ui_context' ) && noyona_is_checkout_ui_context() ) {
-		return 'shipping';
-	}
-
-	return $destination;
+	return 'shipping';
 }
 
 /* ─── Save custom checkout fields ─────────────────── */
