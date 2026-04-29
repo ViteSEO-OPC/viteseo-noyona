@@ -1,9 +1,10 @@
 <?php
 /**
- * Noyona Shipping — Zone × Weight matrix, dual carrier (J&T + LBC).
+ * Noyona Shipping — Zone × Weight matrix.
  *
  * Origin: Makati HQ (single online fulfillment branch, docs/order-tracking-approach.md §7).
- * Checkout shows both J&T Express and LBC Express as options; customer picks one.
+ * Active carrier: J&T Express only. LBC Express is kept in code but disabled at
+ * checkout per client direction — flip its `enabled` flag in CARRIERS to re-expose it.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -58,44 +59,52 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 			'weight-5-10kg' => 'Weight 5-10 kg',
 		);
 
-		/** Carriers shown at checkout. Display order = array order. */
+		/**
+		 * Carriers shown at checkout. Display order = array order.
+		 * `enabled => false` keeps the carrier's setup code in place but hides it from
+		 * checkout (existing zone methods get `is_enabled = 0`; new ones aren't created).
+		 */
 		const CARRIERS = array(
-			'jt'  => array( 'label' => 'J&T Express' ),
-			'lbc' => array( 'label' => 'LBC Express' ),
+			'jt'  => array( 'label' => 'J&T Express', 'enabled' => true ),
+			'lbc' => array( 'label' => 'LBC Express', 'enabled' => false ),
 		);
 
 		/**
 		 * Rate matrix — carrier → zone → class → PHP cost.
 		 *
-		 * TODO: Replace 0.00 with real rates from each carrier's published
-		 * rate card for Makati origin. Walk-in rates.
-		 * The setup runner refuses to apply while all cells are still 0.00.
+		 * J&T values: 2023 public walk-in rate card, "From Metro Manila" origin.
+		 *   - 0–1kg row uses the 501g–1kg tier.
+		 *   - 3–5kg row averages the 3.01–4kg and 4.01–5kg tiers.
+		 *   - 5–10kg row averages the 5.01–10kg tiers.
+		 * LBC remains at 0.00 — carrier is disabled at checkout (see CARRIERS), so
+		 * the setup runner will not create / will disable its zone methods.
+		 * The runner refuses to apply while all *enabled* carriers' cells are 0.00.
 		 */
 		const RATE_MATRIX = array(
 			'jt' => array(
 				'ncr' => array(
-					'weight-0-1kg'  => 0.00,
-					'weight-1-3kg'  => 0.00,
-					'weight-3-5kg'  => 0.00,
-					'weight-5-10kg' => 0.00,
+					'weight-0-1kg'  => 115.00,
+					'weight-1-3kg'  => 155.00,
+					'weight-3-5kg'  => 210.00,
+					'weight-5-10kg' => 335.00,
 				),
 				'luzon' => array(
-					'weight-0-1kg'  => 0.00,
-					'weight-1-3kg'  => 0.00,
-					'weight-3-5kg'  => 0.00,
-					'weight-5-10kg' => 0.00,
+					'weight-0-1kg'  => 165.00,
+					'weight-1-3kg'  => 190.00,
+					'weight-3-5kg'  => 300.00,
+					'weight-5-10kg' => 495.00,
 				),
 				'visayas' => array(
-					'weight-0-1kg'  => 0.00,
-					'weight-1-3kg'  => 0.00,
-					'weight-3-5kg'  => 0.00,
-					'weight-5-10kg' => 0.00,
+					'weight-0-1kg'  => 180.00,
+					'weight-1-3kg'  => 200.00,
+					'weight-3-5kg'  => 335.00,
+					'weight-5-10kg' => 575.00,
 				),
 				'mindanao' => array(
-					'weight-0-1kg'  => 0.00,
-					'weight-1-3kg'  => 0.00,
-					'weight-3-5kg'  => 0.00,
-					'weight-5-10kg' => 0.00,
+					'weight-0-1kg'  => 195.00,
+					'weight-1-3kg'  => 220.00,
+					'weight-3-5kg'  => 350.00,
+					'weight-5-10kg' => 575.00,
 				),
 			),
 			'lbc' => array(
@@ -190,8 +199,9 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 			?>
 			<div class="wrap">
 				<h1>Noyona Shipping Setup</h1>
-				<p>Creates 4 shipping zones (NCR, Luzon ex-NCR, Visayas, Mindanao), 4 weight-based shipping classes, and registers a J&amp;T Express + LBC Express flat-rate method in each zone. Origin: Makati HQ.</p>
-				<p><em>Safe to re-run. Edit the <code>RATE_MATRIX</code> in <code>inc/woocommerce-shipping.php</code> then click Run Setup; WooCommerce flat-rate costs update in place.</em></p>
+				<p>Creates 4 shipping zones (NCR, Luzon ex-NCR, Visayas, Mindanao) and 4 weight-based shipping classes, then registers a flat-rate method per enabled carrier in each zone. Origin: Makati HQ.</p>
+				<p><em>Active carrier: <strong>J&amp;T Express</strong>. LBC Express is currently <strong>disabled at checkout</strong> per client direction — flip <code>'enabled' =&gt; true</code> in <code>CARRIERS</code> and re-run setup to expose it.</em></p>
+				<p><em>Safe to re-run. Edit <code>RATE_MATRIX</code> in <code>inc/woocommerce-shipping.php</code> then click Run Setup; WooCommerce flat-rate costs update in place.</em></p>
 
 				<?php if ( $notice ) : ?>
 					<div class="notice notice-error"><p><?php echo esc_html( $notice ); ?></p></div>
@@ -206,7 +216,12 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 				<?php endif; ?>
 
 				<?php foreach ( self::CARRIERS as $carrier_slug => $carrier_def ) : ?>
-					<h2><?php echo esc_html( $carrier_def['label'] ); ?> — rate matrix (PHP)</h2>
+					<h2>
+						<?php echo esc_html( $carrier_def['label'] ); ?> — rate matrix (PHP)
+						<?php if ( empty( $carrier_def['enabled'] ) ) : ?>
+							<span style="color:#a00;font-size:13px;font-weight:normal">— DISABLED at checkout</span>
+						<?php endif; ?>
+					</h2>
 					<table class="widefat striped" style="max-width:820px;margin-bottom:20px">
 						<thead>
 							<tr>
@@ -274,8 +289,14 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 		}
 
 		private static function rates_are_placeholder() {
-			foreach ( self::RATE_MATRIX as $carrier_rates ) {
-				foreach ( $carrier_rates as $zone_cells ) {
+			foreach ( self::CARRIERS as $carrier_slug => $carrier_def ) {
+				if ( empty( $carrier_def['enabled'] ) ) {
+					continue;
+				}
+				if ( ! isset( self::RATE_MATRIX[ $carrier_slug ] ) ) {
+					continue;
+				}
+				foreach ( self::RATE_MATRIX[ $carrier_slug ] as $zone_cells ) {
 					foreach ( $zone_cells as $cost ) {
 						if ( (float) $cost > 0.0 ) {
 							return false;
@@ -327,8 +348,17 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 				$log[] = '  → ' . count( $locations ) . ' state(s) linked';
 
 				foreach ( self::CARRIERS as $carrier_slug => $carrier_def ) {
-					$instance_id = self::ensure_flat_rate_method( $zone, $carrier_def['label'] );
-					$log[]       = "  → {$carrier_def['label']} flat_rate instance_id {$instance_id}";
+					$is_enabled  = ! empty( $carrier_def['enabled'] );
+					$existing_id = self::find_flat_rate_method( $zone, $carrier_def['label'] );
+
+					if ( ! $is_enabled && ! $existing_id ) {
+						$log[] = "  → {$carrier_def['label']} skipped (disabled, no existing method)";
+						continue;
+					}
+
+					$instance_id = $existing_id ?: (int) $zone->add_shipping_method( 'flat_rate' );
+					$status_tag  = $is_enabled ? '' : ' [DISABLED]';
+					$log[]       = "  → {$carrier_def['label']} flat_rate instance_id {$instance_id}{$status_tag}";
 
 					self::set_flat_rate_costs(
 						$instance_id,
@@ -336,7 +366,8 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 						self::RATE_MATRIX[ $carrier_slug ][ $zone_slug ],
 						$class_ids
 					);
-					$log[] = "    → per-class rates applied";
+					self::set_method_enabled( $instance_id, $is_enabled );
+					$log[] = '    → per-class rates applied' . ( $is_enabled ? '' : ' (method disabled at checkout)' );
 				}
 			}
 
@@ -358,9 +389,10 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 
 		/**
 		 * Find a flat_rate instance in $zone whose saved title matches $target_title.
-		 * If none found, create a new flat_rate instance.
+		 * Returns 0 when no matching instance exists. `get_shipping_methods()` returns
+		 * both enabled and disabled methods so a previously-disabled carrier is found.
 		 */
-		private static function ensure_flat_rate_method( WC_Shipping_Zone $zone, $target_title ) {
+		private static function find_flat_rate_method( WC_Shipping_Zone $zone, $target_title ) {
 			foreach ( $zone->get_shipping_methods() as $method ) {
 				if ( 'flat_rate' !== $method->id ) {
 					continue;
@@ -371,7 +403,22 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 					return (int) $method->instance_id;
 				}
 			}
-			return (int) $zone->add_shipping_method( 'flat_rate' );
+			return 0;
+		}
+
+		/**
+		 * Toggle the zone-method `is_enabled` column. Required because flat_rate's
+		 * checkout availability is gated on this DB flag, not the settings option.
+		 */
+		private static function set_method_enabled( $instance_id, $enabled ) {
+			global $wpdb;
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_shipping_zone_methods',
+				array( 'is_enabled' => $enabled ? 1 : 0 ),
+				array( 'instance_id' => (int) $instance_id ),
+				array( '%d' ),
+				array( '%d' )
+			);
 		}
 
 		private static function set_flat_rate_costs( $instance_id, $title, $rates, $class_ids ) {

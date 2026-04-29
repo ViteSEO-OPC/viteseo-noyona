@@ -343,45 +343,52 @@ Why the auto-assignment hook: WooCommerce Shipping Classes are normally per-prod
 
 ## 8. Shipping fee implementation — status
 
-### 8.1 Decisions locked in (2026-04-24)
+### 8.1 Decisions locked in (2026-04-24, revised 2026-04-29)
 
 | Decision | Value |
 |---|---|
 | Origin | Makati HQ, Burgundy Corporate Tower (single online branch) |
-| Carriers at checkout | **Both** — J&T Express + LBC Express, customer picks |
+| Carriers at checkout | **J&T Express only** (revised 2026-04-29) |
+| LBC Express | **Retained in code, disabled at checkout.** Toggle `'enabled' => true` on the LBC entry in `CARRIERS` (`inc/woocommerce-shipping.php`) and re-run setup to re-expose. |
 | Rate type | **Walk-in** rates (no merchant contract yet) |
 | COD surcharge | **None** — COD is not a payment option on this site |
 | Weight buckets | `0-1kg`, `1-3kg`, `3-5kg`, `5-10kg` |
 | Destination zones | NCR, Luzon (ex-NCR), Visayas, Mindanao |
-| Total rate cells | 4 zones × 4 weight buckets × 2 carriers = **32** |
+| Active rate cells | 4 zones × 4 weight buckets × 1 carrier (J&T) = **16** |
+| Code-only rate cells | Same matrix shape preserved for LBC (kept at `0.00` until re-enabled) |
+
+**Why J&T-only for now (2026-04-29):** Noyona wants to focus on a single carrier at launch — one rate card to verify, one booking workflow, simpler operational training. LBC will be reintroduced once J&T is proven on production volume.
 
 ### 8.2 Code in place
 
 - `inc/woocommerce-shipping.php` — `Noyona_Shipping` class, included from `functions.php` alongside the other `inc/woocommerce-*.php` files.
-- Registers 4 shipping classes, 4 zones mapped to WooCommerce PH province codes, and 2 flat-rate methods per zone (one per carrier) — all idempotent.
+- Registers 4 shipping classes, 4 zones mapped to WooCommerce PH province codes, and a flat-rate method per **enabled** carrier in each zone — all idempotent.
 - **Auto-assigns shipping class from product weight** via `woocommerce_product_get_shipping_class_id` filter. Admin only fills the weight field; class is picked at runtime.
-- **Admin page** at `Tools → Noyona Shipping` — displays both matrices, last-run timestamp, run log, and a "Run Setup" button.
-- **Safety guard**: setup runner refuses to apply if all cells are still `0.00`. "Run Setup" button is disabled in the admin page while the matrix is unpopulated.
+- **Carrier enable/disable flag** (`CARRIERS[*]['enabled']`). Disabled carriers either get `is_enabled = 0` written to their existing `wp_woocommerce_shipping_zone_methods` row, or are skipped entirely on a fresh setup. As of 2026-04-29: J&T enabled, LBC disabled.
+- **Admin page** at `Tools → Noyona Shipping` — displays each carrier's matrix (disabled ones tagged "DISABLED at checkout"), last-run timestamp, run log, and a "Run Setup" button.
+- **Safety guard**: setup runner refuses to apply if all *enabled* carriers' cells are still `0.00`. "Run Setup" button is disabled in the admin page while the enabled matrix is unpopulated.
 
 ### 8.3 Pending
 
-- **Real rate values for the 32 cells.** Source = J&T and LBC public walk-in rate cards for Makati origin. Will be provided by admin as screenshots or pasted text, transcribed into `RATE_MATRIX` constant.
-- **First Run Setup click** after rates are filled — replaces the current ₱50 flat rate with the zone × weight × carrier matrix.
-- **Checkout verification** on local site before deploying to production — confirm both carriers appear, correct rate shown per destination, correct rate shown per cart weight.
+- **J&T rate matrix:** ✅ filled 2026-04-29 from the 2023 J&T public walk-in rate card, "From Metro Manila" origin. 16 cells live in `RATE_MATRIX['jt']`. Tier-merge notes (501g–1kg → `0-1kg`; avg of 3.01–4kg / 4.01–5kg → `3-5kg`; avg of 5.01–10kg tiers → `5-10kg`) are in the docblock above `RATE_MATRIX` for review.
+- **LBC rate matrix:** deferred. 16 cells stay at `0.00` while LBC is disabled. To revive: fill rates from the LBC walk-in card, set `'enabled' => true` on the LBC entry in `CARRIERS`, click Run Setup.
+- **First Run Setup click** — replaces the current ₱50 flat rate with the J&T zone × weight matrix.
+- **Checkout verification** on local site before deploying to production — confirm J&T appears as a single option per destination, correct rate per zone, correct rate per cart weight, and LBC does **not** appear.
 
 ### 8.4 Merge strategy when carrier bands don't match our buckets
 
-J&T's rate card sometimes splits 0–0.5kg and 0.51–1kg. LBC may have different bands too. When a carrier's bands don't line up with our 4 buckets:
+J&T's rate card splits sub-kilo (0–0.5kg vs 0.51–1kg) and breaks 3–5kg into two tiers. LBC has its own bands. When a carrier's bands don't line up with our 4 buckets:
 
-- **Merge by taking the highest rate in the overlapping range.** Ensures we never undercharge.
-- Note each merged cell with an inline comment in `RATE_MATRIX` so reviewers can see the source.
+- **For lower tiers (0–1kg):** take the *highest* rate in the overlapping range so we never undercharge a heavier sub-kilo package.
+- **For wider tiers (3–5kg, 5–10kg):** average the carrier's component tiers — this matches the J&T transcription on 2026-04-29.
+- Note each merged/averaged cell in the docblock above `RATE_MATRIX` so reviewers can audit the source.
 
 ### 8.5 Maintenance cadence (applies once live)
 
 Quarterly review (Jan / Apr / Jul / Oct) per §6.5:
 
-1. Open current J&T and LBC public rate pages.
-2. Re-check the 32 cells against current cards.
+1. Open the current J&T public rate page (and LBC's, if/when LBC is re-enabled).
+2. Re-check the 16 active cells (32 if LBC is back on) against the current card(s).
 3. Edit `RATE_MATRIX` in `inc/woocommerce-shipping.php`, commit, deploy.
 4. Visit `Tools → Noyona Shipping → Run Setup` — the runner updates WooCommerce flat-rate costs in place. No zone recreation.
 
@@ -392,4 +399,4 @@ Flip to API / aggregator (per §3 and §5) when any of:
 - More than one branch starts fulfilling online orders (then §7.4 triggers first — rework the zone matrix for multi-origin).
 - Monthly shipping margin loss from weight / zone mismatches exceeds an aggregator subscription (~USD 11/mo).
 - Volume crosses ~50 shipments/month *and* customer "where's my order?" tickets make tracking automation worthwhile too.
-- A second carrier (not J&T / LBC) is added and the 4×4 matrix grows unmaintainable.
+- A second carrier is enabled at checkout (LBC re-introduced, or a new carrier added) and the matrix grows unmaintainable.
