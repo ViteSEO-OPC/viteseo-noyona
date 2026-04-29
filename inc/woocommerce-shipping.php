@@ -153,6 +153,66 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 		}
 
 		/**
+		 * Convert a free-text Philippine province / state value into a WooCommerce
+		 * PH state code (`00` for Metro Manila, `ABR` for Abra, etc.).
+		 *
+		 * Resolution order:
+		 *   1. Already a valid WC state code → return as-is.
+		 *   2. Exact (case-insensitive) match of the WC-published state label.
+		 *   3. Hard-coded alias (e.g. `NCR`, `MM`, `National Capital Region` → `00`).
+		 *   4. Substring match — useful for stored values like "Pasig City, Metro Manila".
+		 *   5. Fallback — return the original input. WC validation will surface the
+		 *      mismatch so a maintainer can extend the alias list.
+		 */
+		public static function normalize_ph_state( $input ) {
+			$input = trim( (string) $input );
+			if ( '' === $input ) {
+				return '';
+			}
+			if ( ! function_exists( 'WC' ) || ! WC()->countries ) {
+				return $input;
+			}
+			$states = (array) WC()->countries->get_states( 'PH' );
+			if ( empty( $states ) ) {
+				return $input;
+			}
+			if ( isset( $states[ $input ] ) ) {
+				return $input;
+			}
+			foreach ( $states as $code => $label ) {
+				if ( 0 === strcasecmp( (string) $code, $input ) ) {
+					return (string) $code;
+				}
+			}
+			foreach ( $states as $code => $label ) {
+				if ( 0 === strcasecmp( (string) $label, $input ) ) {
+					return (string) $code;
+				}
+			}
+			$aliases = array(
+				'ncr'                     => '00',
+				'mm'                      => '00',
+				'metro manila'            => '00',
+				'national capital region' => '00',
+				'manila'                  => '00',
+			);
+			$needle = strtolower( $input );
+			if ( isset( $aliases[ $needle ], $states[ $aliases[ $needle ] ] ) ) {
+				return $aliases[ $needle ];
+			}
+			foreach ( $states as $code => $label ) {
+				$label = (string) $label;
+				if ( '' === trim( $label ) ) {
+					continue;
+				}
+				if ( false !== stripos( $input, $label ) ) {
+					return (string) $code;
+				}
+			}
+			return $input;
+		}
+
+		/**
 		 * Make sure WC()->customer has a shipping country/state so zone matching can
 		 * find a J&T rate before the customer reaches the address form.
 		 *

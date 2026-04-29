@@ -2187,7 +2187,10 @@ function noyona_normalize_account_addresses( $addresses ) {
 
         $address_line = isset( $address_data['address'] ) ? sanitize_text_field( wp_unslash( (string) $address_data['address'] ) ) : '';
         $city         = isset( $address_data['city'] ) ? sanitize_text_field( wp_unslash( (string) $address_data['city'] ) ) : '';
-        $province     = isset( $address_data['province'] ) ? sanitize_text_field( wp_unslash( (string) $address_data['province'] ) ) : '';
+        $province_raw = isset( $address_data['province'] ) ? sanitize_text_field( wp_unslash( (string) $address_data['province'] ) ) : '';
+        // Normalize free-text province values ("Metro Manila", "NCR", "Pasig City, Metro Manila")
+        // to the WooCommerce PH state code ('00', 'ABR', …) so shipping zone matching works.
+        $province     = class_exists( 'Noyona_Shipping' ) ? Noyona_Shipping::normalize_ph_state( $province_raw ) : $province_raw;
         $zip_code     = isset( $address_data['zip_code'] ) ? sanitize_text_field( wp_unslash( (string) $address_data['zip_code'] ) ) : '';
 
         if ( '' === $address_line && '' === $city && '' === $province && '' === $zip_code ) {
@@ -3331,7 +3334,18 @@ function noyona_render_account_page_shortcode() {
                             </div>
                             <div class="noyona-account-address-form__col">
                                 <label for="noyona-account-address-province"><?php esc_html_e( 'Province', 'noyona-childtheme' ); ?></label>
-                                <input id="noyona-account-address-province" type="text" name="province" value="<?php echo esc_attr( (string) $address_form_data['province'] ); ?>" required />
+                                <?php
+                                $address_form_ph_states  = ( function_exists( 'WC' ) && WC()->countries ) ? (array) WC()->countries->get_states( 'PH' ) : array();
+                                $address_form_province   = (string) $address_form_data['province'];
+                                ?>
+                                <select id="noyona-account-address-province" name="province" required>
+                                    <option value=""><?php esc_html_e( 'Select a province / state', 'noyona-childtheme' ); ?></option>
+                                    <?php foreach ( $address_form_ph_states as $address_form_code => $address_form_label ) : ?>
+                                        <option value="<?php echo esc_attr( (string) $address_form_code ); ?>" <?php selected( $address_form_province, (string) $address_form_code ); ?>>
+                                            <?php echo esc_html( (string) $address_form_label ); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
 
@@ -3457,7 +3471,18 @@ function noyona_render_account_page_shortcode() {
                             <input id="noyona-account-edit-address-city" type="text" name="city" value="<?php echo esc_attr( (string) $address_modal_data['city'] ); ?>" required />
 
                             <label for="noyona-account-edit-address-province"><?php esc_html_e( 'Province', 'noyona-childtheme' ); ?></label>
-                            <input id="noyona-account-edit-address-province" type="text" name="province" value="<?php echo esc_attr( (string) $address_modal_data['province'] ); ?>" required />
+                            <?php
+                            $modal_ph_states = ( function_exists( 'WC' ) && WC()->countries ) ? (array) WC()->countries->get_states( 'PH' ) : array();
+                            $modal_province  = (string) $address_modal_data['province'];
+                            ?>
+                            <select id="noyona-account-edit-address-province" name="province" required>
+                                <option value=""><?php esc_html_e( 'Select a province / state', 'noyona-childtheme' ); ?></option>
+                                <?php foreach ( $modal_ph_states as $modal_code => $modal_label ) : ?>
+                                    <option value="<?php echo esc_attr( (string) $modal_code ); ?>" <?php selected( $modal_province, (string) $modal_code ); ?>>
+                                        <?php echo esc_html( (string) $modal_label ); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
 
                             <label for="noyona-account-edit-address-zip"><?php esc_html_e( 'Zip Code', 'noyona-childtheme' ); ?></label>
                             <input id="noyona-account-edit-address-zip" type="text" name="zip_code" value="<?php echo esc_attr( (string) $address_modal_data['zip_code'] ); ?>" required />

@@ -106,6 +106,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
       action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data"
       aria-label="<?php echo esc_attr__( 'Checkout', 'woocommerce' ); ?>">
 	<input type="hidden" name="ship_to_different_address" value="1" />
+	<input type="hidden" name="shipping_country" value="PH" />
 
 	<div class="noyona-checkout-columns">
 

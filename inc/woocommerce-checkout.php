@@ -397,6 +397,20 @@ function noyona_customise_checkout_fields( $fields ) {
 		$fields['shipping']['shipping_address_1']['label'] = __( 'Address', 'noyona' );
 	}
 
+	// Force shipping_state to render as a SELECT with WooCommerce's PH state codes
+	// baked in. Without this WC's `state` field type renders as a plain text input
+	// when no country selector is on the page (because we removed shipping_country),
+	// which lets free-text values pass the form but fail zone matching.
+	if ( isset( $fields['shipping']['shipping_state'] ) && function_exists( 'WC' ) && WC()->countries ) {
+		$ph_states = (array) WC()->countries->get_states( 'PH' );
+		if ( ! empty( $ph_states ) ) {
+			$fields['shipping']['shipping_state']['type']     = 'select';
+			$fields['shipping']['shipping_state']['options']  = array( '' => __( 'Select a province / state', 'noyona' ) ) + $ph_states;
+			$fields['shipping']['shipping_state']['label']    = __( 'Province / State', 'noyona' );
+			$fields['shipping']['shipping_state']['required'] = true;
+		}
+	}
+
 	return $fields;
 }
 
@@ -1529,6 +1543,16 @@ function noyona_checkout_inline_js() {
 			}
 		}
 
+		// Aliases for province labels that aren't WC's canonical state list — used
+		// only when a saved address still holds a pre-normalized free-text value.
+		var SHIPPING_STATE_ALIASES = {
+			'ncr': '00',
+			'mm': '00',
+			'metro manila': '00',
+			'national capital region': '00',
+			'manila': '00'
+		};
+
 		function setCheckoutFieldValue(fieldName, rawValue) {
 			var value = String(rawValue || '').trim();
 			var selector = '[name="' + fieldName + '"]';
@@ -1543,7 +1567,19 @@ function noyona_checkout_inline_js() {
 			if (field.tagName === 'SELECT') {
 				var normalized = value.toLowerCase();
 				var matched = false;
-				for (var i = 0; i < field.options.length; i++) {
+
+				if (fieldName === 'shipping_state' && SHIPPING_STATE_ALIASES[normalized]) {
+					var aliasValue = SHIPPING_STATE_ALIASES[normalized];
+					for (var aliasIdx = 0; aliasIdx < field.options.length; aliasIdx++) {
+						if (String(field.options[aliasIdx].value || '') === aliasValue) {
+							field.value = aliasValue;
+							matched = true;
+							break;
+						}
+					}
+				}
+
+				for (var i = 0; !matched && i < field.options.length; i++) {
 					var option = field.options[i];
 					var optionValue = String(option.value || '').trim();
 					var optionLabel = String(option.textContent || option.innerText || '').trim();
