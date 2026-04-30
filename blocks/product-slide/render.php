@@ -846,14 +846,18 @@ $unique_id = 'ps-' . uniqid();
                                         );
                                         ?>
                                     <?php else: ?>
-                                        <img
-                                            src="<?php echo esc_url($image); ?>"
-                                            alt="<?php echo esc_attr($image_alt); ?>"
-                                            class="ps-card__image"
-                                            loading="lazy"
-                                            decoding="async"
-                                            sizes="(max-width: 780px) 90vw, (max-width: 1280px) 50vw, 406px"
-                                        />
+                                        <?php
+                                        echo function_exists('noyona_render_image')
+                                            ? noyona_render_image(array(
+                                                'url'    => $image,
+                                                'alt'    => $image_alt,
+                                                'class'  => 'ps-card__image',
+                                                'sizes'  => '(max-width: 780px) 90vw, (max-width: 1280px) 50vw, 406px',
+                                                'width'  => 600,
+                                                'height' => 600,
+                                            ))
+                                            : '<img src="' . esc_url($image) . '" alt="' . esc_attr($image_alt) . '" class="ps-card__image" width="600" height="600" loading="lazy" decoding="async" sizes="(max-width: 780px) 90vw, (max-width: 1280px) 50vw, 406px" />';
+                                        ?>
                                     <?php endif; ?>
                                 <?php endif; ?>
                             </div>

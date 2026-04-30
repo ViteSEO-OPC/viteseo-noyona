@@ -40,7 +40,7 @@ $allowed_html = array(
         <div class="find-us__image-col">
             <div class="find-us__image-box">
                 <?php if (!empty($image)): ?>
-                    <img src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr($atts['storeName']); ?>" loading="lazy" decoding="async">
+                    <img src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr($atts['storeName']); ?>" width="800" height="600" loading="lazy" decoding="async" sizes="(max-width: 768px) 92vw, 50vw">
                 <?php endif; ?>
             </div>
         </div>

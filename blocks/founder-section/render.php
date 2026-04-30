@@ -77,7 +77,7 @@ $button_url = isset($attributes['buttonUrl']) ? (string) $attributes['buttonUrl'
 					);
 					?>
 				<?php else : ?>
-					<img src="<?php echo esc_url($main_url); ?>" alt="" loading="lazy" decoding="async" sizes="(max-width: 960px) 92vw, (max-width: 1499px) 720px, 588px" />
+					<img src="<?php echo esc_url($main_url); ?>" alt="" width="720" height="745" loading="lazy" decoding="async" sizes="(max-width: 960px) 92vw, (max-width: 1499px) 720px, 588px" />
 				<?php endif; ?>
 			</figure>
 		<?php endif; ?>
@@ -99,7 +99,7 @@ $button_url = isset($attributes['buttonUrl']) ? (string) $attributes['buttonUrl'
 					);
 					?>
 				<?php else : ?>
-					<img src="<?php echo esc_url($icon_url); ?>" alt="" loading="lazy" decoding="async" sizes="(max-width: 960px) 120px, 220px" />
+					<img src="<?php echo esc_url($icon_url); ?>" alt="" width="220" height="220" loading="lazy" decoding="async" sizes="(max-width: 960px) 120px, 220px" />
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>

@@ -61,27 +61,38 @@ if (empty($items)) {
     <div class="collection-grid__items">
         <?php foreach ($items as $item): ?>
             <?php
-            $image = isset($item['image']) ? $item['image'] : '';
+            $image    = isset($item['image']) ? (string) $item['image'] : '';
             $image_id = isset($item['imageId']) ? absint($item['imageId']) : 0;
-            if ($image_id) {
-                $resolved_image = wp_get_attachment_image_url($image_id, 'large');
-                if ($resolved_image) {
-                    $image = (string) $resolved_image;
-                }
-            } elseif (!empty($image)) {
-                $resolved_id = attachment_url_to_postid($image);
-                if ($resolved_id) {
-                    $resolved_image = wp_get_attachment_image_url((int) $resolved_id, 'large');
-                    if ($resolved_image) {
-                        $image = (string) $resolved_image;
-                    }
-                }
+            if (!$image_id && '' !== $image) {
+                // Recover an attachment ID from a hand-edited URL so we still get srcset.
+                $image_id = (int) attachment_url_to_postid($image);
             }
             $title = isset($item['title']) ? $item['title'] : '';
             $count = isset($item['count']) ? $item['count'] : '0 Products';
+
+            // sizes: cards are flex 1 1 280px with max 400px, in a 3-up grid on
+            // desktop, full-width on mobile. ~92vw under 768, otherwise ~33vw
+            // capped at 400px.
+            $img_sizes = '(max-width: 768px) 92vw, (max-width: 1280px) 33vw, 400px';
+
+            if (function_exists('noyona_render_image')) {
+                $img_html = noyona_render_image(array(
+                    'id'     => $image_id,
+                    'url'    => $image,
+                    'size'   => 'large',
+                    'class'  => 'collection-card__bg',
+                    'alt'    => $title,
+                    'sizes'  => $img_sizes,
+                    'width'  => 800,  // intrinsic-hint fallback (square-ish portrait)
+                    'height' => 933,
+                ));
+            } else {
+                // Old-style fallback (helper not yet loaded).
+                $img_html = '<img class="collection-card__bg" src="' . esc_url($image) . '" alt="' . esc_attr($title) . '" width="800" height="933" loading="lazy" decoding="async" />';
+            }
             ?>
             <div class="collection-card">
-                <div class="collection-card__bg" style="background-image: url('<?php echo esc_url($image); ?>');"></div>
+                <?php echo $img_html; // safe: noyona_render_image / wp_get_attachment_image both escape internally ?>
                 <div class="collection-card__overlay"></div>
 
                 <div class="collection-card__content">

@@ -198,7 +198,7 @@ if ( empty( $title ) && empty( $content ) ) {
                 <div class="blogs-view__meta">
                     <div class="blogs-view__author">
                         <?php if ( ! empty( $author_avatar ) ) : ?>
-                            <img src="<?php echo esc_url( $author_avatar ); ?>" alt="<?php echo esc_attr( $author_name ); ?>" />
+                            <img src="<?php echo esc_url( $author_avatar ); ?>" alt="<?php echo esc_attr( $author_name ); ?>" width="40" height="40" loading="lazy" decoding="async" />
                         <?php else : ?>
                             <span class="blogs-view__author-dot"></span>
                         <?php endif; ?>

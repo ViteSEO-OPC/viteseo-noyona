@@ -68,7 +68,7 @@ $unique_id = 'ph-' . uniqid();
                             <?php endif; ?>
                             
                             <?php if ( ! empty( $image ) ) : ?>
-                                <img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>" class="ph-card__image" loading="lazy" decoding="async" />
+                                <img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>" class="ph-card__image" width="600" height="600" loading="lazy" decoding="async" sizes="(max-width: 768px) 92vw, (max-width: 1280px) 33vw, 380px" />
                             <?php endif; ?>
                         </div>
 

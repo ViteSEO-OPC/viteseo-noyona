@@ -206,6 +206,8 @@ if ( ! empty( $atts['searchEnabled'] ) ) {
             class="hero-banner__bg"
             src="<?php echo esc_url( $bg_image_desktop ); ?>"
             alt=""
+            width="1920"
+            height="1080"
             decoding="async"
             <?php if ( ! empty( $desktop_srcset ) ) : ?>
                 srcset="<?php echo esc_attr( $desktop_srcset ); ?>"

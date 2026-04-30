@@ -63,7 +63,7 @@ $display_items = array_merge( $items, $items, $items, $items );
                 <div class="review-card__footer">
                     <div class="review-card__avatar">
                         <?php if ( $avatar ) : ?>
-                            <img src="<?php echo esc_url( $avatar ); ?>" alt="User avatar" loading="lazy" decoding="async" />
+                            <img src="<?php echo esc_url( $avatar ); ?>" alt="User avatar" width="48" height="48" loading="lazy" decoding="async" />
                         <?php else : ?>
                             <div class="review-card__avatar-placeholder"></div>
                         <?php endif; ?>

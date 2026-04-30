@@ -128,7 +128,7 @@ $allowed_heading = array(
                                 <a class="<?php echo esc_attr($social_classes); ?>" href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener noreferrer"
                                     aria-label="<?php echo esc_attr($label); ?>" data-tooltip="<?php echo esc_attr($label); ?>">
                                     <?php if ($is_image): ?>
-                                        <img class="contact-form__social-icon" src="<?php echo esc_url($icon); ?>" alt="<?php echo esc_attr($label); ?>" loading="lazy" decoding="async" />
+                                        <img class="contact-form__social-icon" src="<?php echo esc_url($icon); ?>" alt="<?php echo esc_attr($label); ?>" width="32" height="32" loading="lazy" decoding="async" />
                                     <?php else: ?>
                                         <i class="<?php echo esc_attr($icon); ?>"></i>
                                     <?php endif; ?>
@@ -185,7 +185,7 @@ $allowed_heading = array(
 
                 <?php if (!empty($brand_image)): ?>
                     <div class="contact-form__brand">
-                        <img src="<?php echo esc_url($brand_image); ?>" alt="Noyona essentials" loading="lazy" decoding="async" />
+                        <img src="<?php echo esc_url($brand_image); ?>" alt="Noyona essentials" width="600" height="600" loading="lazy" decoding="async" sizes="(max-width: 768px) 92vw, 480px" />
                     </div>
                 <?php endif; ?>
             </div>

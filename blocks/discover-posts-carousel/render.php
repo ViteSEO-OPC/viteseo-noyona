@@ -95,7 +95,7 @@ $print_card = function (array $card) {
 			<div class="product-card__media">
 				<a href="<?php echo esc_url($url); ?>">
 					<?php if ($image): ?>
-						<img src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr($title); ?>" loading="lazy" decoding="async" />
+						<img src="<?php echo esc_url($image); ?>" alt="<?php echo esc_attr($title); ?>" width="640" height="360" loading="lazy" decoding="async" sizes="(max-width: 768px) 92vw, (max-width: 1280px) 33vw, 360px" />
 					<?php else: ?>
 						<div class="product-card__thumb-placeholder"
 							style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;">

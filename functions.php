@@ -225,16 +225,124 @@ function noyona_replace_shop_archive_title( $title ) {
 	return $title;
 }
 
+/**
+ * Render a Media-Library-aware <img>. Resolves attachment ID from a URL when
+ * needed so we get width/height + srcset for free; falls back to a plain <img>
+ * with explicit width/height when the URL lives outside the library.
+ *
+ * @param array $args {
+ *     @type int|string  $id       Attachment ID. Optional.
+ *     @type string      $url      Image URL. Optional if $id given.
+ *     @type string      $size     Registered image size. Default 'large'.
+ *     @type string      $alt      Alt text.
+ *     @type string      $class    CSS class for the <img>.
+ *     @type string      $sizes    sizes="" attribute when using attachment image.
+ *     @type string      $loading  'lazy' (default) or 'eager'.
+ *     @type string      $decoding 'async' (default) or 'sync'.
+ *     @type int         $width    Fallback intrinsic width (for non-library URLs).
+ *     @type int         $height   Fallback intrinsic height.
+ *     @type string      $fetchpriority Optional fetchpriority hint.
+ * }
+ */
+function noyona_render_image( $args = array() ) {
+    $args = wp_parse_args(
+        $args,
+        array(
+            'id'            => 0,
+            'url'           => '',
+            'size'          => 'large',
+            'alt'           => '',
+            'class'         => '',
+            'sizes'         => '',
+            'loading'       => 'lazy',
+            'decoding'      => 'async',
+            'width'         => 0,
+            'height'        => 0,
+            'fetchpriority' => '',
+        )
+    );
+
+    $id = (int) $args['id'];
+    if ( ! $id && ! empty( $args['url'] ) ) {
+        // attachment_url_to_postid is cached internally by WP, so this is cheap on repeat hits.
+        $id = (int) attachment_url_to_postid( $args['url'] );
+    }
+
+    if ( $id ) {
+        $attrs = array(
+            'alt'      => $args['alt'],
+            'decoding' => $args['decoding'],
+        );
+        if ( '' !== $args['class'] ) {
+            $attrs['class'] = $args['class'];
+        }
+        if ( '' !== $args['sizes'] ) {
+            $attrs['sizes'] = $args['sizes'];
+        }
+        if ( '' !== $args['loading'] ) {
+            $attrs['loading'] = $args['loading'];
+        }
+        if ( '' !== $args['fetchpriority'] ) {
+            $attrs['fetchpriority'] = $args['fetchpriority'];
+        }
+        return wp_get_attachment_image( $id, $args['size'], false, $attrs );
+    }
+
+    // URL-only fallback: emit a plain <img> with whatever intrinsic dims we know.
+    if ( empty( $args['url'] ) ) {
+        return '';
+    }
+
+    $w = (int) $args['width'];
+    $h = (int) $args['height'];
+    $html  = '<img src="' . esc_url( $args['url'] ) . '"';
+    $html .= ' alt="' . esc_attr( $args['alt'] ) . '"';
+    if ( '' !== $args['class'] ) {
+        $html .= ' class="' . esc_attr( $args['class'] ) . '"';
+    }
+    if ( $w > 0 ) {
+        $html .= ' width="' . $w . '"';
+    }
+    if ( $h > 0 ) {
+        $html .= ' height="' . $h . '"';
+    }
+    if ( '' !== $args['loading'] ) {
+        $html .= ' loading="' . esc_attr( $args['loading'] ) . '"';
+    }
+    if ( '' !== $args['decoding'] ) {
+        $html .= ' decoding="' . esc_attr( $args['decoding'] ) . '"';
+    }
+    if ( '' !== $args['fetchpriority'] ) {
+        $html .= ' fetchpriority="' . esc_attr( $args['fetchpriority'] ) . '"';
+    }
+    if ( '' !== $args['sizes'] ) {
+        $html .= ' sizes="' . esc_attr( $args['sizes'] ) . '"';
+    }
+    $html .= ' />';
+    return $html;
+}
+
 add_filter( 'wp_preload_resources', 'noyona_preload_home_hero_image' );
 function noyona_preload_home_hero_image( $preload_resources ) {
     if ( ! is_front_page() ) {
         return $preload_resources;
     }
 
+    $base = get_stylesheet_directory_uri() . '/assets/images';
+
+    // Responsive preload: the browser picks the variant matching the viewport
+    // from imagesrcset, so a phone fetches the 18 KB mobile webp instead of
+    // the 75 KB desktop one. The href is the desktop file as a fallback for
+    // user agents that don't honor imagesrcset.
     $preload_resources[] = array(
-        'href'          => get_stylesheet_directory_uri() . '/assets/images/hp-desktop-1920x1080px.webp',
+        'href'          => $base . '/hp-desktop-1920x1080px.webp',
         'as'            => 'image',
         'fetchpriority' => 'high',
+        'imagesrcset'   => $base . '/hp-mobile-375x812px.webp 375w, '
+                         . $base . '/hp-tablet-768x1024px.webp 768w, '
+                         . $base . '/hp-laptop-1280x720px.webp 1280w, '
+                         . $base . '/hp-desktop-1920x1080px.webp 1920w',
+        'imagesizes'    => '100vw',
     );
 
     return $preload_resources;

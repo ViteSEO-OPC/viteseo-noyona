@@ -497,7 +497,7 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                         <div class="customer-reviews-grid__user">
                             <span class="customer-reviews-grid__avatar" aria-hidden="true">
                                 <?php if ( '' !== $avatar_url ) : ?>
-                                    <img src="<?php echo esc_url( $avatar_url ); ?>" alt="" loading="lazy" decoding="async" />
+                                    <img src="<?php echo esc_url( $avatar_url ); ?>" alt="" width="48" height="48" loading="lazy" decoding="async" />
                                 <?php else : ?>
                                     <i class="fa-solid fa-circle-user"></i>
                                 <?php endif; ?>
@@ -573,7 +573,7 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                                     data-full-image="<?php echo esc_url( $media_url ); ?>"
                                     aria-label="<?php esc_attr_e( 'Open review image', 'noyona-childtheme' ); ?>"
                                 >
-                                    <img src="<?php echo esc_url( $media_url ); ?>" alt="" loading="lazy" decoding="async" />
+                                    <img src="<?php echo esc_url( $media_url ); ?>" alt="" width="240" height="240" loading="lazy" decoding="async" sizes="(max-width: 768px) 30vw, 120px" />
                                 </button>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -690,7 +690,7 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                             $reviewer_html = '<div class="customer-reviews-grid__reviewer">' .
                                 '<span class="customer-reviews-grid__reviewer-avatar" aria-hidden="true">';
                             if ( '' !== $reviewer_avatar_url ) {
-                                $reviewer_html .= '<img src="' . esc_url( $reviewer_avatar_url ) . '" alt="" loading="lazy" decoding="async" />';
+                                $reviewer_html .= '<img src="' . esc_url( $reviewer_avatar_url ) . '" alt="" width="40" height="40" loading="lazy" decoding="async" />';
                             } else {
                                 $reviewer_html .= '<i class="fa-solid fa-circle-user"></i>';
                             }
@@ -765,7 +765,7 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
             <button class="customer-reviews-grid__modal-close" type="button" data-review-modal-close aria-label="<?php esc_attr_e( 'Close image preview', 'noyona-childtheme' ); ?>">
                 <i class="fa-solid fa-xmark" aria-hidden="true"></i>
             </button>
-            <img class="customer-reviews-grid__modal-image" src="" alt="" data-review-modal-image />
+            <img class="customer-reviews-grid__modal-image" alt="" decoding="async" data-review-modal-image />
         </div>
     </div>
 </section>

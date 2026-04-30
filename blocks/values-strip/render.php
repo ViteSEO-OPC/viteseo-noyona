@@ -68,7 +68,7 @@ if (empty($items)) {
             ?>
             <div class="values-strip__item">
                 <?php if (!empty($icon)) : ?>
-                    <img src="<?php echo esc_url($icon); ?>" alt="<?php echo esc_attr($title ?: 'Value icon'); ?>" loading="lazy" decoding="async" />
+                    <img src="<?php echo esc_url($icon); ?>" alt="<?php echo esc_attr($title ?: 'Value icon'); ?>" width="80" height="80" loading="lazy" decoding="async" />
                 <?php endif; ?>
                 <?php if (!empty($title)) : ?>
                     <span class="values-strip__title"><?php echo esc_html($title); ?></span>

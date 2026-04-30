@@ -111,7 +111,7 @@ $fallback_images = array(
 					<article class="different-cards__card"<?php echo $style_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 						<?php if ( '' !== trim( $img ) ) : ?>
 							<div class="different-cards__media">
-								<img class="different-cards__image" src="<?php echo esc_url( $img ); ?>" alt="" loading="lazy" />
+								<img class="different-cards__image" src="<?php echo esc_url( $img ); ?>" alt="" width="600" height="600" loading="lazy" decoding="async" sizes="(max-width: 768px) 92vw, (max-width: 1280px) 33vw, 360px" />
 							</div>
 						<?php endif; ?>
 

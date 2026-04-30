@@ -241,7 +241,7 @@ if ( ! empty( $category_counts ) ) {
                     <a class="blog-card__overlay-link" href="<?php echo esc_url( $read_more_url ); ?>" aria-label="Read <?php echo esc_attr( $title ); ?>"></a>
                     <div class="blog-card__media">
                         <?php if ( ! empty( $image ) ) : ?>
-                            <img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $title ); ?>" />
+                            <img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $title ); ?>" width="640" height="360" loading="lazy" decoding="async" sizes="(max-width: 768px) 92vw, (max-width: 1280px) 45vw, 380px" />
                         <?php endif; ?>
                         <?php if ( ! empty( $date_label ) || ! empty( $date_day ) ) : ?>
                             <span class="blog-card__date">
@@ -273,7 +273,7 @@ if ( ! empty( $category_counts ) ) {
                         <div class="blog-card__footer">
                             <div class="blog-card__author">
                                 <?php if ( ! empty( $author_avatar ) ) : ?>
-                                    <img src="<?php echo esc_url( $author_avatar ); ?>" alt="<?php echo esc_attr( $author ); ?>" />
+                                    <img src="<?php echo esc_url( $author_avatar ); ?>" alt="<?php echo esc_attr( $author ); ?>" width="40" height="40" loading="lazy" decoding="async" />
                                 <?php else : ?>
                                     <span class="blog-card__author-dot"></span>
                                 <?php endif; ?>
