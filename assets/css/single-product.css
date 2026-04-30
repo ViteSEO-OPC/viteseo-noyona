@@ -541,6 +541,18 @@ body.single-product .noyona-pdp-tabs__panel-inner {
  * Keep Woo/FlexSlider logic intact.
  * Only style appearance, sizing, and thumbnails.
  */
+
+/* Failsafe: WooCommerce's classic gallery stylesheet starts the container at
+   opacity:0 and only fades it in when wc-single-product.js attaches the
+   `--with-images` modifier after FlexSlider boots. If a perf/cache plugin on
+   the live host defers or strips that script, the images are present in the
+   DOM but invisible. Force opacity:1 so the gallery is always visible — the
+   slider, zoom and variation-image swap still work normally when JS does run. */
+.single-product .woocommerce-product-gallery,
+.single-product .wp-block-woocommerce-product-image-gallery .woocommerce-product-gallery {
+  opacity: 1 !important;
+}
+
  .single-product .wp-block-woocommerce-product-image-gallery,
  .single-product .wp-block-woocommerce-product-image-gallery .woocommerce-product-gallery {
    position: relative;
