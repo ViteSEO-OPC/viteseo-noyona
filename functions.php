@@ -322,54 +322,24 @@ function noyona_render_image( $args = array() ) {
     return $html;
 }
 
-/**
- * Mark the theme's footer scripts as defer so they don't block parsing.
- * They're already in the footer with `in_footer=true`, but defer also lets
- * the browser keep parsing while the script downloads in parallel.
- */
-add_filter( 'script_loader_tag', 'noyona_defer_theme_scripts', 10, 3 );
-function noyona_defer_theme_scripts( $tag, $handle, $src ) {
-    if ( is_admin() ) {
-        return $tag;
-    }
-    $defer_handles = array(
-        'woocom-ct-header',
-        'noyona-account-modals',
-        'woocom-ct-product-gatherer',
-        'leaflet-js',
-    );
-    if ( ! in_array( $handle, $defer_handles, true ) ) {
-        return $tag;
-    }
-    if ( false !== strpos( $tag, ' defer' ) || false !== strpos( $tag, ' async' ) ) {
-        return $tag;
-    }
-    return preg_replace( '/<script /', '<script defer ', $tag, 1 );
-}
-
 add_filter( 'wp_preload_resources', 'noyona_preload_home_hero_image' );
 function noyona_preload_home_hero_image( $preload_resources ) {
-    $theme_uri = get_stylesheet_directory_uri();
-
-    // Preload the body-text font so first paint isn't blocked on a CSS-discovered
-    // font fetch. crossorigin is required for fonts even on the same origin.
-    $preload_resources[] = array(
-        'href'        => $theme_uri . '/assets/fonts/proximanova_regular.ttf',
-        'as'          => 'font',
-        'type'        => 'font/ttf',
-        'crossorigin' => 'anonymous',
-    );
-
     if ( ! is_front_page() ) {
         return $preload_resources;
     }
 
-    $base = $theme_uri . '/assets/images';
+    $base = get_stylesheet_directory_uri() . '/assets/images';
 
     // Responsive preload: the browser picks the variant matching the viewport
     // from imagesrcset, so a phone fetches the 18 KB mobile webp instead of
     // the 75 KB desktop one. The href is the desktop file as a fallback for
     // user agents that don't honor imagesrcset.
+    //
+    // Note: do NOT preload the body font here. The local font already declares
+    // `font-display: swap` so it never blocks paint, and a 184 KB TTF preload
+    // competes with the LCP image on a constrained mobile connection — the
+    // exact regression we ran into. Font preload only makes sense once the
+    // font is converted to WOFF2 (~50 KB) and confirmed to be needed for FCP.
     $preload_resources[] = array(
         'href'          => $base . '/hp-desktop-1920x1080px.webp',
         'as'            => 'image',
