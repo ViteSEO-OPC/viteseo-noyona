@@ -789,7 +789,14 @@
     });
 
     if (window.jQuery) {
-      window.jQuery(document.body).on('added_to_cart removed_from_cart updated_wc_div wc_fragments_refreshed', () => {
+      // Note: `wc_fragments_refreshed` intentionally NOT bound here. It fires
+      // automatically during WC's fragment hydration on every page load,
+      // which (combined with queueRefreshSeries below) caused 5 redundant
+      // /wp-json/wc/store/cart requests during the TBT measurement window.
+      // User-driven cart changes still flow through added_to_cart /
+      // removed_from_cart / updated_wc_div, plus the block-cart events bound
+      // immediately below this block.
+      window.jQuery(document.body).on('added_to_cart removed_from_cart updated_wc_div', () => {
         queueRefreshSeries();
       });
     }
