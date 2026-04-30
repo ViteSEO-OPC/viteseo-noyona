@@ -214,6 +214,156 @@
     syncFromSelect();
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Variation-id resolution fallback.                                  */
+  /*                                                                    */
+  /* On hosts where wc-add-to-cart-variation.js fails to run, the swatch */
+  /* click never produces a `variation_id` and our add-to-cart aborts   */
+  /* with the "Please select all options" alert. Resolve the variation  */
+  /* ourselves from the form's data-product_variations JSON (which WC   */
+  /* inlines on every PDP for products with ≤30 variations).            */
+  /* ------------------------------------------------------------------ */
+
+  function getInlineVariations(form) {
+    if (!form) return null;
+    if ('_noyonaVariations' in form) return form._noyonaVariations;
+
+    var raw = form.getAttribute('data-product_variations');
+    if (!raw) {
+      // For >30 variations WC uses AJAX and leaves this attr empty. Bail —
+      // user gets the original alert path; not worse than before.
+      form._noyonaVariations = null;
+      return null;
+    }
+    try {
+      var parsed = JSON.parse(raw);
+      form._noyonaVariations = Array.isArray(parsed) ? parsed : null;
+    } catch (e) {
+      form._noyonaVariations = null;
+    }
+    return form._noyonaVariations;
+  }
+
+  function findMatchingVariation(form) {
+    var variations = getInlineVariations(form);
+    if (!variations || variations.length === 0) return null;
+
+    var selects = form.querySelectorAll('select[name^="attribute_"]');
+    if (selects.length === 0) return null;
+
+    var picked = {};
+    var allSelected = true;
+    selects.forEach(function (sel) {
+      var name = sel.getAttribute('name') || '';
+      var val = sel.value || '';
+      picked[name] = val;
+      if (!val) allSelected = false;
+    });
+
+    if (!allSelected) return null;
+
+    // Each variation has `.attributes` keyed by `attribute_<slug>`. An empty
+    // value on a variation attribute means "any value matches" (WC default
+    // for "Any" attribute). Check every select's value matches.
+    for (var i = 0; i < variations.length; i++) {
+      var v = variations[i];
+      var attrs = (v && v.attributes) || {};
+      var ok = true;
+      for (var key in picked) {
+        if (!Object.prototype.hasOwnProperty.call(picked, key)) continue;
+        var vAttr = attrs[key];
+        if (vAttr === undefined) continue; // attribute not on variation matrix
+        if (vAttr === '' || vAttr === null) continue; // "any" — matches anything
+        if (String(vAttr).toLowerCase() !== String(picked[key]).toLowerCase()) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) return v;
+    }
+    return null;
+  }
+
+  function ensureVariationIdInput(form) {
+    var input = form.querySelector('input[name="variation_id"]');
+    if (!input) {
+      input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'variation_id';
+      input.value = '0';
+      form.appendChild(input);
+    }
+    return input;
+  }
+
+  function syncVariationId(form) {
+    if (!form || !form.classList.contains('variations_form')) return;
+    var match = findMatchingVariation(form);
+    var input = ensureVariationIdInput(form);
+    var newId = match && match.variation_id ? String(match.variation_id) : '0';
+    if (input.value !== newId) {
+      input.value = newId;
+    }
+    // Mirror Woo's events so anything else on the page (price sync, gallery
+    // fallback variation-image swap) reacts correctly. jQuery is available
+    // because WC core enqueues it; bindWooCommercePdpHooks already guards.
+    if (match && window.jQuery) {
+      window.jQuery(form).trigger('found_variation', [match]);
+      window.jQuery(form).trigger('show_variation', [match]);
+    } else if (!match && window.jQuery) {
+      window.jQuery(form).trigger('reset_data');
+    }
+  }
+
+  function applyUrlVariationParams(form) {
+    if (!window.URLSearchParams) return false;
+    var params;
+    try {
+      params = new URLSearchParams(window.location.search);
+    } catch (e) {
+      return false;
+    }
+    var changed = false;
+    form.querySelectorAll('select[name^="attribute_"]').forEach(function (sel) {
+      var name = sel.getAttribute('name') || '';
+      if (!params.has(name)) return;
+      var val = params.get(name);
+      if (val == null || val === sel.value) return;
+      var has = Array.prototype.some.call(sel.options, function (o) {
+        return o.value === val;
+      });
+      if (has) {
+        sel.value = val;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        if (window.jQuery) window.jQuery(sel).trigger('change');
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
+  function bindVariationIdSync(form) {
+    if (!form || !form.classList.contains('variations_form')) return;
+    if (form._noyonaVariationSyncBound) return;
+    form._noyonaVariationSyncBound = true;
+
+    var selects = form.querySelectorAll('select[name^="attribute_"]');
+    selects.forEach(function (sel) {
+      sel.addEventListener('change', function () {
+        // Defer one tick so any concurrent WC handlers run first; whichever
+        // wins, we end with the correct variation_id (idempotent set).
+        setTimeout(function () { syncVariationId(form); }, 0);
+      });
+    });
+
+    // Honour ?attribute_*=… in the URL (WC's script does this when present).
+    applyUrlVariationParams(form);
+
+    // Initial pass — covers the URL-preselect case and any server-rendered
+    // selected-option markup.
+    syncVariationId(form);
+  }
+
   function initSwatches(form) {
     if (!form) {
       return;
@@ -221,6 +371,8 @@
 
     var selects = form.querySelectorAll('select[name^="attribute_"]');
     selects.forEach(buildSwatchRow);
+
+    bindVariationIdSync(form);
   }
 
   function bindWooCommercePdpHooks() {
