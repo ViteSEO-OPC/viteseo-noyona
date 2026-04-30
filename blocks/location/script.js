@@ -285,9 +285,16 @@
 
     var map = L.map(mapEl, { zoomControl: false }).setView([14.5547, 121.0244], 11);
     L.control.zoom({ position: "bottomright" }).addTo(map);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors",
+    // tile.openstreetmap.org is OSM's dev/operations server and is rate-limited /
+    // 403'd for production embeds under their tile usage policy. CARTO's Voyager
+    // basemap is a free, no-API-key, production-friendly raster source built on
+    // the same OSM data. Subdomains a–d + the {r} retina hint match Leaflet's
+    // template syntax. Attribution must credit both OSM and CARTO.
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+      maxZoom: 20,
+      subdomains: "abcd",
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
     }).addTo(map);
 
     var markers = {};
