@@ -1,5 +1,3 @@
-console.log('🔥 HEADER JS LOADED — build', Date.now());
-
 (function () {
   const STICKY_AT = 15;
 
