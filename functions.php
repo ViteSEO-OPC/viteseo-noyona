@@ -450,9 +450,17 @@ function noyona_disable_store_api_cache_headers( $result, $server, $request ) {
 
 
 
-// Make sure theme declares WooCommerce support
+// Make sure theme declares WooCommerce support, including the three flags
+// that opt the classic single-product gallery into FlexSlider / PhotoSwipe /
+// zoom. Without these, WC may skip enqueuing wc-single-product on a block
+// theme, leaving the gallery markup in the page but never initialised — which
+// is what was happening on production (images stacked vertically because
+// FlexSlider never wrapped them in .flex-viewport).
 add_action( 'after_setup_theme', function() {
     add_theme_support( 'woocommerce' );
+    add_theme_support( 'wc-product-gallery-zoom' );
+    add_theme_support( 'wc-product-gallery-lightbox' );
+    add_theme_support( 'wc-product-gallery-slider' );
 } );
 
 /**

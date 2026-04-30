@@ -326,6 +326,29 @@ function noyona_pdp_enqueue_assets() {
 		return;
 	}
 
+	// Belt-and-suspenders: explicitly enqueue the WC gallery scripts. They are
+	// registered by WC_Frontend_Scripts on every front-end load and *should*
+	// auto-enqueue on PDPs, but block-theme detection plus production perf
+	// plugins can race that. Calling enqueue is idempotent — only the
+	// `is_registered && ! is_enqueued` branch ships extra work.
+	$gallery_handles = array(
+		'flexslider',
+		'photoswipe',
+		'photoswipe-ui-default',
+		'zoom',
+		'wc-single-product',
+		'wc-add-to-cart-variation',
+	);
+	foreach ( $gallery_handles as $handle ) {
+		if ( wp_script_is( $handle, 'registered' ) && ! wp_script_is( $handle, 'enqueued' ) ) {
+			wp_enqueue_script( $handle );
+		}
+	}
+	// PhotoSwipe stylesheet (lightbox) is registered alongside the JS.
+	if ( wp_style_is( 'photoswipe-default-skin', 'registered' ) && ! wp_style_is( 'photoswipe-default-skin', 'enqueued' ) ) {
+		wp_enqueue_style( 'photoswipe-default-skin' );
+	}
+
 	$theme_ver  = wp_get_theme()->get( 'Version' );
 	$style_path = get_stylesheet_directory() . '/assets/css/single-product.css';
 	$script_path = get_stylesheet_directory() . '/assets/js/single-product.js';

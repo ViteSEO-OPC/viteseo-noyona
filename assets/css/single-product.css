@@ -553,6 +553,40 @@ body.single-product .noyona-pdp-tabs__panel-inner {
   opacity: 1 !important;
 }
 
+/* Pre-initialisation layout: while FlexSlider hasn't yet wrapped the gallery
+   in .flex-viewport, the raw markup is just <figure> children of __wrapper
+   which collapse into a vertical stack. This rule treats the first image as
+   the main view and arranges the rest as a thumbnail strip below — so the
+   PDP looks correct from the first paint regardless of whether JS finishes.
+   Once FlexSlider runs it adds `--with-images` and these :not() rules stop
+   matching, returning control to FlexSlider's own layout. */
+.single-product .woocommerce-product-gallery:not(.woocommerce-product-gallery--with-images) .woocommerce-product-gallery__wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.single-product .woocommerce-product-gallery:not(.woocommerce-product-gallery--with-images) .woocommerce-product-gallery__image {
+  margin: 0;
+}
+.single-product .woocommerce-product-gallery:not(.woocommerce-product-gallery--with-images) .woocommerce-product-gallery__image:first-child {
+  grid-column: 1 / -1;
+}
+.single-product .woocommerce-product-gallery:not(.woocommerce-product-gallery--with-images) .woocommerce-product-gallery__image:not(:first-child) img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+.single-product .woocommerce-product-gallery:not(.woocommerce-product-gallery--with-images) .woocommerce-product-gallery__image:first-child img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
  .single-product .wp-block-woocommerce-product-image-gallery,
  .single-product .wp-block-woocommerce-product-image-gallery .woocommerce-product-gallery {
    position: relative;
