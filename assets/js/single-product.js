@@ -858,6 +858,62 @@
   }
 
   /**
+   * Open a simple lightbox modal showing the full-size image. Used by the
+   * fallback gallery's magnifier button. ESC or backdrop click closes.
+   * Idempotent: closes any existing instance before opening a new one.
+   */
+  function openNoyonaPdpLightbox(src, alt) {
+    if (!src) return;
+    var prev = document.getElementById('noyona-pdp-lightbox');
+    if (prev) prev.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'noyona-pdp-lightbox';
+    overlay.className = 'noyona-pdp-lightbox';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Product image preview');
+
+    var inner = document.createElement('div');
+    inner.className = 'noyona-pdp-lightbox__inner';
+
+    var img = document.createElement('img');
+    img.className = 'noyona-pdp-lightbox__img';
+    img.src = src;
+    img.alt = alt || '';
+    inner.appendChild(img);
+
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'noyona-pdp-lightbox__close';
+    closeBtn.setAttribute('aria-label', 'Close image preview');
+    closeBtn.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+
+    overlay.appendChild(inner);
+    overlay.appendChild(closeBtn);
+    document.body.appendChild(overlay);
+    document.documentElement.classList.add('noyona-pdp-lightbox-open');
+
+    function close() {
+      overlay.remove();
+      document.documentElement.classList.remove('noyona-pdp-lightbox-open');
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') close();
+    }
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay || e.target === inner) close();
+    });
+    closeBtn.addEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+
+    // Defer focus to the close button for keyboard users.
+    setTimeout(function () { closeBtn.focus(); }, 0);
+  }
+
+  /**
    * Self-contained PDP gallery fallback.
    *
    * Why this exists: in production we hit a state where wc-single-product.js
@@ -919,9 +975,12 @@
       gallery.dataset.noyonaFallback = '1';
       gallery.classList.add('noyona-pdp-gallery-fallback');
 
-      // Build new DOM: <div main><img></div> + <ul thumbs>...</ul>
+      // Build new DOM: <div main><div zoom><img></div><button magnify></div> + <ul thumbs>
       var main = document.createElement('div');
       main.className = 'noyona-pdp-gallery-main';
+
+      var zoomWrap = document.createElement('div');
+      zoomWrap.className = 'noyona-pdp-gallery-zoom';
 
       var mainImg = document.createElement('img');
       mainImg.className = 'noyona-pdp-gallery-main-img';
@@ -932,7 +991,46 @@
       if (imageData[0].sizes)  mainImg.sizes  = imageData[0].sizes;
       if (imageData[0].width)  mainImg.setAttribute('width', imageData[0].width);
       if (imageData[0].height) mainImg.setAttribute('height', imageData[0].height);
-      main.appendChild(mainImg);
+      zoomWrap.appendChild(mainImg);
+      main.appendChild(zoomWrap);
+
+      // Magnifier button (top-right) — opens lightbox of the current image.
+      // Mirrors WooCommerce's `.woocommerce-product-gallery__trigger` so the
+      // page reads the same in fallback and FlexSlider modes.
+      var magnifyBtn = document.createElement('button');
+      magnifyBtn.type = 'button';
+      magnifyBtn.className = 'noyona-pdp-gallery-magnify';
+      magnifyBtn.setAttribute('aria-label', 'View larger image');
+      magnifyBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i>';
+      main.appendChild(magnifyBtn);
+
+      // Hover zoom: track cursor as % of the container, expose to CSS as
+      // --zoom-x / --zoom-y. CSS handles the actual transform. Disabled on
+      // touch devices via @media (hover: none) in the stylesheet.
+      zoomWrap.addEventListener('mouseenter', function () {
+        zoomWrap.classList.add('is-zooming');
+      });
+      zoomWrap.addEventListener('mouseleave', function () {
+        zoomWrap.classList.remove('is-zooming');
+        zoomWrap.style.removeProperty('--zoom-x');
+        zoomWrap.style.removeProperty('--zoom-y');
+      });
+      zoomWrap.addEventListener('mousemove', function (e) {
+        var rect = zoomWrap.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        var x = ((e.clientX - rect.left) / rect.width) * 100;
+        var y = ((e.clientY - rect.top) / rect.height) * 100;
+        zoomWrap.style.setProperty('--zoom-x', x + '%');
+        zoomWrap.style.setProperty('--zoom-y', y + '%');
+      });
+
+      // Magnify click → lightbox. Helper is module-private, defined once
+      // outside this loop (see openNoyonaPdpLightbox below).
+      magnifyBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openNoyonaPdpLightbox(mainImg.src, mainImg.alt);
+      });
 
       var thumbs = document.createElement('ul');
       thumbs.className = 'noyona-pdp-gallery-thumbs';

@@ -597,6 +597,7 @@ body.single-product .noyona-pdp-tabs__panel-inner {
 .single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-thumbs {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.5rem;
   margin: 0.75rem 0 0;
   padding: 0;
@@ -637,6 +638,132 @@ body.single-product .noyona-pdp-tabs__panel-inner {
 .single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-thumb button:focus-visible {
   outline: 2px solid #b46676;
   outline-offset: 2px;
+}
+
+/* Hover zoom on the main fallback image. JS sets --zoom-x / --zoom-y from
+   the cursor position; CSS reads them as transform-origin. The wrap clips
+   so the scaled image doesn't bleed outside the rounded container. */
+.single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-zoom {
+  position: relative;
+  overflow: hidden;
+  border-radius: clamp(14px, 2.5vw, 22px);
+  cursor: zoom-in;
+}
+.single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-zoom .noyona-pdp-gallery-main-img {
+  transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+  transition: transform 0.18s ease;
+  will-change: transform;
+}
+.single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-zoom.is-zooming .noyona-pdp-gallery-main-img {
+  transform: scale(2);
+  transition: transform 0.05s ease-out;
+}
+/* Touch devices: skip hover zoom (no real hover, the cursor never leaves). */
+@media (hover: none) {
+  .single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-zoom {
+    cursor: default;
+  }
+  .single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-zoom.is-zooming .noyona-pdp-gallery-main-img {
+    transform: none;
+  }
+}
+
+/* Magnifier button at the top-right of the main image. Mirrors the
+   positioning of WooCommerce's `.woocommerce-product-gallery__trigger`. */
+.single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-main {
+  position: relative;
+}
+.single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-magnify {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 4;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2b2b2b;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+.single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-magnify:hover {
+  background: #fff;
+  transform: scale(1.05);
+}
+.single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-magnify:focus-visible {
+  outline: 2px solid #b46676;
+  outline-offset: 2px;
+}
+
+/* Lightbox modal (opened by the magnifier). Self-contained — no plugin deps. */
+.noyona-pdp-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  animation: noyona-pdp-lightbox-fade 0.18s ease-out;
+}
+@keyframes noyona-pdp-lightbox-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.noyona-pdp-lightbox__inner {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.noyona-pdp-lightbox__img {
+  max-width: 100%;
+  max-height: calc(100vh - 4rem);
+  width: auto;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+.noyona-pdp-lightbox__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f1f1f;
+  font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+.noyona-pdp-lightbox__close:hover {
+  background: #fff;
+  transform: scale(1.05);
+}
+.noyona-pdp-lightbox__close:focus-visible {
+  outline: 2px solid #b46676;
+  outline-offset: 2px;
+}
+/* Prevent background scroll while lightbox is open. */
+html.noyona-pdp-lightbox-open,
+html.noyona-pdp-lightbox-open body {
+  overflow: hidden;
 }
 
  .single-product .wp-block-woocommerce-product-image-gallery,
@@ -699,13 +826,14 @@ body.single-product .noyona-pdp-tabs__panel-inner {
  .single-product .noyona-pdp-column--media .flex-control-thumbs {
    display: flex !important;
    flex-wrap: wrap;
+   justify-content: center;
    gap: 0.5rem;
    margin: 0.75rem 0 0 !important;
    padding: 0 !important;
    list-style: none;
    width: 100%;
  }
- 
+
  .single-product .noyona-pdp-column--media .flex-control-thumbs li {
    float: none !important;
    width: auto !important;
@@ -805,6 +933,7 @@ body.single-product .noyona-pdp-tabs__panel-inner {
 .single-product .noyona-pdp-column--media .flex-control-thumbs {
   display: flex !important;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.5rem;
   margin: 0.75rem 0 0 !important;
   padding: 0 !important;
