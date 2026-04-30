@@ -857,12 +857,177 @@
     });
   }
 
+  /**
+   * Self-contained PDP gallery fallback.
+   *
+   * Why this exists: in production we hit a state where wc-single-product.js
+   * (and FlexSlider with it) does not initialize the gallery — the markup is
+   * present but the figures stack vertically because FlexSlider never wraps
+   * them in `.flex-viewport`. Causes vary by host (perf-plugin defer rules,
+   * jQuery race, Woo block-template detection edge cases). Adding theme
+   * supports + force-enqueue covers the common case but leaves a tail of
+   * environments where it still fails.
+   *
+   * This fallback waits 400 ms after DOMContentLoaded — long enough for
+   * FlexSlider to win if it can. If `.flex-viewport` is still absent we
+   * rebuild the gallery DOM into a `noyona-pdp-gallery-main` viewport plus a
+   * `noyona-pdp-gallery-thumbs` strip, wire click-to-swap, and listen for
+   * `found_variation` so variation images still swap. We do NOT touch the
+   * original `__wrapper` figures other than hiding the wrapper, so if WC
+   * later runs FlexSlider through some delayed path, our overlay just sits
+   * on top of an idle wrapper without interfering.
+   */
+  function initGalleryFallback() {
+    var galleries = document.querySelectorAll('.single-product .woocommerce-product-gallery');
+    galleries.forEach(function (gallery) {
+      // FlexSlider already initialized — leave it alone.
+      if (gallery.querySelector('.flex-viewport')) return;
+      // Already converted on a prior run.
+      if (gallery.dataset.noyonaFallback === '1') return;
+
+      var wrapper = gallery.querySelector('.woocommerce-product-gallery__wrapper');
+      if (!wrapper) return;
+
+      var figures = Array.prototype.slice.call(
+        wrapper.querySelectorAll('.woocommerce-product-gallery__image')
+      );
+      if (figures.length === 0) return;
+
+      // Capture each image's URLs/attrs from the existing markup. WC stores
+      // the full-size URL on `data-large_image` and the displayed src on
+      // the `<img>` itself.
+      var imageData = figures.map(function (figure) {
+        var img = figure.querySelector('img');
+        if (!img) return null;
+        var anchor = figure.querySelector('a');
+        var fullSrc = (anchor && anchor.getAttribute('href')) ||
+                      img.getAttribute('data-large_image') ||
+                      img.getAttribute('data-src') ||
+                      img.getAttribute('src') || '';
+        return {
+          full:   fullSrc,
+          thumb:  img.getAttribute('src') || fullSrc,
+          srcset: img.getAttribute('srcset') || '',
+          sizes:  img.getAttribute('sizes') || '',
+          alt:    img.getAttribute('alt') || '',
+          width:  img.getAttribute('width') || '',
+          height: img.getAttribute('height') || '',
+        };
+      }).filter(Boolean);
+      if (imageData.length === 0) return;
+
+      gallery.dataset.noyonaFallback = '1';
+      gallery.classList.add('noyona-pdp-gallery-fallback');
+
+      // Build new DOM: <div main><img></div> + <ul thumbs>...</ul>
+      var main = document.createElement('div');
+      main.className = 'noyona-pdp-gallery-main';
+
+      var mainImg = document.createElement('img');
+      mainImg.className = 'noyona-pdp-gallery-main-img';
+      mainImg.alt = imageData[0].alt;
+      mainImg.decoding = 'async';
+      mainImg.src = imageData[0].full;
+      if (imageData[0].srcset) mainImg.srcset = imageData[0].srcset;
+      if (imageData[0].sizes)  mainImg.sizes  = imageData[0].sizes;
+      if (imageData[0].width)  mainImg.setAttribute('width', imageData[0].width);
+      if (imageData[0].height) mainImg.setAttribute('height', imageData[0].height);
+      main.appendChild(mainImg);
+
+      var thumbs = document.createElement('ul');
+      thumbs.className = 'noyona-pdp-gallery-thumbs';
+
+      imageData.forEach(function (data, i) {
+        var li = document.createElement('li');
+        li.className = 'noyona-pdp-gallery-thumb' + (i === 0 ? ' is-active' : '');
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('data-noyona-thumb-index', String(i));
+        btn.setAttribute('aria-label', 'Show product image ' + (i + 1));
+
+        var thumbImg = document.createElement('img');
+        thumbImg.src = data.thumb;
+        thumbImg.alt = '';
+        thumbImg.loading = 'lazy';
+        thumbImg.decoding = 'async';
+        btn.appendChild(thumbImg);
+        li.appendChild(btn);
+        thumbs.appendChild(li);
+      });
+
+      // Hide the original (unstyled, vertically stacked) wrapper without
+      // removing it — so any late FlexSlider init still finds its target.
+      wrapper.style.display = 'none';
+      gallery.appendChild(main);
+      // Only show the thumbnail strip when there's more than one image.
+      if (imageData.length > 1) {
+        gallery.appendChild(thumbs);
+      }
+
+      thumbs.addEventListener('click', function (event) {
+        var btn = event.target.closest('button[data-noyona-thumb-index]');
+        if (!btn) return;
+        var idx = parseInt(btn.getAttribute('data-noyona-thumb-index'), 10);
+        if (isNaN(idx) || !imageData[idx]) return;
+
+        var data = imageData[idx];
+        mainImg.src = data.full;
+        mainImg.alt = data.alt;
+        if (data.srcset) { mainImg.srcset = data.srcset; } else { mainImg.removeAttribute('srcset'); }
+        if (data.sizes)  { mainImg.sizes  = data.sizes;  } else { mainImg.removeAttribute('sizes'); }
+
+        thumbs.querySelectorAll('.noyona-pdp-gallery-thumb').forEach(function (item) {
+          item.classList.remove('is-active');
+        });
+        var parentLi = btn.closest('.noyona-pdp-gallery-thumb');
+        if (parentLi) parentLi.classList.add('is-active');
+      });
+
+      // Variation image swap: WC's add-to-cart-variation script fires
+      // `found_variation` on the .variations_form. The variation object's
+      // `.image` carries the variation-specific src/srcset/full URL.
+      if (window.jQuery) {
+        var $form = window.jQuery('form.variations_form');
+        if ($form.length) {
+          $form.on('found_variation.noyonaFallback', function (_event, variation) {
+            if (!variation || !variation.image) return;
+            var v = variation.image;
+            var newSrc = v.full_src || v.src || '';
+            if (!newSrc) return;
+            mainImg.src = newSrc;
+            if (v.alt) mainImg.alt = v.alt;
+            if (v.srcset) { mainImg.srcset = v.srcset; } else { mainImg.removeAttribute('srcset'); }
+            if (v.sizes)  { mainImg.sizes  = v.sizes;  } else { mainImg.removeAttribute('sizes'); }
+          });
+          $form.on('reset_image.noyonaFallback', function () {
+            var first = imageData[0];
+            if (!first) return;
+            mainImg.src = first.full;
+            mainImg.alt = first.alt;
+            if (first.srcset) { mainImg.srcset = first.srcset; } else { mainImg.removeAttribute('srcset'); }
+            if (first.sizes)  { mainImg.sizes  = first.sizes;  } else { mainImg.removeAttribute('sizes'); }
+          });
+        }
+      }
+    });
+  }
+
+  function scheduleGalleryFallback() {
+    // Wait long enough for wc-single-product.js / FlexSlider to win on hosts
+    // where they actually do initialize. On hosts where they don't, this
+    // delay is invisible — the pre-init CSS layout is already in place.
+    setTimeout(initGalleryFallback, 400);
+  }
+
   bindWooCommercePdpHooks();
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPdp);
+    document.addEventListener('DOMContentLoaded', scheduleGalleryFallback);
   } else {
     initPdp();
+    scheduleGalleryFallback();
   }
 
   // Handle delayed Woo markup injections in block-based templates.
