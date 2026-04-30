@@ -100,14 +100,13 @@ function woocom_ct_enqueue_assets() {
         true
     );
 
-    // Header behavior (sticky / color change / wishlist toggle)
-    // CACHE-BUST: using time() to guarantee the browser always loads the
-    // latest file.  Revert to filemtime() once debugging is done.
+    // Header behavior (sticky / color change / wishlist toggle).
+    $header_js_path = get_stylesheet_directory() . '/assets/js/header.js';
     wp_enqueue_script(
         'woocom-ct-header',
         get_stylesheet_directory_uri() . '/assets/js/header.js',
         array(),
-        (string) time(),
+        file_exists( $header_js_path ) ? (string) filemtime( $header_js_path ) : wp_get_theme()->get( 'Version' ),
         true
     );
 
@@ -123,11 +122,12 @@ function woocom_ct_enqueue_assets() {
         || ( '' !== $account_lc && 0 === strpos( $request_lc, $account_lc ) );
 
     if ( $is_account_frontend ) {
+        $account_modals_path = get_stylesheet_directory() . '/assets/js/account-modals.js';
         wp_enqueue_script(
             'noyona-account-modals',
             get_stylesheet_directory_uri() . '/assets/js/account-modals.js',
             array(),
-            (string) time(),
+            file_exists( $account_modals_path ) ? (string) filemtime( $account_modals_path ) : wp_get_theme()->get( 'Version' ),
             true
         );
     }
@@ -322,13 +322,49 @@ function noyona_render_image( $args = array() ) {
     return $html;
 }
 
+/**
+ * Mark the theme's footer scripts as defer so they don't block parsing.
+ * They're already in the footer with `in_footer=true`, but defer also lets
+ * the browser keep parsing while the script downloads in parallel.
+ */
+add_filter( 'script_loader_tag', 'noyona_defer_theme_scripts', 10, 3 );
+function noyona_defer_theme_scripts( $tag, $handle, $src ) {
+    if ( is_admin() ) {
+        return $tag;
+    }
+    $defer_handles = array(
+        'woocom-ct-header',
+        'noyona-account-modals',
+        'woocom-ct-product-gatherer',
+        'leaflet-js',
+    );
+    if ( ! in_array( $handle, $defer_handles, true ) ) {
+        return $tag;
+    }
+    if ( false !== strpos( $tag, ' defer' ) || false !== strpos( $tag, ' async' ) ) {
+        return $tag;
+    }
+    return preg_replace( '/<script /', '<script defer ', $tag, 1 );
+}
+
 add_filter( 'wp_preload_resources', 'noyona_preload_home_hero_image' );
 function noyona_preload_home_hero_image( $preload_resources ) {
+    $theme_uri = get_stylesheet_directory_uri();
+
+    // Preload the body-text font so first paint isn't blocked on a CSS-discovered
+    // font fetch. crossorigin is required for fonts even on the same origin.
+    $preload_resources[] = array(
+        'href'        => $theme_uri . '/assets/fonts/proximanova_regular.ttf',
+        'as'          => 'font',
+        'type'        => 'font/ttf',
+        'crossorigin' => 'anonymous',
+    );
+
     if ( ! is_front_page() ) {
         return $preload_resources;
     }
 
-    $base = get_stylesheet_directory_uri() . '/assets/images';
+    $base = $theme_uri . '/assets/images';
 
     // Responsive preload: the browser picks the variant matching the viewport
     // from imagesrcset, so a phone fetches the 18 KB mobile webp instead of

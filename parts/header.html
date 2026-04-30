@@ -64,7 +64,7 @@
     <nav class="main-nav">
         <!-- Burger Menu Button -->
         <button class="mobile-menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav">
-            <i class="fa-solid fa-bars"></i>
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
         </button>
 
         <ul class="nav-list" id="primary-nav">
@@ -75,7 +75,7 @@
                 <div class="nav-link-wrapper">
                     <a href="/shop/" class="nav-link">Shop</a>
                     <button class="submenu-toggle" type="button" aria-label="Toggle sub-menu" aria-expanded="false">
-                        <i class="fa-solid fa-plus"></i>
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
                     </button>
                 </div>
                 <ul class="dropdown-menu">
@@ -90,7 +90,7 @@
                 <div class="nav-link-wrapper">
                     <a href="/coming-soon/" class="nav-link">Partner Brands</a>
                     <button class="submenu-toggle" type="button" aria-label="Toggle sub-menu" aria-expanded="false">
-                        <i class="fa-solid fa-plus"></i>
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
                     </button>
                 </div>
                 <ul class="dropdown-menu">
@@ -130,7 +130,7 @@
         <!-- Wishlist toggle -->
         <!-- wp:html -->
         <button class="header-icon header-wishlist-toggle" type="button" aria-label="Open wishlist">
-            <i class="fa-regular fa-heart"></i>
+            <i class="fa-regular fa-heart" aria-hidden="true"></i>
         </button>
         <!-- /wp:html -->
 
@@ -149,7 +149,7 @@
         <div class="header-account header-account--logged-in">
             <button class="header-icon header-account-toggle" type="button" aria-label="Open account menu" aria-haspopup="menu" aria-expanded="false"
                 aria-controls="header-account-menu">
-                <i class="fa-regular fa-user"></i>
+                <i class="fa-regular fa-user" aria-hidden="true"></i>
             </button>
             <div class="header-account-menu" id="header-account-menu" role="menu" aria-hidden="true">
                 <a href="/my-account/" role="menuitem">Profile</a>
@@ -162,7 +162,7 @@
         <!-- Account icon (logged-out) -->
         <!-- wp:html -->
         <a class="header-icon header-account--logged-out" href="/my-account/" aria-label="Log in">
-            <i class="fa-regular fa-user"></i>
+            <i class="fa-regular fa-user" aria-hidden="true"></i>
         </a>
         <!-- /wp:html -->
 
@@ -175,20 +175,20 @@
 <!-- Wishlist right-side panel -->
 <!-- wp:html -->
 <div class="wishlist-panel" id="wishlist-panel">
-    <div class="wishlist-panel__overlay"></div>
-    <aside class="wishlist-panel__content">
+    <div class="wishlist-panel__overlay" aria-hidden="true"></div>
+    <aside class="wishlist-panel__content" role="dialog" aria-modal="true" aria-labelledby="wishlist-panel-title">
         <div class="wishlist-panel__topbar">
             <button class="wishlist-panel__back" type="button" data-wishlist-close aria-label="Close wishlist">
-                <i class="fa-solid fa-arrow-left"></i>
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
                 <span>Continue Shopping</span>
             </button>
             <!-- <button class="wishlist-panel__close" type="button" data-wishlist-close aria-label="Close wishlist">×</button> -->
         </div>
         <div class="wishlist-panel__body">
-            <h2 class="wishlist-panel__title">Your Wishlist</h2>
+            <h2 class="wishlist-panel__title" id="wishlist-panel-title">Your Wishlist</h2>
             <p class="wishlist-panel__subtitle">Save your favorite products here and add them to cart anytime.</p>
             <div class="wishlist-panel__empty">
-                <i class="fa-regular fa-heart"></i>
+                <i class="fa-regular fa-heart" aria-hidden="true"></i>
                 <p>No wishlist items yet.</p>
             </div>
         </div>

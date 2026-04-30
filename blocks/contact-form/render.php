@@ -221,9 +221,9 @@ $allowed_heading = array(
             <input type="hidden" name="action" value="noyona_contact_form_submit">
 
             <!-- Honeypot (bots fill this, humans won't) -->
-            <div style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
-                <label>Leave this field empty</label>
-                <input type="text" name="website" tabindex="-1" autocomplete="off">
+            <div aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+                <label for="<?php echo esc_attr($form_id); ?>-honeypot">Leave this field empty</label>
+                <input id="<?php echo esc_attr($form_id); ?>-honeypot" type="text" name="website" tabindex="-1" autocomplete="off">
             </div>
 
             <div class="contact-form__fields">

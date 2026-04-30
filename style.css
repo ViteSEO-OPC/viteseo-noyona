@@ -74,10 +74,13 @@ body {
   box-shadow: none;
 }
 
-/* Keep keyboard focus visible (accessible) */
+/* Keep keyboard focus visible (accessible). The :focus-visible pseudo-class
+   only matches when the user navigates with a keyboard, so mouse clicks
+   stay clean while keyboard users get a clear focus indicator. */
 :where(a, button, input, select, textarea, summary, [role="button"], [tabindex]):focus-visible {
-  outline: none;
-  /* If you want NO keyboard ring too, remove this rule and use Option B */
+  outline: 2px solid #b46676;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* Remove mobile tap highlight */
