@@ -1819,6 +1819,8 @@ function woocom_ct_register_blocks() {
     register_block_type( get_stylesheet_directory() . '/blocks/newsletter-strip' );
     register_block_type( get_stylesheet_directory() . '/blocks/faq' );
     register_block_type( get_stylesheet_directory() . '/blocks/faq-list' );
+    register_block_type( get_stylesheet_directory() . '/blocks/faq-blogpost' );
+    register_block_type( get_stylesheet_directory() . '/blocks/cta-blogpost' );
     register_block_type( get_stylesheet_directory() . '/blocks/contact' );
     register_block_type( get_stylesheet_directory() . '/blocks/location' );
     register_block_type( get_stylesheet_directory() . '/blocks/not-found' );

@@ -1,0 +1,25 @@
+.wp-block-noyona-faq-blogpost.faq-blogpost--editor {
+  border: 1px dashed #d9d9d9;
+  border-radius: 0.85rem;
+}
+
+.faq-blogpost--editor .faq-blogpost__item {
+  box-shadow: none;
+}
+
+.faq-blogpost-editor__item-fields {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #ffffff;
+}
+
+.faq-blogpost-editor__item-heading {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #5f6368;
+}

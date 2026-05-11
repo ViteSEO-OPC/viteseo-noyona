@@ -1,0 +1,9 @@
+.wp-block-noyona-cta-blogpost.cta-blogpost--editor {
+  border: 1px dashed #e2e2e2;
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.wp-block-noyona-cta-blogpost.cta-blogpost--editor .cta-blogpost__button {
+  box-shadow: none;
+}

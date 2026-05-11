@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "noyona/faq-blogpost",
+  "version": "1.0.0",
+  "title": "FAQ Blogpost",
+  "category": "widgets",
+  "icon": "editor-help",
+  "description": "FAQ accordion section for blog posts.",
+  "keywords": ["faq", "accordion", "blog", "faq-blogpost", "faq blogpost"],
+  "postTypes": ["post"],
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "default": "Frequently Asked Questions"
+    },
+    "subheading": {
+      "type": "string",
+      "default": "Lorem ipsum dolor sit amet, consectetur adipiscing elit"
+    },
+    "items": {
+      "type": "array",
+      "default": [
+        {
+          "question": "Duis aute irure dolor in reprehenderit?",
+          "answer": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        },
+        {
+          "question": "Excepteur sint occaecat cupidatat non proident?",
+          "answer": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium."
+        },
+        {
+          "question": "Ut enim ad minim veniam, quis nostrud?",
+          "answer": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit."
+        }
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "openFirst": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "style": "file:./style.css",
+  "editorStyle": "file:./editor.css",
+  "editorScript": "file:./editor.js",
+  "viewScript": "file:./view.js",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}
