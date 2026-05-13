@@ -326,6 +326,19 @@ function noyona_pdp_enqueue_assets() {
 		return;
 	}
 
+	// Required by Woo's variation templates (wp.template / _.template runtime).
+	// Some optimization stacks defer these unexpectedly, so enforce them here.
+	$variation_runtime_handles = array(
+		'underscore',
+		'wp-util',
+		'wc-add-to-cart-variation',
+	);
+	foreach ( $variation_runtime_handles as $handle ) {
+		if ( wp_script_is( $handle, 'registered' ) && ! wp_script_is( $handle, 'enqueued' ) ) {
+			wp_enqueue_script( $handle );
+		}
+	}
+
 	// Belt-and-suspenders: explicitly enqueue the WC gallery scripts. They are
 	// registered by WC_Frontend_Scripts on every front-end load and *should*
 	// auto-enqueue on PDPs, but block-theme detection plus production perf
@@ -365,7 +378,7 @@ function noyona_pdp_enqueue_assets() {
 	wp_enqueue_script(
 		'noyona-single-product',
 		get_stylesheet_directory_uri() . '/assets/js/single-product.js',
-		array( 'jquery', 'wc-single-product' ),
+		array( 'jquery', 'wp-util', 'underscore', 'wc-add-to-cart-variation' ),
 		$script_ver,
 		true
 	);
