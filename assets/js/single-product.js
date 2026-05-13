@@ -163,6 +163,66 @@
     });
   }
 
+  function getVariationFormForSelect(select) {
+    if (!select) {
+      return null;
+    }
+    return select.closest('form.variations_form');
+  }
+
+  function triggerWooVariationEvents(select) {
+    if (!select) {
+      return;
+    }
+
+    var form = getVariationFormForSelect(select);
+
+    // Native change for non-jQuery listeners.
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // WooCommerce variation form listeners are jQuery-based.
+    if (typeof window.jQuery !== 'undefined') {
+      var $select = window.jQuery(select);
+      $select.trigger('change');
+
+      if (form) {
+        var $form = window.jQuery(form);
+        $form.trigger('woocommerce_variation_select_change');
+        $form.trigger('check_variations');
+        $form.trigger('change');
+      }
+    }
+  }
+
+  function setSelectValueFromCustomUi(select, requestedValue, requestedIndex) {
+    if (!select || !select.options) {
+      return false;
+    }
+
+    var options = Array.prototype.slice.call(select.options, 0);
+    var targetOption = null;
+
+    if (typeof requestedValue === 'string' && requestedValue !== '') {
+      targetOption = options.find(function (opt) {
+        return String(opt.value) === String(requestedValue);
+      }) || null;
+    }
+
+    if (!targetOption && typeof requestedIndex === 'number' && requestedIndex > -1 && options[requestedIndex]) {
+      targetOption = options[requestedIndex];
+    }
+
+    if (!targetOption || !targetOption.value) {
+      return false;
+    }
+
+    // Always sync by the real option value (slug), never by label text.
+    select.value = String(targetOption.value);
+    select.selectedIndex = targetOption.index;
+    triggerWooVariationEvents(select);
+    return true;
+  }
+
   function buildSwatchRow(select) {
     if (select.closest('.noyona-pdp-variation__shade-box')) {
       if (typeof select._noyonaUiSync === 'function') {
@@ -230,13 +290,7 @@
       }
 
       btn.addEventListener('click', function () {
-        select.selectedIndex = index;
-        // Keep our custom active UI in sync.
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-        // Keep Woo variation matching/image switching in sync.
-        if (typeof window.jQuery !== 'undefined') {
-          window.jQuery(select).trigger('change');
-        }
+        setSelectValueFromCustomUi(select, opt.value, index);
       });
 
       row.appendChild(btn);
@@ -329,11 +383,7 @@
         if (btn.disabled) {
           return;
         }
-        select.selectedIndex = index;
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-        if (typeof window.jQuery !== 'undefined') {
-          window.jQuery(select).trigger('change');
-        }
+        setSelectValueFromCustomUi(select, opt.value, index);
       });
 
       row.appendChild(btn);
@@ -547,9 +597,7 @@
         return o.value === val;
       });
       if (has) {
-        sel.value = val;
-        sel.dispatchEvent(new Event('change', { bubbles: true }));
-        if (window.jQuery) window.jQuery(sel).trigger('change');
+        setSelectValueFromCustomUi(sel, val, null);
         changed = true;
       }
     });
