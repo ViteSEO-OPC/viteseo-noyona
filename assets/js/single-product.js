@@ -84,6 +84,61 @@
     return false;
   }
 
+  function normalizeAttributeKey(name) {
+    var key = (name || '').toLowerCase();
+    key = key.replace(/^attribute_/, '');
+    key = key.replace(/^pa_/, '');
+    key = key.replace(/[_\s]+/g, '-');
+    return key;
+  }
+
+  function getAttributeLabel(select) {
+    var row = select.closest('tr');
+    var labelNode = row ? row.querySelector('th.label label') : null;
+    var labelText = labelNode ? String(labelNode.textContent || '').trim() : '';
+    if (labelText) {
+      return labelText;
+    }
+
+    var key = normalizeAttributeKey(select.getAttribute('name') || '');
+    if (!key) {
+      return 'Option';
+    }
+
+    return key
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, function (char) {
+        return char.toUpperCase();
+      });
+  }
+
+  function isSizePackAttributeSelect(select) {
+    var key = normalizeAttributeKey(select.getAttribute('name') || '');
+    var label = getAttributeLabel(select).toLowerCase();
+
+    if (/^(size|sizes|pack-size|packsize|pack)$/.test(key)) {
+      return true;
+    }
+
+    if (/^pack-size-/.test(key)) {
+      return true;
+    }
+
+    if (/pack[\s_-]*size/.test(label)) {
+      return true;
+    }
+
+    return label === 'size';
+  }
+
+  function shouldUsePillUi(select) {
+    if (shouldUseSwatchUi(select)) {
+      return false;
+    }
+
+    return isSizePackAttributeSelect(select);
+  }
+
   function shouldUseSwatchUi(select) {
     if (isColorAttributeSelect(select)) {
       return true;
@@ -110,6 +165,9 @@
 
   function buildSwatchRow(select) {
     if (select.closest('.noyona-pdp-variation__shade-box')) {
+      if (typeof select._noyonaUiSync === 'function') {
+        select._noyonaUiSync();
+      }
       return;
     }
 
@@ -210,8 +268,164 @@
       });
     }
 
+    select._noyonaUiSync = syncFromSelect;
     select.addEventListener('change', syncFromSelect);
     syncFromSelect();
+  }
+
+  function buildPillRow(select) {
+    if (select.closest('.noyona-pdp-variation__choice-box')) {
+      if (typeof select._noyonaUiSync === 'function') {
+        select._noyonaUiSync();
+      }
+      return;
+    }
+
+    if (select.closest('.noyona-pdp-variation__shade-box') || select.closest('.noyona-pdp-variation__dropdown-box')) {
+      return;
+    }
+
+    if (!shouldUsePillUi(select)) {
+      return;
+    }
+
+    var wrap = document.createElement('div');
+    wrap.className = 'noyona-pdp-variation__choice-box';
+
+    var header = document.createElement('div');
+    header.className = 'noyona-pdp-variation__field-head';
+
+    var label = document.createElement('span');
+    label.className = 'noyona-pdp-variation__field-label';
+
+    var attributeLabel = getAttributeLabel(select);
+    label.textContent = 'Select ' + attributeLabel.toLowerCase();
+
+    var current = document.createElement('span');
+    current.className = 'noyona-pdp-variation__field-current';
+
+    header.appendChild(label);
+    header.appendChild(current);
+
+    var row = document.createElement('div');
+    row.className = 'noyona-pdp-variation__choices';
+    row.setAttribute('role', 'list');
+
+    var options = Array.prototype.slice.call(select.options, 0);
+    options.forEach(function (opt, index) {
+      if (!opt.value) {
+        return;
+      }
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'noyona-pdp-choice';
+      btn.setAttribute('role', 'listitem');
+      btn.setAttribute('data-value', opt.value);
+      btn.setAttribute('data-index', String(index));
+      btn.textContent = opt.text || opt.value;
+
+      btn.addEventListener('click', function () {
+        if (btn.disabled) {
+          return;
+        }
+        select.selectedIndex = index;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        if (typeof window.jQuery !== 'undefined') {
+          window.jQuery(select).trigger('change');
+        }
+      });
+
+      row.appendChild(btn);
+    });
+
+    select.classList.add('noyona-pdp-variation__select-hidden');
+    select.parentNode.insertBefore(wrap, select);
+    wrap.appendChild(header);
+    wrap.appendChild(row);
+    wrap.appendChild(select);
+
+    function syncFromSelect() {
+      var selectedOption = select.options[select.selectedIndex] || null;
+      current.textContent =
+        selectedOption && selectedOption.value
+          ? String(selectedOption.text || '').trim()
+          : '';
+
+      row.querySelectorAll('.noyona-pdp-choice').forEach(function (button) {
+        var value = button.getAttribute('data-value') || '';
+        var idx = parseInt(button.getAttribute('data-index') || '-1', 10);
+        var disabled = false;
+        if (idx > -1 && select.options[idx]) {
+          disabled = !!select.options[idx].disabled;
+        }
+        var isSelected = selectedOption && selectedOption.value && value === selectedOption.value;
+        button.classList.toggle('is-selected', !!isSelected);
+        button.classList.toggle('is-disabled', !!disabled);
+        button.disabled = !!disabled;
+        button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+        button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      });
+    }
+
+    select._noyonaUiSync = syncFromSelect;
+    select.addEventListener('change', syncFromSelect);
+    syncFromSelect();
+  }
+
+  function buildDropdownRow(select) {
+    if (select.closest('.noyona-pdp-variation__dropdown-box')) {
+      if (typeof select._noyonaUiSync === 'function') {
+        select._noyonaUiSync();
+      }
+      return;
+    }
+
+    if (select.closest('.noyona-pdp-variation__shade-box') || select.closest('.noyona-pdp-variation__choice-box')) {
+      return;
+    }
+
+    var wrap = document.createElement('div');
+    wrap.className = 'noyona-pdp-variation__dropdown-box';
+
+    var header = document.createElement('div');
+    header.className = 'noyona-pdp-variation__field-head';
+
+    var label = document.createElement('span');
+    label.className = 'noyona-pdp-variation__field-label';
+    label.textContent = 'Select ' + getAttributeLabel(select).toLowerCase();
+    header.appendChild(label);
+
+    var selectWrap = document.createElement('div');
+    selectWrap.className = 'noyona-pdp-variation__dropdown';
+
+    select.classList.remove('noyona-pdp-variation__select-hidden');
+    select.parentNode.insertBefore(wrap, select);
+    wrap.appendChild(header);
+    wrap.appendChild(selectWrap);
+    selectWrap.appendChild(select);
+
+    function syncFromSelect() {
+      wrap.classList.toggle('has-value', !!select.value);
+    }
+
+    select._noyonaUiSync = syncFromSelect;
+    select.addEventListener('change', syncFromSelect);
+    syncFromSelect();
+  }
+
+  function buildVariationControl(select) {
+    if (shouldUseSwatchUi(select)) {
+      buildSwatchRow(select);
+      return;
+    }
+
+    if (shouldUsePillUi(select)) {
+      buildPillRow(select);
+      return;
+    }
+
+    buildDropdownRow(select);
   }
 
   /* ------------------------------------------------------------------ */
@@ -370,7 +584,7 @@
     }
 
     var selects = form.querySelectorAll('select[name^="attribute_"]');
-    selects.forEach(buildSwatchRow);
+    selects.forEach(buildVariationControl);
 
     bindVariationIdSync(form);
   }
