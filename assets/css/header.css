@@ -863,6 +863,10 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wc-block-mini-cart__drawer .wc-block-cart-items__row,
 .wc-block-mini-cart__drawer .wc-block-mini-cart-items__row {
+  display: grid !important;
+  grid-template-columns: 92px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start !important;
   border-bottom: 1px solid #dddddd;
   padding-bottom: 16px;
 }
@@ -878,6 +882,7 @@ body:not(.logged-in) .header-account--logged-out {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
+  min-width: 0 !important;
   gap: 0 !important;
 }
 
@@ -887,6 +892,10 @@ body:not(.logged-in) .header-account--logged-out {
   color: #253042;
   text-decoration: none;
   line-height: 1.2;
+  min-width: 0;
+  width: auto !important;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .wc-block-mini-cart__drawer .wc-block-components-product-price,
@@ -899,22 +908,31 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row {
   width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
-  justify-content: space-between;
   gap: 12px;
   margin-bottom: 0 !important;
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row .wc-block-components-product-name {
   margin: 0 !important;
-  flex: 1 1 auto;
   min-width: 0;
+  width: auto !important;
+  max-width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row .wc-block-components-product-price {
   margin: 0 !important;
-  flex: 0 0 auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-align: right;
+  align-self: start;
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row .wc-block-components-product-price__value.is-discounted,
@@ -923,7 +941,6 @@ body:not(.logged-in) .header-account--logged-out {
   font-weight: 700;
   color: #E199A4;
   white-space: nowrap;
-  margin-left: auto;
   display: inline-block;
 }
 
