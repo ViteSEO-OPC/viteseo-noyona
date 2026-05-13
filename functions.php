@@ -387,38 +387,15 @@ function noyona_trim_noncommerce_assets() {
         return;
     }
 
-    // Keep Woo assets when header mini-cart is present on a page.
-    if ( has_block( 'woocommerce/mini-cart' ) ) {
-        return;
-    }
-
-    if (
-        is_cart()
-        || is_checkout()
-        || is_account_page()
-        || is_woocommerce()
-        || ( function_exists( 'noyona_is_checkout_ui_context' ) && noyona_is_checkout_ui_context() )
-    ) {
-        return;
-    }
-
-    wp_dequeue_style( 'woocommerce-layout' );
-    wp_dequeue_style( 'woocommerce-smallscreen' );
-    wp_dequeue_style( 'woocommerce-general' );
-    wp_dequeue_style( 'woocommerce-blocktheme' );
-    wp_dequeue_style( 'wc-blocks-style' );
-    wp_dequeue_style( 'wc-blocks-vendors-style' );
-    wp_dequeue_style( 'wc-blocks-packages-style' );
-
-    // Keep these to avoid breaking header mini-cart drawer behavior.
-    // wp_dequeue_script( 'woocommerce' );
-    // wp_dequeue_script( 'wc-cart-fragments' );
-    wp_dequeue_script( 'wc-add-to-cart' );
-    wp_dequeue_script( 'jquery-blockui' );
-    wp_dequeue_script( 'jquery-cookie' );
-    wp_dequeue_script( 'js-cookie' );
-    wp_dequeue_script( 'wc-order-attribution' );
-    wp_dequeue_script( 'sourcebuster-js' );
+    // The WooCommerce mini-cart block lives in parts/header.html, so it is
+    // present on every frontend page. has_block( 'woocommerce/mini-cart' )
+    // does NOT reliably detect blocks inside block-theme template parts, so
+    // the previous dequeue path could strip wc-blocks-style and friends on
+    // most pages — causing the header cart badge to fail to hydrate and
+    // disappear after normal navigation. Until the header part is rebuilt
+    // without the block, the only safe behavior on the frontend is to keep
+    // every Woo / WC Blocks asset enqueued.
+    return;
 }
 
 /**
