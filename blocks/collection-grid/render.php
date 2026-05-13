@@ -118,6 +118,16 @@ if (empty($items)) {
     <?php endif; ?>
 </div>
 
+<?php
+// Print the view script via wp_footer instead of inline in block output:
+// when this <script> tag is part of the rendered block HTML it can get
+// caught by the_content filter chain (wptexturize/wpautop), which under
+// certain surrounding content escapes loose `&` to `&#038;` — turning
+// `&&` into `&#038;&#038;` and breaking the JS parse. Output on wp_footer
+// runs outside that pipeline so the operators survive verbatim.
+if ( ! function_exists( 'noyona_collection_grid_print_view_script' ) ) {
+    function noyona_collection_grid_print_view_script() {
+        ?>
 <script>
     (function () {
         function initCollectionGrid(block) {
@@ -173,3 +183,9 @@ if (empty($items)) {
         }
     })();
 </script>
+        <?php
+    }
+}
+// add_action with a string callback is keyed by the callback name, so this
+// is a no-op if the block renders more than once on the same page.
+add_action( 'wp_footer', 'noyona_collection_grid_print_view_script' );
