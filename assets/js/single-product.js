@@ -89,7 +89,49 @@
     key = key.replace(/^attribute_/, '');
     key = key.replace(/^pa_/, '');
     key = key.replace(/[_\s]+/g, '-');
+    key = key.replace(/-+/g, '-');
+    key = key.replace(/^-+|-+$/g, '');
     return key;
+  }
+
+  function slugifyForCompare(value) {
+    return String(value || '')
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function logVariationDebug(label, payload) {
+    if (typeof console === 'undefined' || typeof console.log !== 'function') {
+      return;
+    }
+    console.log('[Noyona PDP]', label, payload || {});
+  }
+
+  function debugVariationFormState(form, context) {
+    if (!form) {
+      return;
+    }
+    var selects = Array.prototype.slice.call(
+      form.querySelectorAll('select[name^="attribute_"]'),
+      0
+    ).map(function (sel) {
+      var selected = sel.options[sel.selectedIndex] || null;
+      return {
+        name: sel.name || '',
+        value: sel.value || '',
+        selectedText: selected ? String(selected.text || '').trim() : '',
+      };
+    });
+
+    var variationIdInput = form.querySelector('input[name="variation_id"]');
+    logVariationDebug('variation-form-state:' + String(context || 'unknown'), {
+      attributes: selects,
+      variation_id: variationIdInput ? variationIdInput.value : '',
+    });
   }
 
   function getAttributeLabel(select) {
@@ -170,6 +212,106 @@
     return select.closest('form.variations_form');
   }
 
+  function findMatchingAttributeSelect(form, attributeToken, fallbackSelect) {
+    if (!form) {
+      return fallbackSelect || null;
+    }
+
+    var selects = Array.prototype.slice.call(
+      form.querySelectorAll('select[name^="attribute_"]'),
+      0
+    );
+    if (!selects.length) {
+      return fallbackSelect || null;
+    }
+
+    var normalizedTarget = normalizeAttributeKey(attributeToken || '');
+    if (normalizedTarget) {
+      var direct = selects.find(function (candidate) {
+        return (
+          normalizeAttributeKey(candidate.getAttribute('name') || '') ===
+          normalizedTarget
+        );
+      });
+      if (direct) {
+        return direct;
+      }
+    }
+
+    if (
+      fallbackSelect &&
+      fallbackSelect.form === form &&
+      fallbackSelect.getAttribute('name')
+    ) {
+      return fallbackSelect;
+    }
+
+    return selects.length === 1 ? selects[0] : (fallbackSelect || null);
+  }
+
+  function resolveOptionForSelect(select, requestedValue, requestedLabel, requestedIndex) {
+    if (!select || !select.options) {
+      return null;
+    }
+
+    var options = Array.prototype.slice.call(select.options, 0);
+    var valueRaw = String(requestedValue || '').trim();
+    var labelRaw = String(requestedLabel || '').trim();
+    var valueLc = valueRaw.toLowerCase();
+    var labelLc = labelRaw.toLowerCase();
+    var valueSlug = slugifyForCompare(valueRaw);
+    var labelSlug = slugifyForCompare(labelRaw);
+
+    var match = null;
+
+    if (valueRaw) {
+      match =
+        options.find(function (opt) {
+          return String(opt.value) === valueRaw;
+        }) ||
+        options.find(function (opt) {
+          return String(opt.value || '').toLowerCase() === valueLc;
+        }) ||
+        options.find(function (opt) {
+          return slugifyForCompare(opt.value || '') === valueSlug;
+        }) ||
+        null;
+    }
+
+    if (!match && labelRaw) {
+      match =
+        options.find(function (opt) {
+          return String(opt.text || '').trim() === labelRaw;
+        }) ||
+        options.find(function (opt) {
+          return String(opt.text || '').trim().toLowerCase() === labelLc;
+        }) ||
+        options.find(function (opt) {
+          return slugifyForCompare(opt.text || '') === labelSlug;
+        }) ||
+        options.find(function (opt) {
+          return slugifyForCompare(opt.value || '') === labelSlug;
+        }) ||
+        null;
+    }
+
+    if (
+      !match &&
+      typeof requestedIndex === 'number' &&
+      requestedIndex > -1 &&
+      options[requestedIndex] &&
+      options[requestedIndex].value
+    ) {
+      match = options[requestedIndex];
+    }
+
+    if (!match || !match.value) {
+      return null;
+    }
+
+    return match;
+  }
+
   function triggerWooVariationEvents(select) {
     if (!select) {
       return;
@@ -194,32 +336,58 @@
     }
   }
 
-  function setSelectValueFromCustomUi(select, requestedValue, requestedIndex) {
+  function setSelectValueFromCustomUi(
+    select,
+    requestedValue,
+    requestedIndex,
+    requestedLabel,
+    attributeToken
+  ) {
     if (!select || !select.options) {
       return false;
     }
 
-    var options = Array.prototype.slice.call(select.options, 0);
-    var targetOption = null;
+    var form = getVariationFormForSelect(select);
+    var targetSelect = findMatchingAttributeSelect(
+      form,
+      attributeToken || select.getAttribute('name') || '',
+      select
+    );
+    var targetOption = resolveOptionForSelect(
+      targetSelect,
+      requestedValue,
+      requestedLabel,
+      requestedIndex
+    );
 
-    if (typeof requestedValue === 'string' && requestedValue !== '') {
-      targetOption = options.find(function (opt) {
-        return String(opt.value) === String(requestedValue);
-      }) || null;
-    }
-
-    if (!targetOption && typeof requestedIndex === 'number' && requestedIndex > -1 && options[requestedIndex]) {
-      targetOption = options[requestedIndex];
-    }
-
-    if (!targetOption || !targetOption.value) {
+    if (!targetSelect || !targetOption || !targetOption.value) {
+      logVariationDebug('variation-select-match-failed', {
+        clickedCustomValue: requestedValue || '',
+        clickedCustomLabel: requestedLabel || '',
+        attributeToken: attributeToken || '',
+        sourceSelectName: select.getAttribute('name') || '',
+      });
       return false;
     }
 
     // Always sync by the real option value (slug), never by label text.
-    select.value = String(targetOption.value);
-    select.selectedIndex = targetOption.index;
-    triggerWooVariationEvents(select);
+    targetSelect.value = String(targetOption.value);
+    targetSelect.selectedIndex = targetOption.index;
+
+    if (targetSelect !== select) {
+      select.value = String(targetOption.value);
+      select.selectedIndex = targetOption.index;
+    }
+
+    logVariationDebug('variation-option-click-sync', {
+      clickedCustomValue: requestedValue || '',
+      clickedCustomLabel: requestedLabel || '',
+      matchedSelectName: targetSelect.getAttribute('name') || '',
+      matchedOptionValue: targetOption.value,
+      matchedOptionLabel: String(targetOption.text || '').trim(),
+    });
+
+    triggerWooVariationEvents(targetSelect);
     return true;
   }
 
@@ -290,7 +458,13 @@
       }
 
       btn.addEventListener('click', function () {
-        setSelectValueFromCustomUi(select, opt.value, index);
+        setSelectValueFromCustomUi(
+          select,
+          opt.value,
+          index,
+          opt.text || opt.value,
+          select.getAttribute('name') || ''
+        );
       });
 
       row.appendChild(btn);
@@ -383,7 +557,13 @@
         if (btn.disabled) {
           return;
         }
-        setSelectValueFromCustomUi(select, opt.value, index);
+        setSelectValueFromCustomUi(
+          select,
+          opt.value,
+          index,
+          opt.text || opt.value,
+          select.getAttribute('name') || ''
+        );
       });
 
       row.appendChild(btn);
@@ -597,7 +777,13 @@
         return o.value === val;
       });
       if (has) {
-        setSelectValueFromCustomUi(sel, val, null);
+        setSelectValueFromCustomUi(
+          sel,
+          val,
+          null,
+          val,
+          sel.getAttribute('name') || ''
+        );
         changed = true;
       }
     });
@@ -934,6 +1120,7 @@
       var selectedVariationId = 0;
       // Keep variation UX consistent with Woo validation before request.
       if (form.classList.contains('variations_form')) {
+        debugVariationFormState(form, 'before-add-to-cart');
         var variationId = form.querySelector('input[name="variation_id"]');
         if (!variationId || !variationId.value || variationId.value === '0') {
           var msg =
