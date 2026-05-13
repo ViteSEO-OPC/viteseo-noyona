@@ -557,6 +557,7 @@ body:not(.logged-in) .header-account--logged-out {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .header-mini-cart .wc-block-mini-cart__button {
@@ -575,11 +576,12 @@ body:not(.logged-in) .header-account--logged-out {
   position: relative;
 }
 
-.header-mini-cart .wc-block-mini-cart__badge {
-  font-size: 0.7rem;
-  min-width: 16px;
-  height: 16px;
-  line-height: 16px;
+/* Hide WC's native badge — the visible count lives in
+   .noyona-cart-count-badge, which is rendered outside the React-managed
+   button so WC Blocks hydration can never remove or empty it. */
+.header-mini-cart .wc-block-mini-cart__badge,
+.header-mini-cart .wc-block-mini-cart__button-badge {
+  display: none !important;
 }
 
 .header-icons .wp-block-woocommerce-mini-cart {

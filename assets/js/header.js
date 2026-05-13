@@ -752,27 +752,22 @@
       Number.isFinite(Number(cart.items_count));
 
     const ensureHeaderCartBadge = () => {
-      const controls = document.querySelectorAll(
-        '.header-mini-cart .wc-block-mini-cart__button, .header-icons .header-cart-fallback'
+      // Mount the custom badge as a SIBLING of the WC mini-cart button (or
+      // the non-Woo fallback link), never inside the React-managed button.
+      // WC Blocks hydration can remove/replace the native badge and any DOM
+      // appended inside the button, so the visible count must live outside
+      // React's mount point.
+      const mounts = document.querySelectorAll(
+        '.header-mini-cart, .header-icons .header-cart-fallback'
       );
-      controls.forEach((control) => {
-        const nativeBadge = control.querySelector('.wc-block-mini-cart__badge, .wc-block-mini-cart__button-badge');
-        let customBadge = control.querySelector('.noyona-cart-count-badge');
-
-        // If Woo renders its own badge, keep that one and remove custom clone.
-        if (nativeBadge) {
-          if (customBadge) {
-            customBadge.remove();
-          }
-          return;
-        }
-
+      mounts.forEach((mount) => {
+        let customBadge = mount.querySelector(':scope > .noyona-cart-count-badge');
         if (!customBadge) {
           customBadge = document.createElement('span');
           customBadge.className = 'noyona-cart-count-badge is-hidden';
           customBadge.textContent = '0';
           customBadge.setAttribute('aria-hidden', 'true');
-          control.appendChild(customBadge);
+          mount.appendChild(customBadge);
         }
       });
     };
@@ -781,19 +776,16 @@
       const safeCount = Math.max(0, parseInt(count, 10) || 0);
       ensureHeaderCartBadge();
 
+      // Update ONLY the theme-owned badge. The WC native badge is hidden via
+      // CSS and intentionally not touched here — letting WC manage its own
+      // DOM/classes prevents fight-with-React races.
       document
-        .querySelectorAll(
-          '.noyona-cart-count-badge, .wc-block-mini-cart__badge, .wc-block-mini-cart__button-badge'
-        )
+        .querySelectorAll('.noyona-cart-count-badge')
         .forEach((badge) => {
           badge.textContent = String(safeCount);
           badge.classList.toggle('is-hidden', safeCount < 1);
           badge.setAttribute('aria-hidden', safeCount < 1 ? 'true' : 'false');
         });
-
-      document.querySelectorAll('.header-mini-cart .wc-block-mini-cart__button').forEach((button) => {
-        button.classList.toggle('wc-block-mini-cart__button--empty', safeCount < 1);
-      });
     };
 
     let miniCartRowsRetryPending = false;

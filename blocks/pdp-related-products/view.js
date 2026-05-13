@@ -19,10 +19,10 @@
 
   function syncHeaderCartBadge(count) {
     const safeCount = Math.max(0, parseInt(count, 10) || 0);
+    // Only the theme-owned badge is written. The WC native badge is hidden
+    // by CSS and intentionally left alone so React/WC can manage it freely.
     document
-      .querySelectorAll(
-        ".wc-block-mini-cart__badge, .wc-block-mini-cart__button-badge"
-      )
+      .querySelectorAll(".noyona-cart-count-badge")
       .forEach((badge) => {
         badge.textContent = String(safeCount);
         badge.classList.toggle("is-hidden", safeCount < 1);
