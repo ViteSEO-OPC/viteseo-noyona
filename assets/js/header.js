@@ -741,6 +741,16 @@
       return 0;
     };
 
+    // Treat a Store API response as trustworthy only when it is an object
+    // that explicitly reports a finite `items_count`. Anything else (null,
+    // network failure, malformed body, stale cache without the field) must
+    // NOT be allowed to overwrite the server-rendered badge — doing so
+    // hides a correct count behind the `--empty` class.
+    const isValidStoreCart = (cart) =>
+      !!cart &&
+      typeof cart === 'object' &&
+      Number.isFinite(Number(cart.items_count));
+
     const ensureHeaderCartBadge = () => {
       const controls = document.querySelectorAll(
         '.header-mini-cart .wc-block-mini-cart__button, .header-icons .header-cart-fallback'
@@ -850,7 +860,11 @@
 
     const refreshMiniCart = () => {
       fetchStoreCart().then((cart) => {
-        syncHeaderCartBadge(readCartItemCount(cart));
+        if (isValidStoreCart(cart)) {
+          syncHeaderCartBadge(Number(cart.items_count));
+        } else {
+          console.warn('[Noyona Header] Store cart response invalid; preserving existing cart badge.');
+        }
         syncWooBlocksCartStore(cart);
 
         const root = getMiniCartRoot();
