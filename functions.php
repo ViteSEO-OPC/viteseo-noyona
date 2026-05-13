@@ -19,6 +19,20 @@ if ( is_readable( $noyona_shipping_inc ) ) {
 	require_once $noyona_shipping_inc;
 }
 
+add_action('admin_head', function () {
+    echo '<style>
+        .wp-list-table .column-rank_math_seo_details,
+        .wp-list-table .column-rank_math_title,
+        .wp-list-table .column-rank_math_description,
+        .wp-list-table .column-rank_math_focus_keyword {
+            width: 180px !important;
+            min-width: 180px !important;
+            white-space: normal !important;
+            word-break: normal !important;
+        }
+    </style>';
+});
+
 // Load parent + child styles and our custom assets
 add_action( 'wp_enqueue_scripts', 'woocom_ct_enqueue_assets' );
 function woocom_ct_enqueue_assets() {
