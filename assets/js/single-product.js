@@ -104,6 +104,21 @@
       .replace(/^-+|-+$/g, '');
   }
 
+  function valuesEqualLoose(a, b) {
+    var left = String(a || '').trim();
+    var right = String(b || '').trim();
+    if (!left && !right) {
+      return true;
+    }
+    if (left === right) {
+      return true;
+    }
+    if (left.toLowerCase() === right.toLowerCase()) {
+      return true;
+    }
+    return slugifyForCompare(left) === slugifyForCompare(right);
+  }
+
   function logVariationDebug(label, payload) {
     if (typeof console === 'undefined' || typeof console.log !== 'function') {
       return;
@@ -128,7 +143,33 @@
     });
 
     var variationIdInput = form.querySelector('input[name="variation_id"]');
+    var rawVariations = form.getAttribute('data-product_variations');
+    var parsedCount = 0;
+    var variationAttrKeys = [];
+    if (rawVariations) {
+      try {
+        var parsed = JSON.parse(rawVariations);
+        if (Array.isArray(parsed)) {
+          parsedCount = parsed.length;
+          var keyMap = {};
+          parsed.slice(0, 20).forEach(function (variation) {
+            var attrs = variation && variation.attributes ? variation.attributes : {};
+            Object.keys(attrs).forEach(function (key) {
+              keyMap[key] = true;
+            });
+          });
+          variationAttrKeys = Object.keys(keyMap);
+        }
+      } catch (e) {
+        variationAttrKeys = ['<invalid-json>'];
+      }
+    }
+
     logVariationDebug('variation-form-state:' + String(context || 'unknown'), {
+      hasVariationsFormClass: !!(form.classList && form.classList.contains('variations_form')),
+      hasDataProductVariations: !!rawVariations,
+      productVariationsCount: parsedCount,
+      productVariationAttributeKeys: variationAttrKeys,
       attributes: selects,
       variation_id: variationIdInput ? variationIdInput.value : '',
     });
@@ -677,13 +718,32 @@
       // For >30 variations WC uses AJAX and leaves this attr empty. Bail —
       // user gets the original alert path; not worse than before.
       form._noyonaVariations = null;
+      logVariationDebug('data-product_variations-missing', {
+        formClass: form.className || '',
+      });
       return null;
     }
     try {
       var parsed = JSON.parse(raw);
       form._noyonaVariations = Array.isArray(parsed) ? parsed : null;
+      if (Array.isArray(parsed)) {
+        var keyMap = {};
+        parsed.slice(0, 20).forEach(function (variation) {
+          var attrs = variation && variation.attributes ? variation.attributes : {};
+          Object.keys(attrs).forEach(function (key) {
+            keyMap[key] = true;
+          });
+        });
+        logVariationDebug('data-product_variations-loaded', {
+          count: parsed.length,
+          attributeKeys: Object.keys(keyMap),
+        });
+      }
     } catch (e) {
       form._noyonaVariations = null;
+      logVariationDebug('data-product_variations-invalid-json', {
+        error: e && e.message ? e.message : String(e),
+      });
     }
     return form._noyonaVariations;
   }
@@ -695,16 +755,26 @@
     var selects = form.querySelectorAll('select[name^="attribute_"]');
     if (selects.length === 0) return null;
 
-    var picked = {};
+    var picked = [];
     var allSelected = true;
     selects.forEach(function (sel) {
-      var name = sel.getAttribute('name') || '';
+      var name = String(sel.getAttribute('name') || '');
+      var normalizedName = normalizeAttributeKey(name);
       var val = sel.value || '';
-      picked[name] = val;
+      picked.push({
+        name: name,
+        normalizedName: normalizedName,
+        value: val,
+      });
       if (!val) allSelected = false;
     });
 
-    if (!allSelected) return null;
+    if (!allSelected) {
+      logVariationDebug('matching-variation-incomplete-selection', {
+        picked: picked,
+      });
+      return null;
+    }
 
     // Each variation has `.attributes` keyed by `attribute_<slug>`. An empty
     // value on a variation attribute means "any value matches" (WC default
@@ -712,19 +782,37 @@
     for (var i = 0; i < variations.length; i++) {
       var v = variations[i];
       var attrs = (v && v.attributes) || {};
+      var normalizedAttrMap = {};
+      Object.keys(attrs).forEach(function (attrKey) {
+        normalizedAttrMap[normalizeAttributeKey(attrKey)] = attrs[attrKey];
+      });
       var ok = true;
-      for (var key in picked) {
-        if (!Object.prototype.hasOwnProperty.call(picked, key)) continue;
-        var vAttr = attrs[key];
+      for (var p = 0; p < picked.length; p++) {
+        var pickedAttr = picked[p];
+        var vAttr = attrs[pickedAttr.name];
+        if (typeof vAttr === 'undefined') {
+          vAttr = normalizedAttrMap[pickedAttr.normalizedName];
+        }
         if (vAttr === undefined) continue; // attribute not on variation matrix
         if (vAttr === '' || vAttr === null) continue; // "any" — matches anything
-        if (String(vAttr).toLowerCase() !== String(picked[key]).toLowerCase()) {
+        if (!valuesEqualLoose(vAttr, pickedAttr.value)) {
           ok = false;
           break;
         }
       }
-      if (ok) return v;
+      if (ok) {
+        logVariationDebug('matching-variation-found', {
+          variation_id: v && v.variation_id ? v.variation_id : '',
+          picked: picked,
+          variationAttributes: attrs,
+        });
+        return v;
+      }
     }
+    logVariationDebug('matching-variation-not-found', {
+      picked: picked,
+      variationCount: variations.length,
+    });
     return null;
   }
 
@@ -757,6 +845,11 @@
     } else if (!match && window.jQuery) {
       window.jQuery(form).trigger('reset_data');
     }
+    logVariationDebug('sync-variation-id', {
+      variation_id: input.value,
+      hasMatch: !!match,
+      formClass: form.className || '',
+    });
   }
 
   function applyUrlVariationParams(form) {
@@ -815,6 +908,11 @@
   function initSwatches(form) {
     if (!form) {
       return;
+    }
+
+    if (!form._noyonaInitialVariationDebug) {
+      form._noyonaInitialVariationDebug = true;
+      debugVariationFormState(form, 'init-swatches');
     }
 
     var selects = form.querySelectorAll('select[name^="attribute_"]');
