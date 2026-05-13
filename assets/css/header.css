@@ -935,6 +935,18 @@ body:not(.logged-in) .header-account--logged-out {
   align-self: start;
 }
 
+.wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row .noyona-mini-cart-price {
+  margin: 0 !important;
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-align: right;
+  align-self: start;
+  font-size: 24px;
+  font-weight: 700;
+  color: #E199A4;
+  line-height: 1.2;
+}
+
 .wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row .wc-block-components-product-price__value.is-discounted,
 .wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row .wc-block-components-product-price__value {
   font-size: 24px;
@@ -982,6 +994,10 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wc-block-mini-cart__drawer .wc-block-components-product-metadata,
 .wc-block-mini-cart__drawer .wc-block-components-product-details {
+  display: none !important;
+}
+
+.wc-block-mini-cart__drawer .wc-block-components-product-price {
   display: none !important;
 }
 

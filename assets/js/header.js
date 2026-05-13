@@ -354,11 +354,35 @@
 
     const getMiniCartRoot = () => document.querySelector('.wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-contents');
 
-    const syncProductTitlePriceRows = (root) => {
+    const getMiniCartItemDisplayPrice = (item, row) => {
+      // Prefer rendered Woo price text (already formatted with currency/settings).
+      if (row) {
+        const renderedValue = row.querySelector(
+          '.wc-block-components-product-price__value.is-discounted, .wc-block-components-product-price__value'
+        );
+        const renderedText = stripToText(renderedValue ? renderedValue.textContent : '');
+        if (renderedText) return renderedText;
+      }
+
+      // Fallback to Store API price (minor units -> peso formatting).
+      if (item && item.prices) {
+        const candidateMinor =
+          parseMinorAmount(item.prices.sale_price) ||
+          parseMinorAmount(item.prices.price);
+        if (Number.isFinite(candidateMinor) && candidateMinor >= 0) {
+          return formatPeso(candidateMinor / 100);
+        }
+      }
+
+      return '';
+    };
+
+    const syncProductTitlePriceRows = (root, cart) => {
       if (!root) return;
+      const items = cart && Array.isArray(cart.items) ? cart.items : [];
 
       const rows = root.querySelectorAll('.wc-block-cart-items__row, .wc-block-mini-cart-items__row');
-      rows.forEach((row) => {
+      rows.forEach((row, index) => {
         const wrap = row.querySelector('.wc-block-cart-item__wrap');
         if (!wrap) return;
 
@@ -376,32 +400,22 @@
         }
         if (!nameEl) return;
 
-        const priceCandidates = Array.from(
-          row.querySelectorAll('.wc-block-components-product-price')
-        ).filter((candidate) => !candidate.closest('.wc-block-cart-item__quantity'));
-
-        let priceEl = null;
-        if (existingRow) {
-          priceEl = existingRow.querySelector('.wc-block-components-product-price');
-        }
-        if (!priceEl) {
-          priceEl = priceCandidates[0] || null;
-        }
-
-        if (!priceEl) return;
+        const item = items[index] || null;
+        const priceText = getMiniCartItemDisplayPrice(item, row);
 
         if (existingRow) {
           if (!existingRow.contains(nameEl)) existingRow.prepend(nameEl);
-          if (!existingRow.contains(priceEl)) existingRow.append(priceEl);
+          let customPrice = existingRow.querySelector('.noyona-mini-cart-price');
+          if (!customPrice) {
+            customPrice = document.createElement('span');
+            customPrice.className = 'noyona-mini-cart-price';
+            existingRow.appendChild(customPrice);
+          }
+          customPrice.textContent = priceText || '—';
 
           // Prevent duplicate title/price nodes from stacking on repeated refreshes.
           allNameEls.forEach((candidate) => {
             if (candidate !== nameEl && !existingRow.contains(candidate)) {
-              candidate.remove();
-            }
-          });
-          priceCandidates.forEach((candidate) => {
-            if (candidate !== priceEl && !existingRow.contains(candidate)) {
               candidate.remove();
             }
           });
@@ -413,16 +427,14 @@
         titlePriceRow.className = 'noyona-mini-cart-title-price-row';
         nameEl.parentNode.insertBefore(titlePriceRow, nameEl);
         titlePriceRow.appendChild(nameEl);
-        titlePriceRow.appendChild(priceEl);
+        const customPrice = document.createElement('span');
+        customPrice.className = 'noyona-mini-cart-price';
+        customPrice.textContent = priceText || '—';
+        titlePriceRow.appendChild(customPrice);
 
         // Remove any duplicate nodes left by Store API rerenders.
         allNameEls.forEach((candidate) => {
           if (candidate !== nameEl && !titlePriceRow.contains(candidate)) {
-            candidate.remove();
-          }
-        });
-        priceCandidates.forEach((candidate) => {
-          if (candidate !== priceEl && !titlePriceRow.contains(candidate)) {
             candidate.remove();
           }
         });
@@ -844,7 +856,7 @@
         const root = getMiniCartRoot();
         if (!root) return;
 
-        syncProductTitlePriceRows(root);
+        syncProductTitlePriceRows(root, cart);
         syncSelectedVariationRows(root, cart);
         reconcileMiniCartRows(root, cart);
         syncCheckoutButton(root);
