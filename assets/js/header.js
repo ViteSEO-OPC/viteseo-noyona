@@ -179,52 +179,117 @@
       return String(probe.textContent || probe.innerText || '').trim();
     };
 
-    const isShadeKey = (key) => /(?:^|[\s_-])(color|colour|shade|swatch|tone|tint)(?:$|[\s_-])/i.test(String(key || '').trim());
+    const normalizeAttrKey = (key) =>
+      String(key || '')
+        .toLowerCase()
+        .replace(/^attribute_/, '')
+        .replace(/^pa_/, '')
+        .replace(/[_-]+/g, ' ')
+        .trim();
 
-    const extractShadeFromCartItem = (item) => {
-      if (!item || typeof item !== 'object') return '';
+    const prettifyAttrLabel = (rawKey) => {
+      const normalized = normalizeAttrKey(rawKey);
+      if (!normalized) return '';
+
+      if (/(^|\s)(color|colour|shade|swatch|tone|tint)(\s|$)/.test(normalized)) {
+        return 'Shade';
+      }
+      if (/(^|\s)pack size(\s|$)/.test(normalized)) {
+        return 'Pack Size';
+      }
+      if (/(^|\s)size(\s|$)/.test(normalized)) {
+        return 'Size';
+      }
+
+      return normalized
+        .split(' ')
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
+
+    const addMetaPair = (pairs, key, value) => {
+      const label = prettifyAttrLabel(key);
+      const finalValue = stripToText(value);
+      if (!label || !finalValue) return;
+
+      const normalizedLabel = label.toLowerCase();
+      const exists = pairs.some(
+        (item) => item.label.toLowerCase() === normalizedLabel && item.value === finalValue
+      );
+      if (!exists) {
+        pairs.push({ label, value: finalValue });
+      }
+    };
+
+    const extractVariationMetaFromCartItem = (item) => {
+      const pairs = [];
+      if (!item || typeof item !== 'object') return pairs;
 
       if (Array.isArray(item.item_data)) {
-        for (const detail of item.item_data) {
-          const key = detail && (detail.key || detail.name || detail.label) ? String(detail.key || detail.name || detail.label) : '';
-          const val = detail && (detail.value || detail.display_value || detail.display || detail.raw) ? String(detail.value || detail.display_value || detail.display || detail.raw) : '';
-          if (isShadeKey(key) && stripToText(val)) return stripToText(val);
-        }
+        item.item_data.forEach((detail) => {
+          const key = detail && (detail.key || detail.name || detail.label)
+            ? String(detail.key || detail.name || detail.label)
+            : '';
+          const val = detail && (detail.value || detail.display_value || detail.display || detail.raw)
+            ? String(detail.value || detail.display_value || detail.display || detail.raw)
+            : '';
+          addMetaPair(pairs, key, val);
+        });
       }
 
       if (Array.isArray(item.variation)) {
-        for (const detail of item.variation) {
-          const key = detail && (detail.attribute || detail.name || detail.key || detail.label) ? String(detail.attribute || detail.name || detail.key || detail.label) : '';
-          const val = detail && (detail.value || detail.display_value || detail.display) ? String(detail.value || detail.display_value || detail.display) : '';
-          if (isShadeKey(key) && stripToText(val)) return stripToText(val);
-        }
+        item.variation.forEach((detail) => {
+          const key = detail && (detail.attribute || detail.name || detail.key || detail.label)
+            ? String(detail.attribute || detail.name || detail.key || detail.label)
+            : '';
+          const val = detail && (detail.value || detail.display_value || detail.display)
+            ? String(detail.value || detail.display_value || detail.display)
+            : '';
+          addMetaPair(pairs, key, val);
+        });
       } else if (item.variation && typeof item.variation === 'object') {
-        for (const [key, val] of Object.entries(item.variation)) {
-          if (isShadeKey(key) && stripToText(val)) return stripToText(val);
-        }
+        Object.entries(item.variation).forEach(([key, val]) => {
+          addMetaPair(pairs, key, val);
+        });
       }
 
-      return '';
+      return pairs;
     };
 
-    const extractShadeFromDomDetails = (wrap) => {
-      if (!wrap) return '';
-      const detailNames = wrap.querySelectorAll('.wc-block-components-product-details__name');
-      for (const nameEl of detailNames) {
-        const key = stripToText(nameEl.textContent);
-        if (!isShadeKey(key)) continue;
-        let valueEl = null;
-        if (nameEl.parentElement) {
-          valueEl = nameEl.parentElement.querySelector('.wc-block-components-product-details__value');
-        }
-        if (!valueEl) {
-          const next = nameEl.nextElementSibling;
-          if (next) valueEl = next;
-        }
+    const extractVariationMetaFromDomDetails = (wrap) => {
+      const pairs = [];
+      if (!wrap) return pairs;
+
+      const detailRows = wrap.querySelectorAll(
+        '.wc-block-components-product-details__item, .wc-block-components-product-details li'
+      );
+      detailRows.forEach((row) => {
+        const nameEl = row.querySelector('.wc-block-components-product-details__name, dt, .variation-label');
+        const valueEl = row.querySelector('.wc-block-components-product-details__value, dd, .variation-value');
+        const key = stripToText(nameEl ? nameEl.textContent : '');
         const val = stripToText(valueEl ? valueEl.textContent : '');
-        if (val) return val;
+        addMetaPair(pairs, key, val);
+      });
+
+      if (!pairs.length) {
+        const names = wrap.querySelectorAll('.wc-block-components-product-details__name');
+        names.forEach((nameEl) => {
+          const key = stripToText(nameEl.textContent);
+          let valueEl = null;
+          if (nameEl.parentElement) {
+            valueEl = nameEl.parentElement.querySelector('.wc-block-components-product-details__value');
+          }
+          if (!valueEl) {
+            const next = nameEl.nextElementSibling;
+            if (next) valueEl = next;
+          }
+          const val = stripToText(valueEl ? valueEl.textContent : '');
+          addMetaPair(pairs, key, val);
+        });
       }
-      return '';
+
+      return pairs;
     };
 
     const syncWooBlocksCartStore = (cart) => {
@@ -325,7 +390,7 @@
       });
     };
 
-    const syncSelectedShadeRows = (root, cart) => {
+    const syncSelectedVariationRows = (root, cart) => {
       if (!root) return;
       const items = cart && Array.isArray(cart.items) ? cart.items : [];
       const rows = root.querySelectorAll('.wc-block-cart-items__row, .wc-block-mini-cart-items__row');
@@ -334,25 +399,30 @@
         const wrap = row.querySelector('.wc-block-cart-item__wrap');
         if (!wrap) return;
 
-        const existing = wrap.querySelector('.noyona-mini-cart-selected-shade');
-        const fromCart = extractShadeFromCartItem(items[index] || null);
-        const fromDom = extractShadeFromDomDetails(wrap);
-        const shadeValue = fromCart || fromDom;
+        const existing = wrap.querySelector('.noyona-mini-cart-variation-meta');
+        const fromCart = extractVariationMetaFromCartItem(items[index] || null);
+        const fromDom = extractVariationMetaFromDomDetails(wrap);
+        const metaPairs = fromCart.length ? fromCart : fromDom;
 
-        if (!shadeValue) {
-          if (existing) existing.remove();
+        if (!metaPairs.length) {
+          if (existing) {
+            existing.remove();
+          }
           return;
         }
 
-        const shadeText = 'Shade: ' + shadeValue;
+        const html = metaPairs
+          .map((pair) => `<div class="noyona-mini-cart-variation-meta__row"><span class="noyona-mini-cart-variation-meta__label">${pair.label}:</span> <span class="noyona-mini-cart-variation-meta__value">${pair.value}</span></div>`)
+          .join('');
+
         if (existing) {
-          existing.textContent = shadeText;
+          existing.innerHTML = html;
           return;
         }
 
         const rowEl = document.createElement('div');
-        rowEl.className = 'noyona-mini-cart-selected-shade';
-        rowEl.textContent = shadeText;
+        rowEl.className = 'noyona-mini-cart-variation-meta';
+        rowEl.innerHTML = html;
 
         const anchor = wrap.querySelector('.noyona-mini-cart-title-price-row');
         if (anchor && anchor.parentNode) {
@@ -736,7 +806,7 @@
         if (!root) return;
 
         syncProductTitlePriceRows(root);
-        syncSelectedShadeRows(root, cart);
+        syncSelectedVariationRows(root, cart);
         reconcileMiniCartRows(root, cart);
         syncCheckoutButton(root);
         syncTermsGate(root);

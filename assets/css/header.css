@@ -927,11 +927,24 @@ body:not(.logged-in) .header-account--logged-out {
   display: inline-block;
 }
 
-.wc-block-mini-cart__drawer .noyona-mini-cart-selected-shade {
+.wc-block-mini-cart__drawer .noyona-mini-cart-variation-meta {
   margin-top: 4px;
+  margin-bottom: 6px;
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.35;
   color: #7c4a57;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-variation-meta__row {
+  display: block;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-variation-meta__label {
+  font-weight: 600;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-variation-meta__value {
+  font-weight: 500;
 }
 
 /* Use wrap-contained price; hide separate right-side total column. */
@@ -1352,7 +1365,7 @@ body:not(.logged-in) .header-account--logged-out {
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-row--deselected .noyona-mini-cart-title-price-row,
-.wc-block-mini-cart__drawer .noyona-mini-cart-row--deselected .noyona-mini-cart-selected-shade,
+.wc-block-mini-cart__drawer .noyona-mini-cart-row--deselected .noyona-mini-cart-variation-meta,
 .wc-block-mini-cart__drawer .noyona-mini-cart-row--deselected .wc-block-cart-item__quantity {
   opacity: 0.35;
   transition: opacity 0.2s ease;
