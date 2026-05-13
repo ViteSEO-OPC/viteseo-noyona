@@ -362,23 +362,50 @@
         const wrap = row.querySelector('.wc-block-cart-item__wrap');
         if (!wrap) return;
 
-        const nameAnchor = wrap.querySelector('a.wc-block-components-product-name');
-        const nameFallback = wrap.querySelector('.wc-block-components-product-name');
-        const nameEl = nameAnchor || nameFallback;
+        const allNameEls = Array.from(
+          wrap.querySelectorAll('a.wc-block-components-product-name, .wc-block-components-product-name')
+        );
+        const existingRow = wrap.querySelector('.noyona-mini-cart-title-price-row');
+
+        let nameEl = null;
+        if (existingRow) {
+          nameEl = existingRow.querySelector('a.wc-block-components-product-name, .wc-block-components-product-name');
+        }
+        if (!nameEl) {
+          nameEl = allNameEls.find((el) => el.tagName === 'A') || allNameEls[0] || null;
+        }
         if (!nameEl) return;
 
-        const discountedPrice = wrap.querySelector('.wc-block-components-product-price__value.is-discounted');
-        const fallbackPrice = wrap.querySelector('.wc-block-components-product-price__value');
-        const priceValue = discountedPrice || fallbackPrice;
-        const priceEl = priceValue
-          ? priceValue.closest('.wc-block-components-product-price') || priceValue
-          : null;
+        const priceCandidates = Array.from(
+          row.querySelectorAll('.wc-block-components-product-price')
+        ).filter((candidate) => !candidate.closest('.wc-block-cart-item__quantity'));
+
+        let priceEl = null;
+        if (existingRow) {
+          priceEl = existingRow.querySelector('.wc-block-components-product-price');
+        }
+        if (!priceEl) {
+          priceEl = priceCandidates[0] || null;
+        }
+
         if (!priceEl) return;
 
-        const existingRow = wrap.querySelector('.noyona-mini-cart-title-price-row');
         if (existingRow) {
           if (!existingRow.contains(nameEl)) existingRow.prepend(nameEl);
           if (!existingRow.contains(priceEl)) existingRow.append(priceEl);
+
+          // Prevent duplicate title/price nodes from stacking on repeated refreshes.
+          allNameEls.forEach((candidate) => {
+            if (candidate !== nameEl && !existingRow.contains(candidate)) {
+              candidate.remove();
+            }
+          });
+          priceCandidates.forEach((candidate) => {
+            if (candidate !== priceEl && !existingRow.contains(candidate)) {
+              candidate.remove();
+            }
+          });
+
           return;
         }
 
@@ -387,6 +414,18 @@
         nameEl.parentNode.insertBefore(titlePriceRow, nameEl);
         titlePriceRow.appendChild(nameEl);
         titlePriceRow.appendChild(priceEl);
+
+        // Remove any duplicate nodes left by Store API rerenders.
+        allNameEls.forEach((candidate) => {
+          if (candidate !== nameEl && !titlePriceRow.contains(candidate)) {
+            candidate.remove();
+          }
+        });
+        priceCandidates.forEach((candidate) => {
+          if (candidate !== priceEl && !titlePriceRow.contains(candidate)) {
+            candidate.remove();
+          }
+        });
       });
     };
 
