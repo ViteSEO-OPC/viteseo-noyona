@@ -19,7 +19,8 @@ if ( is_readable( $noyona_shipping_inc ) ) {
 	require_once $noyona_shipping_inc;
 }
 
-add_action('admin_head', function () {
+add_action( 'admin_head', 'noyona_admin_rank_math_columns_css' );
+function noyona_admin_rank_math_columns_css() {
     echo '<style>
         .wp-list-table .column-rank_math_seo_details,
         .wp-list-table .column-rank_math_title,
@@ -31,7 +32,7 @@ add_action('admin_head', function () {
             word-break: normal !important;
         }
     </style>';
-});
+}
 
 // Load parent + child styles and our custom assets
 add_action( 'wp_enqueue_scripts', 'woocom_ct_enqueue_assets' );
@@ -447,12 +448,13 @@ function noyona_disable_store_api_cache_headers( $result, $server, $request ) {
 // theme, leaving the gallery markup in the page but never initialised — which
 // is what was happening on production (images stacked vertically because
 // FlexSlider never wrapped them in .flex-viewport).
-add_action( 'after_setup_theme', function() {
+add_action( 'after_setup_theme', 'noyona_add_woocommerce_theme_support' );
+function noyona_add_woocommerce_theme_support() {
     add_theme_support( 'woocommerce' );
     add_theme_support( 'wc-product-gallery-zoom' );
     add_theme_support( 'wc-product-gallery-lightbox' );
     add_theme_support( 'wc-product-gallery-slider' );
-} );
+}
 
 /**
  * Product category URLs under /shop/{slug}/ to avoid collision with regular pages like /eyes/.
@@ -5511,16 +5513,14 @@ function noyona_is_site_under_development() {
 /**
  * Disable WordPress core XML sitemaps.
  */
-add_filter(
-    'wp_sitemaps_enabled',
-    function( $enabled ) {
-        if ( noyona_is_site_under_development() ) {
-            return false;
-        }
-
-        return $enabled;
+add_filter( 'wp_sitemaps_enabled', 'noyona_filter_wp_sitemaps_enabled' );
+function noyona_filter_wp_sitemaps_enabled( $enabled ) {
+    if ( noyona_is_site_under_development() ) {
+        return false;
     }
-);
+
+    return $enabled;
+}
 
 /**
  * Force a restrictive robots.txt from WordPress.
@@ -5580,7 +5580,8 @@ function noyona_send_robots_headers() {
 /* =================================================
  * SEO: DOCUMENT TITLES
  * ================================================= */
-add_filter('pre_get_document_title', function ($title) {
+add_filter( 'pre_get_document_title', 'noyona_filter_static_document_titles' );
+function noyona_filter_static_document_titles( $title ) {
     /* ---- STATIC PAGE TITLES ---- */
     if (is_front_page()) return 'Noyona Essentials | Filipino Vegan Cosmetics Rooted in Nature';
     if (is_page('shop')) return 'Noyona Essentials | Shop Vegan Filipino Cosmetics – Keratin, Foundation & Lip Color';
@@ -5604,11 +5605,12 @@ add_filter('pre_get_document_title', function ($title) {
     if (is_page(array('accounts', 'account'))) return 'Noyona Essentials Account | Manage Your Cosmetics Profile';
     if (is_page(array('terms-of-service', 'terms-of-services'))) return 'Noyona Essentials Terms of Service | Policies & Customer Rights';
     return $title;
-});
+}
 
-add_filter( 'woocommerce_get_checkout_url', function ( $url ) {
+add_filter( 'woocommerce_get_checkout_url', 'noyona_force_checkout_url', 99 );
+function noyona_force_checkout_url( $url ) {
     return esc_url_raw( home_url( '/checkout/' ) );
-}, 99 );
+}
 
 /**
  * Detect "order-pay" pages opened via our My Account "Pay Now" CTA.
@@ -5778,7 +5780,8 @@ function noyona_render_order_pay_autostart_script() {
 /* =================================================
  * SEO: META DESCRIPTIONS
  * ================================================= */
-add_action('wp_head', function () {
+add_action( 'wp_head', 'noyona_render_static_meta_descriptions' );
+function noyona_render_static_meta_descriptions() {
 
     if (is_front_page()) {
         echo '<meta name="description" content="Discover Noyona Essentials, a Filipino cosmetics brand rooted in nature. Vegan, cruelty-free products crafted for lasting beauty and everyday confidence.">';
@@ -5863,11 +5866,12 @@ add_action('wp_head', function () {
     }
     if (is_page(array('terms-of-service', 'terms-of-services'))) {
         echo '<meta name="description" content="Review the Noyona Essentials Terms of Service. Learn about customer rights, policies, and trusted guidelines for shopping vegan Filipino cosmetics rooted in nature.">';
-        return; 
+        return;
     }
-});
+}
 
-add_action('wp_footer', function () {
+add_action( 'wp_footer', 'noyona_render_checkout_empty_paragraph_cleanup' );
+function noyona_render_checkout_empty_paragraph_cleanup() {
     if (!is_checkout()) return;
     ?>
     <script>
@@ -5889,7 +5893,7 @@ add_action('wp_footer', function () {
     });
     </script>
     <?php
-});
+}
 
 add_action( 'wp_footer', 'noyona_render_global_checkout_login_modal', 40 );
 function noyona_render_global_checkout_login_modal() {
@@ -5950,7 +5954,8 @@ function noyona_render_global_checkout_login_modal() {
     <?php
 }
 
-add_filter('woocommerce_get_item_data', function($item_data, $cart_item) {
+add_filter( 'woocommerce_get_item_data', 'noyona_strip_br_from_woo_item_data', 10, 2 );
+function noyona_strip_br_from_woo_item_data( $item_data, $cart_item ) {
     foreach ($item_data as &$item) {
         // Remove any <br> tags from display value
         if (isset($item['display'])) {
@@ -5960,4 +5965,4 @@ add_filter('woocommerce_get_item_data', function($item_data, $cart_item) {
         }
     }
     return $item_data;
-}, 10, 2);
+}
