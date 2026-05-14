@@ -382,17 +382,29 @@ function noyona_add_preconnect_hints( $hints, $relation_type ) {
     return array_values( array_unique( $hints ) );
 }
 
-// Wordfence's `wordfenceAJAXjs` script (admin.ajaxWatcher.*.js) hooks into
-// jQuery's AJAX events but is registered WITHOUT declaring `jquery` as a
-// dependency, so under WP 6.3+ defer it executes before jQuery is available
-// and throws `Uncaught ReferenceError: jQuery is not defined`. We patch the
-// registered handle to add `jquery` to its deps so WP serializes them in the
-// correct order (jQuery first, Wordfence second). We hook at script-print
-// time (not just wp_enqueue_scripts) because Wordfence may register the
-// handle from `wp_footer` or `wp_print_footer_scripts` paths rather than
-// `wp_enqueue_scripts` — hooking at print time guarantees we catch every
-// case. The function is idempotent: it bails when already patched. We do
-// NOT touch Wordfence files and we do NOT alter any other handle.
+// Wordfence's `wordfenceAJAXjs` script (admin.ajaxWatcher.*.js) is loaded
+// on logged-in frontend pages as a BLOCKING script and uses jQuery without
+// declaring it as a dependency. Production has jQuery registered with
+// `strategy=defer`, so jQuery executes after DOM parse — but Wordfence's
+// script (blocking) runs synchronously at parse time, before deferred
+// jQuery has executed. Result: `Uncaught ReferenceError: jQuery is not
+// defined`.
+//
+// Tag order alone is not enough to fix this: even with `jquery` added to
+// Wordfence's deps, WP prints jquery's <script> tag first but jquery still
+// runs deferred while Wordfence runs immediately. So we ALSO set
+// `strategy=defer` on Wordfence's handle, which:
+//   - causes WP to emit a real `defer` attribute on Wordfence's <script>;
+//   - makes Wordfence execute alongside deferred jQuery, after DOM parse;
+//   - preserves Wordfence's inline `wordfenceAJAXjs-js-extra` (the
+//     `WFAJAXWatcherVars` localized object) — `-extra` inlines execute
+//     synchronously when the parser hits them, regardless of the main
+//     script's strategy, so the nonce is set before the deferred main
+//     script reads it.
+// We hook at print time (not just wp_enqueue_scripts) because Wordfence
+// may register the handle from later hooks. The function is idempotent
+// (in_array check on deps; idempotent assignment on strategy). We do NOT
+// touch Wordfence plugin files and we do NOT alter any other handle.
 add_action( 'wp_print_scripts', 'noyona_fix_wordfence_ajaxwatcher_jquery_dep', 0 );
 add_action( 'wp_print_footer_scripts', 'noyona_fix_wordfence_ajaxwatcher_jquery_dep', 0 );
 function noyona_fix_wordfence_ajaxwatcher_jquery_dep() {
@@ -417,6 +429,12 @@ function noyona_fix_wordfence_ajaxwatcher_jquery_dep() {
     if ( ! in_array( 'jquery', $script->deps, true ) ) {
         $script->deps[] = 'jquery';
     }
+
+    // Force defer so execution order matches deferred jQuery.
+    if ( ! is_array( $script->extra ) ) {
+        $script->extra = array();
+    }
+    $script->extra['strategy'] = 'defer';
 }
 
 // Google Site Kit's `googlesitekit-events-provider-woocommerce` handle
