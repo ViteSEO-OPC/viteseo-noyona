@@ -382,6 +382,40 @@ function noyona_add_preconnect_hints( $hints, $relation_type ) {
     return array_values( array_unique( $hints ) );
 }
 
+// Wordfence's `wordfenceAJAXjs` script (admin.ajaxWatcher.*.js) hooks into
+// jQuery's AJAX events but is registered WITHOUT declaring `jquery` as a
+// dependency, so under WP 6.3+ defer it executes before jQuery is available
+// and throws `Uncaught ReferenceError: jQuery is not defined`. We patch the
+// registered handle to add `jquery` to its deps so WP serializes them in the
+// correct order (jQuery first, Wordfence second). Side effect: WP's strategy
+// chain downgrades jQuery from defer to blocking, which is the correct
+// behavior given a blocking jQuery consumer. We do NOT touch Wordfence files
+// and we do NOT alter any other handle.
+add_action( 'wp_enqueue_scripts', 'noyona_fix_wordfence_ajaxwatcher_jquery_dep', 999 );
+function noyona_fix_wordfence_ajaxwatcher_jquery_dep() {
+    if ( is_admin() ) {
+        return;
+    }
+
+    $scripts = wp_scripts();
+    if ( ! $scripts instanceof WP_Scripts ) {
+        return;
+    }
+
+    if ( ! isset( $scripts->registered['wordfenceAJAXjs'] ) ) {
+        return;
+    }
+
+    $script = $scripts->registered['wordfenceAJAXjs'];
+    if ( ! is_array( $script->deps ) ) {
+        $script->deps = array();
+    }
+
+    if ( ! in_array( 'jquery', $script->deps, true ) ) {
+        $script->deps[] = 'jquery';
+    }
+}
+
 add_action( 'wp_enqueue_scripts', 'noyona_trim_noncommerce_assets', 100 );
 function noyona_trim_noncommerce_assets() {
     if ( is_admin() ) {

@@ -375,12 +375,25 @@ function noyona_pdp_enqueue_assets() {
 		$style_ver
 	);
 
+	// in_footer + strategy=defer is required: this script declares
+	// wc-add-to-cart-variation as a dep, which WC registers with
+	// strategy=defer. If we leave this script as blocking, WP 6.3+
+	// propagates the blocking strategy upward and downgrades
+	// wc-add-to-cart-variation -> woocommerce -> wc-cart-fragments, leaving
+	// woocommerce.min.js without a real `defer` attribute. It then executes
+	// before deferred jQuery and throws `ReferenceError: jQuery is not
+	// defined`. single-product.js is IIFE-wrapped and all its jQuery
+	// touches are inside event handlers behind typeof guards, so deferring
+	// it is safe.
 	wp_enqueue_script(
 		'noyona-single-product',
 		get_stylesheet_directory_uri() . '/assets/js/single-product.js',
 		array( 'jquery', 'wp-util', 'underscore', 'wc-add-to-cart-variation' ),
 		$script_ver,
-		true
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
 	);
 
 	wp_localize_script(
