@@ -387,11 +387,14 @@ function noyona_add_preconnect_hints( $hints, $relation_type ) {
 // dependency, so under WP 6.3+ defer it executes before jQuery is available
 // and throws `Uncaught ReferenceError: jQuery is not defined`. We patch the
 // registered handle to add `jquery` to its deps so WP serializes them in the
-// correct order (jQuery first, Wordfence second). Side effect: WP's strategy
-// chain downgrades jQuery from defer to blocking, which is the correct
-// behavior given a blocking jQuery consumer. We do NOT touch Wordfence files
-// and we do NOT alter any other handle.
-add_action( 'wp_enqueue_scripts', 'noyona_fix_wordfence_ajaxwatcher_jquery_dep', 999 );
+// correct order (jQuery first, Wordfence second). We hook at script-print
+// time (not just wp_enqueue_scripts) because Wordfence may register the
+// handle from `wp_footer` or `wp_print_footer_scripts` paths rather than
+// `wp_enqueue_scripts` — hooking at print time guarantees we catch every
+// case. The function is idempotent: it bails when already patched. We do
+// NOT touch Wordfence files and we do NOT alter any other handle.
+add_action( 'wp_print_scripts', 'noyona_fix_wordfence_ajaxwatcher_jquery_dep', 0 );
+add_action( 'wp_print_footer_scripts', 'noyona_fix_wordfence_ajaxwatcher_jquery_dep', 0 );
 function noyona_fix_wordfence_ajaxwatcher_jquery_dep() {
     if ( is_admin() ) {
         return;
@@ -414,6 +417,28 @@ function noyona_fix_wordfence_ajaxwatcher_jquery_dep() {
     if ( ! in_array( 'jquery', $script->deps, true ) ) {
         $script->deps[] = 'jquery';
     }
+}
+
+// Google Site Kit's `googlesitekit-events-provider-woocommerce` handle
+// attaches an inline `-before` script that sets up window._googlesitekit
+// .wcdata. WP 6.3+ `WP_Scripts::is_delayable_node()` then treats Site Kit's
+// handle as not-defer-eligible, and since Site Kit depends on `woocommerce`,
+// the eligibility check propagates upward and downgrades `woocommerce-js`
+// from defer to blocking. jQuery keeps real defer (its other dependents are
+// all delayable). woocommerce.min.js then executes synchronously at parse
+// time, before deferred jQuery runs -> `Uncaught ReferenceError: jQuery is
+// not defined`. We restore the real `defer` attribute on the `woocommerce`
+// handle's tag only. Site Kit's flow, jQuery's strategy, and every other
+// handle are untouched.
+add_filter( 'script_loader_tag', 'noyona_restore_defer_on_woocommerce_js', 99, 3 );
+function noyona_restore_defer_on_woocommerce_js( $tag, $handle, $src ) {
+    if ( 'woocommerce' !== $handle ) {
+        return $tag;
+    }
+    if ( false !== strpos( $tag, ' defer' ) ) {
+        return $tag;
+    }
+    return preg_replace( '/<script(\s+)(?=src=)/', '<script$1defer ', $tag, 1 );
 }
 
 add_action( 'wp_enqueue_scripts', 'noyona_trim_noncommerce_assets', 100 );
