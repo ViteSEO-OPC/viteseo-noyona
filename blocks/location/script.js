@@ -270,7 +270,40 @@
     var activeQuickFilter = "all";
     var selectedStoreId = null;
     var currentPage = 1;
-    var pageSize = 24;
+
+    /**
+     * Derive the per-page store count from the active grid layout. We read the
+     * computed `grid-template-columns` of `.nsl-v2-store-grid` directly so the
+     * JS can never drift from the CSS breakpoints in `style.css`. Mapping:
+     *   4 columns → 24 stores  (4 × 6 complete rows)
+     *   3 columns → 21 stores  (3 × 7 complete rows)
+     *   2 columns → 10 stores  (2 × 5 complete rows)
+     *   1 column  → 5  stores  (1 × 5 complete rows)
+     * Falls back to 24 if the grid hasn't been laid out yet or the value cannot
+     * be parsed (e.g. element is `display: none`).
+     */
+    function computePageSize() {
+      if (!storeGrid) {
+        return 24;
+      }
+      var template = "";
+      try {
+        template = window.getComputedStyle(storeGrid).gridTemplateColumns || "";
+      } catch (e) {
+        template = "";
+      }
+      if (!template || template === "none") {
+        return 24;
+      }
+      var columns = template.trim().split(/\s+/).length;
+      if (columns >= 4) return 24;
+      if (columns === 3) return 21;
+      if (columns === 2) return 10;
+      if (columns === 1) return 5;
+      return 24;
+    }
+
+    var pageSize = computePageSize();
     var routeMode = "driving";
     var userLocation = null;
     var userMarker = null;
@@ -748,6 +781,32 @@
     renderFilters();
     renderExtraFilters();
     renderStoresAndMap();
+
+    /**
+     * Recompute the per-page count when the viewport crosses a breakpoint and
+     * the active grid column count changes. Debounced so a window-drag does
+     * not thrash the layout. Only re-renders when pageSize actually changes;
+     * resize events within the same breakpoint short-circuit. On a real
+     * breakpoint change we reset to page 1 — pagination state is page-index
+     * only (no URL/state persistence), so attempting to preserve the first
+     * visible store would be misleading.
+     */
+    var resizeDebounceTimer = null;
+    function handleViewportResize() {
+      var nextPageSize = computePageSize();
+      if (nextPageSize === pageSize) {
+        return;
+      }
+      pageSize = nextPageSize;
+      currentPage = 1;
+      renderStoresAndMap();
+    }
+    window.addEventListener("resize", function () {
+      if (resizeDebounceTimer) {
+        clearTimeout(resizeDebounceTimer);
+      }
+      resizeDebounceTimer = window.setTimeout(handleViewportResize, 120);
+    });
 
     wrapper.addEventListener("input", function (event) {
       if (!event.target.classList.contains("nsl-v2-search-input")) return;
