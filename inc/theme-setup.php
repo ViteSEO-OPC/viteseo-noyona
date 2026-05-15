@@ -104,6 +104,10 @@ function noyona_force_woo_login_redirect_to_account( $redirect, $user ) {
         return $redirect;
     }
 
+    if ( $user instanceof WP_User && user_can( $user, 'manage_options' ) ) {
+        return admin_url();
+    }
+
     return noyona_get_account_page_url();
 }
 

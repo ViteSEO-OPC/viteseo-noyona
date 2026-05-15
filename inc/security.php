@@ -147,7 +147,12 @@ function noyona_redirect_logged_in_auth_routes_to_account() {
         return;
     }
 
-    wp_safe_redirect( $account_url );
+    $redirect_url = $account_url;
+    if ( ( $is_login_route || $is_register_route ) && current_user_can( 'manage_options' ) ) {
+        $redirect_url = admin_url();
+    }
+
+    wp_safe_redirect( $redirect_url );
     exit;
 }
 
