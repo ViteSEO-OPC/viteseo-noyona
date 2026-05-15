@@ -412,7 +412,8 @@ function noyona_pdp_enqueue_assets() {
 
 /**
  * PDP main image: hide the default WooCommerce "Sale!" flash and, when the
- * product is marked Featured, render a "BEST SELLER" pill badge in its place.
+ * product is marked Featured, inject a "BEST SELLER" pill badge directly
+ * into the main product image wrapper.
  *
  * Scope:
  *  - Only the main single-product image area.
@@ -420,6 +421,18 @@ function noyona_pdp_enqueue_assets() {
  *    (woocommerce/product-sale-badge Gutenberg block) and are NOT affected.
  *  - PDP related-products use the shop-loop sale-flash hook
  *    (woocommerce_show_product_loop_sale_flash), which is NOT touched here.
+ *
+ * Render strategy:
+ *  - The default Sale! flash, attached to woocommerce_before_single_product_summary,
+ *    is removed (PDP-scoped) so its <span class="onsale">Sale!</span> never emits.
+ *  - The BEST SELLER badge is injected via
+ *    `woocommerce_single_product_image_thumbnail_html`, the per-image filter
+ *    WooCommerce runs to produce each `<div class="woocommerce-product-gallery__image">`.
+ *    Injecting at this layer guarantees the badge is a child of the real image
+ *    wrapper (a stable positioned ancestor in the page DOM), not a sibling
+ *    that escapes to the viewport. The badge is only added to the main image
+ *    (`$attachment_id === $product->get_image_id()`); a static once-flag is a
+ *    belt-and-suspenders guard against duplicate injection.
  */
 add_action( 'wp', 'noyona_pdp_hide_sale_flash_badge' );
 function noyona_pdp_hide_sale_flash_badge() {
@@ -429,17 +442,47 @@ function noyona_pdp_hide_sale_flash_badge() {
 	remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
 }
 
-add_action( 'woocommerce_before_single_product_summary', 'noyona_pdp_render_best_seller_badge', 10 );
-function noyona_pdp_render_best_seller_badge() {
-	global $product;
+add_filter( 'woocommerce_single_product_image_thumbnail_html', 'noyona_pdp_inject_best_seller_into_gallery_image', 10, 2 );
+function noyona_pdp_inject_best_seller_into_gallery_image( $html, $attachment_id ) {
+	static $injected = false;
 
+	if ( $injected ) {
+		return $html;
+	}
+
+	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+		return $html;
+	}
+
+	global $product;
 	if ( ! $product instanceof WC_Product ) {
-		return;
+		return $html;
 	}
 
 	if ( ! $product->is_featured() ) {
-		return;
+		return $html;
 	}
 
-	echo '<span class="noyona-pdp-best-seller-badge">' . esc_html__( 'BEST SELLER', 'viteseo-noyona-childtheme' ) . '</span>';
+	$main_image_id = (int) $product->get_image_id();
+	if ( $main_image_id < 1 || (int) $attachment_id !== $main_image_id ) {
+		return $html;
+	}
+
+	$badge = '<span class="noyona-pdp-best-seller-badge">' . esc_html__( 'BEST SELLER', 'viteseo-noyona-childtheme' ) . '</span>';
+
+	$replacements = 0;
+	$new_html     = preg_replace(
+		'/(<div\b[^>]*class="[^"]*\bwoocommerce-product-gallery__image\b[^"]*"[^>]*>)/i',
+		'$1' . $badge,
+		$html,
+		1,
+		$replacements
+	);
+
+	if ( $replacements > 0 && is_string( $new_html ) ) {
+		$injected = true;
+		return $new_html;
+	}
+
+	return $html;
 }

@@ -1426,18 +1426,13 @@ body.single-product .related.products ul.products li.product .onsale {
 }
 
 /* Positioning context for the BEST SELLER badge.
-   The badge is rendered via `woocommerce_before_single_product_summary`,
-   which in the block PDP fires as a sibling preceding the gallery wrapper
-   inside `.noyona-pdp-column--media`. Anchoring the badge to the column
-   keeps it inside the main image card at top-left and prevents it from
-   escaping to the viewport. The gallery wrapper rule is kept as a
-   defensive fallback for any WC version that nests the hook output
-   inside the wrapper instead. */
-.single-product .noyona-pdp-column--media {
-  position: relative;
-}
-
-.single-product .wp-block-woocommerce-product-image-gallery {
+   The badge is injected into the per-image WooCommerce wrapper
+   (.woocommerce-product-gallery__image) via the
+   woocommerce_single_product_image_thumbnail_html filter, so the
+   image wrapper itself is its positioning context. This keeps the
+   badge anchored to the actual main product image card across
+   variation image swaps, FlexSlider rotation, and responsive layouts. */
+.single-product .woocommerce-product-gallery__image {
   position: relative;
 }
 
