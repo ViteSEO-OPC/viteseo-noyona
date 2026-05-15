@@ -237,6 +237,26 @@
     var searchInput = wrapper.querySelector(".nsl-v2-search-input");
     var suggestionsEl = wrapper.querySelector(".nsl-v2-suggestions");
     var selectedPanel = wrapper.querySelector(".nsl-v2-selected-panel");
+
+    /**
+     * Mobile-only mirror of the selected-store details. The overlay panel
+     * floats inside the map on desktop/laptop, but on small viewports the
+     * map is too narrow to share with a 390px panel — so we mirror the
+     * same `formatSelectedDetail()` markup into a below-map container and
+     * let CSS pick which one is visible at the active breakpoint.
+     * Container is created once and lives between `.nsl-v2-top` and
+     * `.nsl-v2-bottom`. Empty state is hidden via `:not(:empty)` in CSS.
+     */
+    var mobileSelectedPanel = wrapper.querySelector(".nsl-v2-mobile-selected");
+    if (!mobileSelectedPanel) {
+      var topSection = wrapper.querySelector(".nsl-v2-top");
+      if (topSection && topSection.parentNode) {
+        mobileSelectedPanel = document.createElement("div");
+        mobileSelectedPanel.className = "nsl-v2-mobile-selected";
+        topSection.parentNode.insertBefore(mobileSelectedPanel, topSection.nextSibling);
+      }
+    }
+
     var parentFilterList = wrapper.querySelector(".nsl-v2-parent-filter-list");
     var childFilterList = wrapper.querySelector(".nsl-v2-child-filter-list");
     var extraFilterList = wrapper.querySelector(".nsl-v2-extra-filter-list");
@@ -735,15 +755,33 @@
       var selected = getSelectedStore();
       if (!selected || filtered.every(function (s) { return String(s.id) !== String(selected.id); })) {
         selectedStoreId = null;
-        selectedPanel.innerHTML = query ? getEmptySelectedMarkup(false) : getEmptySelectedMarkup(true);
+        setSelectedPanelHtml(query ? getEmptySelectedMarkup(false) : getEmptySelectedMarkup(true));
         selectedPanel.classList.toggle("is-collapsed", !!query);
         setActiveMarker(null);
         clearRoute();
       } else {
         selectedPanel.classList.remove("is-collapsed");
-        selectedPanel.innerHTML = formatSelectedDetail(selected);
+        setSelectedPanelHtml(formatSelectedDetail(selected));
         setActiveMarker(selected.id);
         syncAddressToggleVisibility();
+      }
+    }
+
+    /**
+     * Update both the in-map overlay panel and the below-map mobile mirror
+     * with the same selected-store HTML. The mobile container is left empty
+     * when the markup is the placeholder ("Select a store...") so the
+     * `:not(:empty)` CSS rule hides it until a real store is chosen.
+     */
+    function setSelectedPanelHtml(html) {
+      selectedPanel.innerHTML = html;
+      if (!mobileSelectedPanel) {
+        return;
+      }
+      if (typeof html === "string" && html.indexOf("nsl-v2-detail") !== -1) {
+        mobileSelectedPanel.innerHTML = html;
+      } else {
+        mobileSelectedPanel.innerHTML = "";
       }
     }
 
@@ -753,7 +791,7 @@
       });
       if (!store) return;
       selectedStoreId = String(store.id);
-      selectedPanel.innerHTML = formatSelectedDetail(store);
+      setSelectedPanelHtml(formatSelectedDetail(store));
       setActiveMarker(store.id);
       syncAddressToggleVisibility();
       if (shouldFly && !userLocation) {
@@ -771,11 +809,17 @@
     }
 
     function syncAddressToggleVisibility() {
-      var addressEl = selectedPanel.querySelector(".nsl-v2-detail__address");
-      var toggleEl = selectedPanel.querySelector(".nsl-v2-address-toggle");
-      if (!addressEl || !toggleEl) return;
-      var shouldShow = addressEl.scrollHeight > addressEl.clientHeight + 2;
-      toggleEl.hidden = !shouldShow;
+      // Run independently against each panel; the hidden one (display:none)
+      // reports zero scroll/clientHeight, so its toggle is hidden, which is
+      // harmless. Only the visible panel produces meaningful measurements.
+      [selectedPanel, mobileSelectedPanel].forEach(function (panel) {
+        if (!panel) return;
+        var addressEl = panel.querySelector(".nsl-v2-detail__address");
+        var toggleEl = panel.querySelector(".nsl-v2-address-toggle");
+        if (!addressEl || !toggleEl) return;
+        var shouldShow = addressEl.scrollHeight > addressEl.clientHeight + 2;
+        toggleEl.hidden = !shouldShow;
+      });
     }
 
     renderFilters();

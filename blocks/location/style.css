@@ -876,26 +876,11 @@ body.nsl-v2-review-modal-open {
 }
 
 @media (max-width: 1300px) {
-    .nsl-v2-map-shell {
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    .nsl-v2-overlay-panel {
-        position: static;
-        width: 100%;
-        max-height: none;
-        overflow: visible;
-        border-radius: 0;
-        border: 0;
-        border-bottom: 1px solid #ececec;
-        box-shadow: none;
-    }
-
-    .nsl-v2-overlay-top {
-        position: static;
-    }
+    /* Overlay stays anchored inside the map at laptop widths. The
+       previous behavior promoted the overlay to a static block below
+       the map; that was rolled back so the in-map selected-store
+       overlay remains the canonical placement on every viewport above
+       the mobile breakpoint. */
 
     .nsl-v2-map {
         min-height: 420px;
@@ -950,6 +935,31 @@ body.nsl-v2-review-modal-open {
 
     .nsl-v2-map {
         min-height: 320px;
+    }
+}
+
+/* Mobile-only selected-store mirror.
+   The container is created by script.js and inserted between
+   `.nsl-v2-top` (map shell) and `.nsl-v2-bottom` (filters + grid).
+   Hidden by default at every viewport; the mobile media query opts
+   it in, and `:empty` suppresses the empty placeholder so the box
+   does not appear until a marker/suggestion/card is selected. */
+.nsl-v2-mobile-selected {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .nsl-v2-selected-panel {
+        display: none;
+    }
+
+    .nsl-v2-mobile-selected:not(:empty) {
+        display: block;
+        margin-top: 12px;
+        padding: 14px;
+        border: 1px solid #ececec;
+        border-radius: 14px;
+        background: #fff;
     }
 }
 
