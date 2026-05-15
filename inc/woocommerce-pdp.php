@@ -409,3 +409,37 @@ function noyona_pdp_enqueue_assets() {
 		)
 	);
 }
+
+/**
+ * PDP main image: hide the default WooCommerce "Sale!" flash and, when the
+ * product is marked Featured, render a "BEST SELLER" pill badge in its place.
+ *
+ * Scope:
+ *  - Only the main single-product image area.
+ *  - Archive/shop product cards use a different render path
+ *    (woocommerce/product-sale-badge Gutenberg block) and are NOT affected.
+ *  - PDP related-products use the shop-loop sale-flash hook
+ *    (woocommerce_show_product_loop_sale_flash), which is NOT touched here.
+ */
+add_action( 'wp', 'noyona_pdp_hide_sale_flash_badge' );
+function noyona_pdp_hide_sale_flash_badge() {
+	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+		return;
+	}
+	remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
+}
+
+add_action( 'woocommerce_before_single_product_summary', 'noyona_pdp_render_best_seller_badge', 10 );
+function noyona_pdp_render_best_seller_badge() {
+	global $product;
+
+	if ( ! $product instanceof WC_Product ) {
+		return;
+	}
+
+	if ( ! $product->is_featured() ) {
+		return;
+	}
+
+	echo '<span class="noyona-pdp-best-seller-badge">' . esc_html__( 'BEST SELLER', 'viteseo-noyona-childtheme' ) . '</span>';
+}
