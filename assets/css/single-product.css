@@ -325,6 +325,9 @@ body.single-product .noyona-pdp-tabs__panel-inner {
   font-size: 0.875rem;
   font-weight: 700;
   color: #E199A4;
+  background: #FDF2F8;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
 }
 
 .noyona-pdp-variation__shade-head {
@@ -347,6 +350,9 @@ body.single-product .noyona-pdp-tabs__panel-inner {
   font-size: 0.875rem;
   font-weight: 700;
   color: #E199A4;
+  background: #FDF2F8;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
 }
 
 .noyona-pdp-variation__swatches {
@@ -1419,7 +1425,18 @@ body.single-product .related.products ul.products li.product .onsale {
   display: none !important;
 }
 
-/* Ensure the block wrapper is a positioning context for the badge. */
+/* Positioning context for the BEST SELLER badge.
+   The badge is rendered via `woocommerce_before_single_product_summary`,
+   which in the block PDP fires as a sibling preceding the gallery wrapper
+   inside `.noyona-pdp-column--media`. Anchoring the badge to the column
+   keeps it inside the main image card at top-left and prevents it from
+   escaping to the viewport. The gallery wrapper rule is kept as a
+   defensive fallback for any WC version that nests the hook output
+   inside the wrapper instead. */
+.single-product .noyona-pdp-column--media {
+  position: relative;
+}
+
 .single-product .wp-block-woocommerce-product-image-gallery {
   position: relative;
 }
