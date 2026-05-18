@@ -73,12 +73,15 @@
     border: 1px solid #e9e9e9;
     border-radius: 16px;
     overflow: hidden;
-    min-height: 560px;
+    height: clamp(520px, 48vw, 680px);
+    min-height: 0;
+    background: #fff;
 }
 
 .nsl-v2-map {
     width: 100%;
-    min-height: 560px;
+    height: 100%;
+    min-height: 0;
 }
 
 .nsl-v2-marker-wrap {
@@ -647,6 +650,41 @@ body.nsl-v2-review-modal-open {
     padding: 14px;
 }
 
+.nsl-v2-compact-filters {
+    display: none;
+}
+
+.nsl-v2-compact-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.nsl-v2-compact-filter span {
+    color: #555;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.nsl-v2-compact-filter select {
+    width: 100%;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    background: #fff;
+    color: #333;
+    font: inherit;
+    min-height: 42px;
+    padding: 9px 36px 9px 12px;
+}
+
+.nsl-v2-compact-filter select:focus-visible {
+    outline: 2px solid #E199A4;
+    outline-offset: 2px;
+}
+
 .nsl-v2-bottom-row {
     display: grid;
     grid-template-columns: 300px minmax(0, 1fr);
@@ -876,19 +914,8 @@ body.nsl-v2-review-modal-open {
 }
 
 @media (max-width: 1300px) {
-    /* Overlay stays anchored inside the map at laptop widths. The
-       previous behavior promoted the overlay to a static block below
-       the map; that was rolled back so the in-map selected-store
-       overlay remains the canonical placement on every viewport above
-       the mobile breakpoint. */
-
-    .nsl-v2-map {
-        min-height: 420px;
-    }
-
-    .nsl-v2-detail__image,
-    .nsl-v2-detail__gallery {
-        display: none !important;
+    .nsl-v2-map-shell {
+        height: clamp(440px, 52vw, 560px);
     }
 
     .nsl-v2-bottom {
@@ -896,8 +923,25 @@ body.nsl-v2-review-modal-open {
         flex-direction: column;
     }
 
+    .nsl-v2-bottom-top,
+    .nsl-v2-bottom-title,
+    .nsl-v2-child-filter-list,
+    .nsl-v2-extra-filter-list {
+        display: none;
+    }
+
+    .nsl-v2-filter-panel {
+        padding: 12px;
+    }
+
     .nsl-v2-bottom-row {
         grid-template-columns: 1fr;
+    }
+
+    .nsl-v2-compact-filters {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
     }
 
     .nsl-v2-store-grid {
@@ -911,9 +955,35 @@ body.nsl-v2-review-modal-open {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 770px) {
     .noyona-store-locator-wrapper {
         padding: 16px;
+    }
+
+    .nsl-v2-map-shell {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: 0;
+        gap: 12px;
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .nsl-v2-overlay-panel {
+        position: static;
+        width: 100%;
+        max-height: none;
+        overflow: visible;
+        border-radius: 14px;
+        order: 0;
+    }
+
+    .nsl-v2-overlay-top {
+        position: relative;
+        border-bottom: 0;
     }
 
     .nsl-v2-search-row {
@@ -934,7 +1004,16 @@ body.nsl-v2-review-modal-open {
     }
 
     .nsl-v2-map {
-        min-height: 320px;
+        height: 360px;
+        min-height: 360px;
+        border: 1px solid #e9e9e9;
+        border-radius: 16px;
+        overflow: hidden;
+        order: 1;
+    }
+
+    .nsl-v2-compact-filters {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -948,7 +1027,7 @@ body.nsl-v2-review-modal-open {
     display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 770px) {
     .nsl-v2-selected-panel {
         display: none;
     }

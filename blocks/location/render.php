@@ -348,6 +348,20 @@ if ($store_query->have_posts()) {
         </div>
         <div class="nsl-v2-bottom-row">
             <aside class="nsl-v2-filter-panel">
+                <div class="nsl-v2-compact-filters" aria-label="<?php esc_attr_e('Store filters', 'noyona'); ?>">
+                    <label class="nsl-v2-compact-filter">
+                        <span>Island Group</span>
+                        <select class="nsl-v2-island-select"></select>
+                    </label>
+                    <label class="nsl-v2-compact-filter">
+                        <span>Region</span>
+                        <select class="nsl-v2-region-select"></select>
+                    </label>
+                    <label class="nsl-v2-compact-filter">
+                        <span>Quick Filter</span>
+                        <select class="nsl-v2-quick-filter-select"></select>
+                    </label>
+                </div>
                 <h3 class="nsl-v2-bottom-title">Region Filter</h3>
                 <div class="nsl-v2-child-filter-list"></div>
                 <h3 class="nsl-v2-bottom-title nsl-v2-bottom-title--sub">Quick Filters</h3>

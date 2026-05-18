@@ -234,6 +234,7 @@
   function initStoreLocator(wrapper) {
     var jsonEl = wrapper.querySelector('script[type="application/json"]');
     var mapEl = wrapper.querySelector(".nsl-v2-map");
+    var mapShell = wrapper.querySelector(".nsl-v2-map-shell");
     var searchInput = wrapper.querySelector(".nsl-v2-search-input");
     var suggestionsEl = wrapper.querySelector(".nsl-v2-suggestions");
     var selectedPanel = wrapper.querySelector(".nsl-v2-selected-panel");
@@ -260,6 +261,9 @@
     var parentFilterList = wrapper.querySelector(".nsl-v2-parent-filter-list");
     var childFilterList = wrapper.querySelector(".nsl-v2-child-filter-list");
     var extraFilterList = wrapper.querySelector(".nsl-v2-extra-filter-list");
+    var islandSelect = wrapper.querySelector(".nsl-v2-island-select");
+    var regionSelect = wrapper.querySelector(".nsl-v2-region-select");
+    var quickFilterSelect = wrapper.querySelector(".nsl-v2-quick-filter-select");
     var storeGrid = wrapper.querySelector(".nsl-v2-store-grid");
     var storeCount = wrapper.querySelector(".nsl-v2-store-count");
     var storePagination = wrapper.querySelector(".nsl-v2-store-pagination");
@@ -352,6 +356,27 @@
 
     var markers = {};
     var markerLayer = L.layerGroup().addTo(map);
+
+    function invalidateMapSize(delay) {
+      window.setTimeout(function () {
+        map.invalidateSize({ pan: false });
+      }, delay || 0);
+    }
+
+    function invalidateMapSizeSeries() {
+      invalidateMapSize(0);
+      invalidateMapSize(120);
+      invalidateMapSize(320);
+    }
+
+    invalidateMapSizeSeries();
+    window.addEventListener("load", invalidateMapSizeSeries);
+
+    if (window.ResizeObserver && mapShell) {
+      var mapResizeObserver = new ResizeObserver(invalidateMapSizeSeries);
+      mapResizeObserver.observe(mapShell);
+      mapResizeObserver.observe(mapEl);
+    }
 
     function setActiveMarker(storeId) {
       Object.keys(markers).forEach(function (id) {
@@ -580,6 +605,9 @@
       var tree = data.tree;
       var bySearch = data.bySearch;
       var parentOrder = ["Luzon", "Visayas", "Mindanao"];
+      function optionHtml(value, label, selected) {
+        return '<option value="' + escHtml(value) + '"' + (selected ? " selected" : "") + ">" + escHtml(label) + "</option>";
+      }
 
       if (activeIsland !== "all" && !tree[activeIsland]) {
         activeIsland = parentOrder.find(function (name) {
@@ -611,14 +639,33 @@
       });
       parentFilterList.innerHTML = parentHtml;
 
+      if (islandSelect) {
+        islandSelect.innerHTML =
+          optionHtml("all", "All islands (" + bySearch.length + ")", activeIsland === "all") +
+          parentOrder
+            .map(function (island) {
+              var count = tree[island] ? tree[island].count : 0;
+              return optionHtml(island, island + " (" + count + ")", activeIsland === island);
+            })
+            .join("");
+      }
+
       if (activeIsland === "all") {
         childFilterList.innerHTML = '<div class="nsl-v2-filter-hint">Select Luzon, Visayas, or Mindanao to see child regions.</div>';
+        if (regionSelect) {
+          regionSelect.innerHTML = optionHtml("all", "All regions", true);
+          regionSelect.disabled = true;
+        }
         return;
       }
 
       var islandTree = tree[activeIsland];
       if (!islandTree || !islandTree.regions || !Object.keys(islandTree.regions).length) {
         childFilterList.innerHTML = '<div class="nsl-v2-filter-hint">No regions found for this island group.</div>';
+        if (regionSelect) {
+          regionSelect.innerHTML = optionHtml("all", "No regions found", true);
+          regionSelect.disabled = true;
+        }
         return;
       }
 
@@ -651,6 +698,18 @@
             "</button>";
         });
       childFilterList.innerHTML = childHtml;
+
+      if (regionSelect) {
+        regionSelect.disabled = false;
+        regionSelect.innerHTML =
+          optionHtml("all", "All " + activeIsland + " regions", activeRegion === "all") +
+          Object.keys(islandTree.regions)
+            .sort()
+            .map(function (region) {
+              return optionHtml(region, region + " (" + islandTree.regions[region] + ")", activeRegion === region);
+            })
+            .join("");
+      }
     }
 
     function renderExtraFilters() {
@@ -674,6 +733,22 @@
           );
         })
         .join("");
+
+      if (quickFilterSelect) {
+        quickFilterSelect.innerHTML = options
+          .map(function (item) {
+            return (
+              '<option value="' +
+              escHtml(item.key) +
+              '"' +
+              (activeQuickFilter === item.key ? " selected" : "") +
+              ">" +
+              escHtml(item.label) +
+              "</option>"
+            );
+          })
+          .join("");
+      }
     }
 
     function renderPagination(totalItems, totalPages) {
@@ -712,6 +787,7 @@
     }
 
     function renderStoresAndMap() {
+      map.invalidateSize({ pan: false });
       var filtered = getFullyFilteredStores();
       var totalItems = filtered.length;
       var totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
@@ -765,6 +841,7 @@
         setActiveMarker(selected.id);
         syncAddressToggleVisibility();
       }
+      invalidateMapSizeSeries();
     }
 
     /**
@@ -794,6 +871,7 @@
       setSelectedPanelHtml(formatSelectedDetail(store));
       setActiveMarker(store.id);
       syncAddressToggleVisibility();
+      invalidateMapSizeSeries();
       if (shouldFly && !userLocation) {
         zoomToStore(store);
       }
@@ -839,6 +917,8 @@
     function handleViewportResize() {
       var nextPageSize = computePageSize();
       if (nextPageSize === pageSize) {
+        invalidateMapSizeSeries();
+        syncAddressToggleVisibility();
         return;
       }
       pageSize = nextPageSize;
@@ -865,6 +945,61 @@
       renderFilters();
       renderExtraFilters();
       renderStoresAndMap();
+    });
+
+    function applyQuickFilter(nextQuickFilter) {
+      if (nextQuickFilter === "near" && !userLocation) {
+        if (!navigator.geolocation) {
+          alert("Geolocation is not supported by your browser.");
+          renderExtraFilters();
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            setUserMarker(pos.coords.latitude, pos.coords.longitude);
+            map.flyTo([pos.coords.latitude, pos.coords.longitude], 14, { duration: 1 });
+            activeQuickFilter = "near";
+            currentPage = 1;
+            renderExtraFilters();
+            renderStoresAndMap();
+          },
+          function () {
+            alert("Unable to access location. Please allow location permission in your browser.");
+            renderExtraFilters();
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+        return;
+      }
+      activeQuickFilter = nextQuickFilter;
+      currentPage = 1;
+      renderExtraFilters();
+      renderStoresAndMap();
+    }
+
+    wrapper.addEventListener("change", function (event) {
+      if (event.target.classList.contains("nsl-v2-island-select")) {
+        activeIsland = event.target.value || "all";
+        activeRegion = "all";
+        currentPage = 1;
+        renderFilters();
+        renderExtraFilters();
+        renderStoresAndMap();
+        return;
+      }
+
+      if (event.target.classList.contains("nsl-v2-region-select")) {
+        activeRegion = event.target.value || "all";
+        currentPage = 1;
+        renderFilters();
+        renderExtraFilters();
+        renderStoresAndMap();
+        return;
+      }
+
+      if (event.target.classList.contains("nsl-v2-quick-filter-select")) {
+        applyQuickFilter(event.target.value || "all");
+      }
     });
 
     wrapper.addEventListener("click", function (event) {
@@ -901,31 +1036,7 @@
       var extraBtn = event.target.closest(".nsl-v2-filter-extra");
       if (extraBtn) {
         var nextQuickFilter = extraBtn.getAttribute("data-extra-filter") || "all";
-        if (nextQuickFilter === "near" && !userLocation) {
-          if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser.");
-            return;
-          }
-          navigator.geolocation.getCurrentPosition(
-            function (pos) {
-              setUserMarker(pos.coords.latitude, pos.coords.longitude);
-              map.flyTo([pos.coords.latitude, pos.coords.longitude], 14, { duration: 1 });
-              activeQuickFilter = "near";
-              currentPage = 1;
-              renderExtraFilters();
-              renderStoresAndMap();
-            },
-            function () {
-              alert("Unable to access location. Please allow location permission in your browser.");
-            },
-            { enableHighAccuracy: true, timeout: 10000 }
-          );
-          return;
-        }
-        activeQuickFilter = nextQuickFilter;
-        currentPage = 1;
-        renderExtraFilters();
-        renderStoresAndMap();
+        applyQuickFilter(nextQuickFilter);
         return;
       }
 
