@@ -5,6 +5,11 @@
     gap: 18px;
 }
 
+.noyona-store-locator-wrapper,
+.noyona-store-locator-wrapper * {
+    box-sizing: border-box;
+}
+
 .nsl-v2-breadcrumbs {
     display: inline-flex;
     align-items: center;
@@ -163,10 +168,11 @@
 
 .nsl-v2-overlay-panel {
     position: absolute;
-    left: 14px;
-    top: 14px;
-    width: min(390px, calc(100% - 28px));
-    max-height: calc(100% - 28px);
+    left: 16px;
+    top: 16px;
+    width: min(390px, calc(100% - 32px));
+    max-width: calc(100% - 32px);
+    max-height: calc(100% - 32px);
     overflow: hidden;
     border: 1px solid #ececec;
     background: rgba(255, 255, 255, 0.96);
@@ -191,15 +197,20 @@
 
 .nsl-v2-search-wrap {
     position: relative;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .nsl-v2-search-row {
     display: flex;
     gap: 8px;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .nsl-v2-search-input {
     width: 100%;
+    min-width: 0;
     border: 1px solid #ddd;
     border-radius: 12px;
     padding: 11px 12px;
@@ -207,6 +218,8 @@
 }
 
 .nsl-v2-use-location {
+    flex: 0 0 auto;
+    max-width: 100%;
     border: 1px solid #ddd;
     background: #fff;
     border-radius: 12px;
@@ -222,6 +235,7 @@
     background: #fff;
     border-radius: 12px;
     max-height: 220px;
+    max-width: 100%;
     overflow: auto;
 }
 
@@ -955,7 +969,7 @@ body.nsl-v2-review-modal-open {
     }
 }
 
-@media (max-width: 770px) {
+@media (max-width: 640px) {
     .noyona-store-locator-wrapper {
         padding: 16px;
     }
@@ -975,6 +989,7 @@ body.nsl-v2-review-modal-open {
     .nsl-v2-overlay-panel {
         position: static;
         width: 100%;
+        max-width: 100%;
         max-height: none;
         overflow: visible;
         border-radius: 14px;
@@ -991,6 +1006,7 @@ body.nsl-v2-review-modal-open {
     }
 
     .nsl-v2-use-location {
+        flex-basis: auto;
         width: 100%;
     }
 
@@ -1020,14 +1036,14 @@ body.nsl-v2-review-modal-open {
 /* Mobile-only selected-store mirror.
    The container is created by script.js and inserted between
    `.nsl-v2-top` (map shell) and `.nsl-v2-bottom` (filters + grid).
-   Hidden by default at every viewport; the mobile media query opts
+   Hidden by default at every viewport; the true-mobile media query opts
    it in, and `:empty` suppresses the empty placeholder so the box
    does not appear until a marker/suggestion/card is selected. */
 .nsl-v2-mobile-selected {
     display: none;
 }
 
-@media (max-width: 770px) {
+@media (max-width: 640px) {
     .nsl-v2-selected-panel {
         display: none;
     }
