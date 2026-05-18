@@ -516,6 +516,10 @@
   font-family: var(--wp--preset--font-family--proxima-nova);
   font-weight: 400;
   text-transform: uppercase;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  transition: color 0.18s ease, text-decoration-color 0.18s ease;
 }
 
 .noyona-footer .noyona-footer__nav a::after {
@@ -525,8 +529,16 @@
 .noyona-footer .noyona-footer__nav a:hover,
 .noyona-footer .noyona-footer__nav a:focus-visible {
   transform: none;
-  color: #000;
-  opacity: 0.75;
+  color: #7a2f3a;
+  opacity: 1;
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+}
+
+.noyona-footer .noyona-footer__nav a:focus-visible {
+  outline: 2px solid #7a2f3a;
+  outline-offset: 3px;
+  border-radius: 3px;
 }
 
 .noyona-footer .noyona-footer__bottom {
