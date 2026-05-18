@@ -670,6 +670,7 @@ if ($use_woo_products && class_exists('WooCommerce')) {
                 'cartAjax' => $can_ajax_cart,
                 'cartBg' => '#E199A4',
                 'productId' => $product_id,
+                'productSku' => $product->get_sku(),
                 'productType' => $product->get_type(),
                 'variationMap' => $variation_map,
                 'variationChoiceMap' => $variation_choice_map,
@@ -763,6 +764,8 @@ $unique_id = 'ps-' . uniqid();
                     $media_bg = !empty($item['mediaBg']) ? $item['mediaBg'] : '';
                     $media_style = $media_bg ? ' style="--ps-media-bg: ' . esc_attr($media_bg) . ';"' : '';
                     $product_id = isset($item['productId']) ? absint($item['productId']) : 0;
+                    $ajax_cart_url = $product_id > 0 ? add_query_arg('add-to-cart', $product_id, home_url('/')) : $cart_url;
+                    $product_sku = !empty($item['productSku']) ? sanitize_text_field((string) $item['productSku']) : '';
                     $product_type = !empty($item['productType']) ? sanitize_key((string) $item['productType']) : '';
                     $swatches = (!empty($item['swatches']) && is_array($item['swatches'])) ? $item['swatches'] : array();
                     $attribute_param = !empty($item['attributeParam']) ? sanitize_key((string) $item['attributeParam']) : '';
@@ -964,14 +967,15 @@ $unique_id = 'ps-' . uniqid();
                                     </a>
                                     <?php if ($cart_enabled): ?>
                                         <?php if ($product_id > 0 && ($cart_ajax || !empty($variation_map_safe))): ?>
-                                            <button
-                                                type="button"
+                                            <a
+                                                href="<?php echo esc_url($ajax_cart_url); ?>"
                                                 class="ps-btn-cart add_to_cart_button ajax_add_to_cart"
                                                 data-product_id="<?php echo esc_attr($product_id); ?>"
+                                                data-product_sku="<?php echo esc_attr($product_sku); ?>"
                                                 data-product-type="<?php echo esc_attr($product_type); ?>"
                                                 data-quantity="1"
-                                                data-cart-url="<?php echo esc_url($cart_url); ?>"
-                                                data-base-cart-url="<?php echo esc_url(!empty($item['cartUrl']) ? $item['cartUrl'] : '#'); ?>"
+                                                data-cart-url="<?php echo esc_url($ajax_cart_url); ?>"
+                                                data-base-cart-url="<?php echo esc_url($ajax_cart_url); ?>"
                                                 data-attribute-param="<?php echo esc_attr($attribute_param); ?>"
                                                 data-selected-attribute-param="<?php echo esc_attr($selected_attr_param); ?>"
                                                 data-selected-attribute-value="<?php echo esc_attr($selected_attr_value); ?>"
@@ -985,15 +989,17 @@ $unique_id = 'ps-' . uniqid();
                                                     data-variation-choice-map="<?php echo esc_attr(wp_json_encode($variation_choice_map_safe)); ?>"
                                                 <?php endif; ?>
                                                 style="background-color: <?php echo esc_attr($cart_bg); ?>;"
-                                                aria-label="<?php echo esc_attr('Add ' . ($title ? $title : 'product') . ' to cart'); ?>">
+                                                aria-label="<?php echo esc_attr('Add ' . ($title ? $title : 'product') . ' to cart'); ?>"
+                                                rel="nofollow">
                                                 <i class="fa-solid fa-cart-shopping"></i>
-                                            </button>
+                                            </a>
                                         <?php else: ?>
                                             <a href="<?php echo esc_url($cart_url); ?>" class="ps-btn-cart"
                                                 data-base-url="<?php echo esc_url(!empty($item['cartUrl']) ? $item['cartUrl'] : '#'); ?>"
                                                 data-attribute-param="<?php echo esc_attr($attribute_param); ?>"
                                                 style="background-color: <?php echo esc_attr($cart_bg); ?>;"
-                                                aria-label="<?php echo esc_attr('Add ' . ($title ? $title : 'product') . ' to cart'); ?>">
+                                                aria-label="<?php echo esc_attr('Add ' . ($title ? $title : 'product') . ' to cart'); ?>"
+                                                rel="nofollow">
                                                 <i class="fa-solid fa-cart-shopping"></i>
                                             </a>
                                         <?php endif; ?>

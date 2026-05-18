@@ -529,6 +529,7 @@
       if (!cartBtn || !root.contains(cartBtn)) return;
 
       event.preventDefault();
+      event.stopImmediatePropagation();
 
       if (cartBtn.classList.contains("loading")) return;
 
@@ -551,7 +552,7 @@
         productType === "variable" && variationId > 0 ? variationId : productId;
 
       if (!endpoint || !requestProductId) {
-        if (href) window.location.href = href;
+        cartBtn.classList.add("is-error");
         return;
       }
       if (productType === "variable" && (!selectedAttrParam || !selectedAttrValue)) {
@@ -633,7 +634,7 @@
         .finally(function () {
           cartBtn.classList.remove("loading");
         });
-    });
+    }, true);
 
     const onResize = debounce(updateWidths, 150);
     window.addEventListener("resize", onResize);
