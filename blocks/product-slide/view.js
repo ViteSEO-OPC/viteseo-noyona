@@ -410,17 +410,43 @@
         swatches.forEach((swatch) => {
           const on = swatch === target;
           swatch.classList.toggle("is-selected", on);
-          swatch.setAttribute("aria-selected", on ? "true" : "false");
+          swatch.setAttribute("aria-checked", on ? "true" : "false");
+          swatch.removeAttribute("aria-selected");
         });
+        card.dataset.selectedSwatchValue = selectedValue;
         updateCardActionUrls(card, selectedValue, selectedMeta);
       }
 
       swatches.forEach((swatch) => {
         swatch.addEventListener("click", () => selectSwatch(swatch));
+        swatch.addEventListener("keydown", (event) => {
+          const currentIndex = swatches.indexOf(swatch);
+          let nextIndex = currentIndex;
+
+          if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+            nextIndex = (currentIndex + 1) % swatches.length;
+          } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+            nextIndex = (currentIndex - 1 + swatches.length) % swatches.length;
+          } else if (event.key === "Home") {
+            nextIndex = 0;
+          } else if (event.key === "End") {
+            nextIndex = swatches.length - 1;
+          } else {
+            return;
+          }
+
+          event.preventDefault();
+          swatches[nextIndex].focus();
+          selectSwatch(swatches[nextIndex]);
+        });
       });
 
       const initial =
-        swatches.find((swatch) => swatch.classList.contains("is-selected")) ||
+        swatches.find(
+          (swatch) =>
+            swatch.classList.contains("is-selected") ||
+            swatch.getAttribute("aria-checked") === "true"
+        ) ||
         swatches[0];
       if (initial) {
         selectSwatch(initial);

@@ -179,15 +179,18 @@
 }
 
 .ps-swatch--option:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(225, 26, 99, 0.2), 0 0 0 1px #E199A4;
+  outline: 2px solid #E199A4;
+  outline-offset: 2px;
 }
 
-.ps-swatch--option.is-selected {
-  box-shadow: 0 0 0 2px #E199A4;
+.product-slide .ps-swatch--option.is-selected,
+.product-slide .ps-swatch--option[aria-checked="true"] {
+  outline: 2px solid #E199A4;
+  outline-offset: 2px;
 }
 
-.ps-swatch--option.is-selected::after {
+.ps-swatch--option.is-selected::after,
+.ps-swatch--option[aria-checked="true"]::after {
   content: "";
   width: 7px;
   height: 12px;

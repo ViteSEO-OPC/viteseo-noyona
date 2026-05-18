@@ -864,7 +864,7 @@ $unique_id = 'ps-' . uniqid();
 
                             <div class="ps-card__body">
                                 <?php if (!empty($swatches) && is_array($swatches)): ?>
-                                    <div class="ps-card__swatches" role="listbox" aria-label="<?php echo esc_attr__('Select shade', 'viteseo-noyona-childtheme'); ?>">
+                                    <div class="ps-card__swatches" role="radiogroup" aria-label="<?php echo esc_attr__('Select shade', 'viteseo-noyona-childtheme'); ?>">
                                         <?php foreach ($swatches as $index => $swatch): ?>
                                             <?php
                                             if (!is_array($swatch) || empty($swatch['hex'])) {
@@ -903,8 +903,9 @@ $unique_id = 'ps-' . uniqid();
                                                 <?php if ($swatch_variation_id > 0): ?>
                                                     data-variation-id="<?php echo esc_attr($swatch_variation_id); ?>"
                                                 <?php endif; ?>
+                                                role="radio"
                                                 aria-label="<?php echo esc_attr($swatch_label); ?>"
-                                                aria-selected="<?php echo $is_selected ? 'true' : 'false'; ?>">
+                                                aria-checked="<?php echo $is_selected ? 'true' : 'false'; ?>">
                                             </button>
                                         <?php endforeach; ?>
                                     </div>
