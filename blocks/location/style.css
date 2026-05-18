@@ -993,6 +993,7 @@ body.nsl-v2-review-modal-open {
         max-height: none;
         overflow: visible;
         background: var(--wp--preset--color--base, #fff7f8);
+        box-shadow: none;
         border-radius: 14px;
         order: 0;
     }
