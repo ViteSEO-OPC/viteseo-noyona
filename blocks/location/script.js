@@ -128,6 +128,7 @@
     }
 
     var reviews = Array.isArray(store.reviews) ? store.reviews : [];
+    var reviewsTabLabel = reviews.length ? "Reviews (" + reviews.length + ")" : "Reviews";
     var totalRating = reviews.reduce(function (sum, review) {
       return sum + (parseInt(review.rating || 0, 10) || 0);
     }, 0);
@@ -164,9 +165,9 @@
       '">' +
       '<div class="nsl-v2-detail-tabs">' +
       '<button type="button" class="nsl-v2-detail-tab is-active" data-detail-tab="overview">Overview</button>' +
-      '<button type="button" class="nsl-v2-detail-tab" data-detail-tab="reviews">Reviews (' +
-      escHtml(reviews.length) +
-      ")</button>" +
+      '<button type="button" class="nsl-v2-detail-tab" data-detail-tab="reviews">' +
+      escHtml(reviewsTabLabel) +
+      "</button>" +
       "</div>" +
       '<div class="nsl-v2-detail-pane is-active" data-detail-pane="overview">' +
       (store.image ? '<img class="nsl-v2-detail__image" src="' + escHtml(store.image) + '" alt="' + escHtml(store.title) + '" loading="lazy">' : "") +
@@ -199,7 +200,6 @@
       "</li>" +
       "</ul>" +
       '<div class="nsl-v2-detail__actions">' +
-      '<button type="button" class="nsl-v2-route-btn nsl-v2-get-route">Get Route From My Location</button>' +
       '<a class="nsl-v2-directions" href="' +
       escHtml(buildDirectionsUrl(store)) +
       '" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>' +

@@ -324,14 +324,8 @@ if ($store_query->have_posts()) {
                     <div class="nsl-v2-search-wrap">
                         <div class="nsl-v2-search-row">
                             <input type="text" class="nsl-v2-search-input" placeholder="Search location or store name">
-                            <button type="button" class="nsl-v2-use-location">Use My Location</button>
                         </div>
                         <div class="nsl-v2-suggestions" hidden></div>
-                    </div>
-
-                    <div class="nsl-v2-route-mode">
-                        <button type="button" class="nsl-v2-route-mode-btn is-active" data-route-mode="driving">Drive</button>
-                        <button type="button" class="nsl-v2-route-mode-btn" data-route-mode="walking">Walk</button>
                     </div>
                 </div>
 
