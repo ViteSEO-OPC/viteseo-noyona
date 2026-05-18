@@ -994,12 +994,22 @@ body.nsl-v2-review-modal-open {
         overflow: visible;
         background: var(--wp--preset--color--base, #fff7f8);
         box-shadow: none;
+        border: 0;
+        outline: 0;
         border-radius: 14px;
         order: 0;
     }
 
+    .nsl-v2-overlay-panel::before,
+    .nsl-v2-overlay-panel::after {
+        display: none;
+        content: none;
+    }
+
     .nsl-v2-overlay-top {
         position: relative;
+        box-shadow: none;
+        border-top: 0;
         border-bottom: 0;
     }
 
