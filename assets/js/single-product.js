@@ -104,6 +104,193 @@
       .replace(/^-+|-+$/g, '');
   }
 
+  function normalizeImageMatchText(value) {
+    var text = String(value || '');
+    try {
+      text = decodeURIComponent(text);
+    } catch (e) {}
+    if (typeof text.normalize === 'function') {
+      text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    return text
+      .toLowerCase()
+      .replace(/\.[a-z0-9]{2,5}(?:\?.*)?$/i, '')
+      .replace(/&/g, ' and ')
+      .replace(/[_-]+/g, ' ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function getImageBasename(url) {
+    var clean = String(url || '').split('?')[0].split('#')[0];
+    clean = clean.replace(/\/+$/, '');
+    return clean.split('/').pop() || clean;
+  }
+
+  function imageUrlsMatch(a, b) {
+    var left = getImageBasename(a);
+    var right = getImageBasename(b);
+    return !!left && !!right && normalizeImageMatchText(left) === normalizeImageMatchText(right);
+  }
+
+  var weakShadeImageWords = {
+    and: true,
+    color: true,
+    colour: true,
+    dark: true,
+    eyeliner: true,
+    eye: true,
+    jet: true,
+    light: true,
+    liquid: true,
+    noyona: true,
+    pen: true,
+    pencil: true,
+    product: true,
+    shade: true,
+    the: true,
+    tint: true,
+    tone: true,
+    waterproof: true,
+  };
+
+  function getShadeImageTokens(value, label) {
+    var combined = normalizeImageMatchText([label, value].join(' '));
+    var seen = {};
+    return combined.split(' ').filter(function (token) {
+      if (!token || token.length < 2 || weakShadeImageWords[token] || seen[token]) {
+        return false;
+      }
+      seen[token] = true;
+      return true;
+    });
+  }
+
+  function getPdpGallery() {
+    return document.querySelector('.single-product .woocommerce-product-gallery');
+  }
+
+  function getCurrentGalleryImageSrc(gallery) {
+    if (!gallery) return '';
+    var fallbackImg = gallery.querySelector('.noyona-pdp-gallery-main-img');
+    if (fallbackImg) {
+      return fallbackImg.currentSrc || fallbackImg.src || '';
+    }
+    var activeImg =
+      gallery.querySelector('.woocommerce-product-gallery__image.flex-active-slide img') ||
+      gallery.querySelector('.flex-active-slide img') ||
+      gallery.querySelector('.woocommerce-product-gallery__image img');
+    return activeImg ? (activeImg.currentSrc || activeImg.src || activeImg.getAttribute('data-large_image') || '') : '';
+  }
+
+  function collectGalleryImageData(gallery) {
+    if (!gallery) return [];
+    var wrapper = gallery.querySelector('.woocommerce-product-gallery__wrapper');
+    var figures = wrapper
+      ? Array.prototype.slice.call(wrapper.querySelectorAll('.woocommerce-product-gallery__image'))
+      : [];
+    return figures
+      .filter(function (figure) {
+        return !figure.classList.contains('clone');
+      })
+      .map(function (figure, index) {
+        var img = figure.querySelector('img');
+        if (!img) return null;
+        var anchor = figure.querySelector('a');
+        var fullSrc = (anchor && anchor.getAttribute('href')) ||
+          img.getAttribute('data-large_image') ||
+          img.getAttribute('data-src') ||
+          img.getAttribute('src') || '';
+        var title = img.getAttribute('title') ||
+          img.getAttribute('data-caption') ||
+          figure.getAttribute('data-thumb-alt') ||
+          '';
+        var fileText = normalizeImageMatchText(getImageBasename(fullSrc || img.getAttribute('src') || ''));
+        var metaText = normalizeImageMatchText([
+          fileText,
+          img.getAttribute('alt') || '',
+          title,
+        ].join(' '));
+        return {
+          index: index,
+          figure: figure,
+          full: fullSrc,
+          thumb: img.getAttribute('src') || fullSrc,
+          srcset: img.getAttribute('srcset') || '',
+          sizes: img.getAttribute('sizes') || '',
+          alt: img.getAttribute('alt') || '',
+          title: title,
+          width: img.getAttribute('width') || '',
+          height: img.getAttribute('height') || '',
+          fileText: fileText,
+          metaText: metaText,
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function findShadeGalleryMatch(gallery, value, label) {
+    var tokens = getShadeImageTokens(value, label);
+    if (!tokens.length) return null;
+
+    var images = collectGalleryImageData(gallery);
+    var best = null;
+    images.forEach(function (image) {
+      var score = 0;
+      tokens.forEach(function (token) {
+        var fileWords = (' ' + image.fileText + ' ');
+        var metaWords = (' ' + image.metaText + ' ');
+        if (fileWords.indexOf(' ' + token + ' ') !== -1) {
+          score += 8;
+        } else if (image.fileText.indexOf(token) !== -1) {
+          score += 5;
+        } else if (metaWords.indexOf(' ' + token + ' ') !== -1) {
+          score += 4;
+        } else if (image.metaText.indexOf(token) !== -1) {
+          score += 2;
+        }
+      });
+      if (score > 0 && (!best || score > best.score)) {
+        best = { image: image, score: score };
+      }
+    });
+
+    return best ? best.image : null;
+  }
+
+  function switchFallbackGalleryToImage(gallery, image) {
+    if (!gallery || !image || typeof gallery._noyonaFallbackSwitchToIndex !== 'function') {
+      return false;
+    }
+    return gallery._noyonaFallbackSwitchToIndex(image.index);
+  }
+
+  function switchWooGalleryToImage(gallery, image) {
+    if (!gallery || !image) return false;
+
+    if (switchFallbackGalleryToImage(gallery, image)) {
+      return true;
+    }
+
+    var thumbs = gallery.querySelectorAll('.flex-control-thumbs li img');
+    if (thumbs[image.index]) {
+      thumbs[image.index].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+      return true;
+    }
+
+    if (window.jQuery) {
+      var $gallery = window.jQuery(gallery);
+      var slider = $gallery.data('flexslider');
+      if (slider && typeof slider.flexAnimate === 'function') {
+        slider.flexAnimate(image.index);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   function valuesEqualLoose(a, b) {
     var left = String(a || '').trim();
     var right = String(b || '').trim();
@@ -243,6 +430,75 @@
 
     return opts.every(function (o) {
       return hexToCssColor(o.value) !== '';
+    });
+  }
+
+  function isShadeGalleryAttributeSelect(select) {
+    if (!select || !select.getAttribute) return false;
+    if (isColorAttributeSelect(select)) return true;
+
+    var name = (select.getAttribute('name') || '').toLowerCase();
+    return /^attribute_(pa_)?(shade|swatch|tone|tint)$/.test(name);
+  }
+
+  function getSelectedOptionText(select) {
+    if (!select || select.selectedIndex < 0 || !select.options[select.selectedIndex]) {
+      return '';
+    }
+    return String(select.options[select.selectedIndex].text || '').trim();
+  }
+
+  function getSelectedShadeSelect(form) {
+    if (!form) return null;
+    var selects = Array.prototype.slice.call(form.querySelectorAll('select[name^="attribute_"]'));
+    return selects.find(function (select) {
+      return isShadeGalleryAttributeSelect(select) && !!select.value;
+    }) || null;
+  }
+
+  function applyShadeGalleryFallback(form, beforeSrc) {
+    var shadeSelect = getSelectedShadeSelect(form);
+    if (!shadeSelect) return;
+
+    var gallery = getPdpGallery();
+    if (!gallery) return;
+
+    var currentSrc = getCurrentGalleryImageSrc(gallery);
+    if (beforeSrc && currentSrc && !imageUrlsMatch(beforeSrc, currentSrc)) {
+      return;
+    }
+
+    var match = findShadeGalleryMatch(gallery, shadeSelect.value, getSelectedOptionText(shadeSelect));
+    if (!match) return;
+
+    if (currentSrc && imageUrlsMatch(currentSrc, match.full || match.thumb)) {
+      return;
+    }
+
+    switchWooGalleryToImage(gallery, match);
+  }
+
+  function scheduleShadeGalleryFallback(form, beforeSrc) {
+    if (!form || !form.classList.contains('variations_form')) return;
+    window.setTimeout(function () {
+      applyShadeGalleryFallback(form, beforeSrc);
+    }, 260);
+  }
+
+  function bindShadeGalleryFallback(form) {
+    if (!form || !form.classList.contains('variations_form') || form._noyonaShadeGalleryBound) {
+      return;
+    }
+
+    var selects = Array.prototype.slice.call(form.querySelectorAll('select[name^="attribute_"]'))
+      .filter(isShadeGalleryAttributeSelect);
+    if (!selects.length) return;
+
+    form._noyonaShadeGalleryBound = true;
+    selects.forEach(function (select) {
+      select.addEventListener('change', function () {
+        scheduleShadeGalleryFallback(form, getCurrentGalleryImageSrc(getPdpGallery()));
+      });
     });
   }
 
@@ -919,6 +1175,7 @@
     selects.forEach(buildVariationControl);
 
     bindVariationIdSync(form);
+    bindShadeGalleryFallback(form);
   }
 
   function bindWooCommercePdpHooks() {
@@ -1651,24 +1908,7 @@
       // Capture each image's URLs/attrs from the existing markup. WC stores
       // the full-size URL on `data-large_image` and the displayed src on
       // the `<img>` itself.
-      var imageData = figures.map(function (figure) {
-        var img = figure.querySelector('img');
-        if (!img) return null;
-        var anchor = figure.querySelector('a');
-        var fullSrc = (anchor && anchor.getAttribute('href')) ||
-                      img.getAttribute('data-large_image') ||
-                      img.getAttribute('data-src') ||
-                      img.getAttribute('src') || '';
-        return {
-          full:   fullSrc,
-          thumb:  img.getAttribute('src') || fullSrc,
-          srcset: img.getAttribute('srcset') || '',
-          sizes:  img.getAttribute('sizes') || '',
-          alt:    img.getAttribute('alt') || '',
-          width:  img.getAttribute('width') || '',
-          height: img.getAttribute('height') || '',
-        };
-      }).filter(Boolean);
+      var imageData = collectGalleryImageData(gallery);
       if (imageData.length === 0) return;
 
       gallery.dataset.noyonaFallback = '1';
@@ -1692,6 +1932,24 @@
       if (imageData[0].height) mainImg.setAttribute('height', imageData[0].height);
       zoomWrap.appendChild(mainImg);
       main.appendChild(zoomWrap);
+
+      function setFallbackMainImage(index) {
+        if (isNaN(index) || !imageData[index]) return false;
+        var data = imageData[index];
+        mainImg.src = data.full;
+        mainImg.alt = data.alt;
+        if (data.srcset) { mainImg.srcset = data.srcset; } else { mainImg.removeAttribute('srcset'); }
+        if (data.sizes)  { mainImg.sizes  = data.sizes;  } else { mainImg.removeAttribute('sizes'); }
+        thumbs.querySelectorAll('.noyona-pdp-gallery-thumb').forEach(function (item) {
+          item.classList.remove('is-active');
+        });
+        var activeThumb = thumbs.querySelector('[data-noyona-thumb-index="' + index + '"]');
+        var parentLi = activeThumb ? activeThumb.closest('.noyona-pdp-gallery-thumb') : null;
+        if (parentLi) parentLi.classList.add('is-active');
+        return true;
+      }
+
+      gallery._noyonaFallbackSwitchToIndex = setFallbackMainImage;
 
       // Magnifier button (top-right) — opens lightbox of the current image.
       // Mirrors WooCommerce's `.woocommerce-product-gallery__trigger` so the
@@ -1768,17 +2026,7 @@
         var idx = parseInt(btn.getAttribute('data-noyona-thumb-index'), 10);
         if (isNaN(idx) || !imageData[idx]) return;
 
-        var data = imageData[idx];
-        mainImg.src = data.full;
-        mainImg.alt = data.alt;
-        if (data.srcset) { mainImg.srcset = data.srcset; } else { mainImg.removeAttribute('srcset'); }
-        if (data.sizes)  { mainImg.sizes  = data.sizes;  } else { mainImg.removeAttribute('sizes'); }
-
-        thumbs.querySelectorAll('.noyona-pdp-gallery-thumb').forEach(function (item) {
-          item.classList.remove('is-active');
-        });
-        var parentLi = btn.closest('.noyona-pdp-gallery-thumb');
-        if (parentLi) parentLi.classList.add('is-active');
+        setFallbackMainImage(idx);
       });
 
       // Variation image swap: WC's add-to-cart-variation script fires
