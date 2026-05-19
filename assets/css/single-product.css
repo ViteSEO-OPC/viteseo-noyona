@@ -1426,21 +1426,19 @@ body.single-product .related.products ul.products li.product .onsale {
 }
 
 /* Positioning context for the BEST SELLER badge.
-   The badge is injected into the per-image WooCommerce wrapper
-   (.woocommerce-product-gallery__image) via the
-   woocommerce_single_product_image_thumbnail_html filter, so the
-   image wrapper itself is its positioning context. This keeps the
-   badge anchored to the actual main product image card across
-   variation image swaps, FlexSlider rotation, and responsive layouts. */
-.single-product .woocommerce-product-gallery__image {
+   The badge is rendered once inside the WooCommerce gallery container, not
+   inside an individual FlexSlider image. This keeps it product-level while
+   thumbnails, variation image swaps, or the fallback gallery change images. */
+.single-product .woocommerce-product-gallery,
+.single-product .wp-block-woocommerce-product-image-gallery .woocommerce-product-gallery {
   position: relative;
 }
 
-.noyona-pdp-best-seller-badge {
+.single-product .noyona-pdp-best-seller-badge {
   position: absolute;
   top: 0.9rem;
   left: 0.9rem;
-  z-index: 3;
+  z-index: 5;
   display: inline-flex;
   align-items: center;
   padding: 0.4rem 0.95rem;
@@ -1458,7 +1456,7 @@ body.single-product .related.products ul.products li.product .onsale {
 }
 
 @media (max-width: 781px) {
-  .noyona-pdp-best-seller-badge {
+  .single-product .noyona-pdp-best-seller-badge {
     top: 0.65rem;
     left: 0.65rem;
     font-size: 0.72rem;

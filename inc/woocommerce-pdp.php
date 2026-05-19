@@ -411,28 +411,14 @@ function noyona_pdp_enqueue_assets() {
 }
 
 /**
- * PDP main image: hide the default WooCommerce "Sale!" flash and, when the
- * product is marked Featured, inject a "BEST SELLER" pill badge directly
- * into the main product image wrapper.
+ * PDP gallery badge: hide the default WooCommerce "Sale!" flash and, when the
+ * product is marked Featured, render a single "BEST SELLER" pill as a
+ * product-level overlay on the gallery container.
  *
- * Scope:
- *  - Only the main single-product image area.
- *  - Archive/shop product cards use a different render path
- *    (woocommerce/product-sale-badge Gutenberg block) and are NOT affected.
- *  - PDP related-products use the shop-loop sale-flash hook
- *    (woocommerce_show_product_loop_sale_flash), which is NOT touched here.
- *
- * Render strategy:
- *  - The default Sale! flash, attached to woocommerce_before_single_product_summary,
- *    is removed (PDP-scoped) so its <span class="onsale">Sale!</span> never emits.
- *  - The BEST SELLER badge is injected via
- *    `woocommerce_single_product_image_thumbnail_html`, the per-image filter
- *    WooCommerce runs to produce each `<div class="woocommerce-product-gallery__image">`.
- *    Injecting at this layer guarantees the badge is a child of the real image
- *    wrapper (a stable positioned ancestor in the page DOM), not a sibling
- *    that escapes to the viewport. The badge is only added to the main image
- *    (`$attachment_id === $product->get_image_id()`); a static once-flag is a
- *    belt-and-suspenders guard against duplicate injection.
+ * The badge represents the product, not a specific gallery image, so it must
+ * not live inside the first FlexSlider slide. Keeping it as a child of the
+ * WooCommerce gallery container lets it stay visible as thumbnails, variation
+ * images, zoom/lightbox, or the theme's fallback gallery swap the active image.
  */
 add_action( 'wp', 'noyona_pdp_hide_sale_flash_badge' );
 function noyona_pdp_hide_sale_flash_badge() {
@@ -442,47 +428,41 @@ function noyona_pdp_hide_sale_flash_badge() {
 	remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
 }
 
-add_filter( 'woocommerce_single_product_image_thumbnail_html', 'noyona_pdp_inject_best_seller_into_gallery_image', 10, 2 );
-function noyona_pdp_inject_best_seller_into_gallery_image( $html, $attachment_id ) {
-	static $injected = false;
-
-	if ( $injected ) {
-		return $html;
-	}
-
+function noyona_pdp_should_show_best_seller_badge() {
 	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
-		return $html;
+		return false;
 	}
 
 	global $product;
 	if ( ! $product instanceof WC_Product ) {
-		return $html;
+		return false;
 	}
 
-	if ( ! $product->is_featured() ) {
-		return $html;
-	}
+	return $product->is_featured();
+}
 
-	$main_image_id = (int) $product->get_image_id();
-	if ( $main_image_id < 1 || (int) $attachment_id !== $main_image_id ) {
-		return $html;
-	}
+function noyona_pdp_get_best_seller_badge_html() {
+	return '<span class="noyona-pdp-best-seller-badge">' . esc_html__( 'BEST SELLER', 'viteseo-noyona-childtheme' ) . '</span>';
+}
 
-	$badge = '<span class="noyona-pdp-best-seller-badge">' . esc_html__( 'BEST SELLER', 'viteseo-noyona-childtheme' ) . '</span>';
+add_filter( 'render_block_woocommerce/product-image-gallery', 'noyona_pdp_render_best_seller_gallery_badge', 10, 2 );
+function noyona_pdp_render_best_seller_gallery_badge( $block_content, $block ) {
+	if ( ! noyona_pdp_should_show_best_seller_badge() || strpos( $block_content, 'noyona-pdp-best-seller-badge' ) !== false ) {
+		return $block_content;
+	}
 
 	$replacements = 0;
 	$new_html     = preg_replace(
-		'/(<div\b[^>]*class="[^"]*\bwoocommerce-product-gallery__image\b[^"]*"[^>]*>)/i',
-		'$1' . $badge,
-		$html,
+		'/(<div\b[^>]*class="[^"]*\bwoocommerce-product-gallery\b[^"]*"[^>]*>)/i',
+		'$1' . noyona_pdp_get_best_seller_badge_html(),
+		$block_content,
 		1,
 		$replacements
 	);
 
 	if ( $replacements > 0 && is_string( $new_html ) ) {
-		$injected = true;
 		return $new_html;
 	}
 
-	return $html;
+	return $block_content;
 }
