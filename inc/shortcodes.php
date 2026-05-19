@@ -1498,10 +1498,6 @@ function noyona_render_account_page_shortcode() {
             <div class="noyona-account-hero__identity">
                 <div class="noyona-account-hero__avatar-wrap">
                     <img class="noyona-account-avatar" src="<?php echo esc_url( $avatar_url ); ?>" alt="" loading="lazy" decoding="async" />
-                </div>
-                <div class="noyona-account-hero__meta">
-                    <h2><?php echo esc_html( $full_name ); ?></h2>
-                    <p><?php echo esc_html( $email ); ?></p>
                     <div class="noyona-account-hero__upload-row">
                         <form class="noyona-account-avatar-upload noyona-account-hero__avatar-upload" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data">
                             <?php wp_nonce_field( 'noyona_upload_account_avatar', 'noyona_avatar_nonce', false ); ?>
@@ -1525,6 +1521,10 @@ function noyona_render_account_page_shortcode() {
                             <span><?php esc_html_e( 'File type: JPG, PNG, WEBP', 'noyona-childtheme' ); ?></span>
                         </div>
                     </div>
+                </div>
+                <div class="noyona-account-hero__meta">
+                    <h2><?php echo esc_html( $full_name ); ?></h2>
+                    <p><?php echo esc_html( $email ); ?></p>
                 </div>
             </div>
             <div class="noyona-account-hero__actions">
