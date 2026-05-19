@@ -102,6 +102,60 @@ if (!function_exists('nsl_v2_island_label')) {
     }
 }
 
+if (!function_exists('nsl_v2_coordinates_in_bounds')) {
+    function nsl_v2_coordinates_in_bounds($lat, $lng, $bounds)
+    {
+        return $lat >= $bounds[0] && $lat <= $bounds[1] && $lng >= $bounds[2] && $lng <= $bounds[3];
+    }
+}
+
+if (!function_exists('nsl_v2_coordinates_to_island_key')) {
+    function nsl_v2_coordinates_to_island_key($lat, $lng)
+    {
+        if (!is_numeric($lat) || !is_numeric($lng)) {
+            return '';
+        }
+
+        $lat = (float) $lat;
+        $lng = (float) $lng;
+        if ($lat < 4.0 || $lat > 22.5 || $lng < 116.0 || $lng > 128.5) {
+            return '';
+        }
+
+        $luzon_bounds = array(
+            array(12.0, 21.8, 119.0, 126.8), // Mainland Luzon and Bicol.
+            array(7.4, 13.3, 116.5, 121.8), // MIMAROPA, including Palawan and Mindoro.
+        );
+        foreach ($luzon_bounds as $bounds) {
+            if (nsl_v2_coordinates_in_bounds($lat, $lng, $bounds)) {
+                return 'luzon';
+            }
+        }
+
+        $visayas_bounds = array(
+            array(9.0, 12.4, 121.8, 125.35), // Panay, Negros, Cebu, Bohol, Siquijor, Leyte.
+            array(10.0, 12.8, 125.35, 126.35), // Samar and eastern Leyte.
+        );
+        foreach ($visayas_bounds as $bounds) {
+            if (nsl_v2_coordinates_in_bounds($lat, $lng, $bounds)) {
+                return 'visayas';
+            }
+        }
+
+        $mindanao_bounds = array(
+            array(4.4, 9.99, 121.5, 127.6), // Mindanao mainland and nearby islands.
+            array(9.9, 10.6, 125.2, 126.7), // Dinagat/Surigao island area.
+        );
+        foreach ($mindanao_bounds as $bounds) {
+            if (nsl_v2_coordinates_in_bounds($lat, $lng, $bounds)) {
+                return 'mindanao';
+            }
+        }
+
+        return '';
+    }
+}
+
 if (!function_exists('nsl_v2_region_to_island_key')) {
     function nsl_v2_region_to_island_key($region)
     {
@@ -238,8 +292,26 @@ if (!function_exists('nsl_v2_guess_region')) {
             'Zamboanga Peninsula' => array('zamboanga', 'dipolog', 'pagadian'),
             'Caraga' => array('butuan', 'surigao', 'agusan'),
         );
+        $region_islands = array(
+            'NCR' => 'Luzon',
+            'Central Luzon' => 'Luzon',
+            'CALABARZON' => 'Luzon',
+            'Ilocos' => 'Luzon',
+            'Bicol' => 'Luzon',
+            'Western Visayas' => 'Visayas',
+            'Central Visayas' => 'Visayas',
+            'Eastern Visayas' => 'Visayas',
+            'Davao Region' => 'Mindanao',
+            'Northern Mindanao' => 'Mindanao',
+            'SOCCSKSARGEN' => 'Mindanao',
+            'Zamboanga Peninsula' => 'Mindanao',
+            'Caraga' => 'Mindanao',
+        );
 
         foreach ($region_map as $region => $tokens) {
+            if ($island_group !== '' && isset($region_islands[$region]) && $region_islands[$region] !== $island_group) {
+                continue;
+            }
             foreach ($tokens as $token) {
                 if (strpos($address, $token) !== false) {
                     return $region;
@@ -355,7 +427,10 @@ if ($store_query->have_posts()) {
         }
         $gallery_urls = array_values(array_unique(array_filter($gallery_urls)));
 
-        $island_key = nsl_v2_normalize_island_key(get_post_meta($post_id, '_nsl_island_group', true));
+        $island_key = nsl_v2_coordinates_to_island_key($lat, $lng);
+        if ($island_key === '') {
+            $island_key = nsl_v2_normalize_island_key(get_post_meta($post_id, '_nsl_island_group', true));
+        }
 
         $region = trim((string) get_post_meta($post_id, '_nsl_region', true));
         if ($region === '') {

@@ -118,6 +118,43 @@
     return "";
   }
 
+  function coordinatesInBounds(lat, lng, bounds) {
+    return lat >= bounds[0] && lat <= bounds[1] && lng >= bounds[2] && lng <= bounds[3];
+  }
+
+  function coordinatesToIslandKey(lat, lng) {
+    lat = parseFloat(lat);
+    lng = parseFloat(lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return "";
+    if (lat < 4.0 || lat > 22.5 || lng < 116.0 || lng > 128.5) return "";
+
+    var luzonBounds = [
+      [12.0, 21.8, 119.0, 126.8],
+      [7.4, 13.3, 116.5, 121.8],
+    ];
+    if (luzonBounds.some(function (bounds) { return coordinatesInBounds(lat, lng, bounds); })) {
+      return "luzon";
+    }
+
+    var visayasBounds = [
+      [9.0, 12.4, 121.8, 125.35],
+      [10.0, 12.8, 125.35, 126.35],
+    ];
+    if (visayasBounds.some(function (bounds) { return coordinatesInBounds(lat, lng, bounds); })) {
+      return "visayas";
+    }
+
+    var mindanaoBounds = [
+      [4.4, 9.99, 121.5, 127.6],
+      [9.9, 10.6, 125.2, 126.7],
+    ];
+    if (mindanaoBounds.some(function (bounds) { return coordinatesInBounds(lat, lng, bounds); })) {
+      return "mindanao";
+    }
+
+    return "";
+  }
+
   function regionToIslandKey(value) {
     var region = normalizeLocationText(value);
     if (!region) return "";
@@ -215,6 +252,7 @@
 
   function inferStoreIslandKey(store) {
     return (
+      coordinatesToIslandKey(store.lat, store.lng) ||
       normalizeIslandKey(store.island || store.island_group || store.islandGroup) ||
       regionToIslandKey(store.region || store.regionName) ||
       addressToIslandKey(store.address)
