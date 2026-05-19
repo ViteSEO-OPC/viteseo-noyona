@@ -215,6 +215,14 @@
     border-radius: 12px;
     padding: 11px 12px;
     font-size: 15px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.nsl-v2-search-input:focus-visible {
+    border-color: #E199A4;
+    outline: 2px solid #E199A4;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.14);
 }
 
 .nsl-v2-use-location {
@@ -250,14 +258,21 @@
     flex-direction: column;
     gap: 3px;
     cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease;
 }
 
 .nsl-v2-suggestion-item:last-child {
     border-bottom: 0;
 }
 
-.nsl-v2-suggestion-item:hover {
-    background: #fafafa;
+.nsl-v2-suggestion-item:hover,
+.nsl-v2-suggestion-item:focus-visible {
+    background: #fff1f6;
+    outline: 0;
+}
+
+.nsl-v2-suggestion-item:focus-visible {
+    box-shadow: inset 0 0 0 2px #E199A4;
 }
 
 .nsl-v2-suggestion-title {
@@ -344,6 +359,18 @@
     font-weight: 600;
     cursor: pointer;
     border-bottom: 3px solid transparent;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.nsl-v2-detail-tab:hover {
+    background: #fff1f6;
+    color: #c55c82;
+}
+
+.nsl-v2-detail-tab:focus-visible {
+    outline: 2px solid #E199A4;
+    outline-offset: 2px;
+    background: #fff1f6;
 }
 
 .nsl-v2-detail-tab.is-active {
@@ -646,6 +673,20 @@ body.nsl-v2-review-modal-open {
     color: #fff;
     text-decoration: none;
     font-weight: 600;
+    transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.nsl-v2-directions:hover {
+    background: #c55c82;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(197, 92, 130, 0.22);
+}
+
+.nsl-v2-directions:focus-visible {
+    outline: 2px solid #E199A4;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.18);
 }
 
 .nsl-v2-bottom {
@@ -749,6 +790,7 @@ body.nsl-v2-review-modal-open {
     padding: 8px 10px;
     cursor: pointer;
     color: #333;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .nsl-v2-filter-parent {
@@ -763,7 +805,7 @@ body.nsl-v2-review-modal-open {
     padding: 12px 10px 14px;
     color: #2f2f2f;
     margin-bottom: -1px;
-    transition: color 0.2s ease, border-color 0.2s ease;
+    transition: background-color 0.18s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.18s ease;
 }
 
 .nsl-v2-filter-parent.is-active,
@@ -779,7 +821,37 @@ body.nsl-v2-review-modal-open {
     color: var(--nsl-old-rose);
 }
 
+.nsl-v2-filter-child:hover,
+.nsl-v2-filter-extra:hover {
+    border-color: #E199A4;
+    color: #E199A4;
+    background: #fff1f6;
+    transform: translateY(-1px);
+}
+
 .nsl-v2-parent-filter-list .nsl-v2-filter-parent:hover {
+    background: #fff1f6;
+    color: var(--nsl-old-rose);
+    border-bottom-color: rgba(192, 128, 129, 0.5);
+}
+
+.nsl-v2-filter-parent:focus-visible,
+.nsl-v2-filter-child:focus-visible,
+.nsl-v2-filter-extra:focus-visible {
+    outline: 2px solid #E199A4;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.14);
+}
+
+.nsl-v2-filter-parent.is-active:hover,
+.nsl-v2-filter-child.is-active:hover,
+.nsl-v2-filter-extra.is-active:hover {
+    background: #fff1f6;
+    transform: none;
+}
+
+.nsl-v2-parent-filter-list .nsl-v2-filter-parent.is-active:hover {
+    border-color: var(--nsl-old-rose);
     color: var(--nsl-old-rose);
 }
 
@@ -825,11 +897,19 @@ body.nsl-v2-review-modal-open {
     padding: 0 10px;
     cursor: pointer;
     font-size: 13px;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.nsl-v2-store-pagination__btn:hover {
+.nsl-v2-store-pagination__btn:not([disabled]):hover {
     border-color: #E199A4;
     color: #E199A4;
+    background: #fff1f6;
+}
+
+.nsl-v2-store-pagination__btn:focus-visible {
+    outline: 2px solid #E199A4;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.14);
 }
 
 .nsl-v2-store-pagination__btn.is-active {

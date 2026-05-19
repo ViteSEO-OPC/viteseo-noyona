@@ -817,7 +817,9 @@
       var parentHtml =
         '<button type="button" class="nsl-v2-filter-parent nsl-v2-filter-parent--all' +
         (activeIsland === "all" ? " is-active" : "") +
-        '" data-island="all" data-region="all">All (' +
+        '" data-island="all" data-region="all" aria-pressed="' +
+        (activeIsland === "all" ? "true" : "false") +
+        '">All (' +
         bySearch.length +
         ")</button>";
 
@@ -828,6 +830,8 @@
           (activeIsland === island.key ? " is-active" : "") +
           '" data-island="' +
           escHtml(island.key) +
+          '" aria-pressed="' +
+          (activeIsland === island.key ? "true" : "false") +
           '">' +
           escHtml(island.label) +
           "</button>";
@@ -869,7 +873,9 @@
         (activeRegion === "all" ? " is-active" : "") +
         '" data-island="' +
         escHtml(activeIsland) +
-        '" data-region="all">All ' +
+        '" data-region="all" aria-pressed="' +
+        (activeRegion === "all" ? "true" : "false") +
+        '">All ' +
         escHtml(islandTree.label || islandLabel(activeIsland)) +
         "</button>";
 
@@ -884,6 +890,8 @@
             escHtml(activeIsland) +
             '" data-region="' +
             escHtml(regionKey) +
+            '" aria-pressed="' +
+            (activeRegion === regionKey ? "true" : "false") +
             '">(' +
             region.count +
             ") " +
@@ -921,6 +929,8 @@
             (activeQuickFilter === item.key ? " is-active" : "") +
             '" data-extra-filter="' +
             escHtml(item.key) +
+            '" aria-pressed="' +
+            (activeQuickFilter === item.key ? "true" : "false") +
             '">' +
             escHtml(item.label) +
             "</button>"
@@ -967,6 +977,8 @@
           (pageNo === currentPage ? " is-active" : "") +
           '" data-page="' +
           pageNo +
+          '"' +
+          (pageNo === currentPage ? ' aria-current="page"' : "") +
           '">' +
           pageNo +
           "</button>";
