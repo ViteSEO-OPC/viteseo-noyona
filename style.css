@@ -1793,8 +1793,8 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 
 /* Hero — title, count, horizontal "search again" bar */
 .noyona-product-search-page .noyona-search-hero {
-  margin: 48px 0 36px;
-  padding: 0;
+  /* margin: 48px 0 36px; */
+  padding-top: 48px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
