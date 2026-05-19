@@ -100,12 +100,125 @@
     return String(value || "").trim().toLowerCase();
   }
 
+  function normalizeLocationText(value) {
+    return normalizeFilterValue(value)
+      .replace(/[&\-_\/,.()]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
   function normalizeIslandKey(value) {
-    var key = normalizeFilterValue(value);
+    var key = normalizeLocationText(value);
     if (key === "luzon" || key === "visayas" || key === "mindanao") {
       return key;
     }
+    if (key.indexOf("luzon") !== -1) return "luzon";
+    if (key.indexOf("visayas") !== -1) return "visayas";
+    if (key.indexOf("mindanao") !== -1) return "mindanao";
     return "";
+  }
+
+  function regionToIslandKey(value) {
+    var region = normalizeLocationText(value);
+    if (!region) return "";
+
+    var aliases = {
+      luzon: [
+        "ncr",
+        "national capital region",
+        "metro manila",
+        "car",
+        "cordillera administrative region",
+        "region i",
+        "region 1",
+        "ilocos",
+        "ilocos region",
+        "region ii",
+        "region 2",
+        "cagayan valley",
+        "region iii",
+        "region 3",
+        "central luzon",
+        "region iv a",
+        "region iva",
+        "region 4 a",
+        "calabarzon",
+        "region iv b",
+        "region ivb",
+        "region 4 b",
+        "mimaropa",
+        "region v",
+        "region 5",
+        "bicol",
+        "bicol region",
+        "luzon other",
+      ],
+      visayas: [
+        "region vi",
+        "region 6",
+        "western visayas",
+        "region vii",
+        "region 7",
+        "central visayas",
+        "region viii",
+        "region 8",
+        "eastern visayas",
+        "visayas other",
+      ],
+      mindanao: [
+        "region ix",
+        "region 9",
+        "zamboanga peninsula",
+        "region x",
+        "region 10",
+        "northern mindanao",
+        "region xi",
+        "region 11",
+        "davao region",
+        "region xii",
+        "region 12",
+        "soccsksargen",
+        "region xiii",
+        "region 13",
+        "caraga",
+        "barmm",
+        "bangsamoro autonomous region in muslim mindanao",
+        "mindanao other",
+      ],
+    };
+
+    var haystack = " " + region + " ";
+    return Object.keys(aliases).find(function (island) {
+      return aliases[island].some(function (alias) {
+        alias = normalizeLocationText(alias);
+        return region === alias || haystack.indexOf(" " + alias + " ") !== -1;
+      });
+    }) || "";
+  }
+
+  function addressToIslandKey(value) {
+    var address = normalizeLocationText(value);
+    if (!address) return "";
+
+    var tokens = {
+      visayas: ["cebu", "iloilo", "bacolod", "bohol", "leyte", "samar", "dumaguete", "roxas", "aklan", "antique", "capiz", "guimaras", "negros occidental", "negros oriental", "siquijor", "tacloban", "ormoc"],
+      mindanao: ["davao", "cagayan de oro", "zamboanga", "butuan", "surigao", "cotabato", "general santos", "iligan", "dipolog", "pagadian", "misamis", "bukidnon", "camiguin", "lanao", "agusan", "sarangani", "south cotabato", "sultan kudarat"],
+      luzon: ["manila", "quezon city", "makati", "pasig", "taguig", "pasay", "mandaluyong", "marikina", "caloocan", "muntinlupa", "paranaque", "las pinas", "san juan", "malabon", "navotas", "valenzuela", "pateros", "bulacan", "pampanga", "tarlac", "zambales", "nueva ecija", "aurora", "bataan", "laguna", "cavite", "batangas", "rizal", "quezon province", "ilocos", "la union", "pangasinan", "albay", "camarines", "catanduanes", "masbate", "sorsogon", "palawan", "mindoro", "marinduque", "romblon"],
+    };
+
+    return Object.keys(tokens).find(function (island) {
+      return tokens[island].some(function (token) {
+        return address.indexOf(normalizeLocationText(token)) !== -1;
+      });
+    }) || "";
+  }
+
+  function inferStoreIslandKey(store) {
+    return (
+      normalizeIslandKey(store.island || store.island_group || store.islandGroup) ||
+      regionToIslandKey(store.region || store.regionName) ||
+      addressToIslandKey(store.address)
+    );
   }
 
   function islandLabel(key) {
@@ -312,10 +425,11 @@
       store._statusLabel = computed.label;
       var ratingNum = parseFloat(store.rating);
       store._rating = Number.isFinite(ratingNum) ? ratingNum : 4.5;
-      store._islandKey = normalizeIslandKey(store.island_group);
+      store._islandKey = inferStoreIslandKey(store);
+      store.island = store._islandKey;
       store.island_group = islandLabel(store._islandKey);
-      store.region = String(store.region || "").trim() || "Uncategorized";
-      store._regionKey = normalizeFilterValue(store.region);
+      store.region = String(store.region || store.regionName || "").trim() || "Uncategorized";
+      store._regionKey = normalizeLocationText(store.region);
       return store;
     });
 
@@ -1024,7 +1138,7 @@
       }
 
       if (event.target.classList.contains("nsl-v2-region-select")) {
-        activeRegion = normalizeFilterValue(event.target.value) || "all";
+        activeRegion = normalizeLocationText(event.target.value) || "all";
         currentPage = 1;
         renderFilters();
         renderExtraFilters();
@@ -1060,7 +1174,7 @@
       var filterBtn = event.target.closest(".nsl-v2-filter-parent, .nsl-v2-filter-child");
       if (filterBtn) {
         activeIsland = normalizeIslandSelection(filterBtn.getAttribute("data-island"));
-        activeRegion = normalizeFilterValue(filterBtn.getAttribute("data-region")) || "all";
+        activeRegion = normalizeLocationText(filterBtn.getAttribute("data-region")) || "all";
         currentPage = 1;
         renderFilters();
         renderExtraFilters();
