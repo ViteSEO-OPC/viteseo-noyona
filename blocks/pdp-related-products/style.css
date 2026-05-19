@@ -160,6 +160,19 @@
   justify-content: center;
   text-decoration: none;
   cursor: pointer;
+  transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.noyona-pdp-related__cart-btn:hover,
+.noyona-pdp-related__cart-btn:focus-visible {
+  background: #E199A4;
+  box-shadow: 0 8px 18px rgba(225, 153, 164, 0.28);
+  transform: translateY(-1px);
+}
+
+.noyona-pdp-related__cart-btn:focus-visible {
+  outline: 2px solid #E199A4;
+  outline-offset: 3px;
 }
 
 .noyona-pdp-related__cart-btn::before {
@@ -170,6 +183,13 @@
   background-size: 30px 30px;
   background-position: center;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%23e199a4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='21' r='1'/%3E%3Ccircle cx='20' cy='21' r='1'/%3E%3Cpath d='M1 1h4l2.68 13.39A2 2 0 0 0 9.62 16h9.76a2 2 0 0 0 1.94-1.52L23 6H6'/%3E%3C/svg%3E");
+  transition: filter 0.18s ease, transform 0.18s ease;
+}
+
+.noyona-pdp-related__cart-btn:hover::before,
+.noyona-pdp-related__cart-btn:focus-visible::before {
+  filter: brightness(0) invert(1);
+  transform: scale(0.94);
 }
 
 .noyona-pdp-related .added_to_cart.wc-forward {
