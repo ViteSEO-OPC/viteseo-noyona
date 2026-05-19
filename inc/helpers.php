@@ -416,16 +416,10 @@ function noyona_is_product_search_request() {
 
 /* ----- Stop WP canonical redirect on the product search page ----- */
 /**
- * WordPress' redirect_canonical does two things that break this template:
- *
- *  1. It rewrites `?s=…&paged=N` into a pretty `/page/N/?s=…` URL, which 404s
- *     because the front route has no rewrite for that path.
- *  2. When the resulting `WP_Query` matches exactly one product (e.g. after
- *     a narrow price-range filter), it redirects to that single PDP.
- *
- * Both are unwanted here — the search page must stay on its own route and
- * keep showing the (possibly empty) grid. The filter only kicks in on real
- * product-search requests, so other pages are untouched.
+ * WordPress' redirect_canonical can rewrite `?s=…&paged=N` into a pretty
+ * `/page/N/?s=…` URL, which 404s because the front route has no rewrite for
+ * that path. Disable canonical for product-search requests so the URL stays
+ * exactly as we built it.
  */
 add_filter( 'redirect_canonical', 'noyona_disable_canonical_redirect_on_product_search', 10, 2 );
 function noyona_disable_canonical_redirect_on_product_search( $redirect_url, $requested_url = '' ) {
@@ -433,6 +427,34 @@ function noyona_disable_canonical_redirect_on_product_search( $redirect_url, $re
         return false;
     }
     return $redirect_url;
+}
+
+/* ----- Stop WooCommerce's single-search-result redirect on the search page ----- */
+/**
+ * WooCommerce's wc_template_redirect() (template_redirect priority 10) sends
+ * the visitor to the matching product's PDP whenever a product search returns
+ * exactly one result:
+ *
+ *   if ( is_search() && is_post_type_archive('product')
+ *        && apply_filters('woocommerce_redirect_single_search_result', true)
+ *        && 1 === absint( $wp_query->found_posts ) ) {
+ *       wp_safe_redirect( get_permalink( $product->get_id() ), 302 );
+ *       exit;
+ *   }
+ *
+ * That's a different code path from redirect_canonical, so blocking canonical
+ * alone isn't enough. We force the filter to false on our search route so a
+ * narrow price/stock/category filter that leaves one product still renders as
+ * a single card on the search results page instead of jumping to the PDP.
+ * The filter is gated by noyona_is_product_search_request(), so the shop
+ * archive, category pages, PDP, and header live search are unaffected.
+ */
+add_filter( 'woocommerce_redirect_single_search_result', 'noyona_disable_wc_single_search_redirect_on_product_search', 10, 1 );
+function noyona_disable_wc_single_search_redirect_on_product_search( $enabled ) {
+    if ( noyona_is_product_search_request() ) {
+        return false;
+    }
+    return $enabled;
 }
 
 /* ----- Keep product_cat pills on the search route (don't trigger /shop/{slug}/ redirect) ----- */
