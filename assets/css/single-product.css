@@ -307,15 +307,31 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   white-space: nowrap;
 }
 
-@media (max-width: 640px) {
-  .single-product .wp-block-post-title {
-    padding-right: 0;
+@media (max-width: 781px) {
+  body.single-product .noyona-pdp-column--summary .noyona-pdp-social-proof {
+    box-sizing: border-box;
+    min-height: 42px;
+    padding-right: 3.4rem;
+    display: flex;
+    align-items: center;
+  }
+
+  body.single-product .noyona-pdp-column--summary .noyona-pdp-social-proof__pill {
+    max-width: 100%;
   }
 
   body.single-product .noyona-pdp-wishlist {
-    position: static;
+    position: absolute;
+    top: -0.1rem;
+    right: 0;
     align-items: flex-end;
-    margin: 0 0 0.75rem;
+    margin: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .single-product .wp-block-post-title {
+    padding-right: 0;
   }
 
   body.single-product .noyona-pdp-wishlist-button {
