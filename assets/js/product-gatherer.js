@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ----- Wishlist drawer toggle -----
+    // Temporarily disabled: the header heart now navigates to /my-account/wishlist/.
+    /*
     var wishlistToggle = document.querySelector('.header-wishlist-toggle');
     var wishlistPanel  = document.getElementById('wishlist-panel');
 
@@ -33,4 +35,5 @@ document.addEventListener('DOMContentLoaded', function () {
             closeBtn.addEventListener('click', closeWishlist);
         }
     }
+    */
 });

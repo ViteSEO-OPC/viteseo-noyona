@@ -77,6 +77,8 @@
   */
 
   function initWishlist() {
+    // Wishlist drawer is temporarily disabled; the header heart now links to /my-account/wishlist/.
+    /*
     const panel = $('#wishlist-panel');
     if (!panel) return;
 
@@ -96,6 +98,7 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closePanel();
     });
+    */
   }
 
   function initMiniCartCloseAction() {
