@@ -1985,21 +1985,24 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .noyona-product-search-page .noyona-search-filters__apply {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
-  padding: 0 22px;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 18px;
   border: 0;
   border-radius: 999px;
   background: #E199A4;
   color: #fff;
   font-family: var(--wp--preset--font-family--proxima-nova);
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.15s ease;
@@ -2011,6 +2014,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 .noyona-product-search-page .noyona-search-filters__reset {
+  flex: 0 0 auto;
   color: #9c6470;
   font-family: var(--wp--preset--font-family--proxima-nova);
   font-size: 0.85rem;
@@ -2020,6 +2024,87 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 
 .noyona-product-search-page .noyona-search-filters__reset:hover {
   color: #E199A4;
+}
+
+/* Compact price section inside the search filter card.
+ * The global .noyona-shop-filter-section-price rules size the price block
+ * for the wider shop sidebar; here we scale it down so it fits the 280px
+ * search filter card without overflowing. */
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  letter-spacing: normal;
+  line-height: 1.2;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price {
+  gap: 14px;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-slider {
+  height: 26px;
+  margin: 0 4px;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-track,
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-track-fill {
+  height: 5px;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-thumb {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-inputs {
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-input {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  min-height: 38px;
+  border-width: 1px;
+  padding: 0 10px;
+  border-radius: 999px;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-input > span {
+  margin-right: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-input input {
+  width: 100%;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-separator {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Section heading sized for the compact search filter card */
+.noyona-product-search-page .noyona-shop-filter-section h5 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #E199A4;
+  letter-spacing: normal;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section label {
+  font-size: 15px;
+  margin: 0 0 8px;
 }
 
 /* Scoped checkbox style (search page only) */

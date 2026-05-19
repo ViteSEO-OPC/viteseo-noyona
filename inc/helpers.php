@@ -393,6 +393,34 @@ function noyona_render_product_card( $product ) {
     return trim( (string) $html );
 }
 
+/* ----- Keep product_cat pills on the search route (don't trigger /shop/{slug}/ redirect) ----- */
+/**
+ * When the URL carries both `s=` and `product_cat=` with `post_type=product`, WordPress
+ * resolves the main query as a `product_cat` taxonomy, which makes `is_tax('product_cat')`
+ * true and triggers `noyona_redirect_old_product_category_base()` (in inc/rewrites.php),
+ * sending the visitor to `/shop/{slug}/`. We don't want category pills on the search page
+ * to leave the search route, so we strip `product_cat` from the parsed main-query vars
+ * for that specific case. `$_GET['product_cat']` is untouched, so the shortcode still
+ * reads the slug and applies it via its own WP_Query tax_query.
+ */
+add_filter( 'request', 'noyona_keep_product_search_route_when_filtering_by_category' );
+function noyona_keep_product_search_route_when_filtering_by_category( $query_vars ) {
+    if ( ! is_array( $query_vars ) ) {
+        return $query_vars;
+    }
+    if ( empty( $query_vars['s'] ) ) {
+        return $query_vars;
+    }
+    $post_type = isset( $query_vars['post_type'] ) ? (string) $query_vars['post_type'] : '';
+    if ( 'product' !== $post_type ) {
+        return $query_vars;
+    }
+    if ( isset( $query_vars['product_cat'] ) ) {
+        unset( $query_vars['product_cat'] );
+    }
+    return $query_vars;
+}
+
 /* ----- Product search results page renderer ----- */
 add_shortcode( 'noyona_product_search_page', 'noyona_render_product_search_page_shortcode' );
 function noyona_render_product_search_page_shortcode() {
