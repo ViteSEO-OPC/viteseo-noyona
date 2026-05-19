@@ -1157,6 +1157,379 @@ function noyona_render_account_addresses_card( $args ) {
     return (string) ob_get_clean();
 }
 
+function noyona_get_account_wishlist_url() {
+    if ( function_exists( 'wc_get_account_endpoint_url' ) ) {
+        return (string) wc_get_account_endpoint_url( 'wishlist' );
+    }
+
+    return home_url( '/my-account/wishlist/' );
+}
+
+function noyona_get_wishlist_variation_label( $item, $variation ) {
+    if ( isset( $item['variation_label'] ) && '' !== trim( (string) $item['variation_label'] ) ) {
+        return sanitize_text_field( (string) $item['variation_label'] );
+    }
+
+    if ( ! $variation instanceof WC_Product_Variation ) {
+        return '';
+    }
+
+    $parts      = array();
+    $attributes = (array) $variation->get_variation_attributes();
+    foreach ( $attributes as $attribute_key => $attribute_value ) {
+        $attribute_value = (string) $attribute_value;
+        if ( '' === trim( $attribute_value ) ) {
+            continue;
+        }
+
+        $taxonomy = str_replace( 'attribute_', '', (string) $attribute_key );
+        if ( taxonomy_exists( $taxonomy ) ) {
+            $term = get_term_by( 'slug', $attribute_value, $taxonomy );
+            if ( $term instanceof WP_Term ) {
+                $parts[] = $term->name;
+                continue;
+            }
+        }
+
+        $parts[] = wc_clean( str_replace( '-', ' ', $attribute_value ) );
+    }
+
+    return implode( ', ', array_unique( array_filter( $parts ) ) );
+}
+
+function noyona_get_account_wishlist_rows( $items ) {
+    $rows = array();
+    foreach ( (array) $items as $item ) {
+        if ( ! is_array( $item ) || ! function_exists( 'wc_get_product' ) ) {
+            continue;
+        }
+
+        $product_id   = isset( $item['product_id'] ) ? absint( $item['product_id'] ) : 0;
+        $variation_id = isset( $item['variation_id'] ) ? absint( $item['variation_id'] ) : 0;
+        $product      = $product_id > 0 ? wc_get_product( $product_id ) : null;
+        $variation    = $variation_id > 0 ? wc_get_product( $variation_id ) : null;
+        if ( ! $product instanceof WC_Product ) {
+            continue;
+        }
+        if ( ! $variation instanceof WC_Product_Variation ) {
+            $variation    = null;
+            $variation_id = 0;
+        }
+
+        $display_product = $variation instanceof WC_Product_Variation ? $variation : $product;
+        $title           = $product->get_name();
+        $image_html      = $display_product->get_image(
+            'thumbnail',
+            array(
+                'class'    => 'noyona-account-wishlist-product__thumb',
+                'loading'  => 'lazy',
+                'decoding' => 'async',
+            )
+        );
+        if ( '' === trim( (string) $image_html ) ) {
+            $image_html = $product->get_image(
+                'thumbnail',
+                array(
+                    'class'    => 'noyona-account-wishlist-product__thumb',
+                    'loading'  => 'lazy',
+                    'decoding' => 'async',
+                )
+            );
+        }
+
+        $price_html      = $display_product->get_price_html();
+        $price_sort      = (float) $display_product->get_price();
+        $variation_label = noyona_get_wishlist_variation_label( $item, $variation );
+        $is_in_stock     = $display_product->is_in_stock();
+        $is_purchasable  = $display_product->is_purchasable() && $is_in_stock;
+
+        $add_to_cart_url     = '';
+        $add_to_cart_text    = __( 'Add to Cart', 'noyona-childtheme' );
+        $add_to_cart_classes = 'noyona-account-btn noyona-account-btn--primary noyona-account-wishlist-add';
+        $add_to_cart_data    = array();
+
+        if ( ! $is_in_stock ) {
+            $add_to_cart_text = __( 'Out of Stock', 'noyona-childtheme' );
+        } elseif ( $variation instanceof WC_Product_Variation ) {
+            $variation_attributes = (array) $variation->get_variation_attributes();
+            if ( ! empty( $variation_attributes ) ) {
+                $query_args = array(
+                    'add-to-cart'  => (int) $product->get_id(),
+                    'variation_id' => (int) $variation->get_id(),
+                    'quantity'     => 1,
+                );
+                foreach ( $variation_attributes as $attribute_key => $attribute_value ) {
+                    $attribute_key = sanitize_key( (string) $attribute_key );
+                    if ( '' !== $attribute_key && '' !== (string) $attribute_value ) {
+                        $query_args[ $attribute_key ] = (string) $attribute_value;
+                    }
+                }
+                $add_to_cart_url = add_query_arg( $query_args, function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) );
+            } else {
+                $add_to_cart_url  = $product->get_permalink();
+                $add_to_cart_text = __( 'Select Options', 'noyona-childtheme' );
+            }
+        } elseif ( $product->is_type( 'simple' ) && $is_purchasable ) {
+            $add_to_cart_url = $product->add_to_cart_url();
+            if ( $product->supports( 'ajax_add_to_cart' ) ) {
+                $add_to_cart_classes .= ' add_to_cart_button ajax_add_to_cart';
+                $add_to_cart_data['product_id'] = (int) $product->get_id();
+                $add_to_cart_data['quantity']   = 1;
+            }
+        } else {
+            $add_to_cart_url  = $product->get_permalink();
+            $add_to_cart_text = $product->is_type( 'variable' ) ? __( 'Select Options', 'noyona-childtheme' ) : $product->add_to_cart_text();
+        }
+
+        $rows[] = array(
+            'product_id'          => (int) $product->get_id(),
+            'variation_id'        => (int) $variation_id,
+            'title'               => (string) $title,
+            'permalink'           => (string) $product->get_permalink(),
+            'image_html'          => (string) $image_html,
+            'variation_label'     => (string) $variation_label,
+            'price_html'          => (string) $price_html,
+            'price_sort'          => $price_sort,
+            'is_in_stock'         => (bool) $is_in_stock,
+            'is_purchasable'      => (bool) $is_purchasable,
+            'add_to_cart_url'     => (string) $add_to_cart_url,
+            'add_to_cart_text'    => (string) $add_to_cart_text,
+            'add_to_cart_classes' => (string) $add_to_cart_classes,
+            'add_to_cart_data'    => $add_to_cart_data,
+            'added_at'            => isset( $item['added_at'] ) ? absint( $item['added_at'] ) : 0,
+        );
+    }
+
+    return $rows;
+}
+
+function noyona_sort_account_wishlist_rows( $rows, $sort ) {
+    $sort = sanitize_key( (string) $sort );
+    if ( 'default' === $sort || '' === $sort ) {
+        return $rows;
+    }
+
+    usort(
+        $rows,
+        static function ( $a, $b ) use ( $sort ) {
+            if ( 'newest' === $sort ) {
+                return absint( $b['added_at'] ) <=> absint( $a['added_at'] );
+            }
+            if ( 'price_asc' === $sort ) {
+                return (float) $a['price_sort'] <=> (float) $b['price_sort'];
+            }
+            if ( 'price_desc' === $sort ) {
+                return (float) $b['price_sort'] <=> (float) $a['price_sort'];
+            }
+            if ( 'in_stock' === $sort ) {
+                return (int) $b['is_in_stock'] <=> (int) $a['is_in_stock'];
+            }
+            if ( 'name_asc' === $sort ) {
+                return strcasecmp( (string) $a['title'], (string) $b['title'] );
+            }
+            return 0;
+        }
+    );
+
+    return $rows;
+}
+
+function noyona_render_account_wishlist_card( $args ) {
+    $args = wp_parse_args(
+        (array) $args,
+        array(
+            'rows'          => array(),
+            'wishlist_url'  => noyona_get_account_wishlist_url(),
+            'selected_sort' => 'default',
+            'current_page'  => 1,
+            'total_pages'   => 1,
+            'notice_code'   => '',
+        )
+    );
+
+    $rows          = is_array( $args['rows'] ) ? $args['rows'] : array();
+    $wishlist_url  = (string) $args['wishlist_url'];
+    $selected_sort = sanitize_key( (string) $args['selected_sort'] );
+    $current_page  = max( 1, absint( $args['current_page'] ) );
+    $total_pages   = max( 1, absint( $args['total_pages'] ) );
+    $notice_code   = sanitize_key( (string) $args['notice_code'] );
+    $sort_options  = array(
+        'default'    => __( 'Default', 'noyona-childtheme' ),
+        'newest'     => __( 'Newest', 'noyona-childtheme' ),
+        'price_asc'  => __( 'Price: Low to High', 'noyona-childtheme' ),
+        'price_desc' => __( 'Price: High to Low', 'noyona-childtheme' ),
+        'in_stock'   => __( 'In Stock First', 'noyona-childtheme' ),
+        'name_asc'   => __( 'Product Name A-Z', 'noyona-childtheme' ),
+    );
+    if ( ! isset( $sort_options[ $selected_sort ] ) ) {
+        $selected_sort = 'default';
+    }
+
+    $notice_message = '';
+    $notice_type    = 'success';
+    if ( 'removed' === $notice_code ) {
+        $notice_message = __( 'Wishlist item removed.', 'noyona-childtheme' );
+    } elseif ( 'not_found' === $notice_code ) {
+        $notice_type    = 'error';
+        $notice_message = __( 'Wishlist item could not be found.', 'noyona-childtheme' );
+    } elseif ( 'invalid_nonce' === $notice_code ) {
+        $notice_type    = 'error';
+        $notice_message = __( 'Session expired. Please try again.', 'noyona-childtheme' );
+    }
+
+    ob_start();
+    ?>
+    <section id="noyona-account-wishlist-panel" class="noyona-account-profile-card noyona-account-wishlist-card">
+        <header class="noyona-account-profile-card__head noyona-account-wishlist-header">
+            <div>
+                <h3><?php esc_html_e( 'My Wishlist', 'noyona-childtheme' ); ?></h3>
+                <p><?php esc_html_e( 'View and manage your wishlist items', 'noyona-childtheme' ); ?></p>
+            </div>
+            <form class="noyona-account-wishlist-sort" method="get" action="<?php echo esc_url( $wishlist_url ); ?>">
+                <label for="noyona-account-wishlist-sort"><?php esc_html_e( 'Sort by', 'noyona-childtheme' ); ?></label>
+                <select id="noyona-account-wishlist-sort" name="wishlist_sort" onchange="this.form.submit()">
+                    <?php foreach ( $sort_options as $sort_key => $sort_label ) : ?>
+                        <option value="<?php echo esc_attr( $sort_key ); ?>" <?php selected( $selected_sort, $sort_key ); ?>>
+                            <?php echo esc_html( $sort_label ); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
+        </header>
+
+        <?php if ( '' !== $notice_message ) : ?>
+            <p class="noyona-account-wishlist-notice<?php echo ( 'success' === $notice_type ) ? ' is-success' : ' is-error'; ?>">
+                <?php echo esc_html( $notice_message ); ?>
+            </p>
+        <?php endif; ?>
+
+        <?php if ( empty( $rows ) ) : ?>
+            <div class="noyona-account-wishlist-empty">
+                <i class="fa-regular fa-heart" aria-hidden="true"></i>
+                <p><?php esc_html_e( 'No wishlist items yet.', 'noyona-childtheme' ); ?></p>
+            </div>
+        <?php else : ?>
+            <div class="noyona-account-wishlist-table-wrap">
+                <table class="noyona-account-wishlist-table">
+                    <thead>
+                        <tr>
+                            <th scope="col"><?php esc_html_e( 'Product Name', 'noyona-childtheme' ); ?></th>
+                            <th scope="col"><?php esc_html_e( 'Unit Price', 'noyona-childtheme' ); ?></th>
+                            <th scope="col"><?php esc_html_e( 'Stock Status', 'noyona-childtheme' ); ?></th>
+                            <th scope="col"><?php esc_html_e( 'Actions', 'noyona-childtheme' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ( $rows as $row ) : ?>
+                            <?php
+                            $remove_url = wp_nonce_url(
+                                add_query_arg(
+                                    array(
+                                        'action'       => 'noyona_remove_wishlist_item',
+                                        'product_id'   => absint( $row['product_id'] ),
+                                        'variation_id' => absint( $row['variation_id'] ),
+                                        'redirect_to'  => add_query_arg(
+                                            array(
+                                                'wishlist_sort' => $selected_sort,
+                                                'wishlist_page' => $current_page,
+                                            ),
+                                            $wishlist_url
+                                        ),
+                                    ),
+                                    admin_url( 'admin-post.php' )
+                                ),
+                                'noyona_remove_wishlist_item_' . absint( $row['product_id'] ) . '_' . absint( $row['variation_id'] )
+                            );
+                            ?>
+                            <tr>
+                                <td>
+                                    <div class="noyona-account-wishlist-product">
+                                        <a class="noyona-account-wishlist-product__media" href="<?php echo esc_url( (string) $row['permalink'] ); ?>">
+                                            <?php echo $row['image_html']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        </a>
+                                        <span class="noyona-account-wishlist-product__meta">
+                                            <a class="noyona-account-wishlist-product__name" href="<?php echo esc_url( (string) $row['permalink'] ); ?>">
+                                                <?php echo esc_html( (string) $row['title'] ); ?>
+                                            </a>
+                                            <?php if ( '' !== trim( (string) $row['variation_label'] ) ) : ?>
+                                                <small><?php printf( esc_html__( 'Variation: %s', 'noyona-childtheme' ), esc_html( (string) $row['variation_label'] ) ); ?></small>
+                                            <?php endif; ?>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="noyona-account-wishlist-price"><?php echo wp_kses_post( (string) $row['price_html'] ); ?></td>
+                                <td>
+                                    <span class="noyona-account-wishlist-status<?php echo ! empty( $row['is_in_stock'] ) ? ' is-in-stock' : ' is-out-of-stock'; ?>">
+                                        <?php echo ! empty( $row['is_in_stock'] ) ? esc_html__( 'In Stock', 'noyona-childtheme' ) : esc_html__( 'Out of Stock', 'noyona-childtheme' ); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="noyona-account-wishlist-actions">
+                                        <?php if ( ! empty( $row['is_in_stock'] ) && '' !== trim( (string) $row['add_to_cart_url'] ) ) : ?>
+                                            <a
+                                                class="<?php echo esc_attr( (string) $row['add_to_cart_classes'] ); ?>"
+                                                href="<?php echo esc_url( (string) $row['add_to_cart_url'] ); ?>"
+                                                <?php foreach ( (array) $row['add_to_cart_data'] as $data_key => $data_value ) : ?>
+                                                    data-<?php echo esc_attr( (string) $data_key ); ?>="<?php echo esc_attr( (string) $data_value ); ?>"
+                                                <?php endforeach; ?>
+                                            >
+                                                <?php echo esc_html( (string) $row['add_to_cart_text'] ); ?>
+                                            </a>
+                                        <?php else : ?>
+                                            <span class="noyona-account-btn noyona-account-btn--ghost noyona-account-wishlist-add is-disabled" aria-disabled="true">
+                                                <?php echo esc_html( (string) $row['add_to_cart_text'] ); ?>
+                                            </span>
+                                        <?php endif; ?>
+                                        <a class="noyona-account-wishlist-remove" href="<?php echo esc_url( $remove_url ); ?>" onclick="return window.confirm('<?php echo esc_js( __( 'Remove this item from your wishlist?', 'noyona-childtheme' ) ); ?>');" aria-label="<?php esc_attr_e( 'Remove wishlist item', 'noyona-childtheme' ); ?>">
+                                            <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php
+            if ( $total_pages > 1 ) :
+                $wishlist_pagination_links = paginate_links(
+                    array(
+                        'base'      => add_query_arg(
+                            array(
+                                'wishlist_page' => '%#%',
+                                'wishlist_sort' => $selected_sort,
+                            ),
+                            $wishlist_url
+                        ),
+                        'format'    => '',
+                        'current'   => $current_page,
+                        'total'     => $total_pages,
+                        'mid_size'  => 1,
+                        'end_size'  => 1,
+                        'prev_next' => true,
+                        'prev_text' => '&lsaquo;',
+                        'next_text' => '&rsaquo;',
+                        'type'      => 'array',
+                    )
+                );
+                if ( is_array( $wishlist_pagination_links ) && ! empty( $wishlist_pagination_links ) ) :
+                    ?>
+                    <nav class="noyona-account-wishlist-pagination" aria-label="<?php esc_attr_e( 'Wishlist pagination', 'noyona-childtheme' ); ?>">
+                        <?php foreach ( $wishlist_pagination_links as $wishlist_link ) : ?>
+                            <?php echo wp_kses_post( $wishlist_link ); ?>
+                        <?php endforeach; ?>
+                    </nav>
+                    <?php
+                endif;
+            endif;
+            ?>
+        <?php endif; ?>
+    </section>
+    <?php
+
+    return (string) ob_get_clean();
+}
+
 /* ----- [noyona_account_page] shortcode (renderer + cleanup) ----- */
 add_shortcode( 'noyona_account_page', 'noyona_render_account_page_shortcode' );
 function noyona_render_account_page_shortcode() {
@@ -1179,11 +1552,14 @@ function noyona_render_account_page_shortcode() {
     }
 
     $is_orders_endpoint    = function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'orders' );
+    $is_wishlist_endpoint  = function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'wishlist' );
     $is_addresses_endpoint = function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'edit-address' );
     $is_payment_methods_endpoint = function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'payment-methods' );
     $is_payments_endpoint        = $show_payments_tab && $is_payment_methods_endpoint;
     if ( $is_orders_endpoint ) {
         $active_tab = 'orders';
+    } elseif ( $is_wishlist_endpoint ) {
+        $active_tab = 'wishlist';
     } elseif ( $is_addresses_endpoint ) {
         $active_tab = 'addresses';
     } elseif ( $is_payments_endpoint ) {
@@ -1196,7 +1572,7 @@ function noyona_render_account_page_shortcode() {
     }
 
     // Keep other Woo endpoint pages functional (addresses, payment methods, edit account, etc.).
-    if ( $has_endpoint && ! $is_orders_endpoint && ! $is_addresses_endpoint && ! $is_payments_endpoint ) {
+    if ( $has_endpoint && ! $is_orders_endpoint && ! $is_wishlist_endpoint && ! $is_addresses_endpoint && ! $is_payments_endpoint ) {
         return do_shortcode( '[woocommerce_my_account]' );
     }
 
@@ -1226,11 +1602,12 @@ function noyona_render_account_page_shortcode() {
 
     $account_url = noyona_get_account_page_url();
     $orders_url = function_exists( 'wc_get_account_endpoint_url' ) ? wc_get_account_endpoint_url( 'orders' ) : home_url( '/my-account/orders/' );
+    $wishlist_url = noyona_get_account_wishlist_url();
     $addresses_url = noyona_get_account_addresses_url();
     $payments_url = noyona_get_account_payments_url();
     $logout_url = function_exists( 'wc_logout_url' ) ? wc_logout_url( $account_url ) : wp_logout_url( $account_url );
-    $hero_primary_url   = ( 'orders' === $active_tab ) ? $account_url : $orders_url;
-    $hero_primary_label = ( 'orders' === $active_tab )
+    $hero_primary_url   = in_array( $active_tab, array( 'orders', 'wishlist' ), true ) ? $account_url : $orders_url;
+    $hero_primary_label = in_array( $active_tab, array( 'orders', 'wishlist' ), true )
         ? __( 'My Profile', 'noyona-childtheme' )
         : __( 'My Orders', 'noyona-childtheme' );
     $address_return_url = ( 'profile' === $active_tab ) ? $account_url : $addresses_url;
@@ -1477,6 +1854,29 @@ function noyona_render_account_page_shortcode() {
         }
     }
 
+    $wishlist_sort = isset( $_GET['wishlist_sort'] ) ? sanitize_key( wp_unslash( $_GET['wishlist_sort'] ) ) : 'default';
+    $allowed_wishlist_sorts = array( 'default', 'newest', 'price_asc', 'price_desc', 'in_stock', 'name_asc' );
+    if ( ! in_array( $wishlist_sort, $allowed_wishlist_sorts, true ) ) {
+        $wishlist_sort = 'default';
+    }
+    $wishlist_page = isset( $_GET['wishlist_page'] ) ? absint( wp_unslash( $_GET['wishlist_page'] ) ) : 1;
+    if ( $wishlist_page < 1 ) {
+        $wishlist_page = 1;
+    }
+    $wishlist_per_page = 8;
+    $wishlist_rows = array();
+    $wishlist_total_pages = 1;
+    if ( 'wishlist' === $active_tab && function_exists( 'noyona_get_product_wishlist_items' ) ) {
+        $wishlist_items = noyona_get_product_wishlist_items( (int) $current_user->ID );
+        $wishlist_rows  = noyona_get_account_wishlist_rows( $wishlist_items );
+        $wishlist_rows  = noyona_sort_account_wishlist_rows( $wishlist_rows, $wishlist_sort );
+        $wishlist_total_pages = max( 1, (int) ceil( count( $wishlist_rows ) / $wishlist_per_page ) );
+        if ( $wishlist_page > $wishlist_total_pages ) {
+            $wishlist_page = $wishlist_total_pages;
+        }
+        $wishlist_rows = array_slice( $wishlist_rows, ( $wishlist_page - 1 ) * $wishlist_per_page, $wishlist_per_page );
+    }
+
     $address_card_args = array(
         'account_addresses'     => $account_addresses,
         'address_form_data'     => $address_form_data,
@@ -1489,6 +1889,15 @@ function noyona_render_account_page_shortcode() {
         'is_address_modal_open' => $is_address_modal_open,
         'full_name'             => $full_name,
         'phone'                 => $phone,
+    );
+
+    $wishlist_card_args = array(
+        'rows'          => $wishlist_rows,
+        'wishlist_url'  => $wishlist_url,
+        'selected_sort' => $wishlist_sort,
+        'current_page'  => $wishlist_page,
+        'total_pages'   => $wishlist_total_pages,
+        'notice_code'   => isset( $_GET['noyona_wishlist_notice'] ) ? sanitize_key( wp_unslash( $_GET['noyona_wishlist_notice'] ) ) : '',
     );
 
     ob_start();
@@ -1995,6 +2404,8 @@ function noyona_render_account_page_shortcode() {
             endif;
             ?>
         </section>
+        <?php elseif ( 'wishlist' === $active_tab ) : ?>
+            <?php echo noyona_render_account_wishlist_card( $wishlist_card_args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php elseif ( 'addresses' === $active_tab ) : ?>
         <section class="noyona-account-profile-card noyona-account-addresses-card">
             <header class="noyona-account-profile-card__head noyona-account-addresses-card__head">

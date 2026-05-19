@@ -2715,6 +2715,272 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	background: #fff5f8;
 }
 
+.noyona-account-wishlist-card {
+	padding: 28px 32px 30px;
+}
+
+.noyona-account-wishlist-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 18px;
+	flex-wrap: wrap;
+}
+
+.noyona-account-wishlist-sort {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+}
+
+.noyona-account-wishlist-sort label {
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 600;
+	color: #777;
+	white-space: nowrap;
+}
+
+.noyona-account-wishlist-sort select {
+	min-width: 190px;
+	height: 38px;
+	padding: 0 36px 0 14px;
+	border: 1px solid #efd0d7;
+	border-radius: 999px;
+	background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'><path fill='none' stroke='%23dd93a2' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5l5 5 5-5'/></svg>") no-repeat right 14px center / 12px 8px;
+	appearance: none;
+	color: #444;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.76);
+	font-weight: 600;
+}
+
+.noyona-account-wishlist-notice {
+	margin: 14px 0 0;
+	padding: 10px 14px;
+	border-radius: 12px;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 600;
+}
+
+.noyona-account-wishlist-notice.is-success {
+	background: #edf9f1;
+	color: #256743;
+	border: 1px solid #cde9d7;
+}
+
+.noyona-account-wishlist-notice.is-error {
+	background: #fff1f2;
+	color: #9f3f4d;
+	border: 1px solid #f2ccd3;
+}
+
+.noyona-account-wishlist-empty {
+	margin-top: 22px;
+	min-height: 180px;
+	border: 1px dashed #f0cfd7;
+	border-radius: 18px;
+	display: grid;
+	place-items: center;
+	align-content: center;
+	gap: 10px;
+	color: #d78d9c;
+	background: #fffafd;
+	text-align: center;
+}
+
+.noyona-account-wishlist-empty i {
+	font-size: 28px;
+}
+
+.noyona-account-wishlist-empty p {
+	margin: 0;
+	color: #777;
+	font-weight: 600;
+}
+
+.noyona-account-wishlist-table-wrap {
+	margin-top: 18px;
+	overflow-x: auto;
+}
+
+.noyona-account-wishlist-table {
+	width: 100%;
+	min-width: 820px;
+	border-collapse: collapse;
+}
+
+.noyona-account-wishlist-table thead th {
+	padding: 12px 10px;
+	border-bottom: 1px solid #ece8ea;
+	text-align: left;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 700;
+	color: #4c4c4c;
+	white-space: nowrap;
+}
+
+.noyona-account-wishlist-table tbody td {
+	padding: 14px 10px;
+	border-bottom: 1px solid #f1eef0;
+	vertical-align: middle;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.76);
+	font-weight: 600;
+	color: #2a2a2a;
+}
+
+.noyona-account-wishlist-product {
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+	min-width: 280px;
+}
+
+.noyona-account-wishlist-product__media {
+	flex: 0 0 auto;
+	width: 58px;
+	height: 58px;
+	border-radius: 12px;
+	overflow: hidden;
+	background: #faf6f8;
+}
+
+.noyona-account-wishlist-product__thumb {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.noyona-account-wishlist-product__meta {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.noyona-account-wishlist-product__name {
+	color: #1d1d1d;
+	text-decoration: none !important;
+	font-weight: 700;
+}
+
+.noyona-account-wishlist-product__name:hover {
+	color: #d78d9c;
+}
+
+.noyona-account-wishlist-product__meta small {
+	color: #777;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.68);
+	font-weight: 500;
+}
+
+.noyona-account-wishlist-price {
+	color: #e39cab;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.noyona-account-wishlist-status {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 24px;
+	padding: 0 11px;
+	border-radius: 999px;
+	border: 1px solid transparent;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.64);
+	font-weight: 700;
+	line-height: 1;
+	white-space: nowrap;
+}
+
+.noyona-account-wishlist-status.is-in-stock {
+	background: #ecfaf1;
+	border-color: #ccebd8;
+	color: #24814f;
+}
+
+.noyona-account-wishlist-status.is-out-of-stock {
+	background: #fff1f2;
+	border-color: #f2ccd3;
+	color: #9f3f4d;
+}
+
+.noyona-account-wishlist-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	white-space: nowrap;
+}
+
+.noyona-account-wishlist-actions .noyona-account-wishlist-add {
+	width: auto;
+	min-width: 132px;
+	min-height: 36px;
+	padding: 0 16px;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+}
+
+.noyona-account-wishlist-add.is-disabled {
+	cursor: not-allowed;
+	opacity: 0.72;
+}
+
+.noyona-account-wishlist-remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 999px;
+	border: 1px solid #f0ccd4;
+	background: #fff;
+	color: #dc8ea0;
+	text-decoration: none !important;
+	transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.noyona-account-wishlist-remove:hover {
+	transform: translateY(-1px);
+	background: #fff5f7;
+	border-color: #e9b4bf;
+}
+
+.noyona-account-wishlist-pagination {
+	margin-top: 18px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+}
+
+.noyona-account-wishlist-pagination .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 30px;
+	height: 30px;
+	padding: 0 8px;
+	border-radius: 999px;
+	border: 1px solid transparent;
+	color: #d6909f;
+	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.noyona-account-wishlist-pagination .page-numbers.current {
+	background: #e39cab;
+	border-color: #e39cab;
+	color: #fff;
+	box-shadow: 0 8px 16px rgba(227, 156, 171, 0.32);
+}
+
+.noyona-account-wishlist-pagination a.page-numbers:hover {
+	border-color: #efc0cb;
+	background: #fff5f8;
+}
+
 .noyona-account-addresses-card {
 	padding: 24px 30px 30px;
 	overflow: hidden;
@@ -3568,6 +3834,15 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 		min-width: 0;
 	}
 
+	.noyona-account-wishlist-header {
+		flex-direction: column;
+	}
+
+	.noyona-account-wishlist-sort {
+		width: 100%;
+		justify-content: space-between;
+	}
+
 }
 
 @media (max-width: 640px) {
@@ -3672,6 +3947,20 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 
 	.noyona-account-payment-item {
 		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.noyona-account-wishlist-card {
+		padding: 18px;
+	}
+
+	.noyona-account-wishlist-sort {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.noyona-account-wishlist-sort select {
+		width: 100%;
+		min-width: 0;
 	}
 
 	.noyona-account-modal-form__row {

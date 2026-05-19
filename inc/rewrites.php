@@ -7,6 +7,18 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+/* ----- WooCommerce My Account endpoints ----- */
+add_action( 'init', 'noyona_register_account_wishlist_endpoint', 9 );
+function noyona_register_account_wishlist_endpoint() {
+    add_rewrite_endpoint( 'wishlist', EP_ROOT | EP_PAGES );
+}
+
+add_filter( 'woocommerce_get_query_vars', 'noyona_add_account_wishlist_query_var' );
+function noyona_add_account_wishlist_query_var( $query_vars ) {
+    $query_vars['wishlist'] = 'wishlist';
+    return $query_vars;
+}
+
 /* ----- Product category URLs under /shop/{slug}/ ----- */
 /**
  * Product category URLs under /shop/{slug}/ to avoid collision with regular pages like /eyes/.
@@ -40,8 +52,22 @@ function noyona_product_cat_term_link_to_shop_base( $url, $term, $taxonomy ) {
 /* ----- Flush rewrite rules on theme switch ----- */
 add_action( 'after_switch_theme', 'noyona_flush_rewrite_rules_on_switch' );
 function noyona_flush_rewrite_rules_on_switch() {
+    noyona_register_account_wishlist_endpoint();
     noyona_register_shop_category_rewrites();
     flush_rewrite_rules();
+}
+
+/* ----- One-time flush for My Account wishlist endpoint ----- */
+add_action( 'init', 'noyona_maybe_flush_account_wishlist_endpoint', 21 );
+function noyona_maybe_flush_account_wishlist_endpoint() {
+    $version = get_option( 'noyona_account_wishlist_endpoint_version', '' );
+    if ( '1' === $version ) {
+        return;
+    }
+
+    noyona_register_account_wishlist_endpoint();
+    flush_rewrite_rules( false );
+    update_option( 'noyona_account_wishlist_endpoint_version', '1', false );
 }
 
 /* ----- One-time flush for shop category rewrites ----- */
