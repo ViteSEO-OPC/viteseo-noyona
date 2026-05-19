@@ -122,6 +122,15 @@ if (!function_exists('nsl_v2_coordinates_to_island_key')) {
             return '';
         }
 
+        $samar_bounds = array(
+            array(10.7, 12.8, 124.0, 126.4), // Samar, Eastern Samar, Northern Samar, and nearby Eastern Visayas.
+        );
+        foreach ($samar_bounds as $bounds) {
+            if (nsl_v2_coordinates_in_bounds($lat, $lng, $bounds)) {
+                return 'visayas';
+            }
+        }
+
         $luzon_bounds = array(
             array(12.0, 21.8, 119.0, 126.8), // Mainland Luzon and Bicol.
             array(7.4, 13.3, 116.5, 121.8), // MIMAROPA, including Palawan and Mindoro.
@@ -252,7 +261,7 @@ if (!function_exists('nsl_v2_address_to_island_key')) {
         }
 
         $token_map = array(
-            'visayas' => array('cebu', 'iloilo', 'bacolod', 'bohol', 'leyte', 'samar', 'dumaguete', 'roxas', 'aklan', 'antique', 'capiz', 'guimaras', 'negros occidental', 'negros oriental', 'siquijor', 'tacloban', 'ormoc'),
+            'visayas' => array('cebu', 'iloilo', 'bacolod', 'bohol', 'leyte', 'samar', 'eastern samar', 'northern samar', 'western samar', 'calbayog', 'catarman', 'dolores eastern samar', 'dumaguete', 'roxas', 'aklan', 'antique', 'capiz', 'guimaras', 'negros occidental', 'negros oriental', 'siquijor', 'tacloban', 'ormoc'),
             'mindanao' => array('davao', 'cagayan de oro', 'zamboanga', 'butuan', 'surigao', 'cotabato', 'general santos', 'iligan', 'dipolog', 'pagadian', 'misamis', 'bukidnon', 'camiguin', 'lanao', 'agusan', 'sarangani', 'south cotabato', 'sultan kudarat'),
             'luzon' => array('manila', 'quezon city', 'makati', 'pasig', 'taguig', 'pasay', 'mandaluyong', 'marikina', 'caloocan', 'muntinlupa', 'paranaque', 'las pinas', 'san juan', 'malabon', 'navotas', 'valenzuela', 'pateros', 'bulacan', 'pampanga', 'tarlac', 'zambales', 'nueva ecija', 'aurora', 'bataan', 'laguna', 'cavite', 'batangas', 'rizal', 'quezon province', 'ilocos', 'la union', 'pangasinan', 'albay', 'camarines', 'catanduanes', 'masbate', 'sorsogon', 'palawan', 'mindoro', 'marinduque', 'romblon'),
         );

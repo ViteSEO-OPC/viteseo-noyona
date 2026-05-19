@@ -128,6 +128,13 @@
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return "";
     if (lat < 4.0 || lat > 22.5 || lng < 116.0 || lng > 128.5) return "";
 
+    var samarBounds = [
+      [10.7, 12.8, 124.0, 126.4],
+    ];
+    if (samarBounds.some(function (bounds) { return coordinatesInBounds(lat, lng, bounds); })) {
+      return "visayas";
+    }
+
     var luzonBounds = [
       [12.0, 21.8, 119.0, 126.8],
       [7.4, 13.3, 116.5, 121.8],
@@ -238,7 +245,7 @@
     if (!address) return "";
 
     var tokens = {
-      visayas: ["cebu", "iloilo", "bacolod", "bohol", "leyte", "samar", "dumaguete", "roxas", "aklan", "antique", "capiz", "guimaras", "negros occidental", "negros oriental", "siquijor", "tacloban", "ormoc"],
+      visayas: ["cebu", "iloilo", "bacolod", "bohol", "leyte", "samar", "eastern samar", "northern samar", "western samar", "calbayog", "catarman", "dolores eastern samar", "dumaguete", "roxas", "aklan", "antique", "capiz", "guimaras", "negros occidental", "negros oriental", "siquijor", "tacloban", "ormoc"],
       mindanao: ["davao", "cagayan de oro", "zamboanga", "butuan", "surigao", "cotabato", "general santos", "iligan", "dipolog", "pagadian", "misamis", "bukidnon", "camiguin", "lanao", "agusan", "sarangani", "south cotabato", "sultan kudarat"],
       luzon: ["manila", "quezon city", "makati", "pasig", "taguig", "pasay", "mandaluyong", "marikina", "caloocan", "muntinlupa", "paranaque", "las pinas", "san juan", "malabon", "navotas", "valenzuela", "pateros", "bulacan", "pampanga", "tarlac", "zambales", "nueva ecija", "aurora", "bataan", "laguna", "cavite", "batangas", "rizal", "quezon province", "ilocos", "la union", "pangasinan", "albay", "camarines", "catanduanes", "masbate", "sorsogon", "palawan", "mindoro", "marinduque", "romblon"],
     };
