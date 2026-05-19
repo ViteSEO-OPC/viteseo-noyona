@@ -64,6 +64,10 @@ function noyona_get_product_wishlist_meta_key() {
     return 'noyona_product_wishlist';
 }
 
+function noyona_get_product_wishlist_item_key( $product_id, $variation_id = 0 ) {
+    return absint( $product_id ) . ':' . absint( $variation_id );
+}
+
 function noyona_normalize_product_wishlist_item( $item ) {
     if ( is_numeric( $item ) ) {
         $item = array( 'product_id' => absint( $item ) );
@@ -142,7 +146,7 @@ function noyona_get_product_wishlist_items( $user_id ) {
             continue;
         }
 
-        $item_key = absint( $item['product_id'] ) . ':' . absint( $item['variation_id'] );
+        $item_key = noyona_get_product_wishlist_item_key( $item['product_id'], $item['variation_id'] );
         if ( isset( $seen[ $item_key ] ) ) {
             continue;
         }
@@ -156,6 +160,16 @@ function noyona_get_product_wishlist_items( $user_id ) {
     }
 
     return $items;
+}
+
+function noyona_product_wishlist_contains_item( $user_id, $product_id, $variation_id = 0 ) {
+    $needle_key = noyona_get_product_wishlist_item_key( $product_id, $variation_id );
+    foreach ( noyona_get_product_wishlist_items( $user_id ) as $item ) {
+        if ( $needle_key === noyona_get_product_wishlist_item_key( $item['product_id'], $item['variation_id'] ) ) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function noyona_update_product_wishlist_items( $user_id, $items ) {
@@ -233,6 +247,71 @@ function noyona_toggle_product_wishlist_item( $user_id, $item ) {
 
     noyona_update_product_wishlist_items( $user_id, array_values( $items ) );
     return ! $exists;
+}
+
+add_action( 'wp_ajax_noyona_toggle_product_wishlist', 'noyona_toggle_product_wishlist_ajax_handler' );
+add_action( 'wp_ajax_nopriv_noyona_toggle_product_wishlist', 'noyona_toggle_product_wishlist_ajax_handler' );
+function noyona_toggle_product_wishlist_ajax_handler() {
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error(
+            array(
+                'message'   => 'not_logged_in',
+                'login_url' => function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' ),
+            ),
+            401
+        );
+    }
+
+    $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+    if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'noyona_product_wishlist' ) ) {
+        wp_send_json_error( array( 'message' => 'invalid_nonce' ), 403 );
+    }
+
+    $product_id   = isset( $_POST['product_id'] ) ? absint( wp_unslash( $_POST['product_id'] ) ) : 0;
+    $variation_id = isset( $_POST['variation_id'] ) ? absint( wp_unslash( $_POST['variation_id'] ) ) : 0;
+    if ( $product_id < 1 || ! function_exists( 'wc_get_product' ) ) {
+        wp_send_json_error( array( 'message' => 'invalid_product' ), 400 );
+    }
+
+    $product = wc_get_product( $product_id );
+    if ( ! $product instanceof WC_Product ) {
+        wp_send_json_error( array( 'message' => 'invalid_product' ), 400 );
+    }
+
+    if ( $variation_id > 0 ) {
+        $variation = wc_get_product( $variation_id );
+        if ( ! $variation instanceof WC_Product_Variation || absint( $variation->get_parent_id() ) !== $product_id ) {
+            wp_send_json_error( array( 'message' => 'invalid_variation' ), 400 );
+        }
+    }
+
+    $attributes = array();
+    if ( isset( $_POST['attributes'] ) && is_array( $_POST['attributes'] ) ) {
+        $attributes = wp_unslash( $_POST['attributes'] );
+    }
+
+    $variation_label = isset( $_POST['variation_label'] ) ? sanitize_text_field( wp_unslash( $_POST['variation_label'] ) ) : '';
+    $saved           = noyona_toggle_product_wishlist_item(
+        get_current_user_id(),
+        array(
+            'product_id'      => $product_id,
+            'variation_id'    => $variation_id,
+            'attributes'      => $attributes,
+            'variation_label' => $variation_label,
+        )
+    );
+    $items           = noyona_get_product_wishlist_items( get_current_user_id() );
+
+    wp_send_json_success(
+        array(
+            'saved'     => (bool) $saved,
+            'item_key'  => noyona_get_product_wishlist_item_key( $product_id, $variation_id ),
+            'count'     => count( $items ),
+            'message'   => $saved ? 'saved' : 'removed',
+            'productId' => $product_id,
+            'variationId' => $variation_id,
+        )
+    );
 }
 
 add_action( 'admin_post_noyona_remove_wishlist_item', 'noyona_remove_wishlist_item_handler' );

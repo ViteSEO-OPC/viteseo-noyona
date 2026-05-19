@@ -400,14 +400,102 @@ function noyona_pdp_enqueue_assets() {
 		'noyona-single-product',
 		'noyonaPdp',
 		array(
+			'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
 			'checkoutUrl' => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '',
+			'wishlist'    => array(
+				'nonce'    => wp_create_nonce( 'noyona_product_wishlist' ),
+				'loginUrl' => function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' ),
+			),
 			'i18n'        => array(
-				'selectOptions' => __( 'Please select all product options before continuing.', 'viteseo-noyona-childtheme' ),
-				'buyNow'        => __( 'Buy now', 'viteseo-noyona-childtheme' ),
-				'selectShade'   => __( 'Select shade', 'viteseo-noyona-childtheme' ),
+				'selectOptions'         => __( 'Please select all product options before continuing.', 'viteseo-noyona-childtheme' ),
+				'buyNow'                => __( 'Buy now', 'viteseo-noyona-childtheme' ),
+				'selectShade'           => __( 'Select shade', 'viteseo-noyona-childtheme' ),
+				'wishlistAdd'           => __( 'Add to wishlist', 'viteseo-noyona-childtheme' ),
+				'wishlistRemove'        => __( 'Remove from wishlist', 'viteseo-noyona-childtheme' ),
+				'wishlistSaved'         => __( 'Saved to your wishlist.', 'viteseo-noyona-childtheme' ),
+				'wishlistRemoved'       => __( 'Removed from your wishlist.', 'viteseo-noyona-childtheme' ),
+				'wishlistSelectOptions' => __( 'Please select a shade before saving this product.', 'viteseo-noyona-childtheme' ),
+				'wishlistLoginTitle'    => __( 'Log in to save your wishlist', 'viteseo-noyona-childtheme' ),
+				'wishlistLoginCopy'     => __( 'Please log in to save products and view them from My Account.', 'viteseo-noyona-childtheme' ),
+				'wishlistError'         => __( 'Wishlist could not be updated. Please try again.', 'viteseo-noyona-childtheme' ),
 			),
 		)
 	);
+}
+
+function noyona_pdp_get_wishlist_button_html( $product ) {
+	if ( ! $product instanceof WC_Product ) {
+		return '';
+	}
+
+	$product_id     = absint( $product->get_id() );
+	$user_id        = get_current_user_id();
+	$saved_keys     = array();
+	$is_saved       = false;
+	$active_label   = __( 'Remove from wishlist', 'viteseo-noyona-childtheme' );
+	$inactive_label = __( 'Add to wishlist', 'viteseo-noyona-childtheme' );
+
+	if ( $user_id > 0 && function_exists( 'noyona_get_product_wishlist_items' ) ) {
+		foreach ( noyona_get_product_wishlist_items( $user_id ) as $item ) {
+			if ( absint( $item['product_id'] ) !== $product_id ) {
+				continue;
+			}
+
+			$item_key     = function_exists( 'noyona_get_product_wishlist_item_key' )
+				? noyona_get_product_wishlist_item_key( $item['product_id'], $item['variation_id'] )
+				: absint( $item['product_id'] ) . ':' . absint( $item['variation_id'] );
+			$saved_keys[] = $item_key;
+			if ( 0 === absint( $item['variation_id'] ) ) {
+				$is_saved = true;
+			}
+		}
+	}
+
+	$button_label = $is_saved ? $active_label : $inactive_label;
+	$classes      = 'noyona-pdp-wishlist-button';
+	if ( $is_saved ) {
+		$classes .= ' is-active';
+	}
+
+	ob_start();
+	?>
+	<div class="noyona-pdp-wishlist" data-noyona-pdp-wishlist-wrap>
+		<button
+			class="<?php echo esc_attr( $classes ); ?>"
+			type="button"
+			aria-label="<?php echo esc_attr( $button_label ); ?>"
+			aria-pressed="<?php echo $is_saved ? 'true' : 'false'; ?>"
+			data-noyona-pdp-wishlist
+			data-product-id="<?php echo esc_attr( (string) $product_id ); ?>"
+			data-product-type="<?php echo esc_attr( $product->get_type() ); ?>"
+			data-nonce="<?php echo esc_attr( wp_create_nonce( 'noyona_product_wishlist' ) ); ?>"
+			data-saved-keys="<?php echo esc_attr( wp_json_encode( array_values( array_unique( $saved_keys ) ) ) ); ?>"
+			data-label-add="<?php echo esc_attr( $inactive_label ); ?>"
+			data-label-remove="<?php echo esc_attr( $active_label ); ?>"
+		>
+			<i class="fa-<?php echo $is_saved ? 'solid' : 'regular'; ?> fa-heart" aria-hidden="true"></i>
+			<span class="screen-reader-text"><?php echo esc_html( $button_label ); ?></span>
+		</button>
+	</div>
+	<?php
+	return trim( ob_get_clean() );
+}
+
+add_filter( 'render_block_core/post-title', 'noyona_pdp_render_wishlist_button_before_title', 10, 2 );
+function noyona_pdp_render_wishlist_button_before_title( $block_content, $block ) {
+	static $rendered = false;
+
+	if ( $rendered || is_admin() || ! function_exists( 'is_product' ) || ! is_product() || ! function_exists( 'wc_get_product' ) ) {
+		return $block_content;
+	}
+
+	$product = wc_get_product( get_the_ID() );
+	if ( ! $product instanceof WC_Product ) {
+		return $block_content;
+	}
+
+	$rendered = true;
+	return noyona_pdp_get_wishlist_button_html( $product ) . $block_content;
 }
 
 /**

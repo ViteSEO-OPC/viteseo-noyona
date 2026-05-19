@@ -1248,6 +1248,306 @@
     return '/?wc-ajax=add_to_cart';
   }
 
+  function getPdpText(key, fallback) {
+    if (typeof window.noyonaPdp !== 'undefined' && window.noyonaPdp.i18n && window.noyonaPdp.i18n[key]) {
+      return window.noyonaPdp.i18n[key];
+    }
+    return fallback;
+  }
+
+  function getPdpWishlistAjaxUrl() {
+    if (typeof window.noyonaPdp !== 'undefined' && window.noyonaPdp.ajaxUrl) {
+      return window.noyonaPdp.ajaxUrl;
+    }
+    return '/wp-admin/admin-ajax.php';
+  }
+
+  function getPdpWishlistNonce(button) {
+    if (button && button.getAttribute('data-nonce')) {
+      return button.getAttribute('data-nonce');
+    }
+    if (typeof window.noyonaPdp !== 'undefined' && window.noyonaPdp.wishlist && window.noyonaPdp.wishlist.nonce) {
+      return window.noyonaPdp.wishlist.nonce;
+    }
+    return '';
+  }
+
+  function parsePdpWishlistKeys(button) {
+    var raw = button ? button.getAttribute('data-saved-keys') : '';
+    if (!raw) {
+      return [];
+    }
+    try {
+      var parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function storePdpWishlistKeys(button, keys) {
+    if (!button) {
+      return;
+    }
+    var unique = [];
+    keys.forEach(function (key) {
+      key = String(key || '');
+      if (key && unique.indexOf(key) === -1) {
+        unique.push(key);
+      }
+    });
+    button.setAttribute('data-saved-keys', JSON.stringify(unique));
+  }
+
+  function getPdpWishlistForm() {
+    return document.querySelector('form.cart');
+  }
+
+  function isPdpWishlistVariableProduct(button, form) {
+    var type = button ? String(button.getAttribute('data-product-type') || '').toLowerCase() : '';
+    return type.indexOf('variable') !== -1 || !!(form && form.classList.contains('variations_form'));
+  }
+
+  function getPdpWishlistSelection(button) {
+    var form = getPdpWishlistForm();
+    var productId = parseInt(button.getAttribute('data-product-id') || '0', 10) || 0;
+    var variationId = 0;
+    var attributes = {};
+    var labels = [];
+
+    if (form) {
+      form.querySelectorAll('select[name^="attribute_"]').forEach(function (select) {
+        if (!select.name || !select.value) {
+          return;
+        }
+        attributes[select.name] = select.value;
+        var option = select.options[select.selectedIndex] || null;
+        var optionText = option ? String(option.text || option.value || '').trim() : select.value;
+        labels.push(getAttributeLabel(select) + ': ' + optionText);
+      });
+
+      var variationInput = form.querySelector('input[name="variation_id"]');
+      variationId = variationInput ? parseInt(variationInput.value || '0', 10) || 0 : 0;
+    }
+
+    return {
+      form: form,
+      productId: productId,
+      variationId: variationId,
+      attributes: attributes,
+      variationLabel: labels.join(' / '),
+    };
+  }
+
+  function getPdpWishlistCurrentKey(button) {
+    var selection = getPdpWishlistSelection(button);
+    if (isPdpWishlistVariableProduct(button, selection.form) && selection.variationId < 1) {
+      return '';
+    }
+    return String(selection.productId) + ':' + String(selection.variationId || 0);
+  }
+
+  function setPdpWishlistMessage(button, message, type) {
+    var wrap = button ? button.closest('[data-noyona-pdp-wishlist-wrap]') : null;
+    if (!wrap) {
+      return;
+    }
+
+    var note = wrap.querySelector('.noyona-pdp-wishlist-message');
+    if (!message) {
+      if (note) {
+        note.remove();
+      }
+      return;
+    }
+
+    if (!note) {
+      note = document.createElement('span');
+      note.className = 'noyona-pdp-wishlist-message';
+      wrap.appendChild(note);
+    }
+
+    note.textContent = message;
+    note.classList.toggle('is-error', type === 'error');
+    note.classList.toggle('is-success', type === 'success');
+
+    clearTimeout(button._noyonaWishlistMessageTimer);
+    if (type !== 'error') {
+      button._noyonaWishlistMessageTimer = setTimeout(function () {
+        setPdpWishlistMessage(button, '', '');
+      }, 2400);
+    }
+  }
+
+  function setPdpWishlistButtonState(button, saved) {
+    if (!button) {
+      return;
+    }
+
+    var addLabel = button.getAttribute('data-label-add') || getPdpText('wishlistAdd', 'Add to wishlist');
+    var removeLabel = button.getAttribute('data-label-remove') || getPdpText('wishlistRemove', 'Remove from wishlist');
+    var label = saved ? removeLabel : addLabel;
+    var icon = button.querySelector('i');
+    var sr = button.querySelector('.screen-reader-text');
+
+    button.classList.toggle('is-active', !!saved);
+    button.setAttribute('aria-pressed', saved ? 'true' : 'false');
+    button.setAttribute('aria-label', label);
+    if (sr) {
+      sr.textContent = label;
+    }
+    if (icon) {
+      icon.classList.toggle('fa-solid', !!saved);
+      icon.classList.toggle('fa-regular', !saved);
+    }
+  }
+
+  function refreshPdpWishlistButtonState(button) {
+    var key = getPdpWishlistCurrentKey(button);
+    var saved = key ? parsePdpWishlistKeys(button).indexOf(key) !== -1 : false;
+    setPdpWishlistButtonState(button, saved);
+  }
+
+  function handleLoggedOutPdpWishlistClick() {
+    openGlobalCheckoutLoginModal(window.location.href, {
+      title: getPdpText('wishlistLoginTitle', 'Log in to save your wishlist'),
+      copy: getPdpText('wishlistLoginCopy', 'Please log in to save products and view them from My Account.'),
+    });
+  }
+
+  function bindPdpWishlistFormEvents(button) {
+    var form = getPdpWishlistForm();
+    if (!form || form.getAttribute('data-noyona-wishlist-bound') === '1') {
+      return;
+    }
+
+    form.setAttribute('data-noyona-wishlist-bound', '1');
+    form.addEventListener('change', function () {
+      refreshPdpWishlistButtonState(button);
+      setPdpWishlistMessage(button, '', '');
+    });
+
+    if (window.jQuery) {
+      window.jQuery(form).on('found_variation.noyonaWishlist reset_data.noyonaWishlist hide_variation.noyonaWishlist', function () {
+        refreshPdpWishlistButtonState(button);
+        setPdpWishlistMessage(button, '', '');
+      });
+    }
+  }
+
+  function bindPdpWishlistButton(button) {
+    if (!button) {
+      return;
+    }
+
+    bindPdpWishlistFormEvents(button);
+    refreshPdpWishlistButtonState(button);
+
+    if (button.getAttribute('data-noyona-bound') === '1') {
+      return;
+    }
+    button.setAttribute('data-noyona-bound', '1');
+
+    button.addEventListener('click', function () {
+      if (!document.body.classList.contains('logged-in')) {
+        handleLoggedOutPdpWishlistClick();
+        return;
+      }
+
+      var selection = getPdpWishlistSelection(button);
+      if (!selection.productId) {
+        return;
+      }
+
+      if (isPdpWishlistVariableProduct(button, selection.form) && selection.variationId < 1) {
+        setPdpWishlistMessage(
+          button,
+          getPdpText('wishlistSelectOptions', 'Please select a shade before saving this product.'),
+          'error'
+        );
+        return;
+      }
+
+      if (button.classList.contains('is-loading')) {
+        return;
+      }
+
+      var payload = new URLSearchParams();
+      payload.set('action', 'noyona_toggle_product_wishlist');
+      payload.set('nonce', getPdpWishlistNonce(button));
+      payload.set('product_id', String(selection.productId));
+      payload.set('variation_id', String(selection.variationId || 0));
+      if (selection.variationLabel) {
+        payload.set('variation_label', selection.variationLabel);
+      }
+      Object.keys(selection.attributes).forEach(function (key) {
+        payload.set('attributes[' + key + ']', selection.attributes[key]);
+      });
+
+      button.classList.add('is-loading');
+      button.disabled = true;
+
+      fetch(getPdpWishlistAjaxUrl(), {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        },
+        body: payload.toString(),
+      })
+        .then(function (response) {
+          return response.json().catch(function () {
+            return null;
+          }).then(function (data) {
+            return { ok: response.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          if (!result || !result.ok || !result.data || !result.data.success) {
+            var message = result && result.data && result.data.data ? result.data.data.message : '';
+            if (message === 'not_logged_in') {
+              handleLoggedOutPdpWishlistClick();
+              return;
+            }
+            setPdpWishlistMessage(button, getPdpText('wishlistError', 'Wishlist could not be updated. Please try again.'), 'error');
+            return;
+          }
+
+          var responseData = result.data.data || {};
+          var saved = !!responseData.saved;
+          var key = responseData.item_key || getPdpWishlistCurrentKey(button);
+          var keys = parsePdpWishlistKeys(button);
+          var keyIndex = keys.indexOf(key);
+          if (saved && keyIndex === -1) {
+            keys.push(key);
+          } else if (!saved && keyIndex !== -1) {
+            keys.splice(keyIndex, 1);
+          }
+
+          storePdpWishlistKeys(button, keys);
+          setPdpWishlistButtonState(button, saved);
+          setPdpWishlistMessage(
+            button,
+            saved
+              ? getPdpText('wishlistSaved', 'Saved to your wishlist.')
+              : getPdpText('wishlistRemoved', 'Removed from your wishlist.'),
+            'success'
+          );
+        })
+        .catch(function () {
+          setPdpWishlistMessage(button, getPdpText('wishlistError', 'Wishlist could not be updated. Please try again.'), 'error');
+        })
+        .finally(function () {
+          button.classList.remove('is-loading');
+          button.disabled = false;
+        });
+    });
+  }
+
+  function initPdpWishlist() {
+    document.querySelectorAll('[data-noyona-pdp-wishlist]').forEach(bindPdpWishlistButton);
+  }
+
   function maybeOpenMiniCartDrawer() {
     var miniCartBtn = document.querySelector('.wc-block-mini-cart__button');
     if (miniCartBtn) {
@@ -1803,6 +2103,7 @@
   function initPdp() {
     clearLegacyAddToCartState();
     initTabs(document);
+    initPdpWishlist();
 
     document.querySelectorAll('form.cart').forEach(function (form) {
       initSwatches(form);

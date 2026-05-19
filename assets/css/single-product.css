@@ -79,6 +79,7 @@ body.single-product .noyona-pdp-column--media {
 
 body.single-product .noyona-pdp-column--summary {
   min-width: 0;
+  position: relative;
 }
 
 /* Short description = WooCommerce "Product short description" (post excerpt block) */
@@ -97,6 +98,89 @@ body.single-product .noyona-pdp-tabs__panel-inner {
   font-weight: 700;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
+  padding-right: 4rem;
+}
+
+body.single-product .noyona-pdp-wishlist {
+  position: absolute;
+  top: 0.05rem;
+  right: 0;
+  z-index: 4;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+}
+
+body.single-product .noyona-pdp-wishlist-button {
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(225, 153, 164, 0.38);
+  border-radius: 999px;
+  background: rgba(255, 247, 249, 0.96);
+  color: #E199A4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 28px rgba(225, 153, 164, 0.18);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+body.single-product .noyona-pdp-wishlist-button i {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+body.single-product .noyona-pdp-wishlist-button:hover,
+body.single-product .noyona-pdp-wishlist-button:focus-visible {
+  border-color: rgba(225, 26, 99, 0.48);
+  background: #fff;
+  color: #E11A63;
+  box-shadow: 0 16px 34px rgba(225, 153, 164, 0.26);
+  transform: translateY(-1px);
+}
+
+body.single-product .noyona-pdp-wishlist-button:focus-visible {
+  outline: 3px solid rgba(225, 153, 164, 0.26);
+  outline-offset: 3px;
+}
+
+body.single-product .noyona-pdp-wishlist-button.is-active {
+  border-color: rgba(225, 26, 99, 0.5);
+  background: rgba(225, 26, 99, 0.12);
+  color: #E11A63;
+}
+
+body.single-product .noyona-pdp-wishlist-button.is-loading {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+body.single-product .noyona-pdp-wishlist-message {
+  max-width: min(220px, 60vw);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(30, 20, 24, 0.12);
+  color: #5e4a51;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+  padding: 0.5rem 0.75rem;
+  text-align: right;
+}
+
+body.single-product .noyona-pdp-wishlist-message.is-success {
+  color: #9a4f62;
+}
+
+body.single-product .noyona-pdp-wishlist-message.is-error {
+  color: #9c2f45;
 }
 
 /* Rating row: link to reviews */
@@ -232,6 +316,21 @@ body.single-product .noyona-pdp-tabs__panel-inner {
 }
 
 @media (max-width: 640px) {
+  .single-product .wp-block-post-title {
+    padding-right: 0;
+  }
+
+  body.single-product .noyona-pdp-wishlist {
+    position: static;
+    align-items: flex-end;
+    margin: 0 0 0.75rem;
+  }
+
+  body.single-product .noyona-pdp-wishlist-button {
+    width: 42px;
+    height: 42px;
+  }
+
   .single-product .noyona-pdp-price-stock-row {
     flex-wrap: wrap;
     gap: 0.45rem 0.85rem;
