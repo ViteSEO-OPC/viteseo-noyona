@@ -560,14 +560,14 @@ function noyona_render_product_search_page_shortcode() {
         </form>
     </section>
 
-    <section class="alignwide noyona-search-products-head">
-        <h2><?php esc_html_e( 'All Products', 'noyona-childtheme' ); ?></h2>
+    <section class="alignwide noyona-shop-top noyona-search-products-head">
+        <h2 class="noyona-shop-title"><?php esc_html_e( 'All Products', 'noyona-childtheme' ); ?></h2>
         <nav class="noyona-shop-categories noyona-search-categories" aria-label="<?php esc_attr_e( 'Product categories', 'noyona-childtheme' ); ?>">
             <?php echo noyona_render_product_search_category_pills( $query_text, $selected_cat, $base_params ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         </nav>
     </section>
 
-    <div class="wp-block-columns alignwide noyona-shop-layout noyona-search-layout">
+    <div class="wp-block-columns alignwide noyona-shop-layout">
         <div class="wp-block-column noyona-shop-sidebar" style="flex-basis:28%">
             <button type="button" class="noyona-shop-filter-overlay" aria-label="<?php esc_attr_e( 'Close filter panel', 'noyona-childtheme' ); ?>"></button>
             <aside id="noyona-shop-filter-panel" class="wp-block-group noyona-shop-filters" aria-label="<?php esc_attr_e( 'Product filters', 'noyona-childtheme' ); ?>">
@@ -679,7 +679,7 @@ function noyona_render_product_search_page_shortcode() {
             </div>
 
             <div class="wp-block-woocommerce-product-collection noyona-shop-products">
-                <div class="wc-block-product-template">
+                <div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;">
                     <?php if ( $products_query->have_posts() ) : ?>
                         <?php
                         while ( $products_query->have_posts() ) :
