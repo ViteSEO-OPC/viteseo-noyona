@@ -1468,6 +1468,12 @@
             currentCount.replaceWith(nextCount);
           }
 
+          const nextHeroCount = doc.querySelector('.noyona-search-hero__count');
+          const currentHeroCount = document.querySelector('.noyona-search-hero__count');
+          if (nextHeroCount && currentHeroCount) {
+            currentHeroCount.replaceWith(nextHeroCount);
+          }
+
           window.history.replaceState({}, '', nextUrl);
 
           const isListView = document.body.classList.contains('noyona-shop-view-list');

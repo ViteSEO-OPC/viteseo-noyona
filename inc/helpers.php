@@ -563,7 +563,7 @@ function noyona_render_product_search_page_shortcode() {
     <section class="alignwide noyona-search-products-head">
         <h2><?php esc_html_e( 'All Products', 'noyona-childtheme' ); ?></h2>
         <nav class="noyona-shop-categories noyona-search-categories" aria-label="<?php esc_attr_e( 'Product categories', 'noyona-childtheme' ); ?>">
-            <?php echo noyona_render_product_search_category_pills( $query_text, $selected_cat ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <?php echo noyona_render_product_search_category_pills( $query_text, $selected_cat, $base_params ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         </nav>
     </section>
 
@@ -725,14 +725,20 @@ function noyona_render_product_search_page_shortcode() {
     return trim( ob_get_clean() );
 }
 
-function noyona_render_product_search_category_pills( $query_text, $selected_cat ) {
+function noyona_render_product_search_category_pills( $query_text, $selected_cat, $current_params = array() ) {
     $slugs = function_exists( 'noyona_get_shop_category_page_slugs' )
         ? noyona_get_shop_category_page_slugs()
         : array( 'face', 'lips', 'eyes', 'hair', 'body' );
-    $base_args = array(
-        's'         => (string) $query_text,
-        'post_type' => 'product',
+    $base_args = wp_parse_args(
+        (array) $current_params,
+        array(
+            's'         => (string) $query_text,
+            'post_type' => 'product',
+        )
     );
+    $base_args['s']         = (string) $query_text;
+    $base_args['post_type'] = 'product';
+    unset( $base_args['product_cat'], $base_args['paged'] );
 
     $html  = '<a class="noyona-shop-category-all' . ( '' === $selected_cat ? ' is-active' : '' ) . '" href="' . esc_url( add_query_arg( $base_args, home_url( '/' ) ) ) . '">';
     $html .= esc_html__( 'All Products', 'noyona-childtheme' );

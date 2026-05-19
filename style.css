@@ -1785,17 +1785,22 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   padding-bottom: 72px;
 }
 
+.noyona-product-search-page > .alignwide,
+.noyona-product-search-page .alignwide {
+  width: min(1120px, calc(100vw - 48px));
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .noyona-search-hero {
-  margin: 54px 0 30px;
-  padding: clamp(24px, 4vw, 44px);
-  border-radius: 28px;
-  background: linear-gradient(135deg, #fff7fa 0%, #ffffff 55%, #ffeef3 100%);
-  border: 1px solid #f5dce3;
-  box-shadow: 0 18px 44px rgba(196, 117, 137, 0.12);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
-  align-items: end;
-  gap: clamp(18px, 4vw, 42px);
+  margin-top: 52px;
+  margin-bottom: 34px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
 }
 
 .noyona-search-hero__eyebrow {
@@ -1809,8 +1814,8 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 
 .noyona-search-hero h1 {
   margin: 0;
-  color: #1f1f1f;
-  font-size: clamp(42px, 6vw, 76px);
+  color: #E199A4;
+  font-size: clamp(34px, 4vw, 48px);
   line-height: 0.95;
   letter-spacing: -0.055em;
   font-weight: 800;
@@ -1824,6 +1829,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 .noyona-search-again {
+  width: min(640px, 100%);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -1903,11 +1909,59 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 .noyona-search-layout {
+  display: grid !important;
+  grid-template-columns: 230px minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(28px, 4vw, 54px);
   margin-top: 8px;
+}
+
+.noyona-product-search-page .noyona-search-layout > .wp-block-column {
+  max-width: none !important;
+  min-width: 0;
+}
+
+.noyona-product-search-page .noyona-shop-sidebar {
+  width: 230px !important;
+  flex-basis: auto !important;
+}
+
+.noyona-product-search-page .noyona-shop-products-column {
+  width: auto !important;
+  flex-basis: auto !important;
+}
+
+.noyona-product-search-page .noyona-shop-filters {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 22px 24px;
+  border: 1px solid #232323;
+  border-radius: 16px;
+  box-shadow: none;
 }
 
 .noyona-search-filter-form {
   margin: 0;
+}
+
+.noyona-product-search-page .noyona-shop-filter-sections {
+  gap: 16px;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section {
+  padding-top: 14px;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section h5,
+.noyona-product-search-page .noyona-shop-filter-section-price .noyona-shop-filter-price-title {
+  margin-bottom: 10px;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.noyona-product-search-page .noyona-shop-filter-section label {
+  margin-bottom: 6px;
+  font-size: 14px;
 }
 
 .noyona-product-search-page .noyona-shop-filter-section input[type="checkbox"] {
@@ -1942,7 +1996,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 22px;
+  margin-top: 16px;
 }
 
 .noyona-search-filter-actions a {
@@ -1972,8 +2026,9 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 
 .noyona-product-search-page .noyona-shop-products .wc-block-product-template {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 34px 38px;
+  align-items: start;
 }
 
 .noyona-product-search-page .noyona-shop-products .wc-block-product {
@@ -1982,6 +2037,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   background: #fff;
   box-shadow: 0 16px 38px rgba(196, 117, 137, 0.13);
   overflow: hidden;
+  min-width: 0;
 }
 
 .noyona-product-search-page .noyona-shop-products .wc-block-components-product-image {
@@ -1994,8 +2050,21 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 .noyona-product-search-page .noyona-shop-products .wc-block-components-product-image img {
   display: block;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1.22 / 1;
   object-fit: contain;
+}
+
+.noyona-product-search-page .noyona-shop-toolbar {
+  align-items: center;
+  margin-bottom: 26px;
+}
+
+.noyona-product-search-page .noyona-shop-toolbar-right {
+  margin-left: auto;
+}
+
+.noyona-product-search-page .noyona-shop-count {
+  white-space: nowrap;
 }
 
 .noyona-search-no-products {
@@ -2011,6 +2080,90 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   margin: 0;
   font-size: clamp(18px, 2vw, 26px);
   font-weight: 700;
+}
+
+@media (max-width: 1040px) {
+  .noyona-search-layout {
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .noyona-product-search-page .noyona-shop-sidebar {
+    width: 210px !important;
+  }
+
+  .noyona-product-search-page .noyona-shop-products .wc-block-product-template {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 999px) {
+  .noyona-product-search-page .noyona-search-layout {
+    display: block !important;
+  }
+
+  .noyona-product-search-page .noyona-search-layout > .noyona-shop-sidebar {
+    flex-basis: auto !important;
+    width: auto !important;
+    min-width: 0;
+    margin: 0 0 24px !important;
+  }
+
+  .noyona-product-search-page .noyona-shop-sidebar {
+    width: auto !important;
+  }
+
+  .noyona-product-search-page .noyona-shop-filters {
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    overflow: visible;
+    margin-bottom: 0;
+    border-color: #f5dce3;
+    border-radius: 16px;
+    box-shadow: 0 14px 34px rgba(196, 117, 137, 0.16);
+  }
+
+  .noyona-product-search-page .noyona-shop-filter-toggle,
+  .noyona-product-search-page .noyona-shop-filter-close,
+  .noyona-product-search-page .noyona-shop-filter-overlay {
+    display: none !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .noyona-product-search-page > .alignwide,
+  .noyona-product-search-page .alignwide {
+    width: min(100%, calc(100vw - 28px));
+  }
+
+  .noyona-search-products-head {
+    align-items: flex-start;
+  }
+
+  .noyona-search-categories {
+    justify-content: flex-start;
+  }
+
+  .noyona-product-search-page .noyona-shop-products .wc-block-product-template {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .noyona-search-hero {
+    margin-top: 34px;
+  }
+
+  .noyona-search-again {
+    grid-template-columns: minmax(0, 1fr);
+    border-radius: 18px;
+  }
+
+  .noyona-search-again button {
+    width: 100%;
+  }
 }
 
 .noyona-buy-now-wrap {
