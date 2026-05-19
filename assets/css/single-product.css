@@ -325,6 +325,9 @@ body.single-product .noyona-pdp-tabs__panel-inner {
   font-size: 0.875rem;
   font-weight: 700;
   color: #E199A4;
+  background: #FDF2F8;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
 }
 
 .noyona-pdp-variation__shade-head {
@@ -347,6 +350,9 @@ body.single-product .noyona-pdp-tabs__panel-inner {
   font-size: 0.875rem;
   font-weight: 700;
   color: #E199A4;
+  background: #FDF2F8;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
 }
 
 .noyona-pdp-variation__swatches {
@@ -1401,5 +1407,59 @@ body.single-product .related.products ul.products li.product .onsale {
 @media (max-width: 640px) {
   body.single-product .related.products ul.products {
     grid-template-columns: 1fr;
+  }
+}
+
+/* =================================================
+ * PDP main image badge (BEST SELLER for featured products).
+ * Replaces the default WooCommerce "Sale!" flash on the
+ * main single-product image only. Archive/shop sale badges
+ * (woocommerce/product-sale-badge block) are NOT affected.
+ * ================================================= */
+
+/* Defensive PDP-scoped hide: even if WooCommerce or a plugin
+   re-adds the sale flash to woocommerce_before_single_product_summary,
+   suppress it visually on the PDP only. Not applied globally. */
+.single-product .woocommerce-product-gallery .onsale,
+.single-product .wp-block-woocommerce-product-image-gallery .onsale {
+  display: none !important;
+}
+
+/* Positioning context for the BEST SELLER badge.
+   The badge is rendered once inside the WooCommerce gallery container, not
+   inside an individual FlexSlider image. This keeps it product-level while
+   thumbnails, variation image swaps, or the fallback gallery change images. */
+.single-product .woocommerce-product-gallery,
+.single-product .wp-block-woocommerce-product-image-gallery .woocommerce-product-gallery {
+  position: relative;
+}
+
+.single-product .noyona-pdp-best-seller-badge {
+  position: absolute;
+  top: 0.9rem;
+  left: 0.9rem;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  background: #E199A4;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 781px) {
+  .single-product .noyona-pdp-best-seller-badge {
+    top: 0.65rem;
+    left: 0.65rem;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.8rem;
   }
 }

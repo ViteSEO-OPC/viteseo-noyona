@@ -52,26 +52,229 @@ if (!function_exists('nsl_v2_time_to_minutes')) {
 if (!function_exists('nsl_v2_guess_island_group')) {
     function nsl_v2_guess_island_group($address)
     {
-        $address = strtolower((string) $address);
-        if ($address === '') {
+        return nsl_v2_island_label(nsl_v2_address_to_island_key($address));
+    }
+}
+
+if (!function_exists('nsl_v2_normalize_location_text')) {
+    function nsl_v2_normalize_location_text($value)
+    {
+        $value = strtolower(trim((string) $value));
+        $value = str_replace(array('&', '-', '_', '/', ',', '.', '(', ')'), ' ', $value);
+        $value = preg_replace('/\s+/', ' ', $value);
+        return trim((string) $value);
+    }
+}
+
+if (!function_exists('nsl_v2_normalize_island_key')) {
+    function nsl_v2_normalize_island_key($value)
+    {
+        $value = nsl_v2_normalize_location_text($value);
+        if ($value === '') {
+            return '';
+        }
+        if (strpos($value, 'luzon') !== false) {
+            return 'luzon';
+        }
+        if (strpos($value, 'visayas') !== false) {
+            return 'visayas';
+        }
+        if (strpos($value, 'mindanao') !== false) {
+            return 'mindanao';
+        }
+        return '';
+    }
+}
+
+if (!function_exists('nsl_v2_island_label')) {
+    function nsl_v2_island_label($island_key)
+    {
+        if ($island_key === 'luzon') {
             return 'Luzon';
         }
+        if ($island_key === 'visayas') {
+            return 'Visayas';
+        }
+        if ($island_key === 'mindanao') {
+            return 'Mindanao';
+        }
+        return '';
+    }
+}
 
-        $visayas_tokens = array('cebu', 'iloilo', 'bacolod', 'bohol', 'leyte', 'samar', 'dumaguete', 'roxas', 'aklan', 'antique', 'siquijor');
-        foreach ($visayas_tokens as $token) {
-            if (strpos($address, $token) !== false) {
-                return 'Visayas';
+if (!function_exists('nsl_v2_coordinates_in_bounds')) {
+    function nsl_v2_coordinates_in_bounds($lat, $lng, $bounds)
+    {
+        return $lat >= $bounds[0] && $lat <= $bounds[1] && $lng >= $bounds[2] && $lng <= $bounds[3];
+    }
+}
+
+if (!function_exists('nsl_v2_coordinates_to_island_key')) {
+    function nsl_v2_coordinates_to_island_key($lat, $lng)
+    {
+        if (!is_numeric($lat) || !is_numeric($lng)) {
+            return '';
+        }
+
+        $lat = (float) $lat;
+        $lng = (float) $lng;
+        if ($lat < 4.0 || $lat > 22.5 || $lng < 116.0 || $lng > 128.5) {
+            return '';
+        }
+
+        $samar_bounds = array(
+            array(10.7, 12.8, 124.0, 126.4), // Samar, Eastern Samar, Northern Samar, and nearby Eastern Visayas.
+        );
+        foreach ($samar_bounds as $bounds) {
+            if (nsl_v2_coordinates_in_bounds($lat, $lng, $bounds)) {
+                return 'visayas';
             }
         }
 
-        $mindanao_tokens = array('davao', 'cagayan de oro', 'zamboanga', 'butuan', 'surigao', 'cotabato', 'general santos', 'iligan', 'dipolog');
-        foreach ($mindanao_tokens as $token) {
-            if (strpos($address, $token) !== false) {
-                return 'Mindanao';
+        $luzon_bounds = array(
+            array(12.0, 21.8, 119.0, 126.8), // Mainland Luzon and Bicol.
+            array(7.4, 13.3, 116.5, 121.8), // MIMAROPA, including Palawan and Mindoro.
+        );
+        foreach ($luzon_bounds as $bounds) {
+            if (nsl_v2_coordinates_in_bounds($lat, $lng, $bounds)) {
+                return 'luzon';
             }
         }
 
-        return 'Luzon';
+        $visayas_bounds = array(
+            array(9.0, 12.4, 121.8, 125.35), // Panay, Negros, Cebu, Bohol, Siquijor, Leyte.
+            array(10.0, 12.8, 125.35, 126.35), // Samar and eastern Leyte.
+        );
+        foreach ($visayas_bounds as $bounds) {
+            if (nsl_v2_coordinates_in_bounds($lat, $lng, $bounds)) {
+                return 'visayas';
+            }
+        }
+
+        $mindanao_bounds = array(
+            array(4.4, 9.99, 121.5, 127.6), // Mindanao mainland and nearby islands.
+            array(9.9, 10.6, 125.2, 126.7), // Dinagat/Surigao island area.
+        );
+        foreach ($mindanao_bounds as $bounds) {
+            if (nsl_v2_coordinates_in_bounds($lat, $lng, $bounds)) {
+                return 'mindanao';
+            }
+        }
+
+        return '';
+    }
+}
+
+if (!function_exists('nsl_v2_region_to_island_key')) {
+    function nsl_v2_region_to_island_key($region)
+    {
+        $region = nsl_v2_normalize_location_text($region);
+        if ($region === '') {
+            return '';
+        }
+
+        $region_aliases = array(
+            'luzon' => array(
+                'ncr',
+                'national capital region',
+                'metro manila',
+                'car',
+                'cordillera administrative region',
+                'region i',
+                'region 1',
+                'ilocos',
+                'ilocos region',
+                'region ii',
+                'region 2',
+                'cagayan valley',
+                'region iii',
+                'region 3',
+                'central luzon',
+                'region iv a',
+                'region iva',
+                'region 4 a',
+                'calabarzon',
+                'region iv b',
+                'region ivb',
+                'region 4 b',
+                'mimaropa',
+                'region v',
+                'region 5',
+                'bicol',
+                'bicol region',
+                'luzon other',
+            ),
+            'visayas' => array(
+                'region vi',
+                'region 6',
+                'western visayas',
+                'region vii',
+                'region 7',
+                'central visayas',
+                'region viii',
+                'region 8',
+                'eastern visayas',
+                'visayas other',
+            ),
+            'mindanao' => array(
+                'region ix',
+                'region 9',
+                'zamboanga peninsula',
+                'region x',
+                'region 10',
+                'northern mindanao',
+                'region xi',
+                'region 11',
+                'davao region',
+                'region xii',
+                'region 12',
+                'soccsksargen',
+                'region xiii',
+                'region 13',
+                'caraga',
+                'barmm',
+                'bangsamoro autonomous region in muslim mindanao',
+                'mindanao other',
+            ),
+        );
+
+        $haystack = ' ' . $region . ' ';
+        foreach ($region_aliases as $island_key => $aliases) {
+            foreach ($aliases as $alias) {
+                $alias = nsl_v2_normalize_location_text($alias);
+                if ($region === $alias || strpos($haystack, ' ' . $alias . ' ') !== false) {
+                    return $island_key;
+                }
+            }
+        }
+
+        return '';
+    }
+}
+
+if (!function_exists('nsl_v2_address_to_island_key')) {
+    function nsl_v2_address_to_island_key($address)
+    {
+        $address = nsl_v2_normalize_location_text($address);
+        if ($address === '') {
+            return '';
+        }
+
+        $token_map = array(
+            'visayas' => array('cebu', 'iloilo', 'bacolod', 'bohol', 'leyte', 'samar', 'eastern samar', 'northern samar', 'western samar', 'calbayog', 'catarman', 'dolores eastern samar', 'dumaguete', 'roxas', 'aklan', 'antique', 'capiz', 'guimaras', 'negros occidental', 'negros oriental', 'siquijor', 'tacloban', 'ormoc'),
+            'mindanao' => array('davao', 'cagayan de oro', 'zamboanga', 'butuan', 'surigao', 'cotabato', 'general santos', 'iligan', 'dipolog', 'pagadian', 'misamis', 'bukidnon', 'camiguin', 'lanao', 'agusan', 'sarangani', 'south cotabato', 'sultan kudarat'),
+            'luzon' => array('manila', 'quezon city', 'makati', 'pasig', 'taguig', 'pasay', 'mandaluyong', 'marikina', 'caloocan', 'muntinlupa', 'paranaque', 'las pinas', 'san juan', 'malabon', 'navotas', 'valenzuela', 'pateros', 'bulacan', 'pampanga', 'tarlac', 'zambales', 'nueva ecija', 'aurora', 'bataan', 'laguna', 'cavite', 'batangas', 'rizal', 'quezon province', 'ilocos', 'la union', 'pangasinan', 'albay', 'camarines', 'catanduanes', 'masbate', 'sorsogon', 'palawan', 'mindoro', 'marinduque', 'romblon'),
+        );
+
+        foreach ($token_map as $island_key => $tokens) {
+            foreach ($tokens as $token) {
+                if (strpos($address, nsl_v2_normalize_location_text($token)) !== false) {
+                    return $island_key;
+                }
+            }
+        }
+
+        return '';
     }
 }
 
@@ -98,8 +301,26 @@ if (!function_exists('nsl_v2_guess_region')) {
             'Zamboanga Peninsula' => array('zamboanga', 'dipolog', 'pagadian'),
             'Caraga' => array('butuan', 'surigao', 'agusan'),
         );
+        $region_islands = array(
+            'NCR' => 'Luzon',
+            'Central Luzon' => 'Luzon',
+            'CALABARZON' => 'Luzon',
+            'Ilocos' => 'Luzon',
+            'Bicol' => 'Luzon',
+            'Western Visayas' => 'Visayas',
+            'Central Visayas' => 'Visayas',
+            'Eastern Visayas' => 'Visayas',
+            'Davao Region' => 'Mindanao',
+            'Northern Mindanao' => 'Mindanao',
+            'SOCCSKSARGEN' => 'Mindanao',
+            'Zamboanga Peninsula' => 'Mindanao',
+            'Caraga' => 'Mindanao',
+        );
 
         foreach ($region_map as $region => $tokens) {
+            if ($island_group !== '' && isset($region_islands[$region]) && $region_islands[$region] !== $island_group) {
+                continue;
+            }
             foreach ($tokens as $token) {
                 if (strpos($address, $token) !== false) {
                     return $region;
@@ -113,7 +334,10 @@ if (!function_exists('nsl_v2_guess_region')) {
         if ($island_group === 'Mindanao') {
             return 'Mindanao Other';
         }
-        return 'Luzon Other';
+        if ($island_group === 'Luzon') {
+            return 'Luzon Other';
+        }
+        return 'Uncategorized';
     }
 }
 
@@ -212,16 +436,25 @@ if ($store_query->have_posts()) {
         }
         $gallery_urls = array_values(array_unique(array_filter($gallery_urls)));
 
-        $island_group = get_post_meta($post_id, '_nsl_island_group', true);
-        if ($island_group === '') {
-            $island_group = nsl_v2_guess_island_group($address);
+        $island_key = nsl_v2_coordinates_to_island_key($lat, $lng);
+        if ($island_key === '') {
+            $island_key = nsl_v2_normalize_island_key(get_post_meta($post_id, '_nsl_island_group', true));
         }
-        $island_group = ucwords(strtolower((string) $island_group));
 
-        $region = get_post_meta($post_id, '_nsl_region', true);
+        $region = trim((string) get_post_meta($post_id, '_nsl_region', true));
         if ($region === '') {
-            $region = nsl_v2_guess_region($address, $island_group);
+            $region = trim((string) get_post_meta($post_id, '_nsl_region_name', true));
         }
+        if ($region === '') {
+            $region = nsl_v2_guess_region($address, nsl_v2_island_label($island_key));
+        }
+        if ($island_key === '') {
+            $island_key = nsl_v2_region_to_island_key($region);
+        }
+        if ($island_key === '') {
+            $island_key = nsl_v2_address_to_island_key($address);
+        }
+        $island_group = nsl_v2_island_label($island_key);
 
         $allow_public_reviews = ('open' === get_post_field('comment_status', $post_id));
         $review_items = array();
@@ -290,7 +523,8 @@ if ($store_query->have_posts()) {
             'is_open' => (bool) $is_open,
             'status_label' => $is_open ? 'Open Now' : 'Closed',
             'rating' => (float) get_post_meta($post_id, '_nsl_rating', true) ?: 4.5,
-            'island_group' => $island_group !== '' ? $island_group : 'Luzon',
+            'island' => $island_key,
+            'island_group' => $island_group,
             'region' => (string) $region,
             'allow_public_reviews' => (bool) $allow_public_reviews,
             'reviews' => $review_items,
@@ -324,14 +558,8 @@ if ($store_query->have_posts()) {
                     <div class="nsl-v2-search-wrap">
                         <div class="nsl-v2-search-row">
                             <input type="text" class="nsl-v2-search-input" placeholder="Search location or store name">
-                            <button type="button" class="nsl-v2-use-location">Use My Location</button>
                         </div>
                         <div class="nsl-v2-suggestions" hidden></div>
-                    </div>
-
-                    <div class="nsl-v2-route-mode">
-                        <button type="button" class="nsl-v2-route-mode-btn is-active" data-route-mode="driving">Drive</button>
-                        <button type="button" class="nsl-v2-route-mode-btn" data-route-mode="walking">Walk</button>
                     </div>
                 </div>
 
@@ -348,6 +576,20 @@ if ($store_query->have_posts()) {
         </div>
         <div class="nsl-v2-bottom-row">
             <aside class="nsl-v2-filter-panel">
+                <div class="nsl-v2-compact-filters" aria-label="<?php esc_attr_e('Store filters', 'noyona'); ?>">
+                    <label class="nsl-v2-compact-filter">
+                        <span>Island Group</span>
+                        <select class="nsl-v2-island-select"></select>
+                    </label>
+                    <label class="nsl-v2-compact-filter">
+                        <span>Region</span>
+                        <select class="nsl-v2-region-select"></select>
+                    </label>
+                    <label class="nsl-v2-compact-filter">
+                        <span>Quick Filter</span>
+                        <select class="nsl-v2-quick-filter-select"></select>
+                    </label>
+                </div>
                 <h3 class="nsl-v2-bottom-title">Region Filter</h3>
                 <div class="nsl-v2-child-filter-list"></div>
                 <h3 class="nsl-v2-bottom-title nsl-v2-bottom-title--sub">Quick Filters</h3>

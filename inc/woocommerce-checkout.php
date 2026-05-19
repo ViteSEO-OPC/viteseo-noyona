@@ -1754,3 +1754,341 @@ function noyona_checkout_inline_js() {
 	</script>
 	<?php
 }
+/* ----- One-time stale order-confirmation template reset ----- */
+/**
+ * One-time safeguard:
+ * Remove stale DB-saved order confirmation templates so the theme file
+ * templates/order-confirmation.html is used consistently.
+ */
+add_action( 'init', 'noyona_one_time_reset_order_confirmation_template_override', 31 );
+function noyona_one_time_reset_order_confirmation_template_override() {
+    $safeguard_version = '1';
+    $option_key        = 'noyona_order_confirmation_template_safeguard_version';
+    if ( $safeguard_version === get_option( $option_key, '' ) ) {
+        return;
+    }
+
+    if ( ! post_type_exists( 'wp_template' ) ) {
+        update_option( $option_key, $safeguard_version, false );
+        return;
+    }
+
+    $theme_terms = array_values(
+        array_unique(
+            array_filter(
+                array(
+                    get_stylesheet(),
+                    get_template(),
+                )
+            )
+        )
+    );
+
+    $query_args = array(
+        'post_type'      => 'wp_template',
+        'post_status'    => 'any',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'name'           => 'order-confirmation',
+    );
+
+    if ( ! empty( $theme_terms ) ) {
+        $query_args['tax_query'] = array(
+            array(
+                'taxonomy' => 'wp_theme',
+                'field'    => 'name',
+                'terms'    => $theme_terms,
+            ),
+        );
+    }
+
+    $template_ids = get_posts( $query_args );
+    if ( ! empty( $template_ids ) ) {
+        foreach ( $template_ids as $template_id ) {
+            wp_delete_post( (int) $template_id, true );
+        }
+    }
+
+    update_option( $option_key, $safeguard_version, false );
+}
+
+/* ----- Strip <br> from .noyona-pay-meta block markup ----- */
+add_filter( 'render_block', 'noyona_strip_checkout_pay_meta_breaks', 35, 2 );
+function noyona_strip_checkout_pay_meta_breaks( $block_content, $block ) {
+    if ( is_admin() || '' === trim( (string) $block_content ) ) {
+        return $block_content;
+    }
+
+    if ( false === strpos( (string) $block_content, 'noyona-pay-meta' ) ) {
+        return $block_content;
+    }
+
+    return preg_replace_callback(
+        '/(<section\b[^>]*class=(["\'])[^"\']*\bnoyona-pay-meta\b[^"\']*\2[^>]*>)(.*?)(<\/section>)/is',
+        function ( $matches ) {
+            $inner = preg_replace( '/\s*<br\s*\/?>\s*/i', '', (string) $matches[3] );
+            return $matches[1] . $inner . $matches[4];
+        },
+        (string) $block_content
+    );
+}
+
+/* ----- Force /checkout/ as Woo checkout URL ----- */
+add_filter( 'woocommerce_get_checkout_url', 'noyona_force_checkout_url', 99 );
+function noyona_force_checkout_url( $url ) {
+    return esc_url_raw( home_url( '/checkout/' ) );
+}
+
+/* ----- Order-pay auto-start: detection + chrome hiding ----- */
+/**
+ * Detect "order-pay" pages opened via our My Account "Pay Now" CTA.
+ *
+ * @return bool
+ */
+function noyona_is_order_pay_autostart_request() {
+    if ( is_admin() || wp_doing_ajax() ) {
+        return false;
+    }
+
+    if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
+        return false;
+    }
+
+    if ( ! is_wc_endpoint_url( 'order-pay' ) ) {
+        return false;
+    }
+
+    $auto_flag = isset( $_GET['noyona_auto_pay'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['noyona_auto_pay'] ) ) : '';
+    if ( '1' !== $auto_flag ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Hide order-pay page chrome while we auto-submit payment form.
+ */
+add_action( 'wp_head', 'noyona_render_order_pay_autostart_head', 99 );
+function noyona_render_order_pay_autostart_head() {
+    if ( ! noyona_is_order_pay_autostart_request() ) {
+        return;
+    }
+    ?>
+    <script>
+    document.documentElement.classList.add('noyona-order-pay-autostart');
+    </script>
+    <style>
+    html.noyona-order-pay-autostart body.woocommerce-order-pay .wp-site-blocks main,
+    html.noyona-order-pay-autostart body.woocommerce-order-pay .wp-site-blocks .noyona-checkout-shell,
+    html.noyona-order-pay-autostart body.woocommerce-order-pay .wp-site-blocks .woocommerce {
+        opacity: 0;
+        pointer-events: none;
+    }
+    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready .wp-site-blocks main,
+    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready .wp-site-blocks .noyona-checkout-shell,
+    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready .wp-site-blocks .woocommerce {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    html.noyona-order-pay-autostart body.woocommerce-order-pay::before {
+        content: "Opening payment...";
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.96);
+        color: #1f2933;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready::before {
+        display: none;
+    }
+    </style>
+    <?php
+}
+
+/* ----- Order-pay auto-start: auto-submit script ----- */
+/**
+ * Auto-submit WooCommerce order-pay form so users skip manual "Pay for order".
+ */
+add_action( 'wp_footer', 'noyona_render_order_pay_autostart_script', 120 );
+function noyona_render_order_pay_autostart_script() {
+    if ( ! noyona_is_order_pay_autostart_request() ) {
+        return;
+    }
+    ?>
+    <script>
+    (function () {
+        function revealManualScreen() {
+            if (document.body) {
+                document.body.classList.add('noyona-order-pay-autostart-ready');
+            }
+        }
+
+        function autoSubmitOrderPay() {
+            var form = document.querySelector('form#order_review, form.woocommerce-order-pay, form.woocommerce-checkout');
+            if (!form) {
+                revealManualScreen();
+                return;
+            }
+
+            var orderMatch = window.location.pathname.match(/\/order-pay\/(\d+)/);
+            var orderId = orderMatch && orderMatch[1] ? String(orderMatch[1]) : 'unknown';
+            var orderKey = '';
+            try {
+                orderKey = String(new URLSearchParams(window.location.search || '').get('key') || '');
+            } catch (e) {
+                orderKey = '';
+            }
+
+            var storageKey = 'noyonaOrderPayAutoSubmit:' + orderId + ':' + orderKey;
+            if (window.sessionStorage) {
+                try {
+                    if (window.sessionStorage.getItem(storageKey) === '1') {
+                        revealManualScreen();
+                        return;
+                    }
+                    window.sessionStorage.setItem(storageKey, '1');
+                } catch (e) {
+                    // Ignore storage failures.
+                }
+            }
+
+            var methodRadios = form.querySelectorAll('input[name="payment_method"]');
+            var checkedMethod = form.querySelector('input[name="payment_method"]:checked');
+            if (!checkedMethod && methodRadios.length > 0) {
+                methodRadios[0].checked = true;
+                methodRadios[0].dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            var terms = form.querySelector('#terms');
+            if (terms && !terms.checked) {
+                terms.checked = true;
+                terms.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            var payButton = form.querySelector('#place_order, button[name="woocommerce_pay"], input[type="submit"][name="woocommerce_pay"], .form-row button[type="submit"]');
+            if (!payButton || payButton.disabled) {
+                revealManualScreen();
+                return;
+            }
+
+            window.setTimeout(function () {
+                try {
+                    if (window.jQuery) {
+                        window.jQuery(form).trigger('submit');
+                    } else if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit(payButton);
+                    } else {
+                        payButton.click();
+                    }
+                } catch (error) {
+                    revealManualScreen();
+                }
+            }, 180);
+
+            window.setTimeout(function () {
+                // If still on this page after a short delay, allow manual fallback.
+                revealManualScreen();
+            }, 4500);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', autoSubmitOrderPay);
+        } else {
+            autoSubmitOrderPay();
+        }
+    })();
+    </script>
+    <?php
+}
+
+/* ----- Checkout footer: remove empty <p> tags ----- */
+add_action( 'wp_footer', 'noyona_render_checkout_empty_paragraph_cleanup' );
+function noyona_render_checkout_empty_paragraph_cleanup() {
+    if (!is_checkout()) return;
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const paragraphs = document.querySelectorAll('p');
+
+        paragraphs.forEach(function (p) {
+            // Ignore important WooCommerce rows
+            if (p.classList.contains('form-row')) return;
+
+            // Check if empty (no text and no children except whitespace)
+            if (
+                p.textContent.trim() === '' &&
+                p.children.length === 0
+            ) {
+                p.remove();
+            }
+        });
+    });
+    </script>
+    <?php
+}
+
+/* ----- Global checkout login modal ----- */
+add_action( 'wp_footer', 'noyona_render_global_checkout_login_modal', 40 );
+function noyona_render_global_checkout_login_modal() {
+    if ( is_admin() || is_user_logged_in() ) {
+        return;
+    }
+
+    $login_action_url = wp_login_url();
+    $register_url     = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : wp_registration_url();
+    $redirect_to      = function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' );
+    $google_login_url = noyona_get_google_login_url( $redirect_to );
+    ?>
+    <div
+        id="noyona-global-checkout-login-modal"
+        class="noyona-mini-cart-login-modal"
+        data-mini-cart-login-modal-global
+        hidden
+    >
+        <button class="noyona-mini-cart-login-backdrop" type="button" data-mini-cart-login-close aria-label="<?php esc_attr_e( 'Close login modal', 'noyona-childtheme' ); ?>"></button>
+        <div class="noyona-mini-cart-login-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Log in before checkout', 'noyona-childtheme' ); ?>">
+            <button class="noyona-mini-cart-login-close" type="button" data-mini-cart-login-close aria-label="<?php esc_attr_e( 'Close login modal', 'noyona-childtheme' ); ?>">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+            <div class="noyona-mini-cart-login-icon" aria-hidden="true">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+
+            <h3 class="noyona-mini-cart-login-title"><?php esc_html_e( 'Log In to continue checkout', 'noyona-childtheme' ); ?></h3>
+            <p class="noyona-mini-cart-login-copy"><?php esc_html_e( 'Please log in to your account before checking out.', 'noyona-childtheme' ); ?></p>
+
+            <form class="noyona-mini-cart-login-form" method="post" action="<?php echo esc_url( $login_action_url ); ?>">
+                <label for="noyona-mini-cart-login-email"><?php esc_html_e( 'Email', 'noyona-childtheme' ); ?></label>
+                <input id="noyona-mini-cart-login-email" name="log" type="text" required placeholder="<?php esc_attr_e( 'your@email.com', 'noyona-childtheme' ); ?>" />
+
+                <label for="noyona-mini-cart-login-password"><?php esc_html_e( 'Password', 'noyona-childtheme' ); ?></label>
+                <input id="noyona-mini-cart-login-password" name="pwd" type="password" required placeholder="<?php esc_attr_e( 'Enter your password', 'noyona-childtheme' ); ?>" />
+
+                <input type="hidden" name="redirect_to" data-mini-cart-login-redirect value="<?php echo esc_url( $redirect_to ); ?>" />
+                <button type="submit" class="noyona-mini-cart-login-submit"><?php esc_html_e( 'Log In', 'noyona-childtheme' ); ?></button>
+            </form>
+
+            <div class="noyona-mini-cart-login-separator" aria-hidden="true">
+                <span></span><em><?php esc_html_e( 'or', 'noyona-childtheme' ); ?></em><span></span>
+            </div>
+
+            <a class="noyona-mini-cart-login-google" data-mini-cart-login-action href="<?php echo esc_url( $google_login_url ); ?>">
+                <i class="fa-brands fa-google" aria-hidden="true"></i>
+                <span><?php esc_html_e( 'Login with Google', 'noyona-childtheme' ); ?></span>
+            </a>
+
+            <a class="noyona-mini-cart-login-register" data-mini-cart-register-action href="<?php echo esc_url( $register_url ); ?>">
+                <?php esc_html_e( 'Create an Account', 'noyona-childtheme' ); ?>
+            </a>
+
+            <p class="noyona-mini-cart-login-note"><?php esc_html_e( 'You must be logged in to proceed to checkout.', 'noyona-childtheme' ); ?></p>
+        </div>
+    </div>
+    <?php
+}
+

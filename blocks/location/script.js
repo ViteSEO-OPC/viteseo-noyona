@@ -96,38 +96,223 @@
     );
   }
 
+  function normalizeFilterValue(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function normalizeLocationText(value) {
+    return normalizeFilterValue(value)
+      .replace(/[&\-_\/,.()]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function normalizeIslandKey(value) {
+    var key = normalizeLocationText(value);
+    if (key === "luzon" || key === "visayas" || key === "mindanao") {
+      return key;
+    }
+    if (key.indexOf("luzon") !== -1) return "luzon";
+    if (key.indexOf("visayas") !== -1) return "visayas";
+    if (key.indexOf("mindanao") !== -1) return "mindanao";
+    return "";
+  }
+
+  function coordinatesInBounds(lat, lng, bounds) {
+    return lat >= bounds[0] && lat <= bounds[1] && lng >= bounds[2] && lng <= bounds[3];
+  }
+
+  function coordinatesToIslandKey(lat, lng) {
+    lat = parseFloat(lat);
+    lng = parseFloat(lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return "";
+    if (lat < 4.0 || lat > 22.5 || lng < 116.0 || lng > 128.5) return "";
+
+    var samarBounds = [
+      [10.7, 12.8, 124.0, 126.4],
+    ];
+    if (samarBounds.some(function (bounds) { return coordinatesInBounds(lat, lng, bounds); })) {
+      return "visayas";
+    }
+
+    var luzonBounds = [
+      [12.0, 21.8, 119.0, 126.8],
+      [7.4, 13.3, 116.5, 121.8],
+    ];
+    if (luzonBounds.some(function (bounds) { return coordinatesInBounds(lat, lng, bounds); })) {
+      return "luzon";
+    }
+
+    var visayasBounds = [
+      [9.0, 12.4, 121.8, 125.35],
+      [10.0, 12.8, 125.35, 126.35],
+    ];
+    if (visayasBounds.some(function (bounds) { return coordinatesInBounds(lat, lng, bounds); })) {
+      return "visayas";
+    }
+
+    var mindanaoBounds = [
+      [4.4, 9.99, 121.5, 127.6],
+      [9.9, 10.6, 125.2, 126.7],
+    ];
+    if (mindanaoBounds.some(function (bounds) { return coordinatesInBounds(lat, lng, bounds); })) {
+      return "mindanao";
+    }
+
+    return "";
+  }
+
+  function regionToIslandKey(value) {
+    var region = normalizeLocationText(value);
+    if (!region) return "";
+
+    var aliases = {
+      luzon: [
+        "ncr",
+        "national capital region",
+        "metro manila",
+        "car",
+        "cordillera administrative region",
+        "region i",
+        "region 1",
+        "ilocos",
+        "ilocos region",
+        "region ii",
+        "region 2",
+        "cagayan valley",
+        "region iii",
+        "region 3",
+        "central luzon",
+        "region iv a",
+        "region iva",
+        "region 4 a",
+        "calabarzon",
+        "region iv b",
+        "region ivb",
+        "region 4 b",
+        "mimaropa",
+        "region v",
+        "region 5",
+        "bicol",
+        "bicol region",
+        "luzon other",
+      ],
+      visayas: [
+        "region vi",
+        "region 6",
+        "western visayas",
+        "region vii",
+        "region 7",
+        "central visayas",
+        "region viii",
+        "region 8",
+        "eastern visayas",
+        "visayas other",
+      ],
+      mindanao: [
+        "region ix",
+        "region 9",
+        "zamboanga peninsula",
+        "region x",
+        "region 10",
+        "northern mindanao",
+        "region xi",
+        "region 11",
+        "davao region",
+        "region xii",
+        "region 12",
+        "soccsksargen",
+        "region xiii",
+        "region 13",
+        "caraga",
+        "barmm",
+        "bangsamoro autonomous region in muslim mindanao",
+        "mindanao other",
+      ],
+    };
+
+    var haystack = " " + region + " ";
+    return Object.keys(aliases).find(function (island) {
+      return aliases[island].some(function (alias) {
+        alias = normalizeLocationText(alias);
+        return region === alias || haystack.indexOf(" " + alias + " ") !== -1;
+      });
+    }) || "";
+  }
+
+  function addressToIslandKey(value) {
+    var address = normalizeLocationText(value);
+    if (!address) return "";
+
+    var tokens = {
+      visayas: ["cebu", "iloilo", "bacolod", "bohol", "leyte", "samar", "eastern samar", "northern samar", "western samar", "calbayog", "catarman", "dolores eastern samar", "dumaguete", "roxas", "aklan", "antique", "capiz", "guimaras", "negros occidental", "negros oriental", "siquijor", "tacloban", "ormoc"],
+      mindanao: ["davao", "cagayan de oro", "zamboanga", "butuan", "surigao", "cotabato", "general santos", "iligan", "dipolog", "pagadian", "misamis", "bukidnon", "camiguin", "lanao", "agusan", "sarangani", "south cotabato", "sultan kudarat"],
+      luzon: ["manila", "quezon city", "makati", "pasig", "taguig", "pasay", "mandaluyong", "marikina", "caloocan", "muntinlupa", "paranaque", "las pinas", "san juan", "malabon", "navotas", "valenzuela", "pateros", "bulacan", "pampanga", "tarlac", "zambales", "nueva ecija", "aurora", "bataan", "laguna", "cavite", "batangas", "rizal", "quezon province", "ilocos", "la union", "pangasinan", "albay", "camarines", "catanduanes", "masbate", "sorsogon", "palawan", "mindoro", "marinduque", "romblon"],
+    };
+
+    return Object.keys(tokens).find(function (island) {
+      return tokens[island].some(function (token) {
+        return address.indexOf(normalizeLocationText(token)) !== -1;
+      });
+    }) || "";
+  }
+
+  function inferStoreIslandKey(store) {
+    return (
+      coordinatesToIslandKey(store.lat, store.lng) ||
+      normalizeIslandKey(store.island || store.island_group || store.islandGroup) ||
+      regionToIslandKey(store.region || store.regionName) ||
+      addressToIslandKey(store.address)
+    );
+  }
+
+  function islandLabel(key) {
+    if (key === "luzon") return "Luzon";
+    if (key === "visayas") return "Visayas";
+    if (key === "mindanao") return "Mindanao";
+    return "";
+  }
+
+  function normalizeIslandSelection(value) {
+    var key = normalizeFilterValue(value);
+    if (key === "all") return "all";
+    return normalizeIslandKey(key) || "all";
+  }
+
   function formatSelectedDetail(store) {
     if (!store) {
       return getEmptySelectedMarkup(true);
     }
     var phone = store.phone || store.tel || "";
-    var gallery = Array.isArray(store.gallery) ? store.gallery : (store.image ? [store.image] : []);
     var galleryHtml = "";
-    if (gallery.length) {
-      galleryHtml =
-        '<div class="nsl-v2-detail__gallery">' +
-        gallery
-          .slice(0, 5)
-          .map(function (img, index) {
-            return (
-              '<button type="button" class="nsl-v2-detail__thumb' +
-              (index === 0 ? " is-active" : "") +
-              '" data-gallery-src="' +
-              escHtml(img) +
-              '">' +
-              '<img src="' +
-              escHtml(img) +
-              '" alt="' +
-              escHtml(store.title) +
-              '" loading="lazy">' +
-              "</button>"
-            );
-          })
-          .join("") +
-        "</div>";
-    }
+    // Temporarily hidden: store detail gallery/images
+    // var gallery = Array.isArray(store.gallery) ? store.gallery : (store.image ? [store.image] : []);
+    // if (gallery.length) {
+    //   galleryHtml =
+    //     '<div class="nsl-v2-detail__gallery">' +
+    //     gallery
+    //       .slice(0, 5)
+    //       .map(function (img, index) {
+    //         return (
+    //           '<button type="button" class="nsl-v2-detail__thumb' +
+    //           (index === 0 ? " is-active" : "") +
+    //           '" data-gallery-src="' +
+    //           escHtml(img) +
+    //           '">' +
+    //           '<img src="' +
+    //           escHtml(img) +
+    //           '" alt="' +
+    //           escHtml(store.title) +
+    //           '" loading="lazy">' +
+    //           "</button>"
+    //         );
+    //       })
+    //       .join("") +
+    //     "</div>";
+    // }
 
     var reviews = Array.isArray(store.reviews) ? store.reviews : [];
+    var reviewsTabLabel = reviews.length ? "Reviews (" + reviews.length + ")" : "Reviews";
     var totalRating = reviews.reduce(function (sum, review) {
       return sum + (parseInt(review.rating || 0, 10) || 0);
     }, 0);
@@ -164,12 +349,13 @@
       '">' +
       '<div class="nsl-v2-detail-tabs">' +
       '<button type="button" class="nsl-v2-detail-tab is-active" data-detail-tab="overview">Overview</button>' +
-      '<button type="button" class="nsl-v2-detail-tab" data-detail-tab="reviews">Reviews (' +
-      escHtml(reviews.length) +
-      ")</button>" +
+      '<button type="button" class="nsl-v2-detail-tab" data-detail-tab="reviews">' +
+      escHtml(reviewsTabLabel) +
+      "</button>" +
       "</div>" +
       '<div class="nsl-v2-detail-pane is-active" data-detail-pane="overview">' +
-      (store.image ? '<img class="nsl-v2-detail__image" src="' + escHtml(store.image) + '" alt="' + escHtml(store.title) + '" loading="lazy">' : "") +
+      // Temporarily hidden: store detail gallery/images
+      // (store.image ? '<img class="nsl-v2-detail__image" src="' + escHtml(store.image) + '" alt="' + escHtml(store.title) + '" loading="lazy">' : "") +
       galleryHtml +
       '<div class="nsl-v2-detail__headline">' +
       '<h3 class="nsl-v2-detail__title">' +
@@ -199,7 +385,6 @@
       "</li>" +
       "</ul>" +
       '<div class="nsl-v2-detail__actions">' +
-      '<button type="button" class="nsl-v2-route-btn nsl-v2-get-route">Get Route From My Location</button>' +
       '<a class="nsl-v2-directions" href="' +
       escHtml(buildDirectionsUrl(store)) +
       '" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>' +
@@ -234,12 +419,36 @@
   function initStoreLocator(wrapper) {
     var jsonEl = wrapper.querySelector('script[type="application/json"]');
     var mapEl = wrapper.querySelector(".nsl-v2-map");
+    var mapShell = wrapper.querySelector(".nsl-v2-map-shell");
     var searchInput = wrapper.querySelector(".nsl-v2-search-input");
     var suggestionsEl = wrapper.querySelector(".nsl-v2-suggestions");
     var selectedPanel = wrapper.querySelector(".nsl-v2-selected-panel");
+
+    /**
+     * Mobile-only mirror of the selected-store details. The overlay panel
+     * floats inside the map on desktop/laptop, but on small viewports the
+     * map is too narrow to share with a 390px panel — so we mirror the
+     * same `formatSelectedDetail()` markup into a below-map container and
+     * let CSS pick which one is visible at the active breakpoint.
+     * Container is created once and lives between `.nsl-v2-top` and
+     * `.nsl-v2-bottom`. Empty state is hidden via `:not(:empty)` in CSS.
+     */
+    var mobileSelectedPanel = wrapper.querySelector(".nsl-v2-mobile-selected");
+    if (!mobileSelectedPanel) {
+      var topSection = wrapper.querySelector(".nsl-v2-top");
+      if (topSection && topSection.parentNode) {
+        mobileSelectedPanel = document.createElement("div");
+        mobileSelectedPanel.className = "nsl-v2-mobile-selected";
+        topSection.parentNode.insertBefore(mobileSelectedPanel, topSection.nextSibling);
+      }
+    }
+
     var parentFilterList = wrapper.querySelector(".nsl-v2-parent-filter-list");
     var childFilterList = wrapper.querySelector(".nsl-v2-child-filter-list");
     var extraFilterList = wrapper.querySelector(".nsl-v2-extra-filter-list");
+    var islandSelect = wrapper.querySelector(".nsl-v2-island-select");
+    var regionSelect = wrapper.querySelector(".nsl-v2-region-select");
+    var quickFilterSelect = wrapper.querySelector(".nsl-v2-quick-filter-select");
     var storeGrid = wrapper.querySelector(".nsl-v2-store-grid");
     var storeCount = wrapper.querySelector(".nsl-v2-store-count");
     var storePagination = wrapper.querySelector(".nsl-v2-store-pagination");
@@ -261,16 +470,54 @@
       store._statusLabel = computed.label;
       var ratingNum = parseFloat(store.rating);
       store._rating = Number.isFinite(ratingNum) ? ratingNum : 4.5;
+      store._islandKey = inferStoreIslandKey(store);
+      store.island = store._islandKey;
+      store.island_group = islandLabel(store._islandKey);
+      store.region = String(store.region || store.regionName || "").trim() || "Uncategorized";
+      store._regionKey = normalizeLocationText(store.region);
       return store;
     });
 
     var query = "";
-    var activeIsland = "Luzon";
+    var activeIsland = "all";
     var activeRegion = "all";
     var activeQuickFilter = "all";
     var selectedStoreId = null;
     var currentPage = 1;
-    var pageSize = 24;
+
+    /**
+     * Derive the per-page store count from the active grid layout. We read the
+     * computed `grid-template-columns` of `.nsl-v2-store-grid` directly so the
+     * JS can never drift from the CSS breakpoints in `style.css`. Mapping:
+     *   4 columns → 24 stores  (4 × 6 complete rows)
+     *   3 columns → 21 stores  (3 × 7 complete rows)
+     *   2 columns → 10 stores  (2 × 5 complete rows)
+     *   1 column  → 5  stores  (1 × 5 complete rows)
+     * Falls back to 24 if the grid hasn't been laid out yet or the value cannot
+     * be parsed (e.g. element is `display: none`).
+     */
+    function computePageSize() {
+      if (!storeGrid) {
+        return 24;
+      }
+      var template = "";
+      try {
+        template = window.getComputedStyle(storeGrid).gridTemplateColumns || "";
+      } catch (e) {
+        template = "";
+      }
+      if (!template || template === "none") {
+        return 24;
+      }
+      var columns = template.trim().split(/\s+/).length;
+      if (columns >= 4) return 24;
+      if (columns === 3) return 21;
+      if (columns === 2) return 10;
+      if (columns === 1) return 5;
+      return 24;
+    }
+
+    var pageSize = computePageSize();
     var routeMode = "driving";
     var userLocation = null;
     var userMarker = null;
@@ -299,6 +546,27 @@
 
     var markers = {};
     var markerLayer = L.layerGroup().addTo(map);
+
+    function invalidateMapSize(delay) {
+      window.setTimeout(function () {
+        map.invalidateSize({ pan: false });
+      }, delay || 0);
+    }
+
+    function invalidateMapSizeSeries() {
+      invalidateMapSize(0);
+      invalidateMapSize(120);
+      invalidateMapSize(320);
+    }
+
+    invalidateMapSizeSeries();
+    window.addEventListener("load", invalidateMapSizeSeries);
+
+    if (window.ResizeObserver && mapShell) {
+      var mapResizeObserver = new ResizeObserver(invalidateMapSizeSeries);
+      mapResizeObserver.observe(mapShell);
+      mapResizeObserver.observe(mapEl);
+    }
 
     function setActiveMarker(storeId) {
       Object.keys(markers).forEach(function (id) {
@@ -329,10 +597,16 @@
       });
     }
 
+    function getSearchIslandRegionFilteredStores() {
+      return getSearchFilteredStores().filter(function (store) {
+        if (activeIsland !== "all" && store._islandKey !== activeIsland) return false;
+        if (activeRegion !== "all" && store._regionKey !== activeRegion) return false;
+        return true;
+      });
+    }
+
     function getFullyFilteredStores() {
-      var filtered = getSearchFilteredStores().filter(function (store) {
-        if (activeIsland !== "all" && store.island_group !== activeIsland) return false;
-        if (activeRegion !== "all" && store.region !== activeRegion) return false;
+      var filtered = getSearchIslandRegionFilteredStores().filter(function (store) {
         if (activeQuickFilter === "open" && !store._isOpen) return false;
         if (activeQuickFilter === "top" && store._rating < 4.5) return false;
         if (activeQuickFilter === "near") {
@@ -483,7 +757,7 @@
         suggestionsEl.innerHTML = "";
         return;
       }
-      var candidates = getSearchFilteredStores().slice(0, 10);
+      var candidates = getSearchIslandRegionFilteredStores().slice(0, 10);
       if (!candidates.length) {
         suggestionsEl.hidden = false;
         suggestionsEl.innerHTML = '<div class="nsl-v2-suggestion-empty">No matching stores found.</div>';
@@ -512,11 +786,16 @@
       var bySearch = getSearchFilteredStores();
       var tree = {};
       bySearch.forEach(function (store) {
-        var island = store.island_group || "Luzon";
-        var region = store.region || "Uncategorized";
-        if (!tree[island]) tree[island] = { count: 0, regions: {} };
+        var island = store._islandKey;
+        if (!island) return;
+        var regionKey = store._regionKey || "uncategorized";
+        var regionLabel = store.region || "Uncategorized";
+        if (!tree[island]) tree[island] = { count: 0, label: islandLabel(island), regions: {} };
+        if (!tree[island].regions[regionKey]) {
+          tree[island].regions[regionKey] = { count: 0, label: regionLabel };
+        }
         tree[island].count += 1;
-        tree[island].regions[region] = (tree[island].regions[region] || 0) + 1;
+        tree[island].regions[regionKey].count += 1;
       });
       return { bySearch: bySearch, tree: tree };
     }
@@ -526,13 +805,13 @@
       var data = getFilterTreeBySearch();
       var tree = data.tree;
       var bySearch = data.bySearch;
-      var parentOrder = ["Luzon", "Visayas", "Mindanao"];
-
-      if (activeIsland !== "all" && !tree[activeIsland]) {
-        activeIsland = parentOrder.find(function (name) {
-          return !!tree[name];
-        }) || "all";
-        activeRegion = "all";
+      var parentOrder = [
+        { key: "luzon", label: "Luzon" },
+        { key: "visayas", label: "Visayas" },
+        { key: "mindanao", label: "Mindanao" },
+      ];
+      function optionHtml(value, label, selected) {
+        return '<option value="' + escHtml(value) + '"' + (selected ? " selected" : "") + ">" + escHtml(label) + "</option>";
       }
 
       var parentHtml =
@@ -543,29 +822,45 @@
         ")</button>";
 
       parentOrder.forEach(function (island) {
-        var count = tree[island] ? tree[island].count : 0;
+        var count = tree[island.key] ? tree[island.key].count : 0;
         parentHtml +=
           '<button type="button" class="nsl-v2-filter-parent' +
-          (activeIsland === island ? " is-active" : "") +
+          (activeIsland === island.key ? " is-active" : "") +
           '" data-island="' +
-          escHtml(island) +
-          // '" data-region="all">(' +
-          // count +
-          // ") " +
+          escHtml(island.key) +
           '">' +
-          escHtml(island) +
+          escHtml(island.label) +
           "</button>";
       });
       parentFilterList.innerHTML = parentHtml;
 
+      if (islandSelect) {
+        islandSelect.innerHTML =
+          optionHtml("all", "All islands (" + bySearch.length + ")", activeIsland === "all") +
+          parentOrder
+            .map(function (island) {
+              var count = tree[island.key] ? tree[island.key].count : 0;
+              return optionHtml(island.key, island.label + " (" + count + ")", activeIsland === island.key);
+            })
+            .join("");
+      }
+
       if (activeIsland === "all") {
         childFilterList.innerHTML = '<div class="nsl-v2-filter-hint">Select Luzon, Visayas, or Mindanao to see child regions.</div>';
+        if (regionSelect) {
+          regionSelect.innerHTML = optionHtml("all", "All regions", true);
+          regionSelect.disabled = true;
+        }
         return;
       }
 
       var islandTree = tree[activeIsland];
       if (!islandTree || !islandTree.regions || !Object.keys(islandTree.regions).length) {
         childFilterList.innerHTML = '<div class="nsl-v2-filter-hint">No regions found for this island group.</div>';
+        if (regionSelect) {
+          regionSelect.innerHTML = optionHtml("all", "No regions found", true);
+          regionSelect.disabled = true;
+        }
         return;
       }
 
@@ -575,29 +870,40 @@
         '" data-island="' +
         escHtml(activeIsland) +
         '" data-region="all">All ' +
-        escHtml(activeIsland) +
-        // " (" +
-        // islandTree.count +
-        // ")</button>";
+        escHtml(islandTree.label || islandLabel(activeIsland)) +
         "</button>";
 
       Object.keys(islandTree.regions)
         .sort()
-        .forEach(function (region) {
+        .forEach(function (regionKey) {
+          var region = islandTree.regions[regionKey];
           childHtml +=
             '<button type="button" class="nsl-v2-filter-child' +
-            (activeRegion === region ? " is-active" : "") +
+            (activeRegion === regionKey ? " is-active" : "") +
             '" data-island="' +
             escHtml(activeIsland) +
             '" data-region="' +
-            escHtml(region) +
+            escHtml(regionKey) +
             '">(' +
-            islandTree.regions[region] +
+            region.count +
             ") " +
-            escHtml(region) +
+            escHtml(region.label) +
             "</button>";
         });
       childFilterList.innerHTML = childHtml;
+
+      if (regionSelect) {
+        regionSelect.disabled = false;
+        regionSelect.innerHTML =
+          optionHtml("all", "All " + (islandTree.label || islandLabel(activeIsland)) + " regions", activeRegion === "all") +
+          Object.keys(islandTree.regions)
+            .sort()
+            .map(function (regionKey) {
+              var region = islandTree.regions[regionKey];
+              return optionHtml(regionKey, region.label + " (" + region.count + ")", activeRegion === regionKey);
+            })
+            .join("");
+      }
     }
 
     function renderExtraFilters() {
@@ -621,6 +927,22 @@
           );
         })
         .join("");
+
+      if (quickFilterSelect) {
+        quickFilterSelect.innerHTML = options
+          .map(function (item) {
+            return (
+              '<option value="' +
+              escHtml(item.key) +
+              '"' +
+              (activeQuickFilter === item.key ? " selected" : "") +
+              ">" +
+              escHtml(item.label) +
+              "</option>"
+            );
+          })
+          .join("");
+      }
     }
 
     function renderPagination(totalItems, totalPages) {
@@ -659,6 +981,7 @@
     }
 
     function renderStoresAndMap() {
+      map.invalidateSize({ pan: false });
       var filtered = getFullyFilteredStores();
       var totalItems = filtered.length;
       var totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
@@ -702,15 +1025,34 @@
       var selected = getSelectedStore();
       if (!selected || filtered.every(function (s) { return String(s.id) !== String(selected.id); })) {
         selectedStoreId = null;
-        selectedPanel.innerHTML = query ? getEmptySelectedMarkup(false) : getEmptySelectedMarkup(true);
+        setSelectedPanelHtml(query ? getEmptySelectedMarkup(false) : getEmptySelectedMarkup(true));
         selectedPanel.classList.toggle("is-collapsed", !!query);
         setActiveMarker(null);
         clearRoute();
       } else {
         selectedPanel.classList.remove("is-collapsed");
-        selectedPanel.innerHTML = formatSelectedDetail(selected);
+        setSelectedPanelHtml(formatSelectedDetail(selected));
         setActiveMarker(selected.id);
         syncAddressToggleVisibility();
+      }
+      invalidateMapSizeSeries();
+    }
+
+    /**
+     * Update both the in-map overlay panel and the below-map mobile mirror
+     * with the same selected-store HTML. The mobile container is left empty
+     * when the markup is the placeholder ("Select a store...") so the
+     * `:not(:empty)` CSS rule hides it until a real store is chosen.
+     */
+    function setSelectedPanelHtml(html) {
+      selectedPanel.innerHTML = html;
+      if (!mobileSelectedPanel) {
+        return;
+      }
+      if (typeof html === "string" && html.indexOf("nsl-v2-detail") !== -1) {
+        mobileSelectedPanel.innerHTML = html;
+      } else {
+        mobileSelectedPanel.innerHTML = "";
       }
     }
 
@@ -720,9 +1062,10 @@
       });
       if (!store) return;
       selectedStoreId = String(store.id);
-      selectedPanel.innerHTML = formatSelectedDetail(store);
+      setSelectedPanelHtml(formatSelectedDetail(store));
       setActiveMarker(store.id);
       syncAddressToggleVisibility();
+      invalidateMapSizeSeries();
       if (shouldFly && !userLocation) {
         zoomToStore(store);
       }
@@ -738,16 +1081,50 @@
     }
 
     function syncAddressToggleVisibility() {
-      var addressEl = selectedPanel.querySelector(".nsl-v2-detail__address");
-      var toggleEl = selectedPanel.querySelector(".nsl-v2-address-toggle");
-      if (!addressEl || !toggleEl) return;
-      var shouldShow = addressEl.scrollHeight > addressEl.clientHeight + 2;
-      toggleEl.hidden = !shouldShow;
+      // Run independently against each panel; the hidden one (display:none)
+      // reports zero scroll/clientHeight, so its toggle is hidden, which is
+      // harmless. Only the visible panel produces meaningful measurements.
+      [selectedPanel, mobileSelectedPanel].forEach(function (panel) {
+        if (!panel) return;
+        var addressEl = panel.querySelector(".nsl-v2-detail__address");
+        var toggleEl = panel.querySelector(".nsl-v2-address-toggle");
+        if (!addressEl || !toggleEl) return;
+        var shouldShow = addressEl.scrollHeight > addressEl.clientHeight + 2;
+        toggleEl.hidden = !shouldShow;
+      });
     }
 
     renderFilters();
     renderExtraFilters();
     renderStoresAndMap();
+
+    /**
+     * Recompute the per-page count when the viewport crosses a breakpoint and
+     * the active grid column count changes. Debounced so a window-drag does
+     * not thrash the layout. Only re-renders when pageSize actually changes;
+     * resize events within the same breakpoint short-circuit. On a real
+     * breakpoint change we reset to page 1 — pagination state is page-index
+     * only (no URL/state persistence), so attempting to preserve the first
+     * visible store would be misleading.
+     */
+    var resizeDebounceTimer = null;
+    function handleViewportResize() {
+      var nextPageSize = computePageSize();
+      if (nextPageSize === pageSize) {
+        invalidateMapSizeSeries();
+        syncAddressToggleVisibility();
+        return;
+      }
+      pageSize = nextPageSize;
+      currentPage = 1;
+      renderStoresAndMap();
+    }
+    window.addEventListener("resize", function () {
+      if (resizeDebounceTimer) {
+        clearTimeout(resizeDebounceTimer);
+      }
+      resizeDebounceTimer = window.setTimeout(handleViewportResize, 120);
+    });
 
     wrapper.addEventListener("input", function (event) {
       if (!event.target.classList.contains("nsl-v2-search-input")) return;
@@ -762,6 +1139,61 @@
       renderFilters();
       renderExtraFilters();
       renderStoresAndMap();
+    });
+
+    function applyQuickFilter(nextQuickFilter) {
+      if (nextQuickFilter === "near" && !userLocation) {
+        if (!navigator.geolocation) {
+          alert("Geolocation is not supported by your browser.");
+          renderExtraFilters();
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            setUserMarker(pos.coords.latitude, pos.coords.longitude);
+            map.flyTo([pos.coords.latitude, pos.coords.longitude], 14, { duration: 1 });
+            activeQuickFilter = "near";
+            currentPage = 1;
+            renderExtraFilters();
+            renderStoresAndMap();
+          },
+          function () {
+            alert("Unable to access location. Please allow location permission in your browser.");
+            renderExtraFilters();
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+        return;
+      }
+      activeQuickFilter = nextQuickFilter;
+      currentPage = 1;
+      renderExtraFilters();
+      renderStoresAndMap();
+    }
+
+    wrapper.addEventListener("change", function (event) {
+      if (event.target.classList.contains("nsl-v2-island-select")) {
+        activeIsland = normalizeIslandSelection(event.target.value);
+        activeRegion = "all";
+        currentPage = 1;
+        renderFilters();
+        renderExtraFilters();
+        renderStoresAndMap();
+        return;
+      }
+
+      if (event.target.classList.contains("nsl-v2-region-select")) {
+        activeRegion = normalizeLocationText(event.target.value) || "all";
+        currentPage = 1;
+        renderFilters();
+        renderExtraFilters();
+        renderStoresAndMap();
+        return;
+      }
+
+      if (event.target.classList.contains("nsl-v2-quick-filter-select")) {
+        applyQuickFilter(event.target.value || "all");
+      }
     });
 
     wrapper.addEventListener("click", function (event) {
@@ -786,8 +1218,8 @@
 
       var filterBtn = event.target.closest(".nsl-v2-filter-parent, .nsl-v2-filter-child");
       if (filterBtn) {
-        activeIsland = filterBtn.getAttribute("data-island") || "all";
-        activeRegion = filterBtn.getAttribute("data-region") || "all";
+        activeIsland = normalizeIslandSelection(filterBtn.getAttribute("data-island"));
+        activeRegion = normalizeLocationText(filterBtn.getAttribute("data-region")) || "all";
         currentPage = 1;
         renderFilters();
         renderExtraFilters();
@@ -798,31 +1230,7 @@
       var extraBtn = event.target.closest(".nsl-v2-filter-extra");
       if (extraBtn) {
         var nextQuickFilter = extraBtn.getAttribute("data-extra-filter") || "all";
-        if (nextQuickFilter === "near" && !userLocation) {
-          if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser.");
-            return;
-          }
-          navigator.geolocation.getCurrentPosition(
-            function (pos) {
-              setUserMarker(pos.coords.latitude, pos.coords.longitude);
-              map.flyTo([pos.coords.latitude, pos.coords.longitude], 14, { duration: 1 });
-              activeQuickFilter = "near";
-              currentPage = 1;
-              renderExtraFilters();
-              renderStoresAndMap();
-            },
-            function () {
-              alert("Unable to access location. Please allow location permission in your browser.");
-            },
-            { enableHighAccuracy: true, timeout: 10000 }
-          );
-          return;
-        }
-        activeQuickFilter = nextQuickFilter;
-        currentPage = 1;
-        renderExtraFilters();
-        renderStoresAndMap();
+        applyQuickFilter(nextQuickFilter);
         return;
       }
 

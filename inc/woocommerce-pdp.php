@@ -409,3 +409,60 @@ function noyona_pdp_enqueue_assets() {
 		)
 	);
 }
+
+/**
+ * PDP gallery badge: hide the default WooCommerce "Sale!" flash and, when the
+ * product is marked Featured, render a single "BEST SELLER" pill as a
+ * product-level overlay on the gallery container.
+ *
+ * The badge represents the product, not a specific gallery image, so it must
+ * not live inside the first FlexSlider slide. Keeping it as a child of the
+ * WooCommerce gallery container lets it stay visible as thumbnails, variation
+ * images, zoom/lightbox, or the theme's fallback gallery swap the active image.
+ */
+add_action( 'wp', 'noyona_pdp_hide_sale_flash_badge' );
+function noyona_pdp_hide_sale_flash_badge() {
+	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+		return;
+	}
+	remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
+}
+
+function noyona_pdp_should_show_best_seller_badge() {
+	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+		return false;
+	}
+
+	global $product;
+	if ( ! $product instanceof WC_Product ) {
+		return false;
+	}
+
+	return $product->is_featured();
+}
+
+function noyona_pdp_get_best_seller_badge_html() {
+	return '<span class="noyona-pdp-best-seller-badge">' . esc_html__( 'BEST SELLER', 'viteseo-noyona-childtheme' ) . '</span>';
+}
+
+add_filter( 'render_block_woocommerce/product-image-gallery', 'noyona_pdp_render_best_seller_gallery_badge', 10, 2 );
+function noyona_pdp_render_best_seller_gallery_badge( $block_content, $block ) {
+	if ( ! noyona_pdp_should_show_best_seller_badge() || strpos( $block_content, 'noyona-pdp-best-seller-badge' ) !== false ) {
+		return $block_content;
+	}
+
+	$replacements = 0;
+	$new_html     = preg_replace(
+		'/(<div\b[^>]*class="[^"]*\bwoocommerce-product-gallery\b[^"]*"[^>]*>)/i',
+		'$1' . noyona_pdp_get_best_seller_badge_html(),
+		$block_content,
+		1,
+		$replacements
+	);
+
+	if ( $replacements > 0 && is_string( $new_html ) ) {
+		return $new_html;
+	}
+
+	return $block_content;
+}
