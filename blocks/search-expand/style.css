@@ -5,6 +5,7 @@
 }
 
 .search-inline-form {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -12,7 +13,7 @@
 }
 
 .search-inline-input {
-    /* width: clamp(150px, 16vw, 220px); */
+    width: clamp(150px, 16vw, 220px);
     -webkit-appearance: none;
     appearance: none;
     border: 0;
@@ -63,6 +64,167 @@
     margin-right: 0.05rem;
 }
 
+.search-inline-suggestions {
+    position: absolute;
+    top: calc(100% + 0.55rem);
+    left: 0;
+    width: min(360px, calc(100vw - 24px));
+    max-height: min(460px, calc(100dvh - var(--noyona-header-total-offset, 96px) - 24px));
+    overflow: auto;
+    z-index: 2200;
+    border: 1px solid #f0d5db;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(56, 32, 42, 0.13);
+    padding: 0.45rem;
+}
+
+.search-inline-suggestions[hidden] {
+    display: none !important;
+}
+
+.search-inline-suggestions__status {
+    padding: 0.75rem 0.85rem;
+    color: #8c6870;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.search-inline-suggestions__status:empty {
+    display: none;
+}
+
+.search-inline-form.is-loading .search-inline-suggestions__status:not(:empty)::before {
+    content: "";
+    display: inline-block;
+    width: 0.72rem;
+    height: 0.72rem;
+    margin-right: 0.5rem;
+    border: 2px solid #f2d6dc;
+    border-top-color: #e199a4;
+    border-radius: 999px;
+    vertical-align: -0.08em;
+    animation: noyona-search-spin 0.7s linear infinite;
+}
+
+.search-inline-suggestions__status.is-error {
+    color: #9c3e4d;
+}
+
+.search-inline-suggestions__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.search-inline-suggestions__item {
+    margin: 0;
+}
+
+.search-inline-suggestion {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem;
+    border-radius: 14px;
+    color: #2d2528;
+    text-decoration: none;
+    transition: background-color 0.16s ease, transform 0.16s ease;
+}
+
+.search-inline-suggestion:hover,
+.search-inline-suggestion:focus-visible,
+.search-inline-suggestions__item.is-active .search-inline-suggestion {
+    background: #fff5f8;
+    transform: translateY(-1px);
+}
+
+.search-inline-suggestion:focus-visible {
+    outline: 2px solid rgba(225, 153, 164, 0.55);
+    outline-offset: 2px;
+}
+
+.search-inline-suggestion__media {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #fff7fa;
+    overflow: hidden;
+}
+
+.search-inline-suggestion__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.search-inline-suggestion__body {
+    display: grid;
+    gap: 0.18rem;
+    min-width: 0;
+}
+
+.search-inline-suggestion__name {
+    color: #2b2226;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-inline-suggestion__price {
+    color: #e199a4;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.search-inline-suggestion__stock {
+    color: #777;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.search-inline-suggestion__stock.is-in-stock {
+    color: #24814f;
+}
+
+.search-inline-suggestion__stock.is-out-of-stock {
+    color: #9f3f4d;
+}
+
+.search-inline-suggestions__view-all {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.35rem;
+    padding: 0.7rem 0.85rem;
+    border-top: 1px solid #f4e1e6;
+    color: #d78395;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.search-inline-suggestions__view-all:hover,
+.search-inline-suggestions__view-all:focus-visible {
+    color: #e11a63;
+}
+
+.search-inline-suggestions__view-all:focus-visible {
+    outline: 2px solid rgba(225, 153, 164, 0.55);
+    outline-offset: 2px;
+}
+
+@keyframes noyona-search-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 @media (max-width: 500px) {
     .search-inline-form {
         position: static;
@@ -96,6 +258,16 @@
         opacity: 1;
         pointer-events: auto;
         transform: translateY(0);
+    }
+
+    .search-inline-suggestions {
+        position: fixed;
+        top: calc(var(--noyona-header-total-offset, 72px) + 58px);
+        left: 12px;
+        right: 12px;
+        width: auto;
+        max-height: min(420px, calc(100dvh - var(--noyona-header-total-offset, 72px) - 76px));
+        z-index: 2100;
     }
 }
 
