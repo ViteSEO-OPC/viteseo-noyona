@@ -96,36 +96,62 @@
     );
   }
 
+  function normalizeFilterValue(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function normalizeIslandKey(value) {
+    var key = normalizeFilterValue(value);
+    if (key === "luzon" || key === "visayas" || key === "mindanao") {
+      return key;
+    }
+    return "";
+  }
+
+  function islandLabel(key) {
+    if (key === "luzon") return "Luzon";
+    if (key === "visayas") return "Visayas";
+    if (key === "mindanao") return "Mindanao";
+    return "";
+  }
+
+  function normalizeIslandSelection(value) {
+    var key = normalizeFilterValue(value);
+    if (key === "all") return "all";
+    return normalizeIslandKey(key) || "all";
+  }
+
   function formatSelectedDetail(store) {
     if (!store) {
       return getEmptySelectedMarkup(true);
     }
     var phone = store.phone || store.tel || "";
-    var gallery = Array.isArray(store.gallery) ? store.gallery : (store.image ? [store.image] : []);
     var galleryHtml = "";
-    if (gallery.length) {
-      galleryHtml =
-        '<div class="nsl-v2-detail__gallery">' +
-        gallery
-          .slice(0, 5)
-          .map(function (img, index) {
-            return (
-              '<button type="button" class="nsl-v2-detail__thumb' +
-              (index === 0 ? " is-active" : "") +
-              '" data-gallery-src="' +
-              escHtml(img) +
-              '">' +
-              '<img src="' +
-              escHtml(img) +
-              '" alt="' +
-              escHtml(store.title) +
-              '" loading="lazy">' +
-              "</button>"
-            );
-          })
-          .join("") +
-        "</div>";
-    }
+    // Temporarily hidden: store detail gallery/images
+    // var gallery = Array.isArray(store.gallery) ? store.gallery : (store.image ? [store.image] : []);
+    // if (gallery.length) {
+    //   galleryHtml =
+    //     '<div class="nsl-v2-detail__gallery">' +
+    //     gallery
+    //       .slice(0, 5)
+    //       .map(function (img, index) {
+    //         return (
+    //           '<button type="button" class="nsl-v2-detail__thumb' +
+    //           (index === 0 ? " is-active" : "") +
+    //           '" data-gallery-src="' +
+    //           escHtml(img) +
+    //           '">' +
+    //           '<img src="' +
+    //           escHtml(img) +
+    //           '" alt="' +
+    //           escHtml(store.title) +
+    //           '" loading="lazy">' +
+    //           "</button>"
+    //         );
+    //       })
+    //       .join("") +
+    //     "</div>";
+    // }
 
     var reviews = Array.isArray(store.reviews) ? store.reviews : [];
     var reviewsTabLabel = reviews.length ? "Reviews (" + reviews.length + ")" : "Reviews";
@@ -170,7 +196,8 @@
       "</button>" +
       "</div>" +
       '<div class="nsl-v2-detail-pane is-active" data-detail-pane="overview">' +
-      (store.image ? '<img class="nsl-v2-detail__image" src="' + escHtml(store.image) + '" alt="' + escHtml(store.title) + '" loading="lazy">' : "") +
+      // Temporarily hidden: store detail gallery/images
+      // (store.image ? '<img class="nsl-v2-detail__image" src="' + escHtml(store.image) + '" alt="' + escHtml(store.title) + '" loading="lazy">' : "") +
       galleryHtml +
       '<div class="nsl-v2-detail__headline">' +
       '<h3 class="nsl-v2-detail__title">' +
@@ -285,11 +312,15 @@
       store._statusLabel = computed.label;
       var ratingNum = parseFloat(store.rating);
       store._rating = Number.isFinite(ratingNum) ? ratingNum : 4.5;
+      store._islandKey = normalizeIslandKey(store.island_group);
+      store.island_group = islandLabel(store._islandKey);
+      store.region = String(store.region || "").trim() || "Uncategorized";
+      store._regionKey = normalizeFilterValue(store.region);
       return store;
     });
 
     var query = "";
-    var activeIsland = "Luzon";
+    var activeIsland = "all";
     var activeRegion = "all";
     var activeQuickFilter = "all";
     var selectedStoreId = null;
@@ -407,10 +438,16 @@
       });
     }
 
+    function getSearchIslandRegionFilteredStores() {
+      return getSearchFilteredStores().filter(function (store) {
+        if (activeIsland !== "all" && store._islandKey !== activeIsland) return false;
+        if (activeRegion !== "all" && store._regionKey !== activeRegion) return false;
+        return true;
+      });
+    }
+
     function getFullyFilteredStores() {
-      var filtered = getSearchFilteredStores().filter(function (store) {
-        if (activeIsland !== "all" && store.island_group !== activeIsland) return false;
-        if (activeRegion !== "all" && store.region !== activeRegion) return false;
+      var filtered = getSearchIslandRegionFilteredStores().filter(function (store) {
         if (activeQuickFilter === "open" && !store._isOpen) return false;
         if (activeQuickFilter === "top" && store._rating < 4.5) return false;
         if (activeQuickFilter === "near") {
@@ -561,7 +598,7 @@
         suggestionsEl.innerHTML = "";
         return;
       }
-      var candidates = getSearchFilteredStores().slice(0, 10);
+      var candidates = getSearchIslandRegionFilteredStores().slice(0, 10);
       if (!candidates.length) {
         suggestionsEl.hidden = false;
         suggestionsEl.innerHTML = '<div class="nsl-v2-suggestion-empty">No matching stores found.</div>';
@@ -590,11 +627,16 @@
       var bySearch = getSearchFilteredStores();
       var tree = {};
       bySearch.forEach(function (store) {
-        var island = store.island_group || "Luzon";
-        var region = store.region || "Uncategorized";
-        if (!tree[island]) tree[island] = { count: 0, regions: {} };
+        var island = store._islandKey;
+        if (!island) return;
+        var regionKey = store._regionKey || "uncategorized";
+        var regionLabel = store.region || "Uncategorized";
+        if (!tree[island]) tree[island] = { count: 0, label: islandLabel(island), regions: {} };
+        if (!tree[island].regions[regionKey]) {
+          tree[island].regions[regionKey] = { count: 0, label: regionLabel };
+        }
         tree[island].count += 1;
-        tree[island].regions[region] = (tree[island].regions[region] || 0) + 1;
+        tree[island].regions[regionKey].count += 1;
       });
       return { bySearch: bySearch, tree: tree };
     }
@@ -604,16 +646,13 @@
       var data = getFilterTreeBySearch();
       var tree = data.tree;
       var bySearch = data.bySearch;
-      var parentOrder = ["Luzon", "Visayas", "Mindanao"];
+      var parentOrder = [
+        { key: "luzon", label: "Luzon" },
+        { key: "visayas", label: "Visayas" },
+        { key: "mindanao", label: "Mindanao" },
+      ];
       function optionHtml(value, label, selected) {
         return '<option value="' + escHtml(value) + '"' + (selected ? " selected" : "") + ">" + escHtml(label) + "</option>";
-      }
-
-      if (activeIsland !== "all" && !tree[activeIsland]) {
-        activeIsland = parentOrder.find(function (name) {
-          return !!tree[name];
-        }) || "all";
-        activeRegion = "all";
       }
 
       var parentHtml =
@@ -624,17 +663,14 @@
         ")</button>";
 
       parentOrder.forEach(function (island) {
-        var count = tree[island] ? tree[island].count : 0;
+        var count = tree[island.key] ? tree[island.key].count : 0;
         parentHtml +=
           '<button type="button" class="nsl-v2-filter-parent' +
-          (activeIsland === island ? " is-active" : "") +
+          (activeIsland === island.key ? " is-active" : "") +
           '" data-island="' +
-          escHtml(island) +
-          // '" data-region="all">(' +
-          // count +
-          // ") " +
+          escHtml(island.key) +
           '">' +
-          escHtml(island) +
+          escHtml(island.label) +
           "</button>";
       });
       parentFilterList.innerHTML = parentHtml;
@@ -644,8 +680,8 @@
           optionHtml("all", "All islands (" + bySearch.length + ")", activeIsland === "all") +
           parentOrder
             .map(function (island) {
-              var count = tree[island] ? tree[island].count : 0;
-              return optionHtml(island, island + " (" + count + ")", activeIsland === island);
+              var count = tree[island.key] ? tree[island.key].count : 0;
+              return optionHtml(island.key, island.label + " (" + count + ")", activeIsland === island.key);
             })
             .join("");
       }
@@ -675,26 +711,24 @@
         '" data-island="' +
         escHtml(activeIsland) +
         '" data-region="all">All ' +
-        escHtml(activeIsland) +
-        // " (" +
-        // islandTree.count +
-        // ")</button>";
+        escHtml(islandTree.label || islandLabel(activeIsland)) +
         "</button>";
 
       Object.keys(islandTree.regions)
         .sort()
-        .forEach(function (region) {
+        .forEach(function (regionKey) {
+          var region = islandTree.regions[regionKey];
           childHtml +=
             '<button type="button" class="nsl-v2-filter-child' +
-            (activeRegion === region ? " is-active" : "") +
+            (activeRegion === regionKey ? " is-active" : "") +
             '" data-island="' +
             escHtml(activeIsland) +
             '" data-region="' +
-            escHtml(region) +
+            escHtml(regionKey) +
             '">(' +
-            islandTree.regions[region] +
+            region.count +
             ") " +
-            escHtml(region) +
+            escHtml(region.label) +
             "</button>";
         });
       childFilterList.innerHTML = childHtml;
@@ -702,11 +736,12 @@
       if (regionSelect) {
         regionSelect.disabled = false;
         regionSelect.innerHTML =
-          optionHtml("all", "All " + activeIsland + " regions", activeRegion === "all") +
+          optionHtml("all", "All " + (islandTree.label || islandLabel(activeIsland)) + " regions", activeRegion === "all") +
           Object.keys(islandTree.regions)
             .sort()
-            .map(function (region) {
-              return optionHtml(region, region + " (" + islandTree.regions[region] + ")", activeRegion === region);
+            .map(function (regionKey) {
+              var region = islandTree.regions[regionKey];
+              return optionHtml(regionKey, region.label + " (" + region.count + ")", activeRegion === regionKey);
             })
             .join("");
       }
@@ -979,7 +1014,7 @@
 
     wrapper.addEventListener("change", function (event) {
       if (event.target.classList.contains("nsl-v2-island-select")) {
-        activeIsland = event.target.value || "all";
+        activeIsland = normalizeIslandSelection(event.target.value);
         activeRegion = "all";
         currentPage = 1;
         renderFilters();
@@ -989,7 +1024,7 @@
       }
 
       if (event.target.classList.contains("nsl-v2-region-select")) {
-        activeRegion = event.target.value || "all";
+        activeRegion = normalizeFilterValue(event.target.value) || "all";
         currentPage = 1;
         renderFilters();
         renderExtraFilters();
@@ -1024,8 +1059,8 @@
 
       var filterBtn = event.target.closest(".nsl-v2-filter-parent, .nsl-v2-filter-child");
       if (filterBtn) {
-        activeIsland = filterBtn.getAttribute("data-island") || "all";
-        activeRegion = filterBtn.getAttribute("data-region") || "all";
+        activeIsland = normalizeIslandSelection(filterBtn.getAttribute("data-island"));
+        activeRegion = normalizeFilterValue(filterBtn.getAttribute("data-region")) || "all";
         currentPage = 1;
         renderFilters();
         renderExtraFilters();

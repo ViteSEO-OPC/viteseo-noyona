@@ -212,13 +212,15 @@ if ($store_query->have_posts()) {
         }
         $gallery_urls = array_values(array_unique(array_filter($gallery_urls)));
 
-        $island_group = get_post_meta($post_id, '_nsl_island_group', true);
-        if ($island_group === '') {
-            $island_group = nsl_v2_guess_island_group($address);
+        $island_group = trim((string) get_post_meta($post_id, '_nsl_island_group', true));
+        if ($island_group !== '') {
+            $island_group = ucwords(strtolower($island_group));
         }
-        $island_group = ucwords(strtolower((string) $island_group));
 
-        $region = get_post_meta($post_id, '_nsl_region', true);
+        $region = trim((string) get_post_meta($post_id, '_nsl_region', true));
+        if ($region === '') {
+            $region = trim((string) get_post_meta($post_id, '_nsl_region_name', true));
+        }
         if ($region === '') {
             $region = nsl_v2_guess_region($address, $island_group);
         }
@@ -290,7 +292,7 @@ if ($store_query->have_posts()) {
             'is_open' => (bool) $is_open,
             'status_label' => $is_open ? 'Open Now' : 'Closed',
             'rating' => (float) get_post_meta($post_id, '_nsl_rating', true) ?: 4.5,
-            'island_group' => $island_group !== '' ? $island_group : 'Luzon',
+            'island_group' => $island_group,
             'region' => (string) $region,
             'allow_public_reviews' => (bool) $allow_public_reviews,
             'reviews' => $review_items,

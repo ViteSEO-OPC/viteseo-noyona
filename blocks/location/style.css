@@ -783,10 +783,6 @@ body.nsl-v2-review-modal-open {
     color: var(--nsl-old-rose);
 }
 
-.nsl-v2-parent-filter-list .nsl-v2-filter-parent--all {
-    display: none;
-}
-
 .nsl-v2-filter-hint {
     color: #666;
     font-size: 14px;
