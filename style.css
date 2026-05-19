@@ -1788,6 +1788,8 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
  * ============================================================= */
 .noyona-product-search-page {
   padding-bottom: 72px;
+  padding-left: clamp(16px, 4vw, 32px);
+  padding-right: clamp(16px, 4vw, 32px);
   font-family: var(--wp--preset--font-family--proxima-nova);
 }
 
@@ -2320,16 +2322,165 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   border-color: #E199A4;
 }
 
-/* Tablet: stack filter above results */
-@media (max-width: 999px) {
-  .noyona-product-search-page .noyona-search-layout {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
+/* =============================================================
+ * Mobile collapsible filter panel (<details>-based, no JS)
+ *
+ * Markup:
+ *   <aside class="noyona-search-filters">
+ *     <details class="noyona-search-filters-panel">
+ *       <summary class="noyona-search-filter-toggle">Filters</summary>
+ *       <form class="noyona-search-filters__form">…</form>
+ *     </details>
+ *   </aside>
+ *
+ * Desktop (≥1000px): the <summary> button is hidden and the form is
+ * forced visible, so the filter card always shows.
+ * Tablet/mobile (<1000px): the <summary> button shows; the form is
+ * shown only when the user opens the <details>.
+ * ============================================================= */
+.noyona-product-search-page .noyona-search-filters-panel {
+  margin: 0;
+  width: 100%;
+}
+
+.noyona-product-search-page .noyona-search-filter-toggle {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  display: none; /* default off; mobile breakpoint turns it on */
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px;
+  border: 1px solid #f0cfd7;
+  border-radius: 999px;
+  background: #fff;
+  color: #E199A4;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 4px 14px rgba(196, 117, 137, 0.10);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.noyona-product-search-page .noyona-search-filter-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.noyona-product-search-page .noyona-search-filter-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.noyona-product-search-page .noyona-search-filter-toggle__chevron {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.noyona-product-search-page .noyona-search-filters-panel[open] .noyona-search-filter-toggle {
+  background: #E199A4;
+  color: #fff;
+  border-color: #E199A4;
+}
+
+.noyona-product-search-page .noyona-search-filters-panel[open] .noyona-search-filter-toggle__chevron {
+  transform: rotate(180deg);
+}
+
+/* Desktop: always-on filter card, summary button hidden, form visible */
+@media (min-width: 1000px) {
+  .noyona-product-search-page .noyona-search-filters-panel > summary.noyona-search-filter-toggle {
+    display: none;
+  }
+  /* Override the UA `details:not([open]) > :not(summary){display:none}` so
+     the form is always rendered on desktop regardless of [open] state. */
+  .noyona-product-search-page .noyona-search-filters-panel > .noyona-search-filters__form {
+    display: block;
   }
 }
 
-/* Mobile: 1-column product grid, stack search-again form */
-@media (max-width: 680px) {
+/* Tablet (≤999px) — stack layout, show filter toggle, hide card chrome */
+@media (max-width: 999px) {
+  .noyona-product-search-page .noyona-search-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  /* The aside loses its card chrome; the open form gets its own card. */
+  .noyona-product-search-page .noyona-search-filters {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .noyona-product-search-page .noyona-search-filter-toggle {
+    display: inline-flex;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .noyona-product-search-page .noyona-search-filters-panel[open] > .noyona-search-filters__form {
+    margin-top: 12px;
+    padding: 18px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+    animation: noyona-search-panel-fade 0.18s ease;
+  }
+}
+
+@keyframes noyona-search-panel-fade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Tablet (700–999px): page chrome tightens; product grid stays 2 cols */
+@media (max-width: 999px) {
+  .noyona-product-search-page .noyona-search-hero {
+    margin: 36px 0 28px;
+  }
+
+  .noyona-product-search-page .noyona-search-products-head {
+    margin: 4px 0 14px;
+  }
+
+  .noyona-product-search-page .noyona-search-toolbar {
+    gap: 12px;
+  }
+
+  .noyona-product-search-page .noyona-search-toolbar__right {
+    gap: 12px;
+  }
+}
+
+/* Narrow tablets / small landscape mobile — single column grid */
+@media (max-width: 720px) {
+  .noyona-product-search-page .noyona-search-grid .wc-block-product-template {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .noyona-product-search-page .noyona-search-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .noyona-product-search-page .noyona-search-toolbar__right {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .noyona-product-search-page .noyona-search-sort select {
+    max-width: 100%;
+  }
+}
+
+/* Mobile: stack the search-again CTA; pills can scroll if too wide */
+@media (max-width: 560px) {
   .noyona-product-search-page .noyona-search-hero {
     margin-top: 28px;
   }
@@ -2337,7 +2488,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   .noyona-product-search-page .noyona-search-again-form {
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto auto;
-    padding: 10px 12px;
+    padding: 10px 14px;
     border-radius: 18px;
     row-gap: 10px;
   }
@@ -2352,12 +2503,45 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
     align-items: flex-start;
   }
 
+  /* Category pills become a horizontal scroller so 6 pills don't blow the row. */
   .noyona-product-search-page .noyona-search-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
     justify-content: flex-start;
+    padding-bottom: 4px;
+    margin-right: calc(-1 * clamp(16px, 4vw, 32px));
+    padding-right: clamp(16px, 4vw, 32px);
+    scrollbar-width: none;
   }
 
-  .noyona-product-search-page .noyona-search-grid .wc-block-product-template {
-    grid-template-columns: minmax(0, 1fr);
+  .noyona-product-search-page .noyona-search-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .noyona-product-search-page .noyona-search-pill {
+    flex: 0 0 auto;
+  }
+
+  .noyona-product-search-page .noyona-search-grid .wc-block-product {
+    padding: 14px;
+  }
+
+  .noyona-product-search-page .noyona-search-pagination {
+    gap: 10px;
+  }
+
+  .noyona-product-search-page .noyona-search-pagination .page-numbers {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    font-size: 15px;
+  }
+
+  .noyona-product-search-page .noyona-search-pagination .wp-block-query-pagination-previous,
+  .noyona-product-search-page .noyona-search-pagination .wp-block-query-pagination-next {
+    padding: 0 14px;
+    height: 36px;
+    font-size: 13px;
   }
 }
 

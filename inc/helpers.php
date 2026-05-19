@@ -694,59 +694,70 @@ function noyona_render_product_search_page_shortcode() {
 
     <div class="noyona-search-layout alignwide">
         <aside class="noyona-search-filters" aria-label="<?php esc_attr_e( 'Product filters', 'noyona-childtheme' ); ?>">
-            <form class="noyona-search-filters__form" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-                <input type="hidden" name="s" value="<?php echo esc_attr( $query_text ); ?>" />
-                <input type="hidden" name="post_type" value="product" />
-                <?php if ( '' !== $selected_cat ) : ?>
-                    <input type="hidden" name="product_cat" value="<?php echo esc_attr( $selected_cat ); ?>" />
-                <?php endif; ?>
-                <?php if ( 'relevance' !== $selected_order ) : ?>
-                    <input type="hidden" name="orderby" value="<?php echo esc_attr( $selected_order ); ?>" />
-                <?php endif; ?>
+            <details class="noyona-search-filters-panel">
+                <summary class="noyona-search-filter-toggle">
+                    <span class="noyona-search-filter-toggle__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="6" y1="12" x2="18" y2="12"></line><line x1="9" y1="18" x2="15" y2="18"></line></svg>
+                    </span>
+                    <span class="noyona-search-filter-toggle__label"><?php esc_html_e( 'Filters', 'noyona-childtheme' ); ?></span>
+                    <span class="noyona-search-filter-toggle__chevron" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </span>
+                </summary>
+                <form class="noyona-search-filters__form" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+                    <input type="hidden" name="s" value="<?php echo esc_attr( $query_text ); ?>" />
+                    <input type="hidden" name="post_type" value="product" />
+                    <?php if ( '' !== $selected_cat ) : ?>
+                        <input type="hidden" name="product_cat" value="<?php echo esc_attr( $selected_cat ); ?>" />
+                    <?php endif; ?>
+                    <?php if ( 'relevance' !== $selected_order ) : ?>
+                        <input type="hidden" name="orderby" value="<?php echo esc_attr( $selected_order ); ?>" />
+                    <?php endif; ?>
 
-                <div class="noyona-shop-filter-sections">
-                    <section class="noyona-shop-filter-section">
-                        <h5><?php esc_html_e( 'Stock Status', 'noyona-childtheme' ); ?></h5>
-                        <label>
-                            <input type="checkbox" name="stock_status[]" value="instock" <?php checked( in_array( 'instock', $stock_statuses, true ) ); ?> />
-                            <?php esc_html_e( 'In Stock', 'noyona-childtheme' ); ?>
-                        </label>
-                        <label>
-                            <input type="checkbox" name="stock_status[]" value="outofstock" <?php checked( in_array( 'outofstock', $stock_statuses, true ) ); ?> />
-                            <?php esc_html_e( 'Out of Stock', 'noyona-childtheme' ); ?>
-                        </label>
-                    </section>
+                    <div class="noyona-shop-filter-sections">
+                        <section class="noyona-shop-filter-section">
+                            <h5><?php esc_html_e( 'Stock Status', 'noyona-childtheme' ); ?></h5>
+                            <label>
+                                <input type="checkbox" name="stock_status[]" value="instock" <?php checked( in_array( 'instock', $stock_statuses, true ) ); ?> />
+                                <?php esc_html_e( 'In Stock', 'noyona-childtheme' ); ?>
+                            </label>
+                            <label>
+                                <input type="checkbox" name="stock_status[]" value="outofstock" <?php checked( in_array( 'outofstock', $stock_statuses, true ) ); ?> />
+                                <?php esc_html_e( 'Out of Stock', 'noyona-childtheme' ); ?>
+                            </label>
+                        </section>
 
-                    <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
-                        <h5 class="noyona-shop-filter-price-title"><?php esc_html_e( 'Price', 'noyona-childtheme' ); ?></h5>
-                        <div class="noyona-shop-filter-price" data-min="0" data-step="50">
-                            <div class="noyona-shop-filter-price-slider" role="group" aria-label="<?php esc_attr_e( 'Price range', 'noyona-childtheme' ); ?>">
-                                <div class="noyona-shop-filter-price-track"></div>
-                                <div class="noyona-shop-filter-price-track-fill"></div>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="<?php esc_attr_e( 'Minimum price handle', 'noyona-childtheme' ); ?>"></button>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="<?php esc_attr_e( 'Maximum price handle', 'noyona-childtheme' ); ?>"></button>
+                        <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
+                            <h5 class="noyona-shop-filter-price-title"><?php esc_html_e( 'Price', 'noyona-childtheme' ); ?></h5>
+                            <div class="noyona-shop-filter-price" data-min="0" data-step="50">
+                                <div class="noyona-shop-filter-price-slider" role="group" aria-label="<?php esc_attr_e( 'Price range', 'noyona-childtheme' ); ?>">
+                                    <div class="noyona-shop-filter-price-track"></div>
+                                    <div class="noyona-shop-filter-price-track-fill"></div>
+                                    <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="<?php esc_attr_e( 'Minimum price handle', 'noyona-childtheme' ); ?>"></button>
+                                    <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="<?php esc_attr_e( 'Maximum price handle', 'noyona-childtheme' ); ?>"></button>
+                                </div>
+                                <div class="noyona-shop-filter-price-inputs">
+                                    <label class="noyona-shop-filter-price-input">
+                                        <span aria-hidden="true">₱</span>
+                                        <input type="number" inputmode="numeric" min="0" step="1" value="<?php echo esc_attr( null !== $min_price ? (string) $min_price : '' ); ?>" name="min_price" placeholder="0" aria-label="<?php esc_attr_e( 'Minimum price', 'noyona-childtheme' ); ?>" />
+                                    </label>
+                                    <span class="noyona-shop-filter-price-separator" aria-hidden="true">-</span>
+                                    <label class="noyona-shop-filter-price-input">
+                                        <span aria-hidden="true">₱</span>
+                                        <input type="number" inputmode="numeric" min="0" step="1" value="<?php echo esc_attr( null !== $max_price ? (string) $max_price : '' ); ?>" name="max_price" placeholder="0" aria-label="<?php esc_attr_e( 'Maximum price', 'noyona-childtheme' ); ?>" />
+                                    </label>
+                                </div>
+                                <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
                             </div>
-                            <div class="noyona-shop-filter-price-inputs">
-                                <label class="noyona-shop-filter-price-input">
-                                    <span aria-hidden="true">₱</span>
-                                    <input type="number" inputmode="numeric" min="0" step="1" value="<?php echo esc_attr( null !== $min_price ? (string) $min_price : '' ); ?>" name="min_price" placeholder="0" aria-label="<?php esc_attr_e( 'Minimum price', 'noyona-childtheme' ); ?>" />
-                                </label>
-                                <span class="noyona-shop-filter-price-separator" aria-hidden="true">-</span>
-                                <label class="noyona-shop-filter-price-input">
-                                    <span aria-hidden="true">₱</span>
-                                    <input type="number" inputmode="numeric" min="0" step="1" value="<?php echo esc_attr( null !== $max_price ? (string) $max_price : '' ); ?>" name="max_price" placeholder="0" aria-label="<?php esc_attr_e( 'Maximum price', 'noyona-childtheme' ); ?>" />
-                                </label>
-                            </div>
-                            <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
-                        </div>
-                    </section>
-                </div>
+                        </section>
+                    </div>
 
-                <!-- <div class="noyona-search-filters__actions">
-                    <button type="submit" class="noyona-search-filters__apply"><?php esc_html_e( 'Apply Filters', 'noyona-childtheme' ); ?></button>
-                    <a class="noyona-search-filters__reset" href="<?php echo esc_url( add_query_arg( array( 's' => $query_text, 'post_type' => 'product' ), home_url( '/' ) ) ); ?>"><?php esc_html_e( 'Reset', 'noyona-childtheme' ); ?></a>
-                </div> -->
-            </form>
+                    <div class="noyona-search-filters__actions">
+                        <button type="submit" class="noyona-search-filters__apply"><?php esc_html_e( 'Apply Filters', 'noyona-childtheme' ); ?></button>
+                        <a class="noyona-search-filters__reset" href="<?php echo esc_url( add_query_arg( array( 's' => $query_text, 'post_type' => 'product' ), home_url( '/' ) ) ); ?>"><?php esc_html_e( 'Reset', 'noyona-childtheme' ); ?></a>
+                    </div>
+                </form>
+            </details>
         </aside>
 
         <div class="noyona-search-results">
@@ -939,12 +950,12 @@ function noyona_clean_product_search_markup( $html ) {
 
     // Strip <p> wrappers that wpautop puts around our block-level search elements.
     $html = preg_replace(
-        '/<p>\s*(<(?:section|div|aside|form|nav|button|h[1-6])\b[^>]*class=(["\'])[^"\']*\b(?:noyona-(?:product-)?search-[\w-]+)\b[^"\']*\2[^>]*>)/i',
+        '/<p>\s*(<(?:section|div|aside|form|nav|button|details|summary|h[1-6])\b[^>]*class=(["\'])[^"\']*\b(?:noyona-(?:product-)?search-[\w-]+)\b[^"\']*\2[^>]*>)/i',
         '$1',
         $html
     );
     $html = preg_replace(
-        '/(<\/(?:section|div|aside|form|nav|button|h[1-6])>)\s*<\/p>/i',
+        '/(<\/(?:section|div|aside|form|nav|button|details|summary|h[1-6])>)\s*<\/p>/i',
         '$1',
         $html
     );
