@@ -2800,13 +2800,37 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 
 .noyona-account-wishlist-table-wrap {
 	margin-top: 18px;
+	width: min(100%, 980px);
+	margin-right: auto;
+	margin-left: auto;
 	overflow-x: auto;
 }
 
 .noyona-account-wishlist-table {
 	width: 100%;
-	min-width: 820px;
+	min-width: 760px;
 	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.noyona-account-wishlist-table th:nth-child(1),
+.noyona-account-wishlist-table td:nth-child(1) {
+	width: 43%;
+}
+
+.noyona-account-wishlist-table th:nth-child(2),
+.noyona-account-wishlist-table td:nth-child(2) {
+	width: 15%;
+}
+
+.noyona-account-wishlist-table th:nth-child(3),
+.noyona-account-wishlist-table td:nth-child(3) {
+	width: 18%;
+}
+
+.noyona-account-wishlist-table th:nth-child(4),
+.noyona-account-wishlist-table td:nth-child(4) {
+	width: 24%;
 }
 
 .noyona-account-wishlist-table thead th {
@@ -2829,10 +2853,10 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 .noyona-account-wishlist-product {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
 	gap: 12px;
-	min-width: 280px;
+	min-width: 0;
 }
 
 .noyona-account-wishlist-product__media {
@@ -2861,6 +2885,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	color: #1d1d1d;
 	text-decoration: none !important;
 	font-weight: 700;
+	overflow-wrap: anywhere;
 }
 
 .noyona-account-wishlist-product__name:hover {
@@ -2883,14 +2908,20 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	gap: 6px;
 	min-height: 24px;
-	padding: 0 11px;
+	padding: 0 12px;
 	border-radius: 999px;
 	border: 1px solid transparent;
 	font-size: calc(var(--wp--preset--font-size--body) * 0.64);
 	font-weight: 700;
 	line-height: 1;
 	white-space: nowrap;
+}
+
+.noyona-account-wishlist-status i {
+	font-size: 0.72rem;
+	line-height: 1;
 }
 
 .noyona-account-wishlist-status.is-in-stock {
@@ -2906,18 +2937,28 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 .noyona-account-wishlist-actions {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
 	gap: 10px;
+	justify-content: flex-start;
 	white-space: nowrap;
 }
 
 .noyona-account-wishlist-actions .noyona-account-wishlist-add {
 	width: auto;
-	min-width: 132px;
+	min-width: 124px;
 	min-height: 36px;
-	padding: 0 16px;
+	padding: 0 15px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
 	font-size: calc(var(--wp--preset--font-size--body) * 0.72);
+}
+
+.noyona-account-wishlist-actions .noyona-account-wishlist-add i {
+	font-size: 0.86rem;
+	line-height: 1;
 }
 
 .noyona-account-wishlist-add.is-disabled {

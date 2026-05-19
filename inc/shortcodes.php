@@ -1460,6 +1460,7 @@ function noyona_render_account_wishlist_card( $args ) {
                                 <td class="noyona-account-wishlist-price"><?php echo wp_kses_post( (string) $row['price_html'] ); ?></td>
                                 <td>
                                     <span class="noyona-account-wishlist-status<?php echo ! empty( $row['is_in_stock'] ) ? ' is-in-stock' : ' is-out-of-stock'; ?>">
+                                        <i class="fa-solid <?php echo ! empty( $row['is_in_stock'] ) ? 'fa-check' : 'fa-xmark'; ?>" aria-hidden="true"></i>
                                         <?php echo ! empty( $row['is_in_stock'] ) ? esc_html__( 'In Stock', 'noyona-childtheme' ) : esc_html__( 'Out of Stock', 'noyona-childtheme' ); ?>
                                     </span>
                                 </td>
@@ -1473,10 +1474,12 @@ function noyona_render_account_wishlist_card( $args ) {
                                                     data-<?php echo esc_attr( (string) $data_key ); ?>="<?php echo esc_attr( (string) $data_value ); ?>"
                                                 <?php endforeach; ?>
                                             >
+                                                <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
                                                 <?php echo esc_html( (string) $row['add_to_cart_text'] ); ?>
                                             </a>
                                         <?php else : ?>
                                             <span class="noyona-account-btn noyona-account-btn--ghost noyona-account-wishlist-add is-disabled" aria-disabled="true">
+                                                <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
                                                 <?php echo esc_html( (string) $row['add_to_cart_text'] ); ?>
                                             </span>
                                         <?php endif; ?>
