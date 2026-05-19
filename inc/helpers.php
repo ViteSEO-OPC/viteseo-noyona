@@ -742,7 +742,7 @@ function noyona_render_product_search_page_shortcode() {
     </div>
     <?php
 
-    return trim( ob_get_clean() );
+    return noyona_clean_product_search_markup( trim( (string) ob_get_clean() ) );
 }
 
 function noyona_render_product_search_category_pills( $query_text, $selected_cat, $current_params = array(), $available_cat_slugs = array() ) {
@@ -795,6 +795,91 @@ function noyona_render_product_search_category_pills( $query_text, $selected_cat
     }
 
     return $html;
+}
+
+/* ----- Product search page markup cleanup (wpautop artifacts) ----- */
+/**
+ * Strip empty <p></p>, <p><br></p>, and <p>-wrappers that wpautop injects
+ * around our search-page block-level markup. Scoped to the search page —
+ * only wrappers whose class begins with `noyona-search-` or
+ * `noyona-product-search-` are touched, so product card excerpts (which use
+ * <p> text content) are not affected.
+ */
+function noyona_clean_product_search_markup( $html ) {
+    if ( ! is_string( $html ) || '' === trim( $html ) ) {
+        return (string) $html;
+    }
+
+    // Remove empty paragraphs and paragraphs that only contain <br>/&nbsp;/whitespace.
+    $html = preg_replace( '/<p\b[^>]*>(?:\s|&nbsp;|&#160;|<br\s*\/?>)*<\/p>/i', '', $html );
+
+    // Strip <p> wrappers that wpautop puts around our block-level search elements.
+    $html = preg_replace(
+        '/<p>\s*(<(?:section|div|aside|form|nav|button|h[1-6])\b[^>]*class=(["\'])[^"\']*\b(?:noyona-(?:product-)?search-[\w-]+)\b[^"\']*\2[^>]*>)/i',
+        '$1',
+        $html
+    );
+    $html = preg_replace(
+        '/(<\/(?:section|div|aside|form|nav|button|h[1-6])>)\s*<\/p>/i',
+        '$1',
+        $html
+    );
+
+    // Inside the structural wrappers (NOT the product grid), drop stray <br> and
+    // empty <p></p>. The grid wrapper is excluded so product description
+    // <br>/<p> text inside cards stays untouched.
+    $wrappers = array(
+        '/(<section\b[^>]*class=(["\'])[^"\']*\bnoyona-search-hero\b[^"\']*\2[^>]*>)(.*?)(<\/section>)/is',
+        '/(<form\b[^>]*class=(["\'])[^"\']*\bnoyona-search-again-form\b[^"\']*\2[^>]*>)(.*?)(<\/form>)/is',
+        '/(<section\b[^>]*class=(["\'])[^"\']*\bnoyona-search-products-head\b[^"\']*\2[^>]*>)(.*?)(<\/section>)/is',
+        '/(<nav\b[^>]*class=(["\'])[^"\']*\bnoyona-search-pills\b[^"\']*\2[^>]*>)(.*?)(<\/nav>)/is',
+        '/(<aside\b[^>]*class=(["\'])[^"\']*\bnoyona-search-filters\b[^"\']*\2[^>]*>)(.*?)(<\/aside>)/is',
+        '/(<form\b[^>]*class=(["\'])[^"\']*\bnoyona-search-filters__form\b[^"\']*\2[^>]*>)(.*?)(<\/form>)/is',
+        '/(<div\b[^>]*class=(["\'])[^"\']*\bnoyona-search-toolbar\b[^"\']*\2[^>]*>)(.*?)(<\/div>)/is',
+        '/(<form\b[^>]*class=(["\'])[^"\']*\bnoyona-search-sort\b[^"\']*\2[^>]*>)(.*?)(<\/form>)/is',
+    );
+
+    foreach ( $wrappers as $pattern ) {
+        $html = preg_replace_callback(
+            $pattern,
+            static function ( $matches ) {
+                $inner = isset( $matches[3] ) ? (string) $matches[3] : '';
+                $inner = preg_replace( '/<br\s*\/?>/i', '', $inner );
+                $inner = preg_replace( '/<p\b[^>]*>(?:\s|&nbsp;|&#160;)*<\/p>/i', '', $inner );
+                return (string) $matches[1] . (string) $inner . (string) $matches[4];
+            },
+            (string) $html
+        );
+    }
+
+    // Final pass to clean anything left at the top level.
+    $html = preg_replace( '/<p\b[^>]*>(?:\s|&nbsp;|&#160;|<br\s*\/?>)*<\/p>/i', '', (string) $html );
+
+    return (string) $html;
+}
+
+add_filter( 'render_block_core/shortcode', 'noyona_clean_product_search_shortcode_block_artifacts', 20, 3 );
+function noyona_clean_product_search_shortcode_block_artifacts( $block_content, $block = array(), $instance = null ) {
+    if ( false === strpos( (string) $block_content, 'noyona-product-search-page' )
+        && false === strpos( (string) $block_content, 'noyona-search-hero' ) ) {
+        return $block_content;
+    }
+
+    return noyona_clean_product_search_markup( (string) $block_content );
+}
+
+add_filter( 'the_content', 'noyona_clean_product_search_page_artifacts', 35 );
+function noyona_clean_product_search_page_artifacts( $content ) {
+    if ( is_admin() ) {
+        return $content;
+    }
+
+    if ( false === strpos( (string) $content, 'noyona-product-search-page' )
+        && false === strpos( (string) $content, 'noyona-search-hero' ) ) {
+        return $content;
+    }
+
+    return noyona_clean_product_search_markup( (string) $content );
 }
 
 /* ----- Detect site under development (controls SEO behavior) ----- */
