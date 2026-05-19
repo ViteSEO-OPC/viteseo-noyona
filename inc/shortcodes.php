@@ -899,6 +899,264 @@ function noyona_format_masked_card_number( $card_last4 ) {
     return esc_html( '**** **** **** ' . substr( $card_last4, -4 ) );
 }
 
+function noyona_render_account_addresses_card( $args ) {
+    $args = wp_parse_args(
+        (array) $args,
+        array(
+            'account_addresses'     => array(),
+            'address_form_data'     => array(),
+            'address_modal_data'    => array(),
+            'address_return_url'    => noyona_get_account_addresses_url(),
+            'active_modal'          => '',
+            'notice_code'           => '',
+            'notice_type'           => '',
+            'notice_message'        => '',
+            'is_address_modal_open' => false,
+            'full_name'             => '',
+            'phone'                 => '',
+        )
+    );
+
+    $address_form_defaults = array(
+        'id'         => '',
+        'address'    => '',
+        'city'       => '',
+        'province'   => '',
+        'zip_code'   => '',
+        'is_default' => false,
+    );
+
+    $account_addresses     = is_array( $args['account_addresses'] ) ? $args['account_addresses'] : array();
+    $address_form_data     = wp_parse_args( (array) $args['address_form_data'], $address_form_defaults );
+    $address_modal_data    = wp_parse_args( (array) $args['address_modal_data'], $address_form_defaults );
+    $address_return_url    = remove_query_arg( array( 'noyona_address_edit', 'noyona_modal' ), (string) $args['address_return_url'] );
+    $active_modal          = sanitize_key( (string) $args['active_modal'] );
+    $notice_code           = sanitize_key( (string) $args['notice_code'] );
+    $notice_type           = ( 'success' === $args['notice_type'] ) ? 'success' : 'error';
+    $notice_message        = (string) $args['notice_message'];
+    $is_address_modal_open = ! empty( $args['is_address_modal_open'] );
+    $full_name             = (string) $args['full_name'];
+    $phone                 = (string) $args['phone'];
+    $show_address_notice   = '' !== $notice_message && (
+        in_array( $notice_code, array( 'address_saved', 'address_deleted', 'address_not_found' ), true )
+        || ( in_array( $notice_code, array( 'invalid_nonce', 'missing_fields' ), true ) && in_array( $active_modal, array( '', 'address' ), true ) )
+    );
+
+    ob_start();
+    ?>
+    <section class="noyona-account-profile-card noyona-account-addresses-card">
+        <header class="noyona-account-profile-card__head noyona-account-addresses-card__head">
+            <div>
+                <h3><?php esc_html_e( 'My Addresses', 'noyona-childtheme' ); ?></h3>
+                <p><?php esc_html_e( 'View and add your address here', 'noyona-childtheme' ); ?></p>
+            </div>
+            <a class="noyona-account-btn noyona-account-btn--primary noyona-account-addresses-card__new-btn" href="<?php echo esc_url( $address_return_url ); ?>">
+                <?php esc_html_e( 'Add New Address', 'noyona-childtheme' ); ?>
+            </a>
+        </header>
+
+        <?php if ( $show_address_notice && ! $is_address_modal_open ) : ?>
+            <p class="noyona-account-addresses-notice<?php echo ( 'success' === $notice_type ) ? ' is-success' : ' is-error'; ?>">
+                <?php echo esc_html( $notice_message ); ?>
+            </p>
+        <?php endif; ?>
+
+        <form class="noyona-account-address-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+            <?php wp_nonce_field( 'noyona_upsert_account_address', 'noyona_account_address_nonce', false ); ?>
+            <input type="hidden" name="action" value="noyona_upsert_account_address" />
+            <input type="hidden" name="redirect_to" value="<?php echo esc_url( $address_return_url ); ?>" />
+            <input type="hidden" name="address_id" value="" />
+
+            <div class="noyona-account-address-form__grid">
+                <div class="noyona-account-address-form__fields">
+                    <label for="noyona-account-address-line"><?php esc_html_e( 'Address', 'noyona-childtheme' ); ?></label>
+                    <input id="noyona-account-address-line" type="text" name="address" value="<?php echo esc_attr( (string) $address_form_data['address'] ); ?>" required />
+
+                    <div class="noyona-account-address-form__row">
+                        <div class="noyona-account-address-form__col">
+                            <label for="noyona-account-address-city"><?php esc_html_e( 'City', 'noyona-childtheme' ); ?></label>
+                            <input id="noyona-account-address-city" type="text" name="city" value="<?php echo esc_attr( (string) $address_form_data['city'] ); ?>" required />
+                        </div>
+                        <div class="noyona-account-address-form__col">
+                            <label for="noyona-account-address-province"><?php esc_html_e( 'Province', 'noyona-childtheme' ); ?></label>
+                            <?php
+                            $address_form_ph_states = ( function_exists( 'WC' ) && WC()->countries ) ? (array) WC()->countries->get_states( 'PH' ) : array();
+                            $address_form_province  = (string) $address_form_data['province'];
+                            ?>
+                            <select id="noyona-account-address-province" name="province" required>
+                                <option value=""><?php esc_html_e( 'Select a province / state', 'noyona-childtheme' ); ?></option>
+                                <?php foreach ( $address_form_ph_states as $address_form_code => $address_form_label ) : ?>
+                                    <option value="<?php echo esc_attr( (string) $address_form_code ); ?>" <?php selected( $address_form_province, (string) $address_form_code ); ?>>
+                                        <?php echo esc_html( (string) $address_form_label ); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label for="noyona-account-address-zip"><?php esc_html_e( 'ZIP Code', 'noyona-childtheme' ); ?></label>
+                    <input id="noyona-account-address-zip" type="text" name="zip_code" value="<?php echo esc_attr( (string) $address_form_data['zip_code'] ); ?>" required />
+
+                    <label class="noyona-account-address-form__default">
+                        <input type="checkbox" name="is_default" value="1"<?php checked( ! empty( $address_form_data['is_default'] ) ); ?> />
+                        <span><?php esc_html_e( 'Set as Default Address', 'noyona-childtheme' ); ?></span>
+                    </label>
+                </div>
+
+                <div class="noyona-account-address-form__actions">
+                    <button type="submit" class="noyona-account-btn noyona-account-btn--primary">
+                        <?php esc_html_e( 'Add', 'noyona-childtheme' ); ?>
+                    </button>
+                    <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $address_return_url ); ?>">
+                        <?php esc_html_e( 'Cancel', 'noyona-childtheme' ); ?>
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <div class="noyona-account-address-list">
+            <?php if ( ! empty( $account_addresses ) ) : ?>
+                <?php foreach ( $account_addresses as $account_address ) : ?>
+                    <?php
+                    $address_id = isset( $account_address['id'] ) ? sanitize_key( (string) $account_address['id'] ) : '';
+                    if ( '' === $address_id ) {
+                        continue;
+                    }
+
+                    // Province is stored as a WC state code (e.g. "00"); render the human label ("Metro Manila").
+                    $province_code = isset( $account_address['province'] ) ? (string) $account_address['province'] : '';
+                    $province_disp = class_exists( 'Noyona_Shipping' )
+                        ? Noyona_Shipping::ph_state_label_for( $province_code )
+                        : $province_code;
+
+                    $address_parts = array(
+                        isset( $account_address['address'] ) ? (string) $account_address['address'] : '',
+                        isset( $account_address['city'] ) ? (string) $account_address['city'] : '',
+                        $province_disp,
+                        isset( $account_address['zip_code'] ) ? (string) $account_address['zip_code'] : '',
+                    );
+                    $address_parts = array_filter(
+                        $address_parts,
+                        static function ( $part ) {
+                            return '' !== trim( (string) $part );
+                        }
+                    );
+
+                    $address_line     = implode( ', ', $address_parts );
+                    $edit_address_url = add_query_arg(
+                        array(
+                            'noyona_modal'        => 'address',
+                            'noyona_address_edit' => $address_id,
+                        ),
+                        $address_return_url
+                    );
+                    $delete_address_url = wp_nonce_url(
+                        add_query_arg(
+                            array(
+                                'action'      => 'noyona_delete_account_address',
+                                'address_id'  => $address_id,
+                                'redirect_to' => $address_return_url,
+                            ),
+                            admin_url( 'admin-post.php' )
+                        ),
+                        'noyona_delete_account_address_' . $address_id
+                    );
+                    ?>
+                    <article class="noyona-account-address-item">
+                        <div class="noyona-account-address-item__meta">
+                            <h4><?php echo esc_html( $full_name ); ?></h4>
+                            <?php if ( '' !== $phone ) : ?>
+                                <p class="noyona-account-address-item__phone"><?php echo esc_html( $phone ); ?></p>
+                            <?php endif; ?>
+                            <p class="noyona-account-address-item__line"><?php echo esc_html( $address_line ); ?></p>
+                            <?php if ( ! empty( $account_address['is_default'] ) ) : ?>
+                                <span class="noyona-account-address-item__badge"><?php esc_html_e( 'Default', 'noyona-childtheme' ); ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="noyona-account-address-item__actions">
+                            <a href="<?php echo esc_url( $edit_address_url ); ?>" aria-label="<?php esc_attr_e( 'Edit address', 'noyona-childtheme' ); ?>">
+                                <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                                <span class="screen-reader-text"><?php esc_html_e( 'Edit address', 'noyona-childtheme' ); ?></span>
+                            </a>
+                            <a href="<?php echo esc_url( $delete_address_url ); ?>" onclick="return window.confirm('<?php echo esc_js( __( 'Delete this address?', 'noyona-childtheme' ) ); ?>');" aria-label="<?php esc_attr_e( 'Delete address', 'noyona-childtheme' ); ?>">
+                                <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                                <span class="screen-reader-text"><?php esc_html_e( 'Delete address', 'noyona-childtheme' ); ?></span>
+                            </a>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <p class="noyona-account-addresses-empty"><?php esc_html_e( 'No saved addresses yet.', 'noyona-childtheme' ); ?></p>
+            <?php endif; ?>
+        </div>
+
+        <?php if ( $is_address_modal_open ) : ?>
+            <div
+                id="noyona-account-address-modal"
+                class="noyona-account-modal is-open"
+                aria-hidden="false"
+            >
+                <a href="<?php echo esc_url( $address_return_url ); ?>" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close modal', 'noyona-childtheme' ); ?>"></a>
+                <div class="noyona-account-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Edit address', 'noyona-childtheme' ); ?>">
+                    <a href="<?php echo esc_url( $address_return_url ); ?>" class="noyona-account-modal-back">
+                        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                    </a>
+                    <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit My Address', 'noyona-childtheme' ); ?></h4>
+
+                    <?php if ( 'address' === $active_modal && '' !== $notice_message ) : ?>
+                        <p class="noyona-account-modal-notice<?php echo ( 'success' === $notice_type ) ? ' is-success' : ' is-error'; ?>">
+                            <?php echo esc_html( $notice_message ); ?>
+                        </p>
+                    <?php endif; ?>
+
+                    <form class="noyona-account-modal-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                        <?php wp_nonce_field( 'noyona_upsert_account_address', 'noyona_account_address_nonce', false ); ?>
+                        <input type="hidden" name="action" value="noyona_upsert_account_address" />
+                        <input type="hidden" name="redirect_to" value="<?php echo esc_url( $address_return_url ); ?>" />
+                        <input type="hidden" name="address_id" value="<?php echo esc_attr( (string) $address_modal_data['id'] ); ?>" />
+
+                        <label for="noyona-account-edit-address-line"><?php esc_html_e( 'Address', 'noyona-childtheme' ); ?></label>
+                        <input id="noyona-account-edit-address-line" type="text" name="address" value="<?php echo esc_attr( (string) $address_modal_data['address'] ); ?>" required />
+
+                        <label for="noyona-account-edit-address-city"><?php esc_html_e( 'City', 'noyona-childtheme' ); ?></label>
+                        <input id="noyona-account-edit-address-city" type="text" name="city" value="<?php echo esc_attr( (string) $address_modal_data['city'] ); ?>" required />
+
+                        <label for="noyona-account-edit-address-province"><?php esc_html_e( 'Province', 'noyona-childtheme' ); ?></label>
+                        <?php
+                        $modal_ph_states = ( function_exists( 'WC' ) && WC()->countries ) ? (array) WC()->countries->get_states( 'PH' ) : array();
+                        $modal_province  = (string) $address_modal_data['province'];
+                        ?>
+                        <select id="noyona-account-edit-address-province" name="province" required>
+                            <option value=""><?php esc_html_e( 'Select a province / state', 'noyona-childtheme' ); ?></option>
+                            <?php foreach ( $modal_ph_states as $modal_code => $modal_label ) : ?>
+                                <option value="<?php echo esc_attr( (string) $modal_code ); ?>" <?php selected( $modal_province, (string) $modal_code ); ?>>
+                                    <?php echo esc_html( (string) $modal_label ); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <label for="noyona-account-edit-address-zip"><?php esc_html_e( 'Zip Code', 'noyona-childtheme' ); ?></label>
+                        <input id="noyona-account-edit-address-zip" type="text" name="zip_code" value="<?php echo esc_attr( (string) $address_modal_data['zip_code'] ); ?>" required />
+
+                        <label class="noyona-account-address-form__default">
+                            <input type="checkbox" name="is_default" value="1"<?php checked( ! empty( $address_modal_data['is_default'] ) ); ?> />
+                            <span><?php esc_html_e( 'Set as Default Address', 'noyona-childtheme' ); ?></span>
+                        </label>
+
+                        <div class="noyona-account-modal-actions">
+                            <a href="<?php echo esc_url( $address_return_url ); ?>" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Cancel', 'noyona-childtheme' ); ?></a>
+                            <button type="submit" class="noyona-account-btn noyona-account-btn--primary"><?php esc_html_e( 'Save Changes', 'noyona-childtheme' ); ?></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        <?php endif; ?>
+    </section>
+    <?php
+
+    return (string) ob_get_clean();
+}
+
 /* ----- [noyona_account_page] shortcode (renderer + cleanup) ----- */
 add_shortcode( 'noyona_account_page', 'noyona_render_account_page_shortcode' );
 function noyona_render_account_page_shortcode() {
@@ -971,9 +1229,11 @@ function noyona_render_account_page_shortcode() {
     $addresses_url = noyona_get_account_addresses_url();
     $payments_url = noyona_get_account_payments_url();
     $logout_url = function_exists( 'wc_logout_url' ) ? wc_logout_url( $account_url ) : wp_logout_url( $account_url );
-    $hero_edit_url = in_array( $active_tab, array( 'orders', 'addresses', 'payments' ), true )
-        ? add_query_arg( 'noyona_modal', 'edit', $account_url )
-        : '#noyona-account-edit-modal';
+    $hero_primary_url   = ( 'orders' === $active_tab ) ? $account_url : $orders_url;
+    $hero_primary_label = ( 'orders' === $active_tab )
+        ? __( 'My Profile', 'noyona-childtheme' )
+        : __( 'My Orders', 'noyona-childtheme' );
+    $address_return_url = ( 'profile' === $active_tab ) ? $account_url : $addresses_url;
     $active_modal = isset( $_GET['noyona_modal'] ) ? sanitize_key( wp_unslash( $_GET['noyona_modal'] ) ) : '';
     $notice_code  = isset( $_GET['noyona_account_notice'] ) ? sanitize_key( wp_unslash( $_GET['noyona_account_notice'] ) ) : '';
     $notice_map   = array(
@@ -1019,7 +1279,7 @@ function noyona_render_account_page_shortcode() {
     $address_modal_data   = $address_form_data;
     $is_address_modal_open = false;
 
-    if ( 'addresses' === $active_tab ) {
+    if ( in_array( $active_tab, array( 'profile', 'addresses' ), true ) ) {
         $account_addresses = noyona_get_account_saved_addresses( (int) $current_user->ID );
         $edit_address_id   = isset( $_GET['noyona_address_edit'] ) ? sanitize_key( wp_unslash( $_GET['noyona_address_edit'] ) ) : '';
 
@@ -1217,43 +1477,55 @@ function noyona_render_account_page_shortcode() {
         }
     }
 
+    $address_card_args = array(
+        'account_addresses'     => $account_addresses,
+        'address_form_data'     => $address_form_data,
+        'address_modal_data'    => $address_modal_data,
+        'address_return_url'    => $address_return_url,
+        'active_modal'          => $active_modal,
+        'notice_code'           => $notice_code,
+        'notice_type'           => $notice_type,
+        'notice_message'        => $notice_message,
+        'is_address_modal_open' => $is_address_modal_open,
+        'full_name'             => $full_name,
+        'phone'                 => $phone,
+    );
+
     ob_start();
     ?>
     <div class="noyona-account-page">
         <section class="noyona-account-hero">
             <div class="noyona-account-hero__identity">
-                <img class="noyona-account-avatar" src="<?php echo esc_url( $avatar_url ); ?>" alt="" loading="lazy" decoding="async" />
+                <div class="noyona-account-hero__avatar-wrap">
+                    <img class="noyona-account-avatar" src="<?php echo esc_url( $avatar_url ); ?>" alt="" loading="lazy" decoding="async" />
+                    <form class="noyona-account-avatar-upload noyona-account-hero__avatar-upload" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data">
+                        <?php wp_nonce_field( 'noyona_upload_account_avatar', 'noyona_avatar_nonce', false ); ?>
+                        <input type="hidden" name="action" value="noyona_upload_account_avatar" />
+                        <input type="hidden" name="redirect_to" value="<?php echo esc_url( $account_url ); ?>" />
+                        <input
+                            id="noyona-account-avatar-input"
+                            class="noyona-account-avatar-input"
+                            type="file"
+                            name="noyona_account_avatar"
+                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                            onchange="this.form.submit()"
+                            required
+                        />
+                        <label for="noyona-account-avatar-input" class="noyona-account-btn noyona-account-btn--ghost">
+                            <?php esc_html_e( 'Select Image', 'noyona-childtheme' ); ?>
+                        </label>
+                    </form>
+                </div>
                 <div class="noyona-account-hero__meta">
                     <h2><?php echo esc_html( $full_name ); ?></h2>
                     <p><?php echo esc_html( $email ); ?></p>
                 </div>
             </div>
             <div class="noyona-account-hero__actions">
-                <a class="noyona-account-btn noyona-account-btn--primary" href="<?php echo esc_url( $hero_edit_url ); ?>"><?php esc_html_e( 'Edit Profile', 'noyona-childtheme' ); ?></a>
+                <a class="noyona-account-btn noyona-account-btn--primary" href="<?php echo esc_url( $hero_primary_url ); ?>"><?php echo esc_html( $hero_primary_label ); ?></a>
                 <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $logout_url ); ?>"><?php esc_html_e( 'Log Out', 'noyona-childtheme' ); ?></a>
             </div>
         </section>
-
-        <nav class="noyona-account-tabs" aria-label="<?php esc_attr_e( 'Account sections', 'noyona-childtheme' ); ?>">
-            <a class="noyona-account-tab<?php echo ( 'orders' === $active_tab ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $orders_url ); ?>"<?php echo ( 'orders' === $active_tab ) ? ' aria-current="page"' : ''; ?>>
-                <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
-                <span><?php esc_html_e( 'My Orders', 'noyona-childtheme' ); ?></span>
-            </a>
-            <a class="noyona-account-tab<?php echo ( 'addresses' === $active_tab ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $addresses_url ); ?>"<?php echo ( 'addresses' === $active_tab ) ? ' aria-current="page"' : ''; ?>>
-                <i class="fa-solid fa-house" aria-hidden="true"></i>
-                <span><?php esc_html_e( 'My Addresses', 'noyona-childtheme' ); ?></span>
-            </a>
-            <?php if ( $show_payments_tab ) : ?>
-                <a class="noyona-account-tab<?php echo ( 'payments' === $active_tab ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $payments_url ); ?>"<?php echo ( 'payments' === $active_tab ) ? ' aria-current="page"' : ''; ?>>
-                    <i class="fa-regular fa-credit-card" aria-hidden="true"></i>
-                    <span><?php esc_html_e( 'Banks & Cards', 'noyona-childtheme' ); ?></span>
-                </a>
-            <?php endif; ?>
-            <a class="noyona-account-tab<?php echo ( 'profile' === $active_tab ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $account_url ); ?>"<?php echo ( 'profile' === $active_tab ) ? ' aria-current="page"' : ''; ?>>
-                <i class="fa-regular fa-user" aria-hidden="true"></i>
-                <span><?php esc_html_e( 'My Profile', 'noyona-childtheme' ); ?></span>
-            </a>
-        </nav>
 
         <?php if ( 'orders' === $active_tab ) : ?>
         <section id="noyona-account-orders-panel" class="noyona-account-profile-card noyona-account-orders-card">
@@ -2259,30 +2531,10 @@ function noyona_render_account_page_shortcode() {
                     </div>
                 </div>
 
-                <aside class="noyona-account-profile-avatar">
-                    <img src="<?php echo esc_url( $avatar_url ); ?>" alt="" loading="lazy" decoding="async" />
-                    <form class="noyona-account-avatar-upload" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data">
-                        <?php wp_nonce_field( 'noyona_upload_account_avatar', 'noyona_avatar_nonce', false ); ?>
-                        <input type="hidden" name="action" value="noyona_upload_account_avatar" />
-                        <input type="hidden" name="redirect_to" value="<?php echo esc_url( $account_url ); ?>" />
-                        <input
-                            id="noyona-account-avatar-input"
-                            class="noyona-account-avatar-input"
-                            type="file"
-                            name="noyona_account_avatar"
-                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                            onchange="this.form.submit()"
-                            required
-                        />
-                        <label for="noyona-account-avatar-input" class="noyona-account-btn noyona-account-btn--ghost">
-                            <?php esc_html_e( 'Select Image', 'noyona-childtheme' ); ?>
-                        </label>
-                    </form>
-                    <p><?php esc_html_e( 'File Size: maximum 1 MB', 'noyona-childtheme' ); ?></p>
-                    <p><?php esc_html_e( 'File type: JPG, PNG, WEBP', 'noyona-childtheme' ); ?></p>
-                </aside>
             </div>
         </section>
+
+        <?php echo noyona_render_account_addresses_card( $address_card_args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
         <div
             id="noyona-account-edit-modal"
