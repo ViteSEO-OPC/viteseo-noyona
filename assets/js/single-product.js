@@ -2255,6 +2255,9 @@
       // Magnifier button (top-right) — opens lightbox of the current image.
       // Mirrors WooCommerce's `.woocommerce-product-gallery__trigger` so the
       // page reads the same in fallback and FlexSlider modes.
+      if(gallery.querySelector('.woocommerce-product-gallery__trigger')) {
+        return;
+      }
       var magnifyBtn = document.createElement('button');
       magnifyBtn.type = 'button';
       magnifyBtn.className = 'noyona-pdp-gallery-magnify';
