@@ -2740,6 +2740,8 @@ function noyona_clean_account_markup( $html ) {
 
     $targets = array(
         '/(<nav\b[^>]*class=(["\'])[^"\']*\bnoyona-account-tabs\b[^"\']*\2[^>]*>)(.*?)(<\/nav>)/is',
+        '/(<div\b[^>]*class=(["\'])[^"\']*\bnoyona-account-hero__avatar-wrap\b[^"\']*\2[^>]*>)(.*?)(<\/div>)/is',
+        '/(<div\b[^>]*class=(["\'])[^"\']*\bnoyona-account-hero__upload-row\b[^"\']*\2[^>]*>)(.*?)(<\/div>)/is',
         '/(<div\b[^>]*class=(["\'])[^"\']*\bnoyona-account-hero__actions\b[^"\']*\2[^>]*>)(.*?)(<\/div>)/is',
         '/(<form\b[^>]*class=(["\'])[^"\']*\bnoyona-account-avatar-upload\b[^"\']*\2[^>]*>)(.*?)(<\/form>)/is',
         '/(<form\b[^>]*class=(["\'])[^"\']*\bnoyona-account-address-form\b[^"\']*\2[^>]*>)(.*?)(<\/form>)/is',
@@ -2773,7 +2775,18 @@ function noyona_clean_account_markup( $html ) {
         );
     }
 
+    $html = preg_replace( '/<p\b[^>]*>(?:\s|&nbsp;|&#160;|<br\s*\/?>)*<\/p>/i', '', (string) $html );
+
     return (string) $html;
+}
+
+add_filter( 'render_block_core/shortcode', 'noyona_clean_account_shortcode_block_artifacts', 20, 3 );
+function noyona_clean_account_shortcode_block_artifacts( $block_content, $block = array(), $instance = null ) {
+    if ( false === strpos( (string) $block_content, 'noyona-account-page' ) ) {
+        return $block_content;
+    }
+
+    return noyona_clean_account_markup( (string) $block_content );
 }
 
 add_filter( 'the_content', 'noyona_clean_account_page_artifacts', 35 );
