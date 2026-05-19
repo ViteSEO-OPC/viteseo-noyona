@@ -1516,15 +1516,15 @@ function noyona_render_account_page_shortcode() {
                                 <?php esc_html_e( 'Select Image', 'noyona-childtheme' ); ?>
                             </label>
                         </form>
-                        <div class="noyona-account-hero__upload-notes">
-                            <span><?php esc_html_e( 'File Size: maximum 1 MB', 'noyona-childtheme' ); ?></span>
-                            <span><?php esc_html_e( 'File type: JPG, PNG, WEBP', 'noyona-childtheme' ); ?></span>
-                        </div>
                     </div>
                 </div>
                 <div class="noyona-account-hero__meta">
                     <h2><?php echo esc_html( $full_name ); ?></h2>
                     <p><?php echo esc_html( $email ); ?></p>
+                    <div class="noyona-account-hero__upload-notes">
+                        <span><?php esc_html_e( 'File Size: maximum 1 MB', 'noyona-childtheme' ); ?></span>
+                        <span><?php esc_html_e( 'File type: JPG, PNG, WEBP', 'noyona-childtheme' ); ?></span>
+                    </div>
                 </div>
             </div>
             <div class="noyona-account-hero__actions">
