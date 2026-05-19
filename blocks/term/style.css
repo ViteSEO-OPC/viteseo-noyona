@@ -76,12 +76,39 @@
     overflow: hidden;
     border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.22s ease, transform 0.22s ease, border-color 0.22s ease;
 }
 
 .term-overview__card-link {
     color: inherit;
     text-decoration: none;
     display: block;
+    height: 100%;
+    outline: none;
+}
+
+.term-overview__card-link:hover .term-overview__card-button,
+.term-overview__card-link:focus-visible .term-overview__card-button {
+    background: #E199A4;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(225, 153, 164, 0.28);
+}
+
+.term-overview__card-link:hover .term-overview__card-button i,
+.term-overview__card-link:focus-visible .term-overview__card-button i {
+    transform: translateX(3px);
+}
+
+.term-overview__card:has(.term-overview__card-link:hover),
+.term-overview__card:has(.term-overview__card-link:focus-visible) {
+    border-color: rgba(225, 153, 164, 0.45);
+    box-shadow: 0 14px 32px rgba(225, 153, 164, 0.18);
+}
+
+.term-overview__card-link:focus-visible {
+    box-shadow: inset 0 0 0 3px rgba(225, 153, 164, 0.32);
+    border-radius: 12px;
 }
 
 .term-overview__card-media {
@@ -128,10 +155,12 @@
     text-transform: uppercase;
     letter-spacing: 0.07em;
     font-weight: 700;
+    transition: background-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
 }
 
 .term-overview__card-button i {
     font-size: 0.7rem;
+    transition: transform 0.22s ease;
 }
 
 @media (max-width: 980px) {
