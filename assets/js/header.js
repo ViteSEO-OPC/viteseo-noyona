@@ -1527,6 +1527,7 @@
       });
       pageKeysToDelete.forEach((key) => nextParams.delete(key));
       nextParams.delete('paged');
+      nextParams.delete('search_page');
 
       const nextQuery = nextParams.toString();
       const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}`;

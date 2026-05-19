@@ -2240,6 +2240,86 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   font-weight: 700;
 }
 
+/* Pagination — centered Prev / numbers / Next */
+.noyona-product-search-page .noyona-search-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 32px;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+}
+
+.noyona-product-search-page .noyona-search-pagination .wp-block-query-pagination-numbers {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.noyona-product-search-page .noyona-search-pagination .page-numbers {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: transparent;
+  color: #E199A4;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.noyona-product-search-page .noyona-search-pagination .page-numbers.current {
+  background: #E199A4;
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(225, 153, 164, 0.28);
+}
+
+.noyona-product-search-page .noyona-search-pagination a.page-numbers:hover {
+  background: rgba(225, 153, 164, 0.12);
+  color: #cc848f;
+}
+
+.noyona-product-search-page .noyona-search-pagination .page-numbers.dots {
+  background: transparent;
+  color: #c8949f;
+  box-shadow: none;
+  padding: 0 4px;
+}
+
+.noyona-product-search-page .noyona-search-pagination .wp-block-query-pagination-previous,
+.noyona-product-search-page .noyona-search-pagination .wp-block-query-pagination-next {
+  position: static;
+  width: auto;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #f0cfd7;
+  color: #E199A4;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.noyona-product-search-page .noyona-search-pagination .wp-block-query-pagination-previous::after,
+.noyona-product-search-page .noyona-search-pagination .wp-block-query-pagination-next::after {
+  content: none;
+}
+
+.noyona-product-search-page .noyona-search-pagination .wp-block-query-pagination-previous:hover,
+.noyona-product-search-page .noyona-search-pagination .wp-block-query-pagination-next:hover {
+  background: #E199A4;
+  color: #fff;
+  border-color: #E199A4;
+}
+
 /* Tablet: stack filter above results */
 @media (max-width: 999px) {
   .noyona-product-search-page .noyona-search-layout {

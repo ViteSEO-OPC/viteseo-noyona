@@ -393,6 +393,48 @@ function noyona_render_product_card( $product ) {
     return trim( (string) $html );
 }
 
+/* ----- Detect: is this request the product search results page? ----- */
+function noyona_is_product_search_request() {
+    if ( is_admin() ) {
+        return false;
+    }
+    $has_search = ! empty( $_GET['s'] );
+    if ( function_exists( 'is_search' ) && is_search() ) {
+        $has_search = true;
+    }
+    if ( ! $has_search ) {
+        return false;
+    }
+    $post_type = isset( $_GET['post_type'] ) ? sanitize_key( wp_unslash( $_GET['post_type'] ) ) : '';
+    if ( '' === $post_type ) {
+        $qv_post_type = get_query_var( 'post_type' );
+        $qv_post_type = is_array( $qv_post_type ) ? reset( $qv_post_type ) : $qv_post_type;
+        $post_type    = (string) $qv_post_type;
+    }
+    return 'product' === $post_type;
+}
+
+/* ----- Stop WP canonical redirect on the product search page ----- */
+/**
+ * WordPress' redirect_canonical does two things that break this template:
+ *
+ *  1. It rewrites `?s=…&paged=N` into a pretty `/page/N/?s=…` URL, which 404s
+ *     because the front route has no rewrite for that path.
+ *  2. When the resulting `WP_Query` matches exactly one product (e.g. after
+ *     a narrow price-range filter), it redirects to that single PDP.
+ *
+ * Both are unwanted here — the search page must stay on its own route and
+ * keep showing the (possibly empty) grid. The filter only kicks in on real
+ * product-search requests, so other pages are untouched.
+ */
+add_filter( 'redirect_canonical', 'noyona_disable_canonical_redirect_on_product_search', 10, 2 );
+function noyona_disable_canonical_redirect_on_product_search( $redirect_url, $requested_url = '' ) {
+    if ( noyona_is_product_search_request() ) {
+        return false;
+    }
+    return $redirect_url;
+}
+
 /* ----- Keep product_cat pills on the search route (don't trigger /shop/{slug}/ redirect) ----- */
 /**
  * When the URL carries both `s=` and `product_cat=` with `post_type=product`, WordPress
@@ -453,8 +495,16 @@ function noyona_render_product_search_page_shortcode() {
         $selected_cat = '';
     }
 
-    $per_page     = 6;
-    $current_page = isset( $_GET['paged'] ) ? max( 1, absint( wp_unslash( $_GET['paged'] ) ) ) : max( 1, absint( get_query_var( 'paged', 1 ) ) );
+    $per_page = 6;
+    // Use a dedicated query var so WP's canonical/page rewrite doesn't turn
+    // ?s=…&paged=N into /page/N/?s=… (which 404s on the front route).
+    if ( isset( $_GET['search_page'] ) ) {
+        $current_page = max( 1, absint( wp_unslash( $_GET['search_page'] ) ) );
+    } elseif ( isset( $_GET['paged'] ) ) {
+        $current_page = max( 1, absint( wp_unslash( $_GET['paged'] ) ) );
+    } else {
+        $current_page = max( 1, absint( get_query_var( 'paged', 1 ) ) );
+    }
 
     $base_query_args = array(
         'post_type'      => 'product',
@@ -746,23 +796,47 @@ function noyona_render_product_search_page_shortcode() {
                     <?php endif; ?>
                 </div>
                 <?php
-                $pagination = paginate_links(
+                $total_pages    = max( 1, (int) $products_query->max_num_pages );
+                $pagination_base_args = $base_params;
+                unset( $pagination_base_args['paged'], $pagination_base_args['search_page'] );
+                $build_page_url = static function ( $page ) use ( $pagination_base_args ) {
+                    $args = $pagination_base_args;
+                    if ( $page > 1 ) {
+                        $args['search_page'] = (int) $page;
+                    }
+                    return add_query_arg( $args, home_url( '/' ) );
+                };
+
+                $page_links = paginate_links(
                     array(
-                        'base'      => add_query_arg( array_merge( $base_params, array( 'paged' => '%#%' ) ), home_url( '/' ) ),
+                        'base'      => add_query_arg(
+                            array_merge( $pagination_base_args, array( 'search_page' => '%#%' ) ),
+                            home_url( '/' )
+                        ),
                         'format'    => '',
                         'current'   => $current_page,
-                        'total'     => max( 1, (int) $products_query->max_num_pages ),
+                        'total'     => $total_pages,
                         'type'      => 'array',
-                        'prev_text' => __( 'Previous', 'noyona-childtheme' ),
-                        'next_text' => __( 'Next', 'noyona-childtheme' ),
+                        'prev_next' => false,
+                        'mid_size'  => 1,
+                        'end_size'  => 1,
                     )
                 );
-                if ( is_array( $pagination ) && count( $pagination ) > 1 ) :
+
+                if ( $total_pages > 1 ) :
                     ?>
-                    <nav class="wp-block-query-pagination" aria-label="<?php esc_attr_e( 'Product search pagination', 'noyona-childtheme' ); ?>">
+                    <nav class="wp-block-query-pagination noyona-search-pagination" aria-label="<?php esc_attr_e( 'Product search pagination', 'noyona-childtheme' ); ?>">
+                        <?php if ( $current_page > 1 ) : ?>
+                            <a class="wp-block-query-pagination-previous page-numbers" href="<?php echo esc_url( $build_page_url( $current_page - 1 ) ); ?>" aria-label="<?php esc_attr_e( 'Previous page', 'noyona-childtheme' ); ?>"><?php esc_html_e( 'Previous', 'noyona-childtheme' ); ?></a>
+                        <?php endif; ?>
                         <div class="wp-block-query-pagination-numbers">
-                            <?php echo wp_kses_post( implode( "\n", $pagination ) ); ?>
+                            <?php if ( is_array( $page_links ) ) : ?>
+                                <?php echo wp_kses_post( implode( '', $page_links ) ); ?>
+                            <?php endif; ?>
                         </div>
+                        <?php if ( $current_page < $total_pages ) : ?>
+                            <a class="wp-block-query-pagination-next page-numbers" href="<?php echo esc_url( $build_page_url( $current_page + 1 ) ); ?>" aria-label="<?php esc_attr_e( 'Next page', 'noyona-childtheme' ); ?>"><?php esc_html_e( 'Next', 'noyona-childtheme' ); ?></a>
+                        <?php endif; ?>
                     </nav>
                 <?php endif; ?>
             </div>
