@@ -1498,27 +1498,33 @@ function noyona_render_account_page_shortcode() {
             <div class="noyona-account-hero__identity">
                 <div class="noyona-account-hero__avatar-wrap">
                     <img class="noyona-account-avatar" src="<?php echo esc_url( $avatar_url ); ?>" alt="" loading="lazy" decoding="async" />
-                    <form class="noyona-account-avatar-upload noyona-account-hero__avatar-upload" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data">
-                        <?php wp_nonce_field( 'noyona_upload_account_avatar', 'noyona_avatar_nonce', false ); ?>
-                        <input type="hidden" name="action" value="noyona_upload_account_avatar" />
-                        <input type="hidden" name="redirect_to" value="<?php echo esc_url( $account_url ); ?>" />
-                        <input
-                            id="noyona-account-avatar-input"
-                            class="noyona-account-avatar-input"
-                            type="file"
-                            name="noyona_account_avatar"
-                            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                            onchange="this.form.submit()"
-                            required
-                        />
-                        <label for="noyona-account-avatar-input" class="noyona-account-btn noyona-account-btn--ghost">
-                            <?php esc_html_e( 'Select Image', 'noyona-childtheme' ); ?>
-                        </label>
-                    </form>
                 </div>
                 <div class="noyona-account-hero__meta">
                     <h2><?php echo esc_html( $full_name ); ?></h2>
                     <p><?php echo esc_html( $email ); ?></p>
+                    <div class="noyona-account-hero__upload-row">
+                        <form class="noyona-account-avatar-upload noyona-account-hero__avatar-upload" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data">
+                            <?php wp_nonce_field( 'noyona_upload_account_avatar', 'noyona_avatar_nonce', false ); ?>
+                            <input type="hidden" name="action" value="noyona_upload_account_avatar" />
+                            <input type="hidden" name="redirect_to" value="<?php echo esc_url( $account_url ); ?>" />
+                            <input
+                                id="noyona-account-avatar-input"
+                                class="noyona-account-avatar-input"
+                                type="file"
+                                name="noyona_account_avatar"
+                                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                onchange="this.form.submit()"
+                                required
+                            />
+                            <label for="noyona-account-avatar-input" class="noyona-account-btn noyona-account-btn--ghost">
+                                <?php esc_html_e( 'Select Image', 'noyona-childtheme' ); ?>
+                            </label>
+                        </form>
+                        <div class="noyona-account-hero__upload-notes">
+                            <span><?php esc_html_e( 'File Size: maximum 1 MB', 'noyona-childtheme' ); ?></span>
+                            <span><?php esc_html_e( 'File type: JPG, PNG, WEBP', 'noyona-childtheme' ); ?></span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="noyona-account-hero__actions">
