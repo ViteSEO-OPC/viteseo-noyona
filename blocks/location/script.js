@@ -919,7 +919,7 @@
       var options = [
         { key: "all", label: "All Stores" },
         { key: "open", label: "Open Now" },
-        { key: "near", label: userLocation ? "Near Me (12km)" : "Near Me" },
+        // { key: "near", label: userLocation ? "Near Me (12km)" : "Near Me" },
         // { key: "top", label: "Top Rated (4.5+)" },
       ];
       extraFilterList.innerHTML = options
