@@ -1781,111 +1781,248 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   color: #E199A4;
 }
 
+/* =============================================================
+ * Product search results page
+ * Scoped to .noyona-product-search-page so shop archive pages
+ * keep their own layout. Typography follows theme.json tokens.
+ * ============================================================= */
 .noyona-product-search-page {
   padding-bottom: 72px;
+  font-family: var(--wp--preset--font-family--proxima-nova);
 }
 
-.noyona-search-hero {
-  margin-top: 52px;
-  margin-bottom: 34px;
+/* Hero — title, count, horizontal "search again" bar */
+.noyona-product-search-page .noyona-search-hero {
+  margin: 48px 0 36px;
   padding: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 18px;
+  gap: 14px;
 }
 
-.noyona-search-hero__eyebrow {
-  margin: 0 0 8px;
-  color: #E199A4;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.noyona-search-hero h1 {
+.noyona-product-search-page .noyona-search-hero__title {
   margin: 0;
-  color: #E199A4;
-  font-size: clamp(34px, 4vw, 48px);
-  line-height: 0.95;
-  letter-spacing: -0.055em;
-  font-weight: 800;
+  color: #1f1f1f;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 
-.noyona-search-hero__count {
-  margin: 12px 0 0;
-  color: #7b656c;
-  font-size: clamp(15px, 1.2vw, 18px);
-  font-weight: 600;
+.noyona-product-search-page .noyona-search-hero__count {
+  margin: 0;
+  color: #6b5a60;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(15px, 1.1vw, 17px);
+  font-weight: 500;
 }
 
-.noyona-search-again {
-  width: min(640px, 100%);
+/* Horizontal search-again bar: icon | input | button */
+.noyona-product-search-page .noyona-search-again-form {
+  width: min(720px, 100%);
+  margin: 6px 0 0;
+  padding: 6px 6px 6px 18px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  margin: 0;
-  padding: 8px;
+  background: #fff;
   border: 1px solid #f0cfd7;
   border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 12px 28px rgba(196, 117, 137, 0.12);
+  box-shadow: 0 8px 24px rgba(196, 117, 137, 0.10);
 }
 
-.noyona-search-again input[type="search"] {
+.noyona-product-search-page .noyona-search-again-form__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #E199A4;
+}
+
+.noyona-product-search-page .noyona-search-again-form__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.noyona-product-search-page .noyona-search-again-form__input {
   min-width: 0;
+  width: 100%;
+  height: 44px;
   border: 0;
   background: transparent;
   color: #1f1f1f;
+  font-family: var(--wp--preset--font-family--proxima-nova);
   font-size: 0.95rem;
-  font-weight: 600;
-  padding: 0 12px;
+  font-weight: 500;
+  padding: 0 4px;
   outline: 0;
 }
 
-.noyona-search-again input[type="search"]::placeholder {
+.noyona-product-search-page .noyona-search-again-form__input::placeholder {
   color: #c8949f;
+  font-weight: 400;
 }
 
-.noyona-search-again button,
-.noyona-search-filter-actions button {
-  min-height: 42px;
+.noyona-product-search-page .noyona-search-again-form__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 22px;
   border: 0;
   border-radius: 999px;
   background: #E199A4;
   color: #fff;
-  padding: 0 20px;
-  font-size: 0.86rem;
-  font-weight: 800;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
-.noyona-search-again button:hover,
-.noyona-search-filter-actions button:hover {
-  background: #d78395;
+.noyona-product-search-page .noyona-search-again-form__submit:hover {
+  background: #cc848f;
   transform: translateY(-1px);
 }
 
-.noyona-search-categories {
+/* Products head: "All Products" title left, category pills right */
+.noyona-product-search-page .noyona-search-products-head {
+  margin: 8px 0 18px;
   display: flex;
-  align-items: center;
-  gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.noyona-product-search-page .noyona-search-products-head__title {
+  margin: 0;
+  color: #1f1f1f;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+/* Category pills */
+.noyona-product-search-page .noyona-search-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
+  gap: 10px;
 }
 
-.noyona-search-categories .wc-block-product-categories-list {
-  display: contents;
+.noyona-product-search-page .noyona-search-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 8px 18px;
+  border: 1px solid #ebebeb;
+  border-radius: 999px;
+  background: #fff;
+  color: #1f1f1f;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.noyona-search-filter-form {
+.noyona-product-search-page .noyona-search-pill:hover {
+  border-color: #E199A4;
+  color: #E199A4;
+}
+
+.noyona-product-search-page .noyona-search-pill.is-active,
+.noyona-product-search-page .noyona-search-pill.is-active:hover {
+  border-color: #E199A4;
+  background: #E199A4;
+  color: #fff;
+}
+
+.noyona-product-search-page .noyona-search-pill.is-disabled,
+.noyona-product-search-page .noyona-search-pill.is-disabled:hover {
+  background: #f5f5f5;
+  border-color: #ececec;
+  color: #bdbdbd;
+  box-shadow: none;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Two-column layout: filter card (fixed) + product results (flex) */
+.noyona-product-search-page .noyona-search-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 28px;
+  align-items: flex-start;
+  margin-top: 6px;
+}
+
+/* Compact filter card */
+.noyona-product-search-page .noyona-search-filters {
+  border: none;
+  border-radius: 16px;
+  background: #fff;
+  padding: 22px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+}
+
+.noyona-product-search-page .noyona-search-filters__form {
   margin: 0;
 }
 
+.noyona-product-search-page .noyona-search-filters__actions {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.noyona-product-search-page .noyona-search-filters__apply {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: #E199A4;
+  color: #fff;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.noyona-product-search-page .noyona-search-filters__apply:hover {
+  background: #cc848f;
+  transform: translateY(-1px);
+}
+
+.noyona-product-search-page .noyona-search-filters__reset {
+  color: #9c6470;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.noyona-product-search-page .noyona-search-filters__reset:hover {
+  color: #E199A4;
+}
+
+/* Scoped checkbox style (search page only) */
 .noyona-product-search-page .noyona-shop-filter-section input[type="checkbox"] {
   appearance: none;
   width: 16px;
@@ -1914,6 +2051,151 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   transform: rotate(45deg);
 }
 
+/* Right column: results area */
+.noyona-product-search-page .noyona-search-results {
+  min-width: 0;
+}
+
+.noyona-product-search-page .noyona-search-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.noyona-product-search-page .noyona-search-count {
+  margin: 0;
+  color: #E199A4;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.noyona-product-search-page .noyona-search-toolbar__right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Product grid — exactly 2 columns on desktop */
+.noyona-product-search-page .noyona-search-grid .wc-block-product-template {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.noyona-product-search-page .noyona-search-grid .wc-block-product {
+  border: none;
+  border-radius: 16px;
+  background: #fff;
+  padding: 18px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.noyona-product-search-page .noyona-search-grid .wc-block-components-product-image {
+  margin-bottom: 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  display: block;
+}
+
+.noyona-product-search-page .noyona-search-grid .wc-block-components-product-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.noyona-product-search-page .noyona-search-grid .wc-block-product .wp-block-post-title {
+  margin: 0 0 6px;
+  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: clamp(16px, 1.2vw, 18px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: #1f1f1f;
+}
+
+.noyona-product-search-page .noyona-search-grid .wc-block-product .wp-block-post-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.noyona-product-search-page .noyona-search-grid .wc-block-product .wp-block-post-excerpt {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #6b5a60;
+}
+
+.noyona-product-search-page .noyona-search-grid .wc-block-product .wp-block-post-excerpt p {
+  margin: 0;
+}
+
+/* No results state spans the full grid row */
+.noyona-product-search-page .noyona-search-grid .noyona-search-no-products {
+  grid-column: 1 / -1;
+  min-height: 200px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #9c6470;
+  box-shadow: none;
+  background: transparent;
+}
+
+.noyona-product-search-page .noyona-search-grid .noyona-search-no-products p {
+  margin: 0;
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 700;
+}
+
+/* Tablet: stack filter above results */
+@media (max-width: 999px) {
+  .noyona-product-search-page .noyona-search-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+}
+
+/* Mobile: 1-column product grid, stack search-again form */
+@media (max-width: 680px) {
+  .noyona-product-search-page .noyona-search-hero {
+    margin-top: 28px;
+  }
+
+  .noyona-product-search-page .noyona-search-again-form {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    padding: 10px 12px;
+    border-radius: 18px;
+    row-gap: 10px;
+  }
+
+  .noyona-product-search-page .noyona-search-again-form__submit {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .noyona-product-search-page .noyona-search-products-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .noyona-product-search-page .noyona-search-pills {
+    justify-content: flex-start;
+  }
+
+  .noyona-product-search-page .noyona-search-grid .wc-block-product-template {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .noyona-shop-view-wrapper {
   display: flex;
   align-items: center;
@@ -1925,42 +2207,6 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   font-weight: 600;
   font-size: 14px;
   white-space: nowrap;
-}
-
-.noyona-search-no-products {
-  grid-column: 1 / -1;
-  min-height: 180px;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: #9c6470;
-}
-
-.noyona-search-no-products p {
-  margin: 0;
-  font-size: clamp(18px, 2vw, 26px);
-  font-weight: 700;
-}
-
-@media (max-width: 760px) {
-  .noyona-search-categories {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 560px) {
-  .noyona-search-hero {
-    margin-top: 34px;
-  }
-
-  .noyona-search-again {
-    grid-template-columns: minmax(0, 1fr);
-    border-radius: 18px;
-  }
-
-  .noyona-search-again button {
-    width: 100%;
-  }
 }
 
 .noyona-buy-now-wrap {
