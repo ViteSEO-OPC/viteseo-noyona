@@ -144,9 +144,18 @@ function woocom_ct_enqueue_assets() {
         }
     }
 
+    $request_post_type = get_query_var( 'post_type' );
+    $request_post_type = is_array( $request_post_type ) ? reset( $request_post_type ) : $request_post_type;
+    $is_product_search = is_search()
+        && (
+            'product' === (string) $request_post_type
+            || ( isset( $_GET['post_type'] ) && 'product' === sanitize_key( wp_unslash( $_GET['post_type'] ) ) )
+        );
+
     $is_shop_archive = ( function_exists( 'is_shop' ) && is_shop() )
         || is_tax( 'product_cat' )
-        || '' !== $shop_price_category_slug;
+        || '' !== $shop_price_category_slug
+        || $is_product_search;
 
     if ( $is_shop_archive && class_exists( 'WooCommerce' ) ) {
         $shop_price_max = noyona_get_max_product_price( $shop_price_category_slug );

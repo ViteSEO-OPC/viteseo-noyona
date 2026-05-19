@@ -1327,8 +1327,8 @@
     const root = document.querySelector('.noyona-shop-filter-price');
     if (!root) return;
 
-    const minInput = root.querySelector('input[name="noyona-price-min"]');
-    const maxInput = root.querySelector('input[name="noyona-price-max"]');
+    const minInput = root.querySelector('input[name="noyona-price-min"], input[name="min_price"]');
+    const maxInput = root.querySelector('input[name="noyona-price-max"], input[name="max_price"]');
     const slider = root.querySelector('.noyona-shop-filter-price-slider');
     const minThumb = root.querySelector('.noyona-shop-filter-price-thumb.is-min');
     const maxThumb = root.querySelector('.noyona-shop-filter-price-thumb.is-max');
