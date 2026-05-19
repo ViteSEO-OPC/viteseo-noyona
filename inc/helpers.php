@@ -670,10 +670,10 @@ function noyona_render_product_search_page_shortcode() {
                     </section>
                 </div>
 
-                <div class="noyona-search-filters__actions">
+                <!-- <div class="noyona-search-filters__actions">
                     <button type="submit" class="noyona-search-filters__apply"><?php esc_html_e( 'Apply Filters', 'noyona-childtheme' ); ?></button>
                     <a class="noyona-search-filters__reset" href="<?php echo esc_url( add_query_arg( array( 's' => $query_text, 'post_type' => 'product' ), home_url( '/' ) ) ); ?>"><?php esc_html_e( 'Reset', 'noyona-childtheme' ); ?></a>
-                </div>
+                </div> -->
             </form>
         </aside>
 
