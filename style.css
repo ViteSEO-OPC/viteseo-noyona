@@ -639,7 +639,7 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
 }
 
 body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__rememberme {
-  grid-row: 6;
+  grid-row: 7;
   grid-column: 1;
   display: inline-flex;
   align-items: center;
@@ -655,7 +655,7 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
 }
 
 body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit {
-  grid-row: 7;
+  grid-row: 8;
   grid-column: 1 / -1;
   width: 100%;
   min-height: 54px;
@@ -679,7 +679,7 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
 }
 
 body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-LostPassword {
-  grid-row: 6;
+  grid-row: 7;
   grid-column: 2;
   margin: 0;
   text-align: right;
@@ -695,7 +695,7 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
 }
 
 .noyona-login-form-footer {
-  grid-row: 8;
+  grid-row: 9;
   grid-column: 1 / -1;
   margin-top: 0.3rem;
   display: grid;
@@ -4806,9 +4806,9 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
    Auth pages — center the card in the viewport
    (header/footer template parts are hidden on these pages)
    ============================================================ */
-body.page-login > .wp-site-blocks,
-body.page-register > .wp-site-blocks,
-body.woocommerce-account.woocommerce-lost-password > .wp-site-blocks {
+body.page-login .wp-site-blocks,
+body.page-register .wp-site-blocks,
+body.woocommerce-account.woocommerce-lost-password .wp-site-blocks {
 	min-height: 100vh;
 	min-height: 100dvh;
 	display: flex;
@@ -4819,25 +4819,25 @@ body.woocommerce-account.woocommerce-lost-password > .wp-site-blocks {
 	box-sizing: border-box;
 }
 
-body.admin-bar.page-login > .wp-site-blocks,
-body.admin-bar.page-register > .wp-site-blocks,
-body.admin-bar.woocommerce-account.woocommerce-lost-password > .wp-site-blocks {
+body.admin-bar.page-login .wp-site-blocks,
+body.admin-bar.page-register .wp-site-blocks,
+body.admin-bar.woocommerce-account.woocommerce-lost-password .wp-site-blocks {
 	min-height: calc(100vh - 32px);
 	min-height: calc(100dvh - 32px);
 }
 
 @media screen and (max-width: 782px) {
-	body.admin-bar.page-login > .wp-site-blocks,
-	body.admin-bar.page-register > .wp-site-blocks,
-	body.admin-bar.woocommerce-account.woocommerce-lost-password > .wp-site-blocks {
+	body.admin-bar.page-login .wp-site-blocks,
+	body.admin-bar.page-register .wp-site-blocks,
+	body.admin-bar.woocommerce-account.woocommerce-lost-password .wp-site-blocks {
 		min-height: calc(100vh - 46px);
 		min-height: calc(100dvh - 46px);
 	}
 }
 
-body.page-login > .wp-site-blocks > main.wp-block-group,
-body.page-register > .wp-site-blocks > main.wp-block-group,
-body.woocommerce-account.woocommerce-lost-password > .wp-site-blocks > main.wp-block-group {
+body.page-login .wp-site-blocks > main.wp-block-group,
+body.page-register .wp-site-blocks > main.wp-block-group,
+body.woocommerce-account.woocommerce-lost-password .wp-site-blocks > main.wp-block-group {
 	width: 100%;
 	max-width: 100%;
 	margin: 0;
@@ -4851,5 +4851,87 @@ body.page-register .noyona-register {
 
 body.woocommerce-account.woocommerce-lost-password .woocommerce {
 	margin: 0 auto;
+}
+
+/* ============================================================
+   Auth pages — hover polish for back links, buttons, text links
+   ============================================================ */
+
+.noyona-account-login-back,
+.noyona-register-back,
+.noyona-lost-password-back {
+	transition: color 160ms ease, transform 160ms ease, opacity 160ms ease;
+	text-decoration: none;
+}
+
+.noyona-account-login-back:hover,
+.noyona-account-login-back:focus-visible,
+.noyona-register-back:hover,
+.noyona-register-back:focus-visible,
+.noyona-lost-password-back:hover,
+.noyona-lost-password-back:focus-visible {
+	color: #e199a4;
+	text-decoration: none;
+	transform: translateX(-2px);
+	outline: none;
+}
+
+.noyona-register-submit,
+.noyona-lost-password-submit,
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit {
+	transition: filter 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.noyona-register-submit:hover,
+.noyona-register-submit:focus-visible,
+.noyona-lost-password-submit:hover,
+.noyona-lost-password-submit:focus-visible,
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit:hover,
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit:focus-visible {
+	filter: brightness(0.94);
+	transform: translateY(-1px);
+	box-shadow: 0 10px 24px rgba(225, 153, 164, 0.32);
+}
+
+.noyona-login-google-btn,
+.noyona-register-google {
+	transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.noyona-login-google-btn:hover,
+.noyona-login-google-btn:focus-visible,
+.noyona-register-google:hover,
+.noyona-register-google:focus-visible {
+	border-color: #c0cad7;
+	background: #fafbfd;
+	box-shadow: 0 6px 16px rgba(15, 23, 40, 0.08);
+	transform: translateY(-1px);
+}
+
+.noyona-lost-password-cancel {
+	transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.noyona-lost-password-cancel:hover,
+.noyona-lost-password-cancel:focus-visible {
+	background: #fdf2f4;
+	color: #c47c87;
+	box-shadow: 0 4px 14px rgba(225, 153, 164, 0.18);
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-LostPassword a,
+.noyona-login-register-link a,
+.noyona-register-login a {
+	transition: color 160ms ease, opacity 160ms ease;
+}
+
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-LostPassword a:hover,
+body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-LostPassword a:focus-visible,
+.noyona-login-register-link a:hover,
+.noyona-login-register-link a:focus-visible,
+.noyona-register-login a:hover,
+.noyona-register-login a:focus-visible {
+	color: #c47c87;
+	opacity: 0.92;
 }
 
