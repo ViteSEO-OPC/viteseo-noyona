@@ -34,7 +34,7 @@ if ( $is_done_preview ) {
 
 $request_uri    = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
 $request_path   = trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' );
-$reviews_path   = trim( (string) wp_parse_url( home_url( '/reviews/' ), PHP_URL_PATH ), '/' );
+$reviews_path   = trim( (string) wp_parse_url( home_url( '/preview/' ), PHP_URL_PATH ), '/' );
 $is_review_step = ( '' !== $reviews_path && $request_path === $reviews_path );
 $saved_checkout_addresses = array();
 $saved_checkout_payload   = array();

@@ -1,0 +1,545 @@
+# Noyona Theme — Typography & Design-Token Consistency Audit (read-only)
+
+---
+
+## 1. Global Typography Tokens
+
+### `theme.json`
+| What | Value | Source |
+|---|---|---|
+| Font family — sans (default) | `"Proxima Nova", system-ui, -apple-system, "Segoe UI", sans-serif` | `theme.json:13` |
+| Font family — serif (h1 only) | `"Noto Serif SemiCondensed", "Noto Serif", "Times New Roman", serif` | `theme.json:18` |
+| Body size | `clamp(16px, 1.4vw, 20px)` | `theme.json:25` |
+| `h-3` size | `clamp(18px, 2vw, 24px)` | `theme.json:26` |
+| `h-2` size | `clamp(32px, 4.2vw, 55px)` | `theme.json:27` |
+| `h-1` size | `clamp(44px, 6vw, 96px)` | `theme.json:28` |
+| Body weight | `400` | `theme.json:42` |
+| Body color (text) | `#333333` | `theme.json:38` |
+| Color palette | one entry only: `ink = #333333` | `theme.json:31-35` |
+
+### Global rules in `style.css`
+- `:root` defines `--footer-bg: #EBAAAC`, `--footer-text: #1a1a1a`, `--footer-btn-bg: #E199A4` (`style.css:19-39`).
+- `body` re-declares the same family/size/weight/line-height as `theme.json` (`style.css:112-117`).
+- `h1`, `h2`, `h3` rules in `style.css:119-138` duplicate `theme.json`'s element styles.
+
+### Font-face declarations
+- `assets/css/fonts.css` — six `@font-face` declarations for Proxima Nova at weights **300, 400, 600, 700, 800, 900**, all `font-display: swap`. So the site actually loads weights 800/900 even though only a handful of selectors use 800.
+
+### Mismatches between `theme.json` and CSS
+- Body family/size/weight is declared in **both** sources (redundant — one source of truth would be cleaner).
+- `h4`, `h5`, `h6` have **no global declaration** in `theme.json` *or* `style.css`. Each component invents its own treatment.
+- Palette has 1 color (`ink`) but the actual CSS file uses 280+ distinct hex values (see §14).
+
+---
+
+## 2. Headings
+
+### `h1`
+- Global (`theme.json`, `style.css:119`): `clamp(44px, 6vw, 96px)`, weight `700`, Noto Serif SemiCondensed, LH `1.05`.
+- Custom h1-like classes:
+  - `.noyona-shop-title.wp-block-query-title` — `clamp(48px, 6vw, 72px)`, **weight 800**, color `#E199A4`, LS `-0.04em` (`style.css:950`).
+  - `.noyona-search-hero__title` — `clamp(32px, 4vw, 48px)`, weight 700, color `#1f1f1f`, LS `-0.01em` (`style.css:1806`).
+  - `.noyona-account-login-title` — `clamp(1.8rem, 4vw, 2.2rem)`, 700, `#0f1728` (`style.css:522`).
+  - `.noyona-register-title` — `clamp(2rem, 4.5vw, 2.4rem)`, 700, `#0f1728` (`style.css:219`).
+  - `.noyona-cart-page-title` — `clamp(1.35rem, 3vw, 1.65rem)`, 700, `#111` (`noyona-cart.css:109`).
+  - `blocks/hero-banner/style.css:77` — `clamp(44px, 6vw, 96px)`, **weight 500**, Proxima Nova.
+  - `blocks/landing-feature-banner/style.css:68` — `clamp(44px, 6vw, 96px)`, 700.
+  - `blocks/coming-soon/style.css:50` — `clamp(36px, 6vw, 64px)`, **weight 600**.
+  - `blocks/faq-list/style.css:37` — `clamp(52px, 6vw, 96px)`, 700.
+  - `blocks/terms/style.css:23` — `clamp(55px, 6vw, 96px)`, **weight 600**.
+  - `blocks/not-found/style.css:50` — `96px` flat, 600.
+  - `blocks/inquiry/style.css:20` — `64px` flat, 700.
+- **Inconsistencies**: 4 distinct weights for h1 across blocks (500, 600, 700, 800). Sizes range from a fixed `64px` to `clamp(55px, 6vw, 96px)` to `clamp(1.8rem, 4vw, 2.2rem)`.
+
+### `h2`
+- Global: `clamp(32px, 4.2vw, 55px)`, 700, Proxima Nova, LH `1.1` (`style.css:126`).
+- Custom:
+  - `.noyona-account-hero__meta h2` — `--font-size--h-2`, 700, color `#1a1a1a` (`style.css:2827`).
+  - `.noyona-search-products-head__title` — `clamp(24px, 2.4vw, 32px)`, 700, `#1f1f1f`, LH `1.15` (`style.css:1904`).
+  - `.noyona-footer__newsletter h2` — `48px` flat, 700 (`footer.css:34`) **AND** later in same file overridden to `clamp(38px, 3.5vw, 56px)` (`footer.css:432`).
+  - `.wishlist-panel__title` — `24px` (`header.css:693`).
+  - `.nsl-v2-title` (store locator) — `clamp(32px, 5vw, 48px)` (`blocks/location/style.css:60`).
+  - `blocks/newsletter-strip/style.css:24` — `clamp(38px, 3.5vw, 56px)`, 700.
+  - `blocks/different-cards/style.css:25` — `var(--font-size--h-2)` fallback `clamp(32px,4.2vw,55px)`.
+  - `blocks/discover-face-banner/style.css:44` — `clamp(32px, 3.8vw, 55px)`, 700.
+  - `blocks/phone-video-reviews/style.css:44` — `clamp(2rem, 3.4vw, 3.4375rem)`, 700.
+  - `blocks/pdp-related-products/style.css:17` — `clamp(2rem, 4vw, 3.2rem)`, 700.
+  - `assets/css/single-product.css:1281, 1407` — `clamp(1.8rem, 3.2vw, 3rem)`, 700 (related products).
+  - `blocks/find-us/style.css:48` — `clamp(32px, 4vw, 48px)`, 700, LH `72px` (fixed px LH on a clamp size — odd).
+
+### `h3`
+- Global: `clamp(18px, 2vw, 24px)`, 600, Proxima Nova, LH `1.15` (`style.css:133`).
+- Overridden:
+  - `.noyona-account-addresses-card__head h3` — `--font-size--h-2`, 700 (`style.css:3820`).
+  - `.noyona-account-profile-card__head h3` — `--font-size--h-2`, 700, `#111` (`style.css:4209`).
+  - `.noyona-account-modal-title` — `--font-size--h-3`, 600, `#121212` (`style.css:4368`).
+  - `blocks/term/style.css`, `blocks/pdp-essentials/style.css:64`, multiple block h3s use their own clamps.
+
+### `h4`
+- **No global declaration.**
+- `.noyona-account-address-item h4` — `--font-size--h-3`, 600, `#111` (`style.css:3972`).
+- `.noyona-account-payment-item__meta h4` — `--font-size--body`, 600, `#111` (`style.css:4144`).
+- `.noyona-account-order-modal__ship h4` — `body * 0.9`, **700**, uppercase, LS `0.04em` (`style.css:3184`).
+- `.suggestions-column h4` (search-expand block) — `0.85rem`, 600 (implicit), uppercase, LS `0.04em` (`blocks/search-expand/style.css:463`).
+
+### `h5`
+- **No global declaration.**
+- `.noyona-shop-filter-section h5` — `clamp(24px, 1.8vw, 32px)`, 600, color `#E199A4` (`style.css:1054`).
+- `.noyona-product-search-page .noyona-shop-filter-section h5` — `18px`, 600, `#E199A4` (`style.css:2099`) — **scoped override of the same selector**.
+- `.noyona-account-order-modal__item-meta h5` — `body * 0.92`, 700, `#1f1f1f` (`style.css:4330`).
+- Lots of inline `<h5>` in templates (filter section labels) — see §15.
+
+### `h6`
+- No rule found anywhere. Never emitted by markup either.
+
+### Page-title-like classes (treated as h1 visually)
+| Selector | File:Line | Size | Weight | Color |
+|---|---|---|---|---|
+| `.noyona-shop-title.wp-block-query-title` | `style.css:950` | `clamp(48px, 6vw, 72px)` | **800** | `#E199A4` |
+| `.noyona-search-hero__title` | `style.css:1806` | `clamp(32px, 4vw, 48px)` | 700 | `#1f1f1f` |
+| `.noyona-account-login-title` | `style.css:522` | `clamp(1.8rem, 4vw, 2.2rem)` | 700 | `#0f1728` |
+| `.noyona-register-title` | `style.css:219` | `clamp(2rem, 4.5vw, 2.4rem)` | 700 | `#0f1728` |
+| `.noyona-cart-page-title` | `noyona-cart.css:109` | `clamp(1.35rem, 3vw, 1.65rem)` | 700 | `#111` |
+| `.noyona-pay-hero__title` (checkout) | `noyona-checkout.css` ~hero | varies | 700 | — |
+
+> Five distinct page-title treatments for what is conceptually the same role.
+
+---
+
+## 3. Body / Paragraph Copy
+
+| Selector | File:Line | Size | Color |
+|---|---|---|---|
+| `body` | `style.css:112-117` | `clamp(16px, 1.4vw, 20px)` | inherits `#333` |
+| `.noyona-account-page` | `style.css:2726` | `var(--font-size--body)` | `#333` |
+| `.noyona-account-hero__meta p` | `style.css:2836` | `var(--font-size--body)` | `#6f6f6f` |
+| `.noyona-account-profile-card__head p` | `style.css:4218` | `var(--font-size--body)` | `#6e6e6e` |
+| `.noyona-account-payment-item__meta p` | `style.css:4152` | `body * 0.78` | `#1f1f1f` |
+| `.noyona-account-address-item__line` | `style.css:3981` | `var(--font-size--body)` | `#1f1f1f` |
+| Search grid excerpt | `style.css:2216` | `13px` | `#6b5a60` |
+| Shop grid excerpt | `style.css:1397` | `13px` | `#666` |
+| Shop list-view excerpt | `style.css:1531` | `clamp(13px, 1vw, 17px)` | `#555` |
+| PDP short description | `single-product.css:276` | `0.9375rem` | `#444` |
+| PDP tab body | `single-product.css:91` | `0.9375rem` | (inherits) |
+| Related products excerpt | `single-product.css:1335` | `clamp(0.83rem, 1.05vw, 0.98rem)` | `#646b74` |
+
+### Helper / hint / small print
+`.noyona-register-subtitle` (`0.95rem`/`#6c7891`), `.noyona-account-login-intro` (`0.94rem`/`#6c7891`), `.noyona-lost-password-copy` (`0.94rem`/`#6c7891`), `.noyona-account-hero__upload-notes` (`body * 0.64`/`#8b8b8b`), `.noyona-account-modal-form small` (`body * 0.68`/`#727d8b`), `.noyona-pdp-wishlist-message` (`0.75rem`/`#5e4a51`), `.search-inline-suggestions__status` (`0.82rem`/`#8c6870`).
+
+> Helper text uses **6 different sizes** (`0.62`–`0.95rem` equivalents) and **9 different shades of gray** across the theme.
+
+---
+
+## 4. Navigation & Header
+
+| Selector | File:Line | Size | Weight | Letter-spacing | Color |
+|---|---|---|---|---|---|
+| `.site-logo-text` | `header.css:196` | `clamp(20px, 2.25vw, 44px)` | 700 | — | `#E199A4` |
+| `.nav-link` | `header.css:288` | `clamp(16px, 2vw, 20px)` | 600 | **`-5%`** (invalid) | `#000` |
+| `.nav-link:hover/.is-active` | `header.css:303` | — | — | — | `#E199A4` |
+| `.dropdown-menu li a` | `header.css:370` | `clamp(18px, 1.4vw, 20px)` | 600 | **`-5%`** (invalid) | `#333` |
+| Mobile nav `.nav-link` | `header.css:1609` | `1.1rem` | (inherits) | — | (inherits) |
+| Mobile dropdown link | `header.css:1649` | `1rem` | — | — | — |
+| `.header-account-menu a` | `header.css:526` | `14px` | — | — | `#222` |
+| `.noyona-brand-strip-fallback__item` | `header.css:43` | `16px` | 500 | `0.03em` | `#000` (uppercase) |
+| `.drawer-title` | `header.css:1721` | `0.85rem` | — | `0.08em` | `#777` (uppercase) |
+| `.search-inline-input::placeholder` | `blocks/search-expand/style.css:39` | — | — | — | `#d9a2ad` |
+| `.search-inline-suggestion__name` | search-expand:169 | `0.86rem` | 700 | — | — |
+| `.search-inline-suggestion__price` | search-expand:179 | `0.78rem` | 700 | — | `#e199a4` |
+| `.search-expand-trigger` | search-expand:283 | `1rem` | — | — | `#d9a2ad` |
+
+> **The `letter-spacing: -5%` at `header.css:301` and `header.css:378` is invalid CSS** (percentages aren't valid for letter-spacing; it's silently ignored). Should be `-0.05em`.
+
+---
+
+## 5. Buttons & CTAs
+
+| Group | Selector(s) | Size | Weight | Background | Color | Border radius | Hover |
+|---|---|---|---|---|---|---|---|
+| Auth primary | `.noyona-register-submit`, `.woocommerce-form-login__submit`, `.noyona-lost-password-submit` | `1rem`/`0.95rem` | 700 | `#e199a4` | `#fff` | `999px` | `filter: brightness(0.97)` |
+| Auth Google | `.noyona-register-google`, `.noyona-login-google-btn` | `0.95rem` | 700 | `#fff` border `#d9e2ef` | `#111827` | `999px` | — |
+| Buy Now (card) | `.noyona-buy-now-btn` (card-footer) | `13px` | 700 uppercase | `#e199a4` | `#fff` | `14px` | `#cc848f` |
+| Buy Now (generic) | `.noyona-buy-now-btn` (global) | `14px` | 700 uppercase | `#e199a4` | `#fff !important` | `14px` | `#cc848f` |
+| Buy Now (list view) | `.noyona-shop-buy-now` | `14px` | 700 | `#E199A4` | `#fff` | `999px` | `#d30b57` |
+| PDP Buy Now | `.noyona-pdp-buy-now` | (inherit) | 700 | transparent border `#E199A4` | `#E199A4` | `999px` | `rgba(225,26,99,0.06)` |
+| Single add-to-cart | `.single_add_to_cart_button` | (inherit) | 700 | `#f4a9b8` | `#fff` | `999px` | filter |
+| Show More | `.noyona-landing-show-more-btn` | `16px` | 600 | `#E199A4` | `#fff` | `999px` | inverted (white bg) |
+| Search Again | `.noyona-search-again-form__submit` | `0.88rem` | 700 | `#E199A4` | `#fff` | `999px` | `#cc848f` |
+| Apply Filters | `.noyona-search-filters__apply` | `0.85rem` | 700 | `#E199A4` | `#fff` | `999px` | `#cc848f` |
+| Reset | `.noyona-search-filters__reset` | `0.85rem` | 600 | — | `#9c6470` | — | `#E199A4` |
+| Filters toggle | `.noyona-search-filter-toggle` | `0.88rem` | 700 | `#fff` border `#f0cfd7` | `#E199A4` | `999px` | bg pink when open |
+| Account primary | `.noyona-account-btn--primary` | `--body` | 600 | gradient `#e8a4b2 → #dd93a2` | `#fff !important` | `999px` | `#df95a5 → #d57f91` |
+| Account ghost | `.noyona-account-btn--ghost` | `--body` | 600 | `#fff` border `#edbcc5` | `#dd93a2 !important` | `999px` | bg `#fff5f8`/`#ce7f90` |
+| Mini-cart checkout | `.wc-block-mini-cart__footer-checkout` | `font-size:0` (icon-only) | 600 | `#E199A4` | `#fff` | `26px !important` | — |
+| Footer button (original) | `.noyona-footer__btn` | `clamp(16px,1.2vw,18px)` | 600 | `#333333` | `#fff` | `16px` | filter |
+| Footer button (redesign override) | `.noyona-footer__btn` | `0.9rem` | (inh) | `#fff` | `#E199A4` | `10px` | — |
+
+> **Five different "darken on hover" values** for the same conceptual primary CTA: `#cc848f`, `#d30b57`, `#cc0a53`, `#c70a52`, `filter:brightness(0.97)`. Border-radius for CTAs varies between `10px`, `14px`, `16px`, `26px`, `999px`.
+
+---
+
+## 6. Badges / Pills / Labels
+
+| Selector | File:Line | Size | Weight | Background | Color |
+|---|---|---|---|---|---|
+| `.noyona-search-pill` | `style.css:1922` | `14px` | 600 | `#fff` border `#ebebeb` | `#1f1f1f` |
+| `.noyona-search-pill.is-active` | `style.css:1946` | — | — | `#E199A4` | `#fff` |
+| `.noyona-search-pill.is-disabled` | `style.css:1953` | — | — | `#f5f5f5` | `#bdbdbd` |
+| `.noyona-shop-category-all` etc. | `style.css:971` | `14px` | 600 | `#fff` border `#ebebeb` | `#111` |
+| `.noyona-pdp-best-seller-badge` | `single-product.css:1544` | `0.78rem` | 700 uppercase, LS `0.06em` | `#E199A4` | `#fff` |
+| `.noyona-account-orders-table__order` | `style.css:2993` | `body*0.62` | 600 LS `0.06em` | (table) | `#e39cab` |
+| `.noyona-account-order-status--completed` | `style.css:3046` | `body*0.62` | 600 | `#ecfaf1` border `#ccebd8` | `#24814f` |
+| `.noyona-account-order-status--cancelled/failed` | 3052 | — | — | `#fff1f1` border `#f3cccc` | `#bb4040` |
+| `.noyona-account-order-status--processing/to-ship` | 3059/3065 | — | — | `#fff7e9` border `#f4ddb4` | `#9a6a14` |
+| `.noyona-account-order-status--on-hold` | 3071 | — | — | `#f5f2ff` border `#ddd3ff` | `#6350a5` |
+| `.noyona-account-order-status--pending` | 3077 | — | — | `#f2f5ff` border `#d3defd` | `#3e5fa9` |
+| `.noyona-account-order-status--refunded` | 3083 | — | — | `#f3f3f3` border `#dbdbdb` | `#5d5d5d` |
+| `.noyona-account-order-status--to-receive/at-hub/out-for-delivery` | 3089 | — | — | `#e9f6ff` border `#cae4f8` | `#2b6d99` |
+| `.noyona-account-wishlist-status.is-in-stock` | 3704 | `body*0.64` | 700 | `#ecfaf1` | `#24814f` |
+| `.noyona-account-wishlist-status.is-out-of-stock` | 3710 | — | — | `#fff1f2` | `#9f3f4d` |
+| `.noyona-account-address-item__badge` | 3990 | `body*0.62` | 600 | `#fbe5ea` | `#d68698` |
+| `.noyona-account-card-brand` | 4190 | `body*0.62` | 600 | `#f2f4ff` | `#4d5ea7` |
+| `.noyona-pdp-variation__field-current` / `__shade-current` | single-product.css:431/456 | `0.875rem` | 700 | `#FDF2F8` | `#E199A4` |
+| `.noyona-pdp-variation__field-label` / `__shade-label` | 423/448 | `0.8125rem` | 700 uppercase LS `0.04em` | — | `#333` |
+| `.noyona-pdp-stock-badge` (block) | `blocks/pdp-stock-shipping/style.css:30` | `0.7rem` | 700 uppercase LS `0.02em` | — | — |
+| `.search-inline-suggestion__stock` | search-expand:185 | `0.7rem` | 600 | — | variants: `#24814f`, `#9f3f4d`, `#777` |
+
+---
+
+## 7. Forms
+
+### Inputs
+| Selector | Size | Background | Border | Radius |
+|---|---|---|---|---|
+| `.noyona-register-field input` (`style.css:276`) | `0.96rem` | `#f8fafc` | `1.5px #e2e8f0` | `14px` |
+| `.woocommerce-form-login .input-text` (`style.css:546`) | `0.96rem` | `#f8fafc` | `1.5px #e2e8f0` | `14px` |
+| `.noyona-account-field input` (`style.css:4256`) | `var(--body)` | `#f5f5f5` | `1px #e3e3e3` | `999px` |
+| `.noyona-account-address-form input/select` (`3881`) | `body * 0.8` | `#f7f7f7` | `1px #ececec` | `10px` |
+| `.noyona-account-modal-form input/select` (`4415`) | `body * 0.8` | `#fafcfe` | `1px #e9eef4` | `10px` |
+| `.noyona-shop-filter-price-input input` (`1123`) | `16px` | transparent | — | inherits pill |
+| Search variant input (`2085`) | `14px` | — | — | — |
+| `.noyona-search-again-form__input` (`1851`) | `0.95rem` | transparent | — | inherits 999px |
+| `.noyona-pdp-variation__dropdown select` (`single-product.css:549`) | `clamp(14px, 1.2vw, 16px)` | — | — | — |
+
+> **Form inputs use 5 different background colors** (`#f5f5f5`, `#f7f7f7`, `#f8fafc`, `#fafcfe`, transparent), **4 different border colors**, and **3 different radii** (`10px`, `14px`, `999px`).
+
+### Labels
+- Auth labels (`style.css:268`, `538`): `0.9rem`, 700, `#101828`.
+- Account modal label: `body * 0.78`, 600, `#343a44`.
+- Account address label: `body * 0.72`, 600, `#1f1f1f`.
+- Account field label: `var(--body)`, 600, `#555`.
+- Filter section label: `clamp(16px, 1.2vw, 18px)`, `#222`.
+- PDP variation label: `0.8125rem`, 700, uppercase, `#333`.
+
+### Placeholders
+`#a0a8b2` (register), `#aab5c6` (account modal), `#c8949f` (search-again), `#d9a2ad` (header search), `rgba(0,0,0,0.55)` (footer newsletter).
+
+### Validation notices (5 different green/red palettes)
+| Pair | Success bg/text | Error bg/text |
+|---|---|---|
+| `.noyona-register-message` | `#eef9f1` / `#245e3c` | `#fff1f0` / `#a32a2a` |
+| `.noyona-account-wishlist-notice` | `#edf9f1` / `#256743` | `#fff1f2` / `#9f3f4d` |
+| `.noyona-account-modal-notice` | `#ecfaf1` / `#236744` | `#fff1f1` / `#a23232` |
+
+---
+
+## 8. Product Card Typography
+
+| Context | Title | Excerpt | Price | Button |
+|---|---|---|---|---|
+| **Shop grid** (`style.css:1388/97/1418`) | `16px`/700/`#111`/LH 1.3 | `13px`/`#666`/LH 1.4 | `15px`/700/`#111` | `13px`/700/uppercase |
+| **Shop list view** (`style.css:1520/31/53`) | `clamp(18-24px)`/`LH 1.05` | `clamp(13-17px)`/`#555`/LH 1.26 | `clamp(20-30px)`/**800** | `14px`/700 |
+| **Search grid** (`style.css:2200/16`) | `clamp(16-18px)`/700/`#1f1f1f`/LH 1.25 | `13px`/`#6b5a60`/LH 1.45 | (inherits) | (uses card buttons) |
+| **PDP related** (`single-product.css:1328/35/42`) | `clamp(1-1.35rem)`/700 | `clamp(0.83-0.98rem)`/`#646b74` | `clamp(1.05-1.35rem)`/700/`#111` | — |
+| **PDP related (block)** (`pdp-related-products/style.css:80`) | `clamp(1-1.35rem)`/700 | — | `clamp(1.05-1.45rem)`/700 | — |
+| **Discover carousel** (`discover-posts-carousel/style.css`) | own clamp | — | — | — |
+| **Product slide** (`blocks/product-slide/style.css`) | own clamp | — | — | — |
+| **Product highlight** (`blocks/product-highlight/style.css`) | own clamp | — | — | — |
+
+> Five+ separate "product card" treatments, each with its own scale.
+
+---
+
+## 9. PDP Typography
+
+`assets/css/single-product.css`:
+
+| Selector | Line | Size | Notes |
+|---|---|---|---|
+| `.single-product .wp-block-post-title` | 96 | `clamp(1.5rem, 2.5vw, 2rem)` | 700 |
+| `.wc-block-components-product-price` | 230 | `clamp(1.35rem, 2.2vw, 1.85rem)` | 700, color `#E199A4` |
+| `del` (sale strikethrough) | 260 | `0.95rem` | 500, color `#999` |
+| `.wp-block-post-excerpt` (short desc) | 276 | `0.9375rem` | LH 1.55, color `#444` |
+| `.noyona-pdp-tabs__panel-inner` | 91 | `0.9375rem` | LH 1.65 |
+| Tab list items | 1249 | `0.875rem` | LH 1.45, color `#555` |
+| `.wc-block-components-product-rating__average` | 194 | `0.9rem` | 700, `#222` |
+| Review link | 201 | `0.8125rem` | 600 |
+| `.noyona-pdp-reviews-link` | 207 | `0.8125rem` | 500, `#6f7785` |
+| Variation labels | 423, 448 | `0.8125rem` | 700, uppercase, LS `0.04em`, `#333` |
+| Variation chips | 431, 456 | `0.875rem` | 700, `#E199A4` bg `#FDF2F8` |
+| Quantity input | 629 | `1.75rem` | 700, `#222` |
+| Quantity pseudo "Quantity" | 619 | `1.75rem` | 700, LS `-0.02em`, `#222` |
+| `.noyona-pdp-best-seller-badge` | 1544 | `0.78rem` | 700, uppercase, LS `0.06em`, white on `#E199A4` |
+| Related products h2 | 1281, 1407 | `clamp(1.8rem, 3.2vw, 3rem)` | 700 |
+| PDP-essentials block title | `pdp-essentials/style.css:14` | `clamp(2rem, 5vw, 3rem)` | 700 |
+| PDP-related block h2 | `pdp-related-products/style.css:17` | `clamp(2rem, 4vw, 3.2rem)` | 700 |
+| Trust badges | `pdp-trust-badges/style.css:25` | `0.75rem` / `0.9rem` | 600 |
+| Stock/shipping label | `pdp-stock-shipping/style.css:7-30` | `0.8125rem` / `0.7rem` | — |
+| Social proof | `pdp-social-proof/style.css:13` | `0.8125rem` | 600 |
+
+> "Section heading" on PDP exists in **3 sizes** depending on which block is rendering it (`2rem→3rem`, `2rem→3.2rem`, `1.8rem→3rem`).
+
+---
+
+## 10. Account Page Typography
+
+All in `style.css`. The account module is the **most fragmented section** of the audit. Notable patterns:
+
+- **Sizing uses ~15 different multipliers** of `--font-size--body`: `0.62`, `0.64`, `0.66`, `0.68`, `0.72`, `0.74`, `0.75`, `0.76`, `0.78`, `0.8`, `0.82`, `0.85`, `0.9`, `0.92`, `1.02`, `1.06`.
+- **h3 elements are visually h2s** in two places (`__addresses-card__head h3` line 3820, `__profile-card__head h3` line 4209 — both `--h-2` size).
+- **Heading colors**: `#1a1a1a` (hero h2), `#111` (multiple), `#121212` (modal title), `#1d1d1d`, `#1f1f1f`, `#181818`, `#212121`, `#0f1728`, `#101828` — at least **9 distinct near-blacks**.
+- **Letter-spacing on chip-style labels**: `0.04em`, `0.05em`, `0.06em` — 3 values for the same role.
+- **Pink accent colors used as text**: `#e39cab`, `#d68698`, `#d78d9c`, `#dc8ea0`, `#d6909f`, `#ce7f90`, `#c8778b` — 7 variants where one would do.
+- **`!important` markers**: `.noyona-account-btn--primary { color: #fff !important }`, `.noyona-account-btn--ghost { color: #dd93a2 !important }`, many `text-decoration: none !important` in modal forms.
+
+---
+
+## 11. Search Results Page Typography
+
+All scoped under `.noyona-product-search-page` in `style.css`. Already heavily worked on this session.
+
+| Selector | Line | Size | Weight | Color |
+|---|---|---|---|---|
+| `.noyona-search-hero__title` | 1806 | `clamp(32px, 4vw, 48px)` | 700 | `#1f1f1f` |
+| `.noyona-search-hero__count` | 1816 | `clamp(15px, 1.1vw, 17px)` | 500 | `#6b5a60` |
+| `.noyona-search-again-form__input` | 1851 | `0.95rem` | 500 | `#1f1f1f` |
+| `.noyona-search-again-form__submit` | 1870 | `0.88rem` | 700 | `#fff`/`#E199A4` bg |
+| `.noyona-search-products-head__title` | 1904 | `clamp(24px, 2.4vw, 32px)` | 700 | `#1f1f1f` |
+| `.noyona-search-pill` | 1922 | `14px` | 600 | `#1f1f1f` |
+| `.noyona-search-count` | 2155 | `15px` | 700 | `#E199A4` |
+| Grid title | 2200 | `clamp(16px, 1.2vw, 18px)` | 700 | `#1f1f1f` |
+| Grid excerpt | 2216 | `13px` | (inherits) | `#6b5a60` |
+| Pagination num | 2262 | `16px` | 700 | `#E199A4` |
+| Filter toggle | 2346 | `0.88rem` | 700 | `#E199A4` |
+| Filter section h5 | 2099 | `18px` | 600 | `#E199A4` |
+| Filter section label | 2107 | `15px` | (inh) | `#222` |
+| Apply Filters | 1994 | `0.85rem` | 700 | `#fff`/`#E199A4` |
+| Reset | 2018 | `0.85rem` | 600 | `#9c6470` |
+
+> Internally consistent within the search page, but uses both `px` and `rem` units in the same block.
+
+---
+
+## 12. Location / Store Locator Typography (`blocks/location/style.css`)
+
+| Selector | Line | Size | Color |
+|---|---|---|---|
+| `.nsl-v2-breadcrumbs` | 20 | `16px` | `#525252`, LS `-0.8px` |
+| `.nsl-v2-breadcrumbs__current` | 44 | (inh) | `#E5989B`, 600 |
+| `.nsl-v2-title` | 60 | `clamp(32px, 5vw, 48px)` | (inh) |
+| `.nsl-v2-title__accent` | 66 | (inh) | `#E199A4` |
+| `.nsl-v2-subtitle` | 70 | `15px` | `#666` |
+| Search input | 149 | `26px` | (LH 42px) |
+| Numerical highlight | 554 | `34px` | 700 |
+| Chip label | 721 | `12px` | 700, uppercase, LS `0.02em` |
+| Map marker labels | (script.js inline) | — | `#0a84ff`, `#22a06b` |
+
+Other texts span `13px`–`18px`, mix of 400/600/700 — internally OK but uses **different brand pinks**: `#E5989B`, `#E199A4`. The map JS injects literal `#0a84ff` / `#22a06b` outside any palette.
+
+---
+
+## 13. Footer Typography (`assets/css/footer.css`)
+
+The file contains **two overlapping rule sets** for the same selectors (original at lines 3-308, "redesign" override at 405-765):
+
+| Selector | Original (line) | Redesign override (line) |
+|---|---|---|
+| `.noyona-footer__newsletter h2` | `48px` / 700 / LH 1.1 (34) | `clamp(38px, 3.5vw, 56px)` / 700 / LH 1.05 (432) |
+| `.noyona-footer__newsletter p` | `clamp(16px,1.2vw,18px)` / opacity 0.85 (88) | `1rem` / opacity 0.86 (444) |
+| `.noyona-footer__btn` | size `clamp(16px,1.2vw,18px)` / `#fff`/`#333` / radius `16px` (67) | `0.9rem` / `#E199A4`/`#fff` / radius `10px` (468) |
+| `.noyona-footer__col-title` | 700 / `clamp(18px,1.4vw,24px)` / uppercase / LS `-1.2px` (111) | same (506) |
+| `.noyona-footer__nav a` | `--body` / 500 / LS `0.02em` (132) | `clamp(16px,1.4vw,20px)` / 400 / **LS `-1px`** / uppercase (513) |
+| `.noyona-footer__copyright` | `--body` / 500 / `#000` opacity 0.9 (192) | `0.95rem` (583) |
+| Social tooltip | `0.75rem` / 600 (231) | `12px` / 600 (659) |
+
+> Newsletter h2 also injects `font-family: Georgia` for the italic word (`footer.css:439`), the **only Georgia reference in the whole theme**.
+
+---
+
+## 14. Color & Background Consistency
+
+### Brand pink clustering
+**One canonical brand pink** is `#E199A4`. But the audit found **at least 35 distinct pink variants** used across the theme. Most-confusable groups:
+
+| Cluster | Variants found | Where they appear |
+|---|---|---|
+| Brand pink | `#E199A4`, `#e199a4` (case) | most CTAs, headings, pills |
+| Slightly lighter brand | `#e5a0ac`, `#e7999c`, `#e5989b` | filter-price title, sticky header old, location breadcrumb |
+| Account pink | `#e8a4b2`, `#dd93a2`, `#df95a5`, `#ce7f90`, `#c8778b` | account ghost btn, gradients |
+| Account muted pink (badge/pricing) | `#e39cab`, `#d68698`, `#d78d9c`, `#dc8ea0`, `#d6909f` | wishlist/orders/badges |
+| Hover-darker pink | `#cc848f`, `#df95a5`, `filter:brightness(0.97)` | various CTAs |
+| Raspberry/dark pink | `#d30b57`, `#c70a52`, `#cc0a53`, `#7a0038`, `#651339` | list-view hover, footer social-bg dark, copyright |
+| Hot pink (accent) | `#E11A63`, `#e11a63`, `#e91e63`, `#ff4d6d`, `#ff4b81`, `#ff1f78`, `#ff2b7b`, `#ff2f57`, `#ff0050` | PDP wishlist active, search/view-all hover, product-gatherer/tiktok |
+| Footer-bg pink | `#EBAAAC`, `#EFB5BE` | `--footer-bg`, `.noyona-footer` (different ones in same module) |
+| Light pink panels | `#FFD9E1`, `#FDF2F8`, `#fef0f2`, `#fdeef2`, `#fdf6f8`, `#fff5f8`, `#fff6f8`, `#fff7f8`, `#fff8fa`, `#fff8fb`, `#fff9fb`, `#fffafd`, `#fbe5ea`, `#fbe3ec`, `#fce4e6`, `#fde5ea` | account hovers, soft callouts |
+
+### Near-black text colors
+At least **9 distinct hexes** used for "dark text" with no clear rule: `#000`, `#111`, `#121212`, `#1a1a1a`, `#1b1b1b`, `#1d1d1d`, `#1f1f1f`, `#181818`, `#212121`, `#222`, `#253042`, `#333`, `#0f1728`, `#101828`, `#202938`, `#2a2a2a`, `#2a3038`, `#2b2226`, `#2b2f38`, `#343a44`.
+
+### Mid grays
+~30 distinct grays between `#444` and `#9a7180` (notably: `#525252`, `#555`, `#5a5a5a`, `#5d5d5d`, `#5e4a51`, `#6a6a6a`, `#6b5a60`, `#6c7891`, `#6e6e6e`, `#6f6f6f`, `#6f7d95`, `#6f7785`, `#71809a`, `#727d8b`, `#737373`, `#747474`, `#777`, `#7a8597`, `#8a8a8a`, `#8b8b8b`, `#8c6870`, `#8da1b5`, `#9a7d6a`, `#999`).
+
+### Greens (success / in-stock)
+`#24814f` (most), `#256743`, `#245e3c`, `#236744`, `#1a7a3e`, `#0a9d53`, `#0b8043`, `#0f8d4d`, `#16b364`, `#177d3d`, `#21c45a`, `#2dbf73`, `#2ea766`, `#2ecc71`, `#2e7d32`, `#3f7e46`, `#46b86e`, `#4caf50`, `#66bb6a`. **~19 variants of "success green"**.
+
+### Reds / errors
+`#9f3f4d`, `#a23232`, `#a32a2a`, `#bb4040`, `#c0392b`, `#c62828`, `#f44336`, `#f97373` — 8 reds. Background pairings `#fff1f0`, `#fff1f1`, `#fff1f2` — 3 near-identical light reds.
+
+### Information blues
+~25 distinct blues (`#1565c0`, `#1877F2`, `#1a6bb5`, `#1f238d`, `#1f2933`, `#1f2937`, `#285aeb`, `#2b6d99`, `#2d3b5f`, `#3e5fa9`, `#3f97f0`, `#4285f4`, `#4a9ede`, `#4d5ea7`, `#6350a5`, `#9cb4da`, etc.). Mostly status chips and social brand colors — but the order-status family alone uses `#3e5fa9`, `#2b6d99`, `#6350a5`, `#4d5ea7` for very similar UI.
+
+---
+
+## 15. Inline Styles & Hardcoded Values in Markup
+
+### Inline `style=""` in HTML templates
+- `.noyona-shop-view-label` inline `color: #E199A4; font-weight: 600; font-size: 14px;` duplicated across **7 template files** (`page-eyes.html:90`, `page-body.html:89`, `page-face.html:90`, `page-hair.html:91`, `page-lips.html:90`, `archive-product.html:116`, `taxonomy-product_cat.html:117`).
+- "Coming Soon" / "No products found" placeholder `<p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">` appears in **5 template files + 3 PHP echoes** (8 sites, identical markup): `page-eyes.html:134`, `page-body.html:133`, `page-face.html:159`, `page-hair.html:135`, `page-lips.html:134`; PHP at `inc/woocommerce-general.php:144, 146, 260`.
+
+### Inline `style=""` in PHP
+- `inc/woocommerce-shipping.php:361, 462, 493` — admin styles (`#a00`, `#f6f7f7`, `#dcdcde`, `font-size:12px`, `font-size:13px`).
+- `inc/woocommerce-checkout.php:1881-1909` — inline `<style>` block emits `color: #1f2933`, `font-weight: 600`, `letter-spacing: 0.02em`.
+- `inc/shortcodes.php:3491-3515` — invoice HTML: `<body style="font-family:Arial,sans-serif;color:#1d1d1d;line-height:1.45">` and inline `<th>/<td>` styles. **Arial** is the only place that family appears.
+- `inc/admin.php:13-23` — admin column widths (no typography).
+
+### Block-level typography in HTML templates (WP block JSON)
+- Repeated per shop page (×7 template files): `wp:post-title {"level":3,"fontSize":"medium","style":{"typography":{"lineHeight":"1.25"}}}`, `wp:woocommerce/product-price {"fontSize":"small"}`, `wp:woocommerce/product-button {"fontSize":"small"}`.
+- `templates/single-product.html:26` — `wp:woocommerce/product-price {"fontSize":"large"}`.
+- `parts/grouped-product-add-to-cart-with-options.html:18, 22` — `fontWeight:400, fontStyle:"normal"`.
+- `parts/header.html:3-27` — `wp:noyona/brand-carousel {"brandFontSize":"16px","brandFontWeight":"500","brandFontColor":"#000","backgroundColor":"#EFB5BE"}`.
+
+### Hardcoded colors in PHP/HTML markup
+| Hex | Sites in markup |
+|---|---|
+| `#E199A4` | 10+ (view-label ×7, trust-badge fallback, product-slide primaryBg/cartBg ×4) |
+| `#EFB5BE` | 3 (page-home values-strip, brand-carousel bg, values-strip default) |
+| `#E9A3AD` | 3 (page-face benefits-strip, page-lips benefits-strip, benefits-strip default) |
+| `#E8BCC3` | 1 (newsletter-strip default) |
+| `#f7d0d8` | 2 (hero-banner default + fallback) |
+| `#000`, `#fff`, `#333`, `#eee`, `#ccc`, `#f9f9f9`, `#ececec`, `#d8d8d8`, `#1d1d1d`, `#1f2933` | scattered in blocks/render.php and PHP echoes |
+| `#1a7a3e`, `#1d4ed8`, `#c2410c` | `blocks/pdp-trust-badges/render.php:18,23,28` defaults |
+| `#e06c99`, `#f58a8a`, `#b54f7c` | `blocks/color-swatches/render.php:10-12` swatch defaults |
+| `#0a84ff`, `#22a06b` | `blocks/location/script.js:647,649,686,699,709` map polyline colors |
+| `#333` (SVG fill/stroke) | `blocks/contact/render.php:174,207`, `blocks/contact/script.js:249` |
+
+### Block render.php — CSS variable injection
+- `blocks/brand-carousel/render.php` accepts `brandFontSize`, `brandFontWeight`, `brandFontColor` block attributes and emits them as inline `--brand-font-*` CSS variables. This is the **only** block where typography is parameterised through the block editor.
+
+### Headings emitted from PHP
+- `inc/helpers.php` emits `<h1 class="noyona-search-hero__title">` (667), `<h2 class="noyona-search-products-head__title">` (689), `<h5>` (719, 731), `<h3 class="wc-block-product-title">` (376).
+- `inc/shortcodes.php` emits `<h2 class="noyona-register-title">` (334), `<h2 class="pg-title">` (96), `<h3 class="pg-product-title">` (171), `<h2>` (1934), `<h3>` (8 sites), `<h4>` (12 sites — `.noyona-account-modal-title` and bare), `<h5>` (2291), `<h1>` (3509 in invoice).
+- ~40 blocks emit headings (h1/h2/h3) — each with its own class.
+
+---
+
+## 16. Top 10 Biggest Typography/Design Inconsistencies
+
+1. **`#E199A4` has 35+ near-duplicate variants** — most painful issue. Brand pink, footer pink, account pink, hover pink, raspberry, hot-pink, soft-pink panels — at least 35 hexes do the same job. Multiple files use *different* hexes for the *same UI role* (footer bg, hover state, accent text).
+2. **9+ near-black text colors** (`#000`, `#111`, `#1a1a1a`, `#1b1b1b`, `#1d1d1d`, `#1f1f1f`, `#212121`, `#222`, `#333`, `#0f1728`, `#101828`, `#121212`). No rule for when to use which.
+3. **`letter-spacing: -5%` is invalid CSS** and silently dropped — `header.css:301` and `header.css:378`. Nav links are missing their intended tightening.
+4. **No global `h4`/`h5`/`h6` declaration** — every component invents its own. Result: `h5` is `clamp(24px,1.8vw,32px)` in one place and `18px` in another (same selector, scoped twice).
+5. **Account section uses ~15 distinct `calc(--body * N)` multipliers** for sizing — there is no scale, just per-component arithmetic. Two `<h3>` elements are styled at h2 size.
+6. **Five different border-radii for CTAs** (`10px`, `14px`, `16px`, `26px`, `999px`) — pill, rounded, half-rounded all coexist.
+7. **`footer.css` defines the same selectors twice** (original 3-308 + redesign 405-765). Newsletter h2 has two sizes; nav has two letter-spacings (`0.02em` vs `-1px`); button has two backgrounds, colors, and radii.
+8. **Three button "hover" patterns** for the primary pink CTA — `#cc848f`, `#d30b57`/`#c70a52`, and `filter:brightness(0.97)` — all on what is the same conceptual button.
+9. **Five different fallback chains for "Proxima Nova"** across files. `header.css` even chains the literal name AND the WP CSS variable. `inc/shortcodes.php:3508` ships Arial in invoices.
+10. **Two heading weights diverge from the global 700 standard**: `.noyona-shop-title.wp-block-query-title` uses **800** (`style.css:955`), `.hero-banner` h1 uses **500** (`blocks/hero-banner/style.css:78,105`), `coming-soon`/`terms` h1 use **600**. Combined with the 6 `@font-face` weights loaded (300/400/600/700/800/900), the site is paying for fonts it barely uses.
+
+> Honorable mentions: `font-size:0` icon-only hacks in mini-cart/PDP, `!important` color overrides in account buttons and mini-cart drawer, the inline `style="color:#E199A4;font-weight:600;font-size:14px"` on `.noyona-shop-view-label` duplicated across 7 templates instead of styling via CSS.
+
+---
+
+## 17. Recommended Typography Scale
+
+Proposed token set. Token names use slugs that map cleanly to `theme.json` and CSS custom properties.
+
+### Type scale
+
+| Token | Role | Desktop | Mobile | Weight | LH | LS | Family |
+|---|---|---|---|---|---|---|---|
+| `display` | Page hero (home banner, FAQ landing) | `clamp(56px, 6vw, 96px)` | `48px` | 700 | 1.05 | -0.02em | Proxima Nova |
+| `h1` | Standard page title | `clamp(40px, 4.5vw, 64px)` | `36px` | 700 | 1.1 | -0.01em | Proxima Nova |
+| `h2` | Section title | `clamp(28px, 3.2vw, 40px)` | `26px` | 700 | 1.15 | -0.005em | Proxima Nova |
+| `h3` | Card/sub-section title | `clamp(20px, 2vw, 24px)` | `19px` | 600 | 1.2 | normal | Proxima Nova |
+| `h4` | Field group / mini section | `clamp(16px, 1.4vw, 18px)` | `16px` | 600 | 1.3 | normal | Proxima Nova |
+| `h5` | Form section header | `14px` | `14px` | 700 | 1.3 | 0.02em (uppercase) | Proxima Nova |
+| `body-lg` | Lead paragraph | `clamp(17px, 1.5vw, 19px)` | `16px` | 400 | 1.55 | normal | Proxima Nova |
+| `body` | Default copy | `clamp(15px, 1.2vw, 17px)` | `15px` | 400 | 1.55 | normal | Proxima Nova |
+| `body-sm` | Helper / note | `13px` | `13px` | 500 | 1.45 | normal | Proxima Nova |
+| `caption` | Meta, timestamps | `11px` | `11px` | 600 | 1.35 | 0.04em | Proxima Nova |
+| `button` | CTA label | `14px` | `14px` | 700 | 1 | 0.01em | Proxima Nova |
+| `button-lg` | Hero CTA | `16px` | `16px` | 700 | 1 | 0.01em | Proxima Nova |
+| `label` | Form labels | `13px` | `13px` | 600 | 1.3 | normal | Proxima Nova |
+| `badge` | Status chip, sale | `11px` | `11px` | 700 | 1 | 0.06em (uppercase) | Proxima Nova |
+
+> Drop the Noto Serif body usage — only `display` and possibly `h1` keep the serif if you want to retain the editorial feel of the current hero. Most h2-h5 should be sans for consistency.
+
+### Color tokens
+
+| Token | Value | Replaces |
+|---|---|---|
+| `--noyona-color-ink` | `#1f1f1f` | `#000`, `#111`, `#121212`, `#1a1a1a`, `#1b1b1b`, `#1d1d1d`, `#212121`, `#222`, `#333`, `#0f1728`, `#101828` |
+| `--noyona-color-ink-soft` | `#5a5a5a` | `#444`/`#474747`/`#4c4c4c`/`#555`/`#5d5d5d`/`#6a6a6a`/`#6f6f6f`/`#777` |
+| `--noyona-color-ink-muted` | `#8b8b8b` | `#8a8a8a`/`#8b8b8b`/`#999`/`#9a7180` |
+| `--noyona-color-brand` | `#E199A4` | every pink CTA, pill active, primary headline |
+| `--noyona-color-brand-soft` | `#FFE4EB` | account hovers, light pink panels |
+| `--noyona-color-brand-hover` | `#cc848f` | every CTA hover (replaces `#d30b57`, `#c70a52`, `#cc0a53`, `filter:brightness(0.97)`) |
+| `--noyona-color-brand-deep` | `#9d4e5f` | dark-pink text (reset link, error labels) |
+| `--noyona-color-surface` | `#ffffff` | card bg |
+| `--noyona-color-surface-alt` | `#f7f7f7` | input bg (replaces `#f5f5f5`, `#f8fafc`, `#fafcfe`) |
+| `--noyona-color-border` | `#ebebeb` | (replaces `#e2e8f0`, `#e3e3e3`, `#ececec`, `#e9eef4`) |
+| `--noyona-color-success` | `#1a7a3e` (text) / `#ecfaf1` (bg) | replaces all `#24814f`/`#236744`/`#245e3c`/`#256743` + matching bgs |
+| `--noyona-color-warning` | `#9a6a14` / `#fff7e9` | unify |
+| `--noyona-color-danger` | `#9f3f4d` / `#fff1f2` | replaces `#a23232`/`#a32a2a`/`#bb4040` + matching bgs |
+| `--noyona-color-info` | `#2b6d99` / `#e9f6ff` | unify status blues |
+
+### Spacing rhythm (typography-adjacent)
+Suggest standardising line heights to `1.1` (display/h1), `1.2` (h2/h3), `1.3` (h4/h5/labels), `1.45` (body-sm), `1.55` (body).
+
+---
+
+## 18. Recommended Implementation Plan (no edits yet)
+
+### Order of operations (low-risk → higher-risk)
+1. **Add the new tokens to `theme.json`** — extend `settings.color.palette` and `settings.typography.fontSizes` with the new slugs above. This is additive; nothing breaks because nothing yet references the new names. **Lowest risk.**
+2. **Define matching CSS custom properties in `style.css` `:root`** — `--noyona-color-ink`, `--noyona-color-brand`, etc. Still additive. (You already have a small `:root` block at lines 19-39 for footer vars — extend the same pattern.)
+3. **Fix the two invalid declarations** `letter-spacing: -5%` at `header.css:301` and `header.css:378` → `-0.05em`. **Visible improvement, isolated change.**
+4. **Consolidate the duplicate footer rules** in `footer.css` — pick one of the two rule sets and delete the other. Decide whether the "redesign" override (lines 405-765) is authoritative; if so, remove the original at lines 3-308.
+5. **Standardise the brand pink** — global find/replace `#e199a4`/`#E199A4` → `var(--noyona-color-brand)` *only after* the variable is defined. Then audit each near-duplicate pink and decide whether it's a "brand", "brand-hover", "brand-deep", or "brand-soft" use case.
+6. **Migrate the ink/grays one cluster at a time** — start with the near-black headings (8 → 1). Account headings (`#1a1a1a`, `#111`, `#0f1728`, `#101828`) → `var(--noyona-color-ink)`. Verify per-page.
+7. **Replace the `calc(var(--font-size--body) * N)` mishmash in the account module** with the new tokens (`body-sm`, `caption`, `label`). About **80-120 selectors affected** — do this in 4 sub-batches: orders → wishlist → addresses+payment → profile+modal.
+8. **Define real `h4` / `h5` / `h6` rules** in `style.css` so component overrides aren't needed.
+9. **Remove the 7-template duplicate of `.noyona-shop-view-label` inline styles** — move into `style.css` once.
+10. **Drop the unused font weights** from `assets/css/fonts.css` (300 and 900 are never used; 800 is only used in 4 selectors and is the main reason `.noyona-shop-title` looks different from every other heading — consider 700 instead). This trims ~200KB of font payload.
+
+### What NOT to touch
+- The search page CSS is already internally consistent — keep it scoped, just swap raw hexes for the new tokens.
+- The header search live suggestions block (`blocks/search-expand`) is functional and self-contained — leave the typography alone.
+- The `inc/shortcodes.php:3508` invoice HTML uses Arial intentionally (for email PDF rendering reliability) — don't replace.
+- WooCommerce template overrides (`woocommerce/*`) use only classes, no inline typography — they'll inherit the new tokens for free.
+
+### Update `theme.json`?
+**Yes** — that's where the new fontSizes and palette tokens should live so the block editor surfaces them. Update `settings.typography.fontSizes` and `settings.color.palette`. Don't delete the existing `h-1`/`h-2`/`h-3` slugs until all references are migrated, to avoid breaking the editor UI for content already authored.
+
+### Define CSS variables in `style.css`?
+**Yes** — for runtime overrides, hover states, and anywhere `theme.json` tokens don't reach (block render.php, inline `style=""`, JS). The `:root` block at the top of `style.css` is the natural home.
+
+### Avoiding layout breakage
+- Use Chrome DevTools' "Computed" panel on a few critical pages (home, search, PDP, account) before and after each batch. Watch for line-height regressions (the biggest visible cause of misalignment when font-size changes).
+- Avoid changing border-radius and color in the same commit — separate them so a regression bisects cleanly.
+- Don't change the `letter-spacing: -5%` fix simultaneously with the nav font-size — fix the bug alone first, observe, then proceed.
+
+### Safe rollout order (3 phases)
+- **Phase 1 — token plumbing**: theme.json extensions + `:root` variables + invalid-CSS fix. No visual changes intended.
+- **Phase 2 — global swaps**: brand pink, near-black ink, success/danger/info clusters. Many files touched, one variable at a time.
+- **Phase 3 — section-by-section refactor**: account → PDP → shop → search → footer. Each section uses the new size/weight tokens, drops the per-selector multipliers and one-off colors. Footer's duplicate rule set is reconciled in this phase.

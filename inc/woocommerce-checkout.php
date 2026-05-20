@@ -133,7 +133,7 @@ function noyona_is_checkout_ui_context() {
 		return true;
 	}
 
-	if ( is_page( array( 'checkout', 'reviews' ) ) ) {
+	if ( is_page( array( 'checkout', 'preview' ) ) ) {
 		return true;
 	}
 
@@ -152,7 +152,7 @@ function noyona_is_checkout_ui_context() {
 		return true;
 	}
 
-	$reviews_path = (string) wp_parse_url( home_url( '/reviews/' ), PHP_URL_PATH );
+	$reviews_path = (string) wp_parse_url( home_url( '/preview/' ), PHP_URL_PATH );
 	$reviews_lc   = trim( strtolower( untrailingslashit( $reviews_path ) ), '/' );
 	if ( '' !== $reviews_lc && ( $request_lc === $reviews_lc || 0 === strpos( $request_lc, $reviews_lc . '/' ) ) ) {
 		return true;
@@ -677,7 +677,7 @@ function noyona_checkout_inline_js() {
 			}
 		}
 
-		var reviewUrl = <?php echo wp_json_encode( home_url( '/reviews/' ) ); ?>;
+		var reviewUrl = <?php echo wp_json_encode( home_url( '/preview/' ) ); ?>;
 		var detailsUrl = <?php echo wp_json_encode( function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' ) ); ?>;
 		var cartUrl = <?php echo wp_json_encode( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) ); ?>;
 		var orderStatusProbeUrl = <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
@@ -696,7 +696,7 @@ function noyona_checkout_inline_js() {
 		try {
 			reviewPath = new URL(reviewUrl, window.location.origin).pathname.replace(/\/+$/, '');
 		} catch (e) {
-			reviewPath = '/reviews';
+			reviewPath = '/preview';
 		}
 
 		function ensureCheckoutStepper() {
