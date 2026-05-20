@@ -4935,3 +4935,51 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
 	opacity: 0.92;
 }
 
+/* ============================================================
+   Auth pages — responsive overflow fix
+   ============================================================ */
+
+/* Border-box everything inside the login form so width: 100% + padding fits */
+body.page-login .woocommerce-form-login,
+body.page-login .woocommerce-form-login *,
+body.page-login .woocommerce-form-login *::before,
+body.page-login .woocommerce-form-login *::after {
+	box-sizing: border-box;
+}
+
+/* Cap the WC column wrappers at the card width so they never push children wider */
+body.page-login.woocommerce-account:not(.logged-in) .woocommerce,
+body.page-login.woocommerce-account:not(.logged-in) .woocommerce .u-columns,
+body.page-login.woocommerce-account:not(.logged-in) .woocommerce .u-column1 {
+	width: 100%;
+	max-width: min(460px, 100%);
+	min-width: 0;
+	margin-inline: auto;
+}
+
+/* Stop the login submit + Google CTA from pushing past the form's grid track */
+body.page-login.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit,
+body.page-login .noyona-login-google-btn,
+body.page-login .noyona-login-register-link {
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+}
+
+/* Narrow viewports: shrink shell + card padding and stack lost-password actions */
+@media (max-width: 480px) {
+	body.page-login .wp-site-blocks,
+	body.page-register .wp-site-blocks,
+	body.woocommerce-account.woocommerce-lost-password .wp-site-blocks {
+		padding: 16px 12px;
+	}
+
+	body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login {
+		padding: 1.1rem 1rem 0.9rem;
+	}
+
+	body.woocommerce-account.woocommerce-lost-password form.noyona-lost-password-form {
+		padding: 1.1rem 1rem 0.9rem;
+	}
+}
+
