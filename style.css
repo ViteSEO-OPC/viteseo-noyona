@@ -4983,3 +4983,151 @@ body.page-login .noyona-login-register-link {
 	}
 }
 
+/* ============================================================
+   Auth pages — mobile full-screen layout (≤520px)
+   Drops the desktop card paradigm: full-width sheet, natural scroll.
+   ============================================================ */
+@media (max-width: 520px) {
+
+	/* Shell: drop flex centering, allow natural top-padding + scroll */
+	body.page-login .wp-site-blocks,
+	body.page-register .wp-site-blocks,
+	body.woocommerce-account.woocommerce-lost-password .wp-site-blocks {
+		min-height: 100vh;
+		min-height: 100dvh;
+		display: block;
+		padding: 0;
+		overflow-x: clip;
+	}
+
+	body.admin-bar.page-login .wp-site-blocks,
+	body.admin-bar.page-register .wp-site-blocks,
+	body.admin-bar.woocommerce-account.woocommerce-lost-password .wp-site-blocks {
+		min-height: calc(100vh - 46px);
+		min-height: calc(100dvh - 46px);
+	}
+
+	body.page-login .wp-site-blocks > main.wp-block-group,
+	body.page-register .wp-site-blocks > main.wp-block-group,
+	body.woocommerce-account.woocommerce-lost-password .wp-site-blocks > main.wp-block-group {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		margin: 0;
+		padding: 24px 20px 32px;
+		box-sizing: border-box;
+	}
+
+	/* === LOGIN === */
+	body.woocommerce-account:not(.logged-in) .woocommerce,
+	body.woocommerce-account:not(.logged-in) .woocommerce .u-columns,
+	body.woocommerce-account:not(.logged-in) .woocommerce .u-column1 {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		margin: 0;
+		padding: 0;
+		float: none;
+		box-sizing: border-box;
+	}
+
+	body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		margin: 0;
+		padding: 0;
+		background: transparent;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		grid-template-columns: 1fr;
+		box-sizing: border-box;
+	}
+
+	body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-row,
+	body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .input-text,
+	body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit,
+	body.page-login .noyona-login-google-btn,
+	body.page-login .noyona-login-register-link,
+	body.page-login .noyona-login-form-footer {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
+	}
+
+	/* === REGISTER === */
+	body.page-register .noyona-register {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		margin: 0;
+		padding: 0;
+	}
+
+	body.page-register .noyona-register-card {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		padding: 0;
+		background: transparent;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+	}
+
+	body.page-register .noyona-register-form input,
+	body.page-register .noyona-register-submit,
+	body.page-register .noyona-register-google,
+	body.page-register .noyona-register-google-wrap,
+	body.page-register .noyona-register-login {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
+	}
+
+	body.page-register .noyona-register-terms {
+		flex-wrap: wrap;
+		min-width: 0;
+	}
+
+	/* === LOST PASSWORD === */
+	body.woocommerce-account.woocommerce-lost-password .woocommerce {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		margin: 0;
+		padding: 0;
+	}
+
+	body.woocommerce-account.woocommerce-lost-password form.noyona-lost-password-form {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		margin: 0;
+		padding: 0;
+		background: transparent;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		box-sizing: border-box;
+	}
+
+	body.woocommerce-account.woocommerce-lost-password form.noyona-lost-password-form .input-text,
+	body.woocommerce-account.woocommerce-lost-password .noyona-lost-password-cancel,
+	body.woocommerce-account.woocommerce-lost-password .noyona-lost-password-submit {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
+	}
+
+	body.woocommerce-account.woocommerce-lost-password .noyona-lost-password-actions {
+		grid-template-columns: 1fr;
+		width: 100%;
+		max-width: 100%;
+	}
+}
+
