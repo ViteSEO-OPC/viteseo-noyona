@@ -30,6 +30,7 @@ $theme_inc_files = array(
     'woocommerce-checkout.php',
     'woocommerce-pdp.php',
     'woocommerce-shipping.php',
+    'review-duplicates-temporary.php', // TEMP: remove after SEO rating data entry is done.
 );
 
 foreach ( $theme_inc_files as $theme_inc_file ) {
