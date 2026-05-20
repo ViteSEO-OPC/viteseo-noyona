@@ -80,11 +80,15 @@ function noyona_handle_contact_form() {
         exit;
     }
 
-    // Validate phone
-    $contact_normalized = noyona_normalize_phone($contact);
-    if ($contact_normalized === false) {
-        wp_safe_redirect( add_query_arg('cf_error', 'invalid_phone', wp_get_referer() ?: home_url('/') ) );
-        exit;
+    // Validate phone (optional — only validate format when a value is provided)
+    if ('' === trim($contact)) {
+        $contact_normalized = '';
+    } else {
+        $contact_normalized = noyona_normalize_phone($contact);
+        if ($contact_normalized === false) {
+            wp_safe_redirect( add_query_arg('cf_error', 'invalid_phone', wp_get_referer() ?: home_url('/') ) );
+            exit;
+        }
     }
 
     // Validate subject/message length
@@ -104,8 +108,10 @@ function noyona_handle_contact_form() {
 
     $body  = "Name: {$first_name} {$last_name}\n";
     $body .= "Email: {$email}\n";
-    $body .= "Phone: {$contact_normalized}\n\n";
-    $body .= "Message:\n{$message}\n";
+    if ('' !== $contact_normalized) {
+        $body .= "Phone: {$contact_normalized}\n";
+    }
+    $body .= "\nMessage:\n{$message}\n";
 
     $headers = array(
         'Content-Type: text/plain; charset=UTF-8',

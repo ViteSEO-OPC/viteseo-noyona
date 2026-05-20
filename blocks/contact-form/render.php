@@ -277,12 +277,11 @@ $allowed_heading = array(
                 </label>
 
                 <label class="contact-form__field contact-form__field--full">
-                <span>Contact Number *</span>
+                <span>Contact Number</span>
                 <input
                     id="<?php echo esc_attr($form_id); ?>-phone"
                     type="tel"
                     name="contact_number"
-                    required
                     autocomplete="tel"
                     inputmode="tel"
                     maxlength="25"
