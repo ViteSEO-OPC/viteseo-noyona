@@ -171,14 +171,18 @@ if ( ! function_exists( 'noyona_cr_build_dynamic_reviews' ) ) {
             }
 
             $content = trim( wp_strip_all_tags( (string) $comment->comment_content ) );
-            if ( '' === $content ) {
-                continue;
+            if ( '[noyona-rating-only]' === $content ) {
+                $content = '';
             }
 
             $title = (string) get_comment_meta( $comment->comment_ID, 'review_title', true );
             $title = trim( wp_strip_all_tags( $title ) );
-            if ( '' === $title ) {
+            if ( '' === $title && '' !== $content ) {
                 $title = wp_trim_words( $content, 7, '...' );
+            }
+
+            if ( '' === $content && '' === $title && $rating <= 0 ) {
+                continue;
             }
 
             $product_id    = (int) $comment->comment_post_ID;
@@ -737,10 +741,10 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                             }
 
                             $comment_form_args['comment_field'] .=
-                                '<p class="comment-form-noyona-title customer-reviews-grid__field"><label for="noyona_review_title">' . esc_html__( 'Review Title', 'noyona-childtheme' ) . ' <span class="required">*</span></label>' .
-                                '<input id="noyona_review_title" name="noyona_review_title" type="text" value="' . esc_attr( $posted_review_title ) . '" required placeholder="' . esc_attr__( 'Summarize your experience', 'noyona-childtheme' ) . '" /></p>' .
-                                '<p class="comment-form-comment customer-reviews-grid__field"><label for="comment">' . esc_html__( 'Your Review', 'noyona-childtheme' ) . ' <span class="required">*</span></label>' .
-                                '<textarea id="comment" name="comment" cols="45" rows="6" required placeholder="' . esc_attr__( 'Tell others about your experience with this product...', 'noyona-childtheme' ) . '">' . esc_textarea( $posted_review_body ) . '</textarea></p>';
+                                '<p class="comment-form-noyona-title customer-reviews-grid__field"><label for="noyona_review_title">' . esc_html__( 'Review Title', 'noyona-childtheme' ) . '</label>' .
+                                '<input id="noyona_review_title" name="noyona_review_title" type="text" value="' . esc_attr( $posted_review_title ) . '" placeholder="' . esc_attr__( 'Summarize your experience', 'noyona-childtheme' ) . '" /></p>' .
+                                '<p class="comment-form-comment customer-reviews-grid__field"><label for="comment">' . esc_html__( 'Your Review', 'noyona-childtheme' ) . '</label>' .
+                                '<textarea id="comment" name="comment" cols="45" rows="6" placeholder="' . esc_attr__( 'Tell others about your experience with this product...', 'noyona-childtheme' ) . '">' . esc_textarea( $posted_review_body ) . '</textarea></p>';
 
                             $comment_form_args['comment_field'] .= wp_nonce_field( 'noyona_review_extras', 'noyona_review_extras_nonce', true, false );
                             $comment_form_args['comment_field'] .=

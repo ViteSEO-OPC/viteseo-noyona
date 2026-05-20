@@ -206,6 +206,30 @@ function noyona_pdp_handle_review_image_uploads() {
 	return $attachment_ids;
 }
 
+add_action( 'init', 'noyona_pdp_allow_rating_only_review', 5 );
+function noyona_pdp_allow_rating_only_review() {
+	if ( empty( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== strtoupper( (string) $_SERVER['REQUEST_METHOD'] ) ) {
+		return;
+	}
+	if ( empty( $_SERVER['REQUEST_URI'] ) || false === strpos( (string) $_SERVER['REQUEST_URI'], 'wp-comments-post.php' ) ) {
+		return;
+	}
+	if ( empty( $_POST['noyona_review_extras_nonce'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		return;
+	}
+	if ( ! isset( $_POST['rating'] ) || '' === trim( (string) wp_unslash( $_POST['rating'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		return;
+	}
+	$post_id = isset( $_POST['comment_post_ID'] ) ? absint( wp_unslash( $_POST['comment_post_ID'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	if ( $post_id <= 0 || 'product' !== get_post_type( $post_id ) ) {
+		return;
+	}
+	$comment_value = isset( $_POST['comment'] ) ? trim( (string) wp_unslash( $_POST['comment'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	if ( '' === $comment_value ) {
+		$_POST['comment'] = '[noyona-rating-only]';
+	}
+}
+
 add_action( 'comment_post', 'noyona_pdp_save_review_extras', 20, 3 );
 function noyona_pdp_save_review_extras( $comment_id, $comment_approved, $commentdata ) {
 	if ( empty( $commentdata['comment_post_ID'] ) || 'product' !== get_post_type( (int) $commentdata['comment_post_ID'] ) ) {
