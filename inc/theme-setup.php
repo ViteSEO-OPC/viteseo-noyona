@@ -225,6 +225,22 @@ function noyona_account_replace_lost_password_text( $translated_text, $text, $do
     return $translated_text;
 }
 
+/* ----- Hide header/footer template parts on the lost-password / reset-password endpoint only ----- */
+add_filter( 'render_block_core/template-part', 'noyona_hide_header_footer_on_lost_password', 10, 2 );
+function noyona_hide_header_footer_on_lost_password( $block_content, $parsed_block ) {
+	if ( is_admin() ) {
+		return $block_content;
+	}
+	if ( ! function_exists( 'noyona_is_account_recovery_context' ) || ! noyona_is_account_recovery_context() ) {
+		return $block_content;
+	}
+	$slug = isset( $parsed_block['attrs']['slug'] ) ? (string) $parsed_block['attrs']['slug'] : '';
+	if ( 'header' === $slug || 'footer' === $slug ) {
+		return '';
+	}
+	return $block_content;
+}
+
 /* ----- Normalize login form controls (footer script) ----- */
 add_action( 'wp_footer', 'noyona_normalize_login_form_controls', 90 );
 function noyona_normalize_login_form_controls() {
