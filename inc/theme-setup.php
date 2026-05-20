@@ -177,6 +177,11 @@ function noyona_account_login_form_intro() {
     $logo_url = trailingslashit( get_stylesheet_directory_uri() ) . 'assets/images/noyona-mobile-logo.webp';
     $logo_markup = '<img src="' . esc_url( $logo_url ) . '" alt="' . esc_attr__( 'Noyona logo', 'noyona-childtheme' ) . '" loading="lazy" decoding="async" />';
 
+    echo '<a class="noyona-account-login-back" href="' . esc_url( home_url( '/' ) ) . '">';
+    echo '<i class="fa-solid fa-arrow-left" aria-hidden="true"></i>';
+    echo '<span>' . esc_html__( 'Back', 'noyona-childtheme' ) . '</span>';
+    echo '</a>';
+
     echo '<div class="noyona-account-login-brand-wrap">';
     echo '<span class="noyona-account-login-brand">' . wp_kses_post( $logo_markup ) . '</span>';
     echo '</div>';
