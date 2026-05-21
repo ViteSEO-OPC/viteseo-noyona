@@ -103,7 +103,7 @@ function noyona_filter_static_document_titles( $title ) {
     if (is_page('refund-policy')) return 'Noyona Essentials Refund Policy | Returns & Customer Care';
     if (is_page('products')) return 'Noyona Essentials Products | Vegan Filipino Cosmetics for Face, Lips, Eyes & Hair';
     if (is_page(array('accounts', 'account'))) return 'Noyona Essentials Account | Manage Your Cosmetics Profile';
-    if (is_page(array('terms-of-service', 'terms-of-services'))) return 'Noyona Essentials Terms of Service | Policies & Customer Rights';
+    if (is_page(array('terms-of-service', 'terms-and-policies'))) return 'Noyona Essentials Terms of Service | Policies & Customer Rights';
     return $title;
 }
 
@@ -195,7 +195,7 @@ function noyona_render_static_meta_descriptions() {
         echo '<meta name="description" content="Access your Noyona Essentials account. Manage orders, track shipping, update details, and enjoy personalized service for vegan Filipino cosmetics rooted in nature.">';
         return; 
     }
-    if (is_page(array('terms-of-service', 'terms-of-services'))) {
+    if (is_page(array('terms-of-service', 'terms-and-policies'))) {
         echo '<meta name="description" content="Review the Noyona Essentials Terms of Service. Learn about customer rights, policies, and trusted guidelines for shopping vegan Filipino cosmetics rooted in nature.">';
         return;
     }

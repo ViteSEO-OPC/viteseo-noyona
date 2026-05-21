@@ -533,7 +533,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 
 			<?php if ( $is_review_step ) : ?>
 				<?php
-				$terms_url = home_url( '/terms-of-services/' );
+				$terms_url = home_url( '/terms-and-policies/' );
 				?>
 				<div class="noyona-review-terms">
 					<label class="noyona-review-terms__label" for="noyona-review-terms">

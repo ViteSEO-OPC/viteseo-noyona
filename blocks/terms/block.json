@@ -25,7 +25,7 @@
     },
     "breadcrumbRootUrl": {
       "type": "string",
-      "default": "/terms-of-services"
+      "default": "/terms-and-policies"
     },
     "breadcrumbCurrent": {
       "type": "string",
