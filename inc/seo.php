@@ -93,7 +93,7 @@ function noyona_filter_static_document_titles( $title ) {
     if (is_page('partner-brands')) return 'Noyona & Lovial | Partner Brands in Filipino Cosmetics & Malaysian Body Care';
     if (is_page('partner-brands/noyona')) return 'Noyona | Vegan, Cruelty-Free Filipino Cosmetics';
     if (is_page('partner-brands/lovial')) return 'Lovial | Trusted Malaysian Body Care Brand';
-    if (is_page('about-noyona-essentials')) return 'About Noyona Essentials: Filipino Vegan & Cruelty-Free Cosmetics | Ethical Beauty PH';
+    if (is_page('about-us')) return 'About Noyona Essentials: Filipino Vegan & Cruelty-Free Cosmetics | Ethical Beauty PH';
     if (is_page('store-locations')) return 'Noyona Essentials Store Locations | Filipino Vegan Cosmetics Near You';
     if (is_page('careers')) return 'Noyona Essentials Careers | Join Our Filipino Cosmetics Team';
     if (is_page('blogs')) return 'Noyona Essentials Blogs | Insights on Filipino Vegan Cosmetics';
@@ -155,7 +155,7 @@ function noyona_render_static_meta_descriptions() {
         echo '<meta name="description" content="Discover Lovial, a trusted Malaysian body care brand. Offering nourishing, hydrating, and brightening products designed to keep your skin soft, smooth, and radiant.">';
         return; 
     }
-    if (is_page('about-noyona-essentials')) {
+    if (is_page('about-us')) {
         echo '<meta name="description" content="Learn about Noyona, a Filipino cosmetics brand offering vegan, cruelty-free beauty rooted in nature. Discover our story, mission, and values.">';
         return; 
     }
