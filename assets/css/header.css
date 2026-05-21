@@ -300,6 +300,14 @@ body.has-scrolled-header .site-logo-text {
   letter-spacing: -5%;
 }
 
+.nav-link--button {
+  appearance: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
 .nav-link:hover,
 .nav-link.is-active {
   color: #E199A4;
