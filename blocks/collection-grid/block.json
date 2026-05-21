@@ -13,11 +13,11 @@
   "attributes": {
     "heading": {
       "type": "string",
-      "default": "Our Collections"
+      "default": "Explore Our Brands"
     },
     "description": {
       "type": "string",
-      "default": "Noyona offers makeup, hair, and body care essentials designed for Filipino skin tones, simple, effective, and confidence-boosting every day."
+      "default": "From color cosmetics to keratin treatments and hair color, each brand is formulated for all Filipino skin and hair types. "
     },
     "headingAlign": {
       "type": "string",

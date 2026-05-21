@@ -104,7 +104,7 @@ if (empty($items)) {
                     </div>
                 </div>
 
-                <a href="coming-soon" class="collection-card__link" aria-label="View <?php echo esc_attr($title); ?>"></a>
+                <!-- <a href="coming-soon" class="collection-card__link" aria-label="View <?php echo esc_attr($title); ?>"></a> -->
             </div>
         <?php endforeach; ?>
     </div>

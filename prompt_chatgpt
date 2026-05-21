@@ -1,0 +1,199 @@
+You are my thinking partner for the Noyona website project. Please do not just generate prompts; help me reason, plan safely, and decide what to ask Claude CLI.
+
+Project context:
+We are working on the Noyona WordPress/WooCommerce child theme. We are cleaning up inconsistent typography, colors, button radii, card styles, and design tokens, but we are doing it carefully in phases.
+
+Current important files:
+- theme.json
+- style.css
+- docs/typography-color-token-implementation-plan.md
+- Claude CLI created/updated docs/typography-color-token-implementation-plan.md as documentation only.
+- No code changes were made yet for the typography/token cleanup.
+
+Current state:
+Claude updated the documentation report only. It did not touch theme.json, style.css, or component CSS. The report says Phase 1 can ship once approved. Phase 1 is additive theme.json tokens + style.css :root variables + invalid letter-spacing fixes only. It should produce little/no visible change.
+
+Designer clarifications already received:
+1. Input background should be #FFFFFF, not #525252.
+2. #525252 is for muted/helper/placeholder/info text.
+3. Borders are contextual: some pink, some #525252, some none. Do not globally force all borders to #000000.
+4. CTA radius 16px applies to all buttons, but this should be Phase 2, not Phase 1.
+5. Card radius 24px and card padding Desktop 15px / Tablet 12px / Mobile 10px applies site-wide, but this should be Phase 2 component migration, not Phase 1.
+6. Screen padding uses standard breakpoints:
+   - Desktop: 1024px and up
+   - Tablet: 768px to 1023px
+   - Mobile: 767px and below
+7. Line-height should be CSS normal.
+8. Figma letter-spacing -5% can be implemented as CSS letter-spacing: -0.05em.
+9. Times New Roman Italic should only be used for .newsletter-strip__title em.
+10. Everything else should use Proxima Nova.
+11. 16px is the minimum text size, even on mobile.
+12. H4/H5 sizes and role weights can be suggested by us/Claude.
+13. Status colors can use standard ecommerce defaults later, but should be provisional and not globally applied in Phase 1.
+
+Remaining blockers:
+1. Pink role mapping is still not final:
+   - #EFB5BE
+   - #FBDDE2
+   - #E199A4
+   We still do not know which is CTA fill, CTA hover, soft background, accent, badge, etc.
+2. Primary CTA hover color is still not final.
+
+Important rule:
+Do not start Phase 2 until pink role mapping and CTA hover are clarified.
+
+Claude’s latest report summary:
+- Updated docs/typography-color-token-implementation-plan.md only.
+- No code files touched.
+- Phase 1 can proceed because it does not depend on the remaining blockers.
+- Phase 1 should be:
+  1. Add typography/color tokens to theme.json additively.
+  2. Add matching CSS variables to style.css :root.
+  3. Keep old slugs for backward compatibility.
+  4. Flip global h1 from Noto Serif to Proxima Nova.
+  5. Add Times New Roman Italic token only for newsletter emphasis.
+  6. Fix invalid letter-spacing: -5% to -0.05em in:
+     - blocks/hero-banner/style.css
+     - blocks/brand-carousel/style.css
+     - assets/css/header.css
+     - any other exact occurrence found
+  7. Do not refactor components yet.
+  8. Do not globally replace colors yet.
+  9. Do not globally change button radii yet.
+  10. Do not globally enforce 16px minimum text yet.
+  11. Do not remove Noto token yet.
+  12. Do not remove duplicate body/h1/h2/h3 CSS from style.css yet.
+
+Suggested provisional tokens:
+Typography:
+- h-4: clamp(18px, 1.6vw, 22px), weight 600
+- h-5: clamp(16px, 1.2vw, 18px), weight 600
+- h-6: skip because unused
+- label: clamp(16px, 1.2vw, 18px), weight 600
+- button: clamp(18px, 1.6vw, 24px), weight 700
+- caption: clamp(16px, 1.2vw, 18px), weight 600
+- helper: clamp(16px, 1.2vw, 18px), weight 400
+- input: clamp(16px, 1.4vw, 20px), weight 400
+
+Color tokens:
+- brand-pink-primary: #E199A4
+- brand-pink-soft: #EFB5BE
+- brand-pink-pale: #FBDDE2
+- text-main: #000000
+- text-muted: #525252
+- white: #FFFFFF
+- input-bg: #FFFFFF
+- placeholder: #525252
+- status-info: #525252
+Do not finalize success/warning/error tokens yet unless clearly marked provisional.
+
+What I need from you:
+Help me continue from this context. First, help me prepare the Claude CLI prompt for Phase 1 implementation only. Keep it safe, additive, reversible, and strict about not refactoring components.
+
+
+
+
+
+
+
+
+
+Tomorrow’s next action:
+Ask Claude CLI to implement Phase 1 only:
+theme.json additive tokens + style.css :root variables + fix invalid letter-spacing -5% → -0.05em + create docs/typography-color-token-phase-1-implementation.md.
+No component refactor yet.
+
+
+
+
+
+
+
+Report updated. No code files touched.
+
+  What changed in the report
+
+  Section: §1 Executive summary
+  Update: Added a one-paragraph block listing the designer clarifications received this round (input bg #FFFFFF,
+    contextual borders, line-height: normal, letter-spacing: -0.05em, CTA 16px all buttons → Phase 2, card 24px +
+    padding → Phase 2, 16px minimum text, status colors provisional, H4/H5 + weights provisional). Listed the two
+    remaining blockers: pink role map + CTA hover.
+  ────────────────────────────────────────
+  Section: §4 Designer-approved color/UI guide
+  Update: Corrected input bg → #FFFFFF. Borders rewritten as "contextual — some pink, some #525252, some none."
+    Added confirmed line-height: normal and letter-spacing: -0.05em.
+  ────────────────────────────────────────
+  Section: §5 Missing/unclear designer values
+  Update: Fully rewritten as a 14-row status table with 🔴 blocker / 🟡 provisional / 🟢 resolved markers. Pink
+    mapping + CTA hover stay 🔴; H4/H5, label/button weights, status colors are 🟡; line-height, letter-spacing,
+    input bg, borders, CTA 16px, card 24px+padding, screen padding breakpoints, 16px minimum, and serif font usage
+
+    are 🟢.
+  ────────────────────────────────────────
+  Section: §6.2 Font-size tokens
+  Update: Added the provisional weight column with the Claude-suggested values (label 600, button 700,
+    caption/badge 600, helper 400, input 400, H4 600, H5 600). Noted 16px minimum is approved but cleanup is Phase
+
+    2.
+  ────────────────────────────────────────
+  Section: §6.3 Color palette
+  Update: Removed border-strong from the "should be applied" list; kept the slug but flagged "available but not
+  for
+    global application." input-bg explicitly #FFFFFF. Pink slug names tagged as placeholders pending role rename.
+    Status tokens explicitly named (provisional) in the slug.
+  ────────────────────────────────────────
+  Section: §7 style.css :root variables
+  Update: Added comments noting CTA radius is Phase 2 migration, card radius/padding is Phase 2 migration. Added
+    explicit --noyona-color-input-bg (#FFFFFF), --noyona-color-placeholder. Renamed --noyona-color-border →
+    --noyona-color-border-strong with a comment "borders are contextual — NOT for global application." Added
+    explicit "CTA hover token intentionally NOT defined yet — pending designer mapping." Added --noyona-text-min: 
+    16px.
+  ────────────────────────────────────────
+  Section: §13 Recommended safe Phase 1
+  Update: Rewrote with explicit ❌ no-go list (no CTA radius change, no card radius/padding, no screen padding
+    rollout, no pink replacement, no hover token, no text-size cleanup, no border replacement, no status
+    replacement). Confirmed Noto Serif token stays in Phase 1.
+  ────────────────────────────────────────
+  Section: §14 What NOT to change yet
+  Update: Rewrote and re-ordered: contextual border rule clarified, CTA 16px deferred to Phase 2, card
+    radius/padding deferred to Phase 2, status colors deferred, 12–15px text deferred, Noto Serif token retention
+    noted.
+  ────────────────────────────────────────
+  Section: §15 Phase 2 / Phase 3 rollout
+  Update: Added a "Pre-flight" requirement — wait for pink role map + CTA hover before starting Phase 2. Added
+    explicit per-component migration checklist (pink role swap, near-black/gray collapse, CTA radius 16px, card
+    24px + padding tokens, font-family Apple/Proxima Nova Light replacement, 16px text floor, drop !important,
+  keep
+     borders contextual). Phase 3 cleanup now mentions replacing (provisional) status tokens with designer-final
+    hexes.
+
+  Files modified
+
+  - ✅ docs/typography-color-token-implementation-plan.md (this report only)
+  - ❌ theme.json — not touched 
+  - ❌ style.css — not touched
+  - ❌ Any block / component CSS — not touched
+
+  Remaining blockers before actual implementation
+
+  ┌─────┬────────────────────────────────────────┬──────────┬─────────────────────────────────────────────────┐
+  │  #  │                Blocker                 │  Owner   │                Effect on Phase 2                │
+  ├─────┼────────────────────────────────────────┼──────────┼─────────────────────────────────────────────────┤
+  │     │ Pink role mapping for #EFB5BE /        │          │ Blocks renaming pink slugs and substituting the │
+  │ 1   │ #FBDDE2 / #E199A4 (which is CTA fill,  │ Designer │  35+ pink variants site-wide.                   │
+  │     │ CTA hover, soft bg, accent, badge?)    │          │                                                 │
+  ├─────┼────────────────────────────────────────┼──────────┼─────────────────────────────────────────────────┤
+  │     │                                        │          │ Blocks defining the --cta-hover token; needed   │
+  │ 2   │ Primary CTA hover color                │ Designer │ before flipping 124 pill CTAs to the new 16px   │
+  │     │                                        │          │ shape with a consistent hover.                  │
+  └─────┴────────────────────────────────────────┴──────────┴─────────────────────────────────────────────────┘
+
+  Phase 1 (additive theme.json tokens + :root variables + the 5-location letter-spacing: -5% → -0.05em bug fix)
+  can ship the moment you give the go-ahead. It does not depend on the two remaining blockers and produces no
+  visible change to the site.
+
+✻ Cooked for 4m 13s · 2 shells still running
+
+※ recap: Goal is rolling out the designer's typography and color tokens for the Noyona theme; the current task is 
+  the planning doc at docs/typography-color-token-implementation-plan.md, just updated with the latest 
+  clarifications. Next: await designer's pink role mapping and CTA hover color before starting Phase 1.
