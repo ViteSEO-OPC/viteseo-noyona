@@ -648,6 +648,16 @@ if ($store_query->have_posts()) {
 
             reviewForm.addEventListener('submit', function () {
                 var emailInput = reviewForm.querySelector('#nsl-v2-review-email');
+                var commentInput = reviewForm.querySelector('#nsl-v2-review-comment');
+                if (!emailInput && !commentInput) return;
+
+                if (commentInput) {
+                    var commentValue = String(commentInput.value || '').trim();
+                    if (commentValue === '') {
+                        commentInput.value = 'Rated without written review.';
+                    }
+                }
+
                 if (!emailInput) return;
 
                 var emailValue = String(emailInput.value || '').trim();
