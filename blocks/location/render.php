@@ -619,11 +619,11 @@ if ($store_query->have_posts()) {
                 </p>
                 <p>
                     <label for="nsl-v2-review-email"><?php esc_html_e('Email', 'noyona'); ?></label>
-                    <input type="email" id="nsl-v2-review-email" name="email">
+                    <input type="email" id="nsl-v2-review-email" name="email" required>
                 </p>
                 <p>
                     <label for="nsl-v2-review-rating"><?php esc_html_e('Rating', 'noyona'); ?></label>
-                    <select id="nsl-v2-review-rating" name="nsl_comment_rating" required>
+                    <select id="nsl-v2-review-rating" name="nsl_comment_rating">
                         <option value="5">5</option>
                         <option value="4">4</option>
                         <option value="3">3</option>
@@ -633,7 +633,7 @@ if ($store_query->have_posts()) {
                 </p>
                 <p>
                     <label for="nsl-v2-review-comment"><?php esc_html_e('Review', 'noyona'); ?></label>
-                    <textarea id="nsl-v2-review-comment" name="comment" rows="4"></textarea>
+                    <textarea id="nsl-v2-review-comment" name="comment" rows="4" required></textarea>
                 </p>
                 <p>
                     <button type="submit" class="nsl-v2-review-submit"><?php esc_html_e('Submit Review', 'noyona'); ?></button>
