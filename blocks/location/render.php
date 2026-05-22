@@ -31,6 +31,46 @@ if (!function_exists('nsl_v2_save_comment_rating')) {
 }
 add_action('comment_post', 'nsl_v2_save_comment_rating');
 
+if (!function_exists('nsl_v2_preprocess_store_review_comment')) {
+    /**
+     * Keep location review author/comment aligned with submitted form values.
+     * This allows admins to post dummy reviews using custom names.
+     *
+     * @param array $commentdata Comment payload.
+     * @return array
+     */
+    function nsl_v2_preprocess_store_review_comment($commentdata)
+    {
+        $is_location_store_review = isset($_POST['nsl_v2_store_review']) && '1' === (string) wp_unslash($_POST['nsl_v2_store_review']); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        if (!$is_location_store_review) {
+            return $commentdata;
+        }
+
+        $post_id = isset($commentdata['comment_post_ID']) ? (int) $commentdata['comment_post_ID'] : 0;
+        if ($post_id <= 0 || 'store' !== get_post_type($post_id)) {
+            return $commentdata;
+        }
+
+        // Logged-in admins normally get forced to their profile name/email.
+        // Override with submitted fields so dummy review names are respected.
+        if (is_user_logged_in() && current_user_can('manage_options')) {
+            $posted_author = isset($_POST['author']) ? sanitize_text_field((string) wp_unslash($_POST['author'])) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            if ($posted_author === '') {
+                $posted_author = __('Anonymous', 'noyona');
+            }
+            $commentdata['comment_author'] = $posted_author;
+
+            $posted_email = isset($_POST['email']) ? sanitize_email((string) wp_unslash($_POST['email'])) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            if ($posted_email !== '') {
+                $commentdata['comment_author_email'] = $posted_email;
+            }
+        }
+
+        return $commentdata;
+    }
+}
+add_filter('preprocess_comment', 'nsl_v2_preprocess_store_review_comment', 20);
+
 $wrapper_attributes = get_block_wrapper_attributes(array(
     'class' => 'noyona-store-locator-wrapper',
 ));
@@ -500,7 +540,7 @@ if ($store_query->have_posts()) {
             $comment_email = strtolower(trim((string) $comment->comment_author_email));
             $is_fallback_comment = (
                 $comment_text === '__NSL_EMPTY_REVIEW__'
-                && (bool) preg_match('/^[a-z0-9.]+\\+\\d+@example\\.com$/', $comment_email)
+                && (bool) preg_match('/^[a-z0-9.]+\+\d+@example\.com$/', $comment_email)
             );
             if ($is_fallback_comment) {
                 $comment_text = '';
@@ -622,9 +662,10 @@ if ($store_query->have_posts()) {
                 <input type="hidden" name="comment_post_ID" id="nsl-v2-comment-post-id" value="">
                 <input type="hidden" name="comment_parent" value="0">
                 <input type="hidden" name="redirect_to" value="<?php echo esc_url(get_permalink()); ?>">
+                <input type="hidden" name="nsl_v2_store_review" value="1">
                 <p>
                     <label for="nsl-v2-review-author"><?php esc_html_e('Name', 'noyona'); ?></label>
-                    <input type="text" id="nsl-v2-review-author" name="author" required>
+                    <input type="text" id="nsl-v2-review-author" name="author">
                 </p>
                 <p>
                     <label for="nsl-v2-review-email"><?php esc_html_e('Email', 'noyona'); ?></label>
@@ -656,12 +697,34 @@ if ($store_query->have_posts()) {
             if (!reviewForm) return;
 
             reviewForm.addEventListener('submit', function () {
+                var authorInput = reviewForm.querySelector('#nsl-v2-review-author');
                 var emailInput = reviewForm.querySelector('#nsl-v2-review-email');
                 var commentInput = reviewForm.querySelector('#nsl-v2-review-comment');
-                if (!emailInput && !commentInput) return;
+                if (!authorInput && !emailInput && !commentInput) return;
 
+                var fallbackAuthorInput = reviewForm.querySelector('input[type="hidden"][data-nsl-fallback="author"]');
                 var fallbackEmailInput = reviewForm.querySelector('input[type="hidden"][data-nsl-fallback="email"]');
                 var fallbackCommentInput = reviewForm.querySelector('input[type="hidden"][data-nsl-fallback="comment"]');
+
+                if (authorInput) {
+                    var authorValue = String(authorInput.value || '').trim();
+                    if (authorValue === '') {
+                        if (!fallbackAuthorInput) {
+                            fallbackAuthorInput = document.createElement('input');
+                            fallbackAuthorInput.type = 'hidden';
+                            fallbackAuthorInput.name = 'author';
+                            fallbackAuthorInput.setAttribute('data-nsl-fallback', 'author');
+                            reviewForm.appendChild(fallbackAuthorInput);
+                        }
+                        fallbackAuthorInput.value = 'Anonymous';
+                        authorInput.disabled = true;
+                    } else {
+                        authorInput.disabled = false;
+                        if (fallbackAuthorInput) {
+                            fallbackAuthorInput.remove();
+                        }
+                    }
+                }
 
                 if (commentInput) {
                     var commentValue = String(commentInput.value || '').trim();
@@ -694,12 +757,10 @@ if ($store_query->have_posts()) {
                     return;
                 }
 
-                var authorInput = reviewForm.querySelector('#nsl-v2-review-author');
-                var authorValue = authorInput ? String(authorInput.value || '').toLowerCase() : '';
-                var localPart = authorValue
+                var seed = authorInput ? String(authorInput.value || '').toLowerCase() : '';
+                var localPart = seed
                     .replace(/[^a-z0-9]+/g, '.')
                     .replace(/^\.+|\.+$/g, '');
-
                 if (!localPart) {
                     localPart = 'reviewer';
                 }
