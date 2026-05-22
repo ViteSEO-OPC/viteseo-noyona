@@ -496,9 +496,18 @@ if ($store_query->have_posts()) {
             if ($comment_rating < 1 || $comment_rating > 5) {
                 $comment_rating = 5;
             }
+            $comment_text = wp_strip_all_tags((string) $comment->comment_content);
+            $comment_email = strtolower(trim((string) $comment->comment_author_email));
+            $is_fallback_comment = (
+                $comment_text === '__NSL_EMPTY_REVIEW__'
+                && (bool) preg_match('/^[a-z0-9.]+\\+\\d+@example\\.com$/', $comment_email)
+            );
+            if ($is_fallback_comment) {
+                $comment_text = '';
+            }
             $review_items[] = array(
                 'name' => (string) $comment->comment_author,
-                'text' => wp_strip_all_tags((string) $comment->comment_content),
+                'text' => $comment_text,
                 'date' => get_comment_date('M j, Y', $comment),
                 'rating' => $comment_rating,
                 'source' => 'public',
@@ -651,17 +660,39 @@ if ($store_query->have_posts()) {
                 var commentInput = reviewForm.querySelector('#nsl-v2-review-comment');
                 if (!emailInput && !commentInput) return;
 
+                var fallbackEmailInput = reviewForm.querySelector('input[type="hidden"][data-nsl-fallback="email"]');
+                var fallbackCommentInput = reviewForm.querySelector('input[type="hidden"][data-nsl-fallback="comment"]');
+
                 if (commentInput) {
                     var commentValue = String(commentInput.value || '').trim();
                     if (commentValue === '') {
-                        commentInput.value = 'Rated without written review.';
+                        if (!fallbackCommentInput) {
+                            fallbackCommentInput = document.createElement('input');
+                            fallbackCommentInput.type = 'hidden';
+                            fallbackCommentInput.name = 'comment';
+                            fallbackCommentInput.setAttribute('data-nsl-fallback', 'comment');
+                            reviewForm.appendChild(fallbackCommentInput);
+                        }
+                        fallbackCommentInput.value = '__NSL_EMPTY_REVIEW__';
+                        commentInput.disabled = true;
+                    } else {
+                        commentInput.disabled = false;
+                        if (fallbackCommentInput) {
+                            fallbackCommentInput.remove();
+                        }
                     }
                 }
 
                 if (!emailInput) return;
 
                 var emailValue = String(emailInput.value || '').trim();
-                if (emailValue !== '') return;
+                if (emailValue !== '') {
+                    emailInput.disabled = false;
+                    if (fallbackEmailInput) {
+                        fallbackEmailInput.remove();
+                    }
+                    return;
+                }
 
                 var authorInput = reviewForm.querySelector('#nsl-v2-review-author');
                 var authorValue = authorInput ? String(authorInput.value || '').toLowerCase() : '';
@@ -672,8 +703,17 @@ if ($store_query->have_posts()) {
                 if (!localPart) {
                     localPart = 'reviewer';
                 }
+                localPart = localPart.slice(0, 40);
 
-                emailInput.value = localPart + '+' + Date.now() + '@example.com';
+                if (!fallbackEmailInput) {
+                    fallbackEmailInput = document.createElement('input');
+                    fallbackEmailInput.type = 'hidden';
+                    fallbackEmailInput.name = 'email';
+                    fallbackEmailInput.setAttribute('data-nsl-fallback', 'email');
+                    reviewForm.appendChild(fallbackEmailInput);
+                }
+                fallbackEmailInput.value = localPart + '+' + Date.now() + '@example.com';
+                emailInput.disabled = true;
             });
         })();
     </script>
