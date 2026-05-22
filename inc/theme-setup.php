@@ -443,3 +443,96 @@ function noyona_normalize_header_rendered_markup( $block_content, $block ) {
  * ================================================= */
 add_filter('show_admin_bar', '__return_false');
 
+/* ----- Location review submit: preserve admin-entered author ----- */
+add_filter( 'preprocess_comment', 'noyona_location_review_use_submitted_author', 20 );
+function noyona_location_review_use_submitted_author( $commentdata ) {
+    $is_location_store_review = isset( $_POST['nsl_v2_store_review'] ) && '1' === (string) wp_unslash( $_POST['nsl_v2_store_review'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( ! $is_location_store_review ) {
+        return $commentdata;
+    }
+    $nonce = isset( $_POST['noyona_location_review_nonce'] ) ? sanitize_text_field( (string) wp_unslash( $_POST['noyona_location_review_nonce'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'noyona_location_review_submit' ) ) {
+        return $commentdata;
+    }
+
+    $post_id = isset( $commentdata['comment_post_ID'] ) ? (int) $commentdata['comment_post_ID'] : 0;
+    if ( $post_id <= 0 || 'store' !== get_post_type( $post_id ) ) {
+        return $commentdata;
+    }
+
+    $posted_author = isset( $_POST['author'] ) ? sanitize_text_field( (string) wp_unslash( $_POST['author'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( '' !== $posted_author ) {
+        $commentdata['comment_author'] = $posted_author;
+    }
+
+    return $commentdata;
+}
+
+add_action( 'comment_post', 'noyona_location_review_force_submitted_author', 30, 3 );
+function noyona_location_review_force_submitted_author( $comment_id, $comment_approved, $commentdata ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+    $is_location_store_review = isset( $_POST['nsl_v2_store_review'] ) && '1' === (string) wp_unslash( $_POST['nsl_v2_store_review'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( ! $is_location_store_review ) {
+        return;
+    }
+    $nonce = isset( $_POST['noyona_location_review_nonce'] ) ? sanitize_text_field( (string) wp_unslash( $_POST['noyona_location_review_nonce'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'noyona_location_review_submit' ) ) {
+        return;
+    }
+
+    $post_id = isset( $commentdata['comment_post_ID'] ) ? (int) $commentdata['comment_post_ID'] : 0;
+    if ( $post_id <= 0 || 'store' !== get_post_type( $post_id ) ) {
+        return;
+    }
+
+    $posted_author = isset( $_POST['author'] ) ? sanitize_text_field( (string) wp_unslash( $_POST['author'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( '' === $posted_author ) {
+        return;
+    }
+
+    wp_update_comment(
+        array(
+            'comment_ID'     => (int) $comment_id,
+            'comment_author' => $posted_author,
+        )
+    );
+}
+
+/* ----- Location review submit: allow optional email/comment (scoped) ----- */
+add_filter( 'pre_option_require_name_email', 'noyona_location_review_optional_email' );
+function noyona_location_review_optional_email( $pre_option ) {
+    $is_location_store_review = isset( $_POST['nsl_v2_store_review'] ) && '1' === (string) wp_unslash( $_POST['nsl_v2_store_review'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( ! $is_location_store_review ) {
+        return $pre_option;
+    }
+    $nonce = isset( $_POST['noyona_location_review_nonce'] ) ? sanitize_text_field( (string) wp_unslash( $_POST['noyona_location_review_nonce'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'noyona_location_review_submit' ) ) {
+        return $pre_option;
+    }
+
+    $post_id = isset( $_POST['comment_post_ID'] ) ? (int) wp_unslash( $_POST['comment_post_ID'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( $post_id <= 0 || 'store' !== get_post_type( $post_id ) ) {
+        return $pre_option;
+    }
+
+    return 0;
+}
+
+add_filter( 'allow_empty_comment', 'noyona_location_review_allow_empty_comment', 10, 2 );
+function noyona_location_review_allow_empty_comment( $allow_empty_comment, $commentdata ) {
+    $is_location_store_review = isset( $_POST['nsl_v2_store_review'] ) && '1' === (string) wp_unslash( $_POST['nsl_v2_store_review'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( ! $is_location_store_review ) {
+        return $allow_empty_comment;
+    }
+    $nonce = isset( $_POST['noyona_location_review_nonce'] ) ? sanitize_text_field( (string) wp_unslash( $_POST['noyona_location_review_nonce'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'noyona_location_review_submit' ) ) {
+        return $allow_empty_comment;
+    }
+
+    $post_id = isset( $commentdata['comment_post_ID'] ) ? (int) $commentdata['comment_post_ID'] : 0;
+    if ( $post_id <= 0 || 'store' !== get_post_type( $post_id ) ) {
+        return $allow_empty_comment;
+    }
+
+    return true;
+}
+

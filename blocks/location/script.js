@@ -324,7 +324,7 @@
             var reviewDate = escHtml(review.date || "");
             var reviewText = escHtml(review.text || "");
             var reviewStars = escHtml(renderStars(review.rating));
-            // var sourceLabel = review.source === "manual" ? "Admin" : "Customer";
+            var sourceLabel = review.source === "manual" ? "Admin" : "Customer";
             return (
               '<article class="nsl-v2-review-item">' +
               '<div class="nsl-v2-review-item__head">' +
@@ -333,7 +333,7 @@
               '</strong><span class="nsl-v2-review-item__stars">' +
               reviewStars +
               '</span></div><p class="nsl-v2-review-item__meta">' +
-              reviewName +
+              escHtml(sourceLabel) +
               (reviewDate ? " - " + reviewDate : "") +
               "</p>" +
               (reviewText ? '<p class="nsl-v2-review-item__text">' + reviewText + "</p>" : "") +
