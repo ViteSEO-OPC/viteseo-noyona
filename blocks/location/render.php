@@ -619,7 +619,7 @@ if ($store_query->have_posts()) {
                 </p>
                 <p>
                     <label for="nsl-v2-review-email"><?php esc_html_e('Email', 'noyona'); ?></label>
-                    <input type="email" id="nsl-v2-review-email" name="email" required>
+                    <input type="email" id="nsl-v2-review-email" name="email">
                 </p>
                 <p>
                     <label for="nsl-v2-review-rating"><?php esc_html_e('Rating', 'noyona'); ?></label>
@@ -633,7 +633,7 @@ if ($store_query->have_posts()) {
                 </p>
                 <p>
                     <label for="nsl-v2-review-comment"><?php esc_html_e('Review', 'noyona'); ?></label>
-                    <textarea id="nsl-v2-review-comment" name="comment" rows="4" required></textarea>
+                    <textarea id="nsl-v2-review-comment" name="comment" rows="4"></textarea>
                 </p>
                 <p>
                     <button type="submit" class="nsl-v2-review-submit"><?php esc_html_e('Submit Review', 'noyona'); ?></button>
@@ -641,5 +641,31 @@ if ($store_query->have_posts()) {
             </form>
         </div>
     </div>
+    <script>
+        (function () {
+            var reviewForm = document.querySelector('.nsl-v2-review-form');
+            if (!reviewForm) return;
+
+            reviewForm.addEventListener('submit', function () {
+                var emailInput = reviewForm.querySelector('#nsl-v2-review-email');
+                if (!emailInput) return;
+
+                var emailValue = String(emailInput.value || '').trim();
+                if (emailValue !== '') return;
+
+                var authorInput = reviewForm.querySelector('#nsl-v2-review-author');
+                var authorValue = authorInput ? String(authorInput.value || '').toLowerCase() : '';
+                var localPart = authorValue
+                    .replace(/[^a-z0-9]+/g, '.')
+                    .replace(/^\.+|\.+$/g, '');
+
+                if (!localPart) {
+                    localPart = 'reviewer';
+                }
+
+                emailInput.value = localPart + '+' + Date.now() + '@example.com';
+            });
+        })();
+    </script>
 </div>
 
