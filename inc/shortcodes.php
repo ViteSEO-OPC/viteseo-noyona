@@ -293,6 +293,9 @@ function woocom_ct_register_form_shortcode() {
             case 'missing_fields':
                 $message = 'Please fill in all required fields.';
                 break;
+            case 'invalid_name':
+                $message = 'Please enter a valid full name (letters, spaces, apostrophes, periods, and hyphens only).';
+                break;
             case 'invalid_email':
                 $message = 'Please enter a valid email address.';
                 break;
@@ -302,8 +305,11 @@ function woocom_ct_register_form_shortcode() {
             case 'password_mismatch':
                 $message = 'Passwords do not match.';
                 break;
+            case 'weak_password':
+                $message = 'Password must be at least 8 characters and include at least one uppercase letter and one special character.';
+                break;
             case 'invalid_phone':
-                $message = 'Please enter a valid phone number.';
+                $message = 'Please enter a valid Philippine mobile number (09XXXXXXXXX or +639XXXXXXXXX).';
                 break;
             case 'terms_not_accepted':
                 $message = 'Please agree to the Terms and Conditions.';
@@ -345,22 +351,22 @@ function woocom_ct_register_form_shortcode() {
                 <input type="hidden" name="action" value="noyona_register">
                 <div class="noyona-register-field">
                     <label for="noyona-register-full-name"><?php esc_html_e( 'Full Name:', 'noyona-childtheme' ); ?></label>
-                    <input id="noyona-register-full-name" type="text" name="full_name" autocomplete="name" placeholder="<?php esc_attr_e( 'Jane Doe', 'noyona-childtheme' ); ?>" required>
+                    <input id="noyona-register-full-name" type="text" name="full_name" autocomplete="name" maxlength="80" pattern="^[A-Za-z]+(?:[ .'-][A-Za-z]+)*$" title="<?php esc_attr_e( 'Use letters, spaces, apostrophes, periods, and hyphens only.', 'noyona-childtheme' ); ?>" placeholder="<?php esc_attr_e( 'Jane Doe', 'noyona-childtheme' ); ?>" required>
                 </div>
 
                 <div class="noyona-register-field">
                     <label for="noyona-register-email"><?php esc_html_e( 'Email Address:', 'noyona-childtheme' ); ?></label>
-                    <input id="noyona-register-email" type="email" name="email" autocomplete="email" placeholder="<?php esc_attr_e( 'janedoe@email.com', 'noyona-childtheme' ); ?>" required>
+                    <input id="noyona-register-email" type="email" name="email" autocomplete="email" maxlength="120" placeholder="<?php esc_attr_e( 'janedoe@email.com', 'noyona-childtheme' ); ?>" required>
                 </div>
 
                 <div class="noyona-register-field">
                     <label for="noyona-register-phone"><?php esc_html_e( 'Phone Number:', 'noyona-childtheme' ); ?></label>
-                    <input id="noyona-register-phone" type="text" name="phone" autocomplete="tel" placeholder="<?php esc_attr_e( '09123456789', 'noyona-childtheme' ); ?>" required>
+                    <input id="noyona-register-phone" type="tel" name="phone" autocomplete="tel" inputmode="numeric" maxlength="13" pattern="^(?:\+639\d{9}|09\d{9})$" title="<?php esc_attr_e( 'Use 09XXXXXXXXX or +639XXXXXXXXX.', 'noyona-childtheme' ); ?>" placeholder="<?php esc_attr_e( '09123456789', 'noyona-childtheme' ); ?>" required>
                 </div>
 
                 <div class="noyona-register-field">
                     <label for="noyona-register-password"><?php esc_html_e( 'Password:', 'noyona-childtheme' ); ?></label>
-                    <input id="noyona-register-password" type="password" name="password" autocomplete="new-password" placeholder="<?php esc_attr_e( 'Enter your password', 'noyona-childtheme' ); ?>" required>
+                    <input id="noyona-register-password" type="password" name="password" autocomplete="new-password" minlength="8" maxlength="64" pattern="(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,64}" title="<?php esc_attr_e( 'Minimum 8 characters, with at least 1 uppercase letter and 1 special character.', 'noyona-childtheme' ); ?>" placeholder="<?php esc_attr_e( 'Enter your password', 'noyona-childtheme' ); ?>" required>
                 </div>
 
                 <label class="noyona-register-terms">
@@ -415,6 +421,53 @@ function noyona_register_page_buffer_cleanup() {
 
 add_action( 'admin_post_nopriv_noyona_register', 'woocom_ct_handle_register_form' );
 add_action( 'admin_post_noyona_register', 'woocom_ct_handle_register_form' );
+function noyona_is_valid_registration_name( $name ) {
+    $name = trim( (string) $name );
+    if ( '' === $name || mb_strlen( $name ) > 80 ) {
+        return false;
+    }
+
+    return (bool) preg_match( "/^[A-Za-z]+(?:[ .'-][A-Za-z]+)*$/", $name );
+}
+
+function noyona_normalize_ph_mobile( $raw_phone ) {
+    $phone_digits = preg_replace( '/\D+/', '', (string) $raw_phone );
+    if ( ! is_string( $phone_digits ) || '' === $phone_digits ) {
+        return false;
+    }
+
+    if ( 0 === strpos( $phone_digits, '09' ) && 11 === strlen( $phone_digits ) ) {
+        return $phone_digits;
+    }
+
+    if ( 0 === strpos( $phone_digits, '639' ) && 12 === strlen( $phone_digits ) ) {
+        return '0' . substr( $phone_digits, 2 );
+    }
+
+    if ( 0 === strpos( $phone_digits, '9' ) && 10 === strlen( $phone_digits ) ) {
+        return '0' . $phone_digits;
+    }
+
+    return false;
+}
+
+function noyona_is_valid_registration_password( $password ) {
+    $password = (string) $password;
+    if ( strlen( $password ) < 8 || strlen( $password ) > 64 ) {
+        return false;
+    }
+
+    if ( ! preg_match( '/[A-Z]/', $password ) ) {
+        return false;
+    }
+
+    if ( ! preg_match( '/[^A-Za-z0-9]/', $password ) ) {
+        return false;
+    }
+
+    return true;
+}
+
 function woocom_ct_handle_register_form() {
     $redirect = wp_get_referer();
     if ( ! $redirect ) {
@@ -436,7 +489,7 @@ function woocom_ct_handle_register_form() {
     $first_name = isset( $_POST['first_name'] ) ? sanitize_text_field( wp_unslash( $_POST['first_name'] ) ) : '';
     $middle_name = isset( $_POST['middle_name'] ) ? sanitize_text_field( wp_unslash( $_POST['middle_name'] ) ) : '';
     $last_name = isset( $_POST['last_name'] ) ? sanitize_text_field( wp_unslash( $_POST['last_name'] ) ) : '';
-    $email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+    $email = isset( $_POST['email'] ) ? sanitize_email( trim( (string) wp_unslash( $_POST['email'] ) ) ) : '';
     $phone = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
     $password = isset( $_POST['password'] ) ? (string) wp_unslash( $_POST['password'] ) : '';
     $confirm_password = isset( $_POST['confirm_password'] ) ? (string) wp_unslash( $_POST['confirm_password'] ) : $password;
@@ -459,6 +512,11 @@ function woocom_ct_handle_register_form() {
         $last_name = $first_name;
     }
 
+    if ( ! noyona_is_valid_registration_name( $first_name ) || ! noyona_is_valid_registration_name( $last_name ) ) {
+        wp_safe_redirect( add_query_arg( 'register_error', 'invalid_name', $redirect ) );
+        exit;
+    }
+
     if ( '' === $first_name || '' === $last_name || '' === $email || '' === $phone || '' === $password ) {
         wp_safe_redirect( add_query_arg( 'register_error', 'missing_fields', $redirect ) );
         exit;
@@ -479,8 +537,13 @@ function woocom_ct_handle_register_form() {
         exit;
     }
 
-    $normalized_phone = function_exists( 'noyona_normalize_phone' ) ? noyona_normalize_phone( $phone ) : $phone;
-    if ( false === $normalized_phone || '' === trim( (string) $normalized_phone ) ) {
+    if ( ! noyona_is_valid_registration_password( $password ) ) {
+        wp_safe_redirect( add_query_arg( 'register_error', 'weak_password', $redirect ) );
+        exit;
+    }
+
+    $normalized_phone = noyona_normalize_ph_mobile( $phone );
+    if ( false === $normalized_phone ) {
         wp_safe_redirect( add_query_arg( 'register_error', 'invalid_phone', $redirect ) );
         exit;
     }
