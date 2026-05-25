@@ -78,7 +78,7 @@
     font-weight: 500;
     white-space: pre-line;
     font-family: var(--wp--preset--font-family--proxima-nova);
-    letter-spacing: -5%;
+    letter-spacing: -0.05em;
     /* color: #ce798a; */
     max-width: 700px;
 }
@@ -138,7 +138,7 @@
     width: 100%;
     /* max-width: 733px; */
     line-height: 1.5;
-    letter-spacing: -5%;
+    letter-spacing: -0.05em;
     font-family: var(--wp--preset--font-family--proxima-nova);
     font-weight: 400;
 }

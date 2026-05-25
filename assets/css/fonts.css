@@ -1,17 +1,44 @@
+/*
+ * Local font registration — Noyona child theme.
+ *
+ * Phase 2A (font registration cleanup):
+ *   - The "Proxima Nova" @font-face blocks below are TEMPORARY COMPATIBILITY ALIASES.
+ *     Proxima Nova font files have been removed from assets/fonts/, but the
+ *     `proxima-nova` slug in theme.json and many component CSS files still
+ *     reference `font-family: "Proxima Nova"`. To avoid a site-wide regression
+ *     to system fonts before component migration, each `font-family: "Proxima Nova"`
+ *     @font-face below now points at the corresponding-weight Poppins TTF file.
+ *     This makes existing Proxima Nova consumers render as Poppins immediately.
+ *   - The real `font-family: "Poppins"` @font-face blocks register Poppins
+ *     directly. The `poppins` slug in theme.json points at this family.
+ *   - Hero Regular is NOT registered here. Hero Regular font files are not
+ *     yet present in assets/fonts/. See docs/typography-color-token-implementation-plan.md
+ *     §5 #14 for the Hero Regular blocker.
+ *
+ * Phase 2 next steps (NOT done here): migrate component CSS and theme.json
+ * element styles from `proxima-nova` to `poppins`, then retire the compatibility
+ * aliases below.
+ */
+
+/* === Compatibility aliases: "Proxima Nova" -> Poppins ============================
+   These exist only to keep existing `font-family: "Proxima Nova"` consumers working
+   during Phase 2 component migration. They are TEMPORARY. Once all consumers have
+   migrated to the `poppins` slug, the four "Proxima Nova" blocks (and the one
+   "Proxima Nova Light" block) below can be deleted. */
+
 @font-face {
   font-family: "Proxima Nova";
-  src: local("Proxima Nova"), local("ProximaNova-Regular"),
-    url("../fonts/proximanova_regular.ttf") format("truetype");
+  src: local("Poppins Regular"), local("Poppins-Regular"),
+    url("../fonts/Poppins-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
-/* No dedicated semibold file is available; use bold as the closest weight. */
 @font-face {
   font-family: "Proxima Nova";
-  src: local("Proxima Nova Semibold"), local("ProximaNova-Semibold"),
-    url("../fonts/proximanova_bold.otf") format("opentype");
+  src: local("Poppins SemiBold"), local("Poppins-SemiBold"),
+    url("../fonts/Poppins-SemiBold.ttf") format("truetype");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -19,8 +46,8 @@
 
 @font-face {
   font-family: "Proxima Nova";
-  src: local("Proxima Nova Bold"), local("ProximaNova-Bold"),
-    url("../fonts/proximanova_bold.otf") format("opentype");
+  src: local("Poppins Bold"), local("Poppins-Bold"),
+    url("../fonts/Poppins-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -28,8 +55,8 @@
 
 @font-face {
   font-family: "Proxima Nova";
-  src: local("Proxima Nova ExtraBold"), local("ProximaNova-Extrabold"),
-    url("../fonts/proximanova_extrabold.otf") format("opentype");
+  src: local("Poppins ExtraBold"), local("Poppins-ExtraBold"),
+    url("../fonts/Poppins-ExtraBold.ttf") format("truetype");
   font-weight: 800;
   font-style: normal;
   font-display: swap;
@@ -37,8 +64,8 @@
 
 @font-face {
   font-family: "Proxima Nova";
-  src: local("Proxima Nova Black"), local("ProximaNova-Black"),
-    url("../fonts/proximanova_black.otf") format("opentype");
+  src: local("Poppins Black"), local("Poppins-Black"),
+    url("../fonts/Poppins-Black.ttf") format("truetype");
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -46,9 +73,95 @@
 
 @font-face {
   font-family: "Proxima Nova Light";
-  src: local("Proxima Nova Light"), local("ProximaNova-Light"),
-    url("../fonts/proximanova_light.otf") format("opentype");
+  src: local("Poppins Light"), local("Poppins-Light"),
+    url("../fonts/Poppins-Light.ttf") format("truetype");
   font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* === Real Poppins family =========================================================
+   Consumed via the `poppins` slug in theme.json. Component CSS should migrate to
+   `var(--wp--preset--font-family--poppins)` (or the corresponding utility) in
+   Phase 2 component migration. */
+
+@font-face {
+  font-family: "Poppins";
+  src: local("Poppins Light"), local("Poppins-Light"),
+    url("../fonts/Poppins-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: local("Poppins Regular"), local("Poppins-Regular"),
+    url("../fonts/Poppins-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: local("Poppins Italic"), local("Poppins-Italic"),
+    url("../fonts/Poppins-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: local("Poppins Medium"), local("Poppins-Medium"),
+    url("../fonts/Poppins-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: local("Poppins SemiBold"), local("Poppins-SemiBold"),
+    url("../fonts/Poppins-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: local("Poppins Bold"), local("Poppins-Bold"),
+    url("../fonts/Poppins-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: local("Poppins BoldItalic"), local("Poppins-BoldItalic"),
+    url("../fonts/Poppins-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: local("Poppins ExtraBold"), local("Poppins-ExtraBold"),
+    url("../fonts/Poppins-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: local("Poppins Black"), local("Poppins-Black"),
+    url("../fonts/Poppins-Black.ttf") format("truetype");
+  font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
