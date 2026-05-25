@@ -64,7 +64,7 @@
     color: #fff; /* var(--brand-font-color, #4b2f1e); */
     font-size: clamp(16px, 1.4vw, 18px);
     white-space: nowrap;
-    letter-spacing: -5%;
+    letter-spacing: -0.05em;
 }
 
 /* Logo wrapper only exists when logo is passed from PHP */
