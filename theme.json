@@ -18,6 +18,11 @@
           "fontFamily": "\"Noto Serif SemiCondensed\", \"Noto Serif\", \"Times New Roman\", serif",
           "name": "Noto Serif SemiCondensed",
           "slug": "noto-serif-semicondensed"
+        },
+        {
+          "fontFamily": "\"Poppins\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+          "name": "Poppins",
+          "slug": "poppins"
         }
       ],
       "fluid": true,
@@ -59,7 +64,7 @@
     "typography": {
       "fontSize": "var(--wp--preset--font-size--body)",
       "fontWeight": "400",
-      "fontFamily": "var(--wp--preset--font-family--proxima-nova)"
+      "fontFamily": "var(--wp--preset--font-family--poppins)"
     },
     "elements": {
       "h1": {
@@ -76,8 +81,7 @@
         "typography": {
           "fontSize": "var(--wp--preset--font-size--h-2)",
           "fontWeight": "700",
-          "lineHeight": "1.1",
-          "fontFamily": "var(--wp--preset--font-family--proxima-nova)"
+          "fontFamily": "var(--wp--preset--font-family--poppins)"
         }
       },
       "h3": {

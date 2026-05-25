@@ -49,7 +49,7 @@ All new tokens are additive — existing `body`, `h-3`, `h-2`, `h-1` slugs were 
 
 **Weights are not encoded into the size tokens.** `theme.json` `fontSizes` entries only carry `slug` / `name` / `size`. Weight is applied per-element style or per-component CSS in Phase 2, when consumers opt in.
 
-**`line-height` is not baked into the size tokens.** Designer Typography Guide line-height (1.5 × font-size) rollout is Phase 2.
+**`line-height` is not baked into the size tokens.** Production line-height = `normal` (designer-confirmed post-Phase 1, plan §5 #6). No Phase 2 line-height migration to 1.5× is planned.
 
 **`letter-spacing` is not baked into the size tokens.** Typography Guide does not specify letter-spacing.
 
@@ -95,7 +95,7 @@ Working-tree observations (not part of this implementation):
 - Hero Regular font files are **not present** in `assets/fonts/`.
 - Proxima Nova font files are marked for deletion in the working tree (also not part of this implementation).
 
-**Consequence for Phase 1:** Adding `hero-regular` or `poppins` font-family tokens to `theme.json` now would either silently fall back to system fonts (because no `@font-face` rule loads them) or risk a Flash Of Invisible Text / regression. Per the implementation plan §5 #14 (Hero Regular / Poppins font asset availability blocker) and §6.1 (gating), font-family token additions are deferred until:
+**Consequence for Phase 1 (historical — superseded by Phase 2A):** At Phase 1 time, adding `hero-regular` or `poppins` font-family tokens to `theme.json` would have silently fallen back to system fonts (because no `@font-face` rule loaded them). The plan §5 #14 / §6.1 deferred font-family token additions until those steps could be done. **Phase 2A subsequently registered Poppins and added the `poppins` slug.** Hero Regular files are still missing, but per the post-Phase 2A decision (Poppins-everywhere Phase 2B target), Hero Regular is no longer a blocker — it is an optional future brand refinement. The pre-Phase 2A steps that remained were:
 
 1. Font files are committed to `assets/fonts/`.
 2. `@font-face` declarations are added to `assets/css/fonts.css` (or equivalent).
@@ -174,18 +174,34 @@ Per Phase 1 hard-stop rules:
 
 ---
 
-## 9. Remaining blockers before Phase 2
+## 9. Blockers — resolved and remaining
 
-Phase 2 component migration is gated on the following clarifications (from the implementation plan):
+### 9.1 Resolved post-Phase 1 (designer decisions captured in the implementation plan)
 
-1. **Pink interactive role mapping** (§5 #1) — Color Palette Guide names `#EFB5BE` / `#E199A4` / `#FBDDE2` as Primary / Secondary / Secondary, but the interactive mapping (CTA fill / CTA hover / soft bg / accent / badge) is still pending.
-2. **Primary CTA hover color** (§5 #2) — no hex provided.
-3. **Hero Regular / Poppins font asset availability** (§5 #14) — see §5 of this report; assets are not yet loaded.
-4. **Mobile H1 exact size** (§5 #16) — designer mobile table malformed; line-height implies ~40px, awaiting confirmation.
-5. **Line-height 1.5 vs prior "`normal`" note** (§5 #6) — Typography Guide says 1.5×, prior project note said `normal`; needs re-confirmation before global rollout. WCAG 2.2 SC 1.4.12 text-spacing must be preserved.
-6. **CTA text color / accessibility decision** (§5 #18) — Color Palette Guide implies dark text on pink fills (white-on-pink fails contrast); existing white-on-pink CTAs need contrast audit before remediation.
-7. **Newsletter emphasis target** (§5 #15) — `.newsletter-strip__title em` should migrate to Hero Regular, Poppins Italic, or another designer-approved style; pending.
-8. **`110 / 50 / 20` screen padding confirmation** (§5 #19, §8.5) — these values are not from the Layout Grid Specification; awaiting designer decision whether to retain (marketing/page-inset) or replace with the universal grid margins (24 / 24 / 16).
+| # | Topic | Decision |
+|---|---|---|
+| §5 #1 | **Pink interactive role mapping** | Fully resolved. CTA fill = `#EFB5BE`, CTA hover = `#FBDDE2`, CTA text = `#333333`, **soft background = `#FBDDE2`** (same `brand-pink-light-blush` token, contextual use), **accent / badge = `#D81B60`** (new `brand-pink-accent` token proposed in plan §6.3; use white text for WCAG AA ~4.95:1). |
+| §5 #2 | **Primary CTA hover color** | `#FBDDE2` (Light Blush). Maps to existing `brand-pink-light-blush` token. No new `cta-hover` slug needed. |
+| §5 #6 | **Line-height system** | Production = **`normal`**. The earlier "1.5 × font-size" interpretation is withdrawn. **No Phase 2 line-height migration planned.** WCAG 2.2 SC 1.4.12 text-spacing override behavior still required. |
+| §5 #15 | **Newsletter emphasis (`.newsletter-strip__title em`)** | Target = **Poppins Bold**. Times New Roman remains as legacy until Phase 2 migration. No `times-italic` token. |
+| §5 #16 | **Mobile H1 size** | **40px** (designer-confirmed). |
+| §5 #17 | **Color slug naming** | Already resolved by the Color Palette Guide: `brand-pink-soft` (Primary, `#EFB5BE`), `brand-pink-muted-rose` (Secondary, `#E199A4`), `brand-pink-light-blush` (Secondary, `#FBDDE2`). Phase 1 shipped these slugs. |
+| §5 #18 | **CTA text color on pink fills** | `#333333` (dark text). Migrate existing white-on-pink CTAs to `#333333` in Phase 2. |
+| §5 #19 | **Screen padding scales** | Both coexist: `110 / 50 / 20` for marketing / large-section / page-inset; `24 / 24 / 16` for the universal layout grid outer margin. Each layout picks the appropriate scale in Phase 2. |
+
+### 9.2 Status of post-Phase 1 blockers (after Phase 2A + post-Phase 2A decisions)
+
+| # | Topic | Status / detail |
+|---|---|---|
+| §5 #14 | **Font asset registration (Poppins)** | ✅ **Resolved by Phase 2A** — see `docs/typography-color-token-phase-2a-font-registration.md`. Poppins TTFs confirmed in `assets/fonts/`; OFL license committed; `@font-face` rules registered in `assets/css/fonts.css` (300 / 400 / 400 italic / 500 / 600 / 700 / 700 italic / 800 / 900); existing enqueue at `inc/enqueue.php` confirmed loading; `poppins` slug added to `theme.json` (additive — not yet consumed). |
+| §5 #14 | **Hero Regular font asset availability** | 🟡 **Not a blocker for Phase 2B.** Hero Regular files are still missing, but the practical Phase 2B target for H1 / hero / page / campaign / key-brand-statement headings is now **Poppins Regular / 400**, not Hero Regular. If Hero Regular files are provided later, the H1 / hero role may be re-migrated to `hero-regular` in a separate optional brand-refinement phase (plan §6.1, §6.4, §16 "Optional future"). |
+| §5 #14 | **⚠ Proxima Nova removal hazard** | ✅ **Resolved by Phase 2A.** The broken Proxima `@font-face` rules in `fonts.css` were rewritten as temporary compatibility aliases pointing at the Poppins TTFs. `proxima-nova` consumers now render in real Poppins instead of falling back to system sans-serif. The aliases retire in Phase 3 cleanup once all consumers have migrated to the `poppins` slug. |
+| §5 #1 | **Pink interactive role mapping** | ✅ **Fully resolved.** CTA fill = `#EFB5BE`, CTA hover = `#FBDDE2`, CTA text = `#333333`, **soft background = `#FBDDE2`**, **accent / badge = `#D81B60`** (new `brand-pink-accent` token proposed in plan §6.3; use white text for WCAG AA ~4.95:1). |
+| Plan §16 (Phase 2B) | **Component font-family migration** (`proxima-nova` → `poppins`, H1 → `poppins` 400) | ⏭ Next Phase 2B sub-step. Per-component swap of `font-family: var(--wp--preset--font-family--proxima-nova)` / `font-family: "Proxima Nova"` → `var(--wp--preset--font-family--poppins)`, plus H1 element-style from `noto-serif-semicondensed` → `poppins` weight 400. Visual delta should be ~none for body / H2 / H3 thanks to Phase 2A compatibility aliases. H1 will visibly change from Noto Serif to Poppins Regular. |
+| §5 #15 | **Newsletter emphasis migration to Poppins Bold** | ⏭ Phase 2B sub-step. Migrate `blocks/newsletter-strip/style.css:36` from Times New Roman literal to Poppins Bold. |
+| Plan §6.3 | **`brand-pink-accent` token (`#D81B60`)** | ⏭ Documentation-only proposal post-Phase 2A. Phase 2B-or-later additive `theme.json` change. |
+
+All other clarifications (line-height = `normal`, screen padding coexistence, CTA pink mapping, CTA hover, CTA text, soft background, mobile H1, newsletter emphasis target, color slug naming) are closed.
 
 ---
 
