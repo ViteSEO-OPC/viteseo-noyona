@@ -230,6 +230,34 @@ function noyona_account_replace_lost_password_text( $translated_text, $text, $do
     return $translated_text;
 }
 
+/* ----- Lost-password validation (email format + registered account) ----- */
+add_filter( 'lostpassword_post', 'noyona_validate_lost_password_email', 10, 2 );
+function noyona_validate_lost_password_email( $errors, $user_data ) {
+    if ( ! ( $errors instanceof WP_Error ) ) {
+        return $errors;
+    }
+
+    $user_login = isset( $_POST['user_login'] ) ? sanitize_text_field( wp_unslash( $_POST['user_login'] ) ) : '';
+    $email      = sanitize_email( $user_login );
+
+    if ( '' === $email || ! is_email( $email ) ) {
+        $errors->add(
+            'invalid_email',
+            __( 'Please enter a valid email address.', 'noyona-childtheme' )
+        );
+        return $errors;
+    }
+
+    if ( ! email_exists( $email ) ) {
+        $errors->add(
+            'invalidcombo',
+            __( 'No account is registered with that email address.', 'noyona-childtheme' )
+        );
+    }
+
+    return $errors;
+}
+
 /* ----- Hide header/footer template parts on the lost-password / reset-password endpoint only ----- */
 add_filter( 'render_block_core/template-part', 'noyona_hide_header_footer_on_lost_password', 10, 2 );
 function noyona_hide_header_footer_on_lost_password( $block_content, $parsed_block ) {
