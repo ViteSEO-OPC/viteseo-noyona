@@ -303,13 +303,28 @@ function noyona_normalize_login_form_controls() {
           });
         }
 
+        // Purge any stale toggles outside the active wrapper (caused by Woo's re-wrap of #password).
+        if (passwordRow) {
+          passwordRow.querySelectorAll('.noyona-password-toggle').forEach(function (el) {
+            if (!wrapper.contains(el)) {
+              el.remove();
+            }
+          });
+        }
+
+        // De-duplicate any extra toggles inside the active wrapper, keep the first.
+        var wrapperToggles = wrapper.querySelectorAll('.noyona-password-toggle');
+        for (var i = 1; i < wrapperToggles.length; i++) {
+          wrapperToggles[i].remove();
+        }
+
         var customToggle = wrapper.querySelector('.noyona-password-toggle');
         if (!customToggle) {
           customToggle = document.createElement('button');
           customToggle.type = 'button';
           customToggle.className = 'noyona-password-toggle';
           customToggle.setAttribute('aria-label', 'Show password');
-          customToggle.innerHTML = '<i class="fa-regular fa-eye" aria-hidden="true"></i>';
+          customToggle.innerHTML = '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>';
           wrapper.appendChild(customToggle);
 
           customToggle.addEventListener('click', function () {
@@ -317,8 +332,8 @@ function noyona_normalize_login_form_controls() {
             password.setAttribute('type', isHidden ? 'text' : 'password');
             customToggle.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
             customToggle.innerHTML = isHidden
-              ? '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>'
-              : '<i class="fa-regular fa-eye" aria-hidden="true"></i>';
+              ? '<i class="fa-regular fa-eye" aria-hidden="true"></i>'
+              : '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>';
           });
         }
       }
