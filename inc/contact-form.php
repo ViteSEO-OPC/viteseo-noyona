@@ -50,6 +50,14 @@ function noyona_handle_contact_form() {
         exit;
     }
 
+    if ( function_exists( 'noyona_is_recaptcha_enabled' ) && noyona_is_recaptcha_enabled( 'v2' ) && function_exists( 'noyona_verify_recaptcha_from_post' ) ) {
+        $captcha_result = noyona_verify_recaptcha_from_post( 'g-recaptcha-response', '', 'v2' );
+        if ( is_wp_error( $captcha_result ) ) {
+            wp_safe_redirect( add_query_arg( 'cf_error', 'captcha_failed', wp_get_referer() ?: home_url('/') ) );
+            exit;
+        }
+    }
+
     // OPTIONAL: Rate limit by IP (simple spam control)
     $ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown';
     $key = 'noyona_cf_' . md5($ip);
@@ -122,5 +130,76 @@ function noyona_handle_contact_form() {
 
     wp_safe_redirect( add_query_arg('cf_success', '1', wp_get_referer() ?: home_url('/') ) );
     exit;
+}
+
+add_filter( 'wpcf7_validate', 'noyona_validate_contact_form_7_recaptcha_v2', 20, 2 );
+function noyona_validate_contact_form_7_recaptcha_v2( $result, $tags ) {
+    if ( ! function_exists( 'noyona_is_recaptcha_enabled' ) || ! noyona_is_recaptcha_enabled( 'v2' ) ) {
+        return $result;
+    }
+
+    if ( ! class_exists( 'WPCF7_Submission' ) ) {
+        return $result;
+    }
+
+    $is_noyona_contact_cf7_form = isset( $_POST['noyona_contact_cf7_form'] )
+        ? sanitize_text_field( wp_unslash( $_POST['noyona_contact_cf7_form'] ) )
+        : '';
+    $is_noyona_contact_cf7_form = ( '1' === $is_noyona_contact_cf7_form );
+
+    // Fallback matcher in case the hidden marker is stripped/missing in transit.
+    if ( ! $is_noyona_contact_cf7_form ) {
+        $is_noyona_contact_cf7_form = isset( $_POST['_wpcf7'], $_POST['first_name'], $_POST['last_name'], $_POST['subject'], $_POST['message'] );
+    }
+
+    if ( ! $is_noyona_contact_cf7_form ) {
+        return $result;
+    }
+
+    $submission = WPCF7_Submission::get_instance();
+    if ( ! $submission ) {
+        return $result;
+    }
+
+    $captcha_token = $submission->get_posted_data( 'g-recaptcha-response' );
+    if ( is_array( $captcha_token ) ) {
+        $captcha_token = reset( $captcha_token );
+    }
+    if ( '' === trim( (string) $captcha_token ) && isset( $_POST['g-recaptcha-response'] ) ) {
+        $captcha_token = wp_unslash( $_POST['g-recaptcha-response'] );
+    }
+    $captcha_token = sanitize_text_field( (string) $captcha_token );
+    $remote_ip     = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+
+    if ( ! function_exists( 'noyona_verify_recaptcha_token' ) ) {
+        return $result;
+    }
+
+    $captcha_result = noyona_verify_recaptcha_token( $captcha_token, $remote_ip, '', 'v2' );
+    if ( is_wp_error( $captcha_result ) && method_exists( $result, 'invalidate' ) ) {
+        $GLOBALS['noyona_cf7_captcha_failed'] = true;
+        $result->invalidate(
+            array(
+                'name' => 'noyona_contact_cf7_captcha',
+                'type' => 'text',
+            ),
+            __( 'Captcha verification failed. Please try again.', 'noyona-childtheme' )
+        );
+    }
+
+    return $result;
+}
+
+add_filter( 'wpcf7_display_message', 'noyona_contact_cf7_captcha_display_message', 20, 2 );
+function noyona_contact_cf7_captcha_display_message( $message, $status ) {
+    if ( 'validation_error' !== $status ) {
+        return $message;
+    }
+
+    if ( empty( $GLOBALS['noyona_cf7_captcha_failed'] ) ) {
+        return $message;
+    }
+
+    return __( 'Captcha verification failed. Please try again.', 'noyona-childtheme' );
 }
 
