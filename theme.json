@@ -18,6 +18,11 @@
           "fontFamily": "\"Noto Serif SemiCondensed\", \"Noto Serif\", \"Times New Roman\", serif",
           "name": "Noto Serif SemiCondensed",
           "slug": "noto-serif-semicondensed"
+        },
+        {
+          "fontFamily": "\"Poppins\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+          "name": "Poppins",
+          "slug": "poppins"
         }
       ],
       "fluid": true,
@@ -25,12 +30,32 @@
         { "slug": "body", "name": "Body", "size": "clamp(16px, 1.4vw, 20px)" },
         { "slug": "h-3", "name": "H3", "size": "clamp(18px, 2vw, 24px)" },
         { "slug": "h-2", "name": "H2", "size": "clamp(32px, 4.2vw, 55px)" },
-        { "slug": "h-1", "name": "H1", "size": "clamp(44px, 6vw, 96px)" }
+        { "slug": "h-1", "name": "H1", "size": "clamp(44px, 6vw, 96px)" },
+        { "slug": "h-4", "name": "H4", "size": "clamp(24px, 2.5vw, 32px)" },
+        { "slug": "h-5", "name": "H5", "size": "clamp(20px, 1.9vw, 24px)" },
+        { "slug": "nav-button", "name": "Navigation / Button", "size": "16px" },
+        { "slug": "label", "name": "Label", "size": "16px" },
+        { "slug": "caption", "name": "Caption", "size": "16px" },
+        { "slug": "helper", "name": "Helper", "size": "16px" },
+        { "slug": "input", "name": "Input", "size": "16px" }
       ]
     },
     "color": {
       "palette": [
-        { "slug": "ink", "name": "Ink", "color": "#333333" }
+        { "slug": "ink", "name": "Ink", "color": "#333333" },
+        { "slug": "brand-pink-soft", "name": "Brand Pink Soft / Primary", "color": "#EFB5BE" },
+        { "slug": "brand-pink-muted-rose", "name": "Brand Pink Muted Rose / Secondary", "color": "#E199A4" },
+        { "slug": "brand-pink-light-blush", "name": "Brand Pink Light Blush / Secondary", "color": "#FBDDE2" },
+        { "slug": "text-main", "name": "Text Main", "color": "#000000" },
+        { "slug": "text-muted", "name": "Text Muted", "color": "#525252" },
+        { "slug": "white", "name": "White", "color": "#FFFFFF" },
+        { "slug": "input-bg", "name": "Input Background", "color": "#FFFFFF" },
+        { "slug": "placeholder", "name": "Placeholder", "color": "#525252" },
+        { "slug": "border-strong", "name": "Border Strong", "color": "#000000" },
+        { "slug": "status-info", "name": "Status Info", "color": "#525252" },
+        { "slug": "status-success", "name": "Status Success (provisional)", "color": "#E6F4EA" },
+        { "slug": "status-warning", "name": "Status Warning (provisional)", "color": "#FFF8E1" },
+        { "slug": "status-error", "name": "Status Error (provisional)", "color": "#FDEAEA" }
       ]
     }
   },
@@ -39,7 +64,7 @@
     "typography": {
       "fontSize": "var(--wp--preset--font-size--body)",
       "fontWeight": "400",
-      "fontFamily": "var(--wp--preset--font-family--proxima-nova)"
+      "fontFamily": "var(--wp--preset--font-family--poppins)"
     },
     "elements": {
       "h1": {
@@ -56,8 +81,7 @@
         "typography": {
           "fontSize": "var(--wp--preset--font-size--h-2)",
           "fontWeight": "700",
-          "lineHeight": "1.1",
-          "fontFamily": "var(--wp--preset--font-family--proxima-nova)"
+          "fontFamily": "var(--wp--preset--font-family--poppins)"
         }
       },
       "h3": {

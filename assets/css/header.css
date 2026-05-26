@@ -297,7 +297,7 @@ body.has-scrolled-header .site-logo-text {
   gap: 0.4rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-bottom: 2px solid transparent;
-  letter-spacing: -5%;
+  letter-spacing: -0.05em;
 }
 
 .nav-link--button {
@@ -383,7 +383,7 @@ body.has-scrolled-header .site-logo-text {
   font-family: "Proxima Nova", var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
   font-size: clamp(18px, 1.4vw, 20px);
   font-weight: 600;
-  letter-spacing: -5%;
+  letter-spacing: -0.05em;
   transition: background 0.2s, color 0.2s;
 }
 

@@ -38,6 +38,73 @@ Tags:
   --footer-btn-bg: #E199A4;
 }
 
+:root {
+  /* === Phase 1 design-token plumbing ===
+     Additive only. Component migration happens in Phase 2.
+     See docs/typography-color-token-implementation-plan.md and
+         docs/typography-color-token-phase-1-implementation.md */
+
+  /* === Radius scale (designer-confirmed; consumers opt in per component in Phase 2) === */
+  --noyona-radius-card: 24px;
+  --noyona-radius-cta: 16px;
+  --noyona-radius-input: 12px;
+
+  /* === Card padding scale (designer-confirmed; consumers opt in per component in Phase 2) === */
+  --noyona-card-pad-desktop: 15px;
+  --noyona-card-pad-tablet: 12px;
+  --noyona-card-pad-mobile: 10px;
+
+  /* === Legacy screen padding / large-section inset tokens ===
+     These are NOT the universal layout grid outer margins.
+     Pending designer confirmation: retain, replace, or remove in Phase 2. */
+  --noyona-screen-pad-desktop: 110px;
+  --noyona-screen-pad-tablet: 50px;
+  --noyona-screen-pad-mobile: 20px;
+  --noyona-screen-pad: clamp(20px, 6vw, 110px);
+
+  /* === Typography helpers ===
+     This is only for the exact invalid letter-spacing bug fix.
+     It is NOT a universal tracking system. */
+  --noyona-letter-spacing-bugfix: -0.05em;
+
+  /* === Minimum text size (designer floor; Phase 2 consumers opt in) === */
+  --noyona-text-min: 16px;
+
+  /* === Brand color shorthands aligned to the Color Palette Guide ===
+     Interactive role mapping is pending. Do not swap colors site-wide in Phase 1. */
+  --noyona-color-pink-soft: var(--wp--preset--color--brand-pink-soft, #EFB5BE);
+  --noyona-color-pink-muted-rose: var(--wp--preset--color--brand-pink-muted-rose, #E199A4);
+  --noyona-color-pink-light-blush: var(--wp--preset--color--brand-pink-light-blush, #FBDDE2);
+  --noyona-color-text-main: var(--wp--preset--color--text-main, #000000);
+  --noyona-color-text-muted: var(--wp--preset--color--text-muted, #525252);
+  --noyona-color-white: var(--wp--preset--color--white, #FFFFFF);
+  --noyona-color-input-bg: var(--wp--preset--color--input-bg, #FFFFFF);
+  --noyona-color-placeholder: var(--wp--preset--color--placeholder, #525252);
+  --noyona-color-border-strong: var(--wp--preset--color--border-strong, #000000);
+
+  /* === Provisional status color shorthands ===
+     Not designer-final. Do not consume globally in Phase 1. */
+  --noyona-color-status-info: var(--wp--preset--color--status-info, #525252);
+  --noyona-color-status-success: var(--wp--preset--color--status-success, #E6F4EA);
+  --noyona-color-status-warning: var(--wp--preset--color--status-warning, #FFF8E1);
+  --noyona-color-status-error: var(--wp--preset--color--status-error, #FDEAEA);
+
+  /* === Layout grid baseline (designer-approved; Phase 2 consumers opt in) === */
+  --noyona-grid-columns-desktop: 12;
+  --noyona-grid-columns-tablet: 8;
+  --noyona-grid-columns-mobile: 4;
+
+  --noyona-grid-gutter-desktop: 24px;
+  --noyona-grid-gutter-tablet: 16px;
+  --noyona-grid-gutter-mobile: 16px;
+
+  --noyona-grid-margin-desktop: 24px;
+  --noyona-grid-margin-tablet: 24px;
+  --noyona-grid-margin-mobile: 16px;
+
+  /* CTA hover token intentionally NOT defined yet. */
+}
+
 /* Global reset for the top edge */
 html,
 body,
