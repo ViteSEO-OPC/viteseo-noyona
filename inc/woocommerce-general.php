@@ -200,6 +200,39 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
     $order    = isset( $query['order'] ) ? $query['order'] : 'ASC';
     $orderby  = isset( $query['orderBy'] ) ? $query['orderBy'] : 'title';
 
+    // Honor the Woo catalog sorter (e.g. ?orderby=price, popularity, rating, date, price-desc).
+    $selected_orderby = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '';
+    switch ( $selected_orderby ) {
+        case 'popularity':
+            $orderby = 'popularity';
+            $order   = 'DESC';
+            break;
+        case 'rating':
+            $orderby = 'rating';
+            $order   = 'DESC';
+            break;
+        case 'date':
+            $orderby = 'date';
+            $order   = 'DESC';
+            break;
+        case 'price':
+            $orderby = 'price';
+            $order   = 'ASC';
+            break;
+        case 'price-desc':
+            $orderby = 'price';
+            $order   = 'DESC';
+            break;
+        case 'title':
+        case 'menu_order':
+            $orderby = $selected_orderby;
+            // keep block default order
+            break;
+        default:
+            // Keep block-defined defaults when no valid catalog sorter is selected.
+            break;
+    }
+
     $args = array(
         'status'  => 'publish',
         'limit'   => $per_page,
@@ -252,6 +285,32 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
 
     $products = wc_get_products( $args );
     $products = noyona_filter_products_by_price_range( $products, $min_price, $max_price );
+
+    // Ensure visual card order strictly matches the selected catalog sort.
+    // For price sorts, use each product's current effective price (sale/current),
+    // so cards with old/regular price crossed out still sort by the live price.
+    if ( in_array( $selected_orderby, array( 'price', 'price-desc' ), true ) ) {
+        usort(
+            $products,
+            static function ( $a, $b ) use ( $selected_orderby ) {
+                $a_price = ( is_object( $a ) && method_exists( $a, 'get_price' ) ) ? (float) $a->get_price() : 0.0;
+                $b_price = ( is_object( $b ) && method_exists( $b, 'get_price' ) ) ? (float) $b->get_price() : 0.0;
+
+                if ( $a_price === $b_price ) {
+                    $a_name = ( is_object( $a ) && method_exists( $a, 'get_name' ) ) ? (string) $a->get_name() : '';
+                    $b_name = ( is_object( $b ) && method_exists( $b, 'get_name' ) ) ? (string) $b->get_name() : '';
+                    return strcasecmp( $a_name, $b_name );
+                }
+
+                if ( 'price-desc' === $selected_orderby ) {
+                    return $b_price <=> $a_price;
+                }
+
+                return $a_price <=> $b_price;
+            }
+        );
+    }
+
     if ( $has_price_range ) {
         $products = array_slice( $products, ( $paged - 1 ) * $per_page, $per_page );
     }
