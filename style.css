@@ -363,6 +363,61 @@ body.woocommerce-account .entry-title {
   box-shadow: 0 0 0 3px rgba(156, 180, 218, 0.22);
 }
 
+/* Register password fields: custom show/hide toggle (mirrors login). */
+.noyona-register-form .password-input {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible;
+}
+
+.noyona-register-form .password-input input {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding-right: 2.9rem;
+}
+
+.noyona-register-form .noyona-password-toggle {
+  position: absolute !important;
+  top: 50% !important;
+  right: 0.74rem !important;
+  left: auto !important;
+  transform: translateY(-50%) !important;
+  width: 22px !important;
+  height: 22px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #71809a;
+  cursor: pointer;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.noyona-register-form .noyona-password-toggle i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Hide Woo's auto-injected toggle inside register password wrappers. */
+.noyona-register-form .show-password-input {
+  display: none !important;
+}
+
+/* Hide Edge/IE native password reveal/clear controls on register password fields. */
+.noyona-register-form input[type="password"]::-ms-reveal,
+.noyona-register-form input[type="password"]::-ms-clear {
+  display: none !important;
+}
+
 
 .noyona-register-terms {
   display: flex;
