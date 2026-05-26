@@ -24,9 +24,24 @@ $placeholder    = isset( $atts['placeholder'] ) ? (string) $atts['placeholder'] 
 $button_text    = isset( $atts['buttonText'] ) ? (string) $atts['buttonText'] : '';
 $form_action    = isset( $atts['formAction'] ) ? (string) $atts['formAction'] : '#';
 $bg             = sanitize_hex_color( $atts['backgroundColor'] );
+$captcha_markup = '';
 
 if ( ! $bg ) {
     $bg = '#E8BCC3';
+}
+
+$default_newsletter_action = admin_url( 'admin-post.php' );
+if ( '' === trim( $form_action ) || '#' === trim( $form_action ) ) {
+    $form_action = $default_newsletter_action;
+}
+
+if ( function_exists( 'noyona_is_recaptcha_enabled' ) && noyona_is_recaptcha_enabled() ) {
+    if ( function_exists( 'noyona_enqueue_recaptcha_script' ) ) {
+        noyona_enqueue_recaptcha_script();
+    }
+    if ( function_exists( 'noyona_get_recaptcha_widget_markup' ) ) {
+        $captcha_markup = noyona_get_recaptcha_widget_markup( 'newsletter-strip__captcha' );
+    }
 }
 ?>
 
@@ -49,6 +64,8 @@ if ( ! $bg ) {
         <?php endif; ?>
 
         <form class="newsletter-strip__form" method="post" action="<?php echo esc_url( $form_action ); ?>">
+            <input type="hidden" name="action" value="noyona_newsletter_subscribe" />
+            <?php wp_nonce_field( 'noyona_newsletter_subscribe', 'noyona_newsletter_nonce' ); ?>
             <input
                 type="email"
                 class="newsletter-strip__input"
@@ -56,6 +73,9 @@ if ( ! $bg ) {
                 placeholder="<?php echo esc_attr( $placeholder ); ?>"
                 required
             />
+            <?php if ( '' !== $captcha_markup ) : ?>
+                <?php echo $captcha_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <?php endif; ?>
             <button type="submit" class="newsletter-strip__button"><?php echo esc_html( $button_text ); ?></button>
         </form>
     </div>
