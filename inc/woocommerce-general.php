@@ -10,7 +10,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 /* ----- Products per page on shop/category archives ----- */
 /**
  * Control products-per-page on shop/category archives.
- * Default is 14, with optional URL override for testing: ?ppp=2
+ *
+ * IMPORTANT: this value drives the MAIN WP/Woo query — i.e. the result count
+ * ("Showing 1-N of TOTAL"), the WP query pagination block, and the per-page
+ * pages cap (max_num_pages). It MUST match the per-page value used by the
+ * custom shop renderer in `noyona_render_shop_archive_product_cards()` and by
+ * the block templates' `perPage` attribute, otherwise the result count, the
+ * visible card count, and the paginator will all disagree (and infinite
+ * scroll's "next page" link can disappear when the main query collapses to
+ * one page while the renderer thinks there should still be more).
+ *
+ * Locked at 12 to mirror the 3-col × 4-row grid used by the renderer and the
+ * infinite-scroll batch size. No URL override — production behaviour is a
+ * uniform 12 cards per infinite-scroll batch (or fewer for the final batch
+ * if the remaining product count is less than 12).
  */
 add_filter( 'loop_shop_per_page', 'noyona_loop_shop_per_page', 20 );
 function noyona_loop_shop_per_page( $per_page ) {
@@ -18,16 +31,7 @@ function noyona_loop_shop_per_page( $per_page ) {
         return 4;
     }
 
-    $default_per_page = 14;
-
-    if ( isset( $_GET['ppp'] ) ) {
-        $override = absint( wp_unslash( $_GET['ppp'] ) );
-        if ( $override >= 1 && $override <= 60 ) {
-            return $override;
-        }
-    }
-
-    return $default_per_page;
+    return 12;
 }
 
 /* ----- Shop-category cookie (for Store API filtering) ----- */
@@ -193,10 +197,16 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
 
     // Build query args from the block's query settings.
     $query   = isset( $attrs['query'] ) ? $attrs['query'] : array();
-    $per_page = isset( $query['perPage'] ) ? (int) $query['perPage'] : 12;
-    if ( $per_page < 1 ) {
-        $per_page = 12;
+    // Use the MAIN shop query's per-page (which respects the loop_shop_per_page
+    // filter and the ?ppp= override). Fall back to the block's perPage attr,
+    // and finally to a sane default. This is the single source of truth: the
+    // result count, the renderer, and the infinite-scroll pagination all use
+    // it, so they can never disagree.
+    $main_per_page = (int) get_query_var( 'posts_per_page' );
+    if ( $main_per_page < 1 ) {
+        $main_per_page = isset( $query['perPage'] ) ? (int) $query['perPage'] : 12;
     }
+    $per_page = $main_per_page > 0 ? $main_per_page : 12;
     $order    = isset( $query['order'] ) ? $query['order'] : 'ASC';
     $orderby  = isset( $query['orderBy'] ) ? $query['orderBy'] : 'title';
 
@@ -283,8 +293,29 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
         unset( $args['offset'] );
     }
 
-    $products = wc_get_products( $args );
-    $products = noyona_filter_products_by_price_range( $products, $min_price, $max_price );
+    // We need total + max_pages in addition to the page's products so that we
+    // can build our own infinite-scroll "next page" URL without depending on
+    // WP's pagination block (which sometimes collapses to nothing on short
+    // result sets / when block context is missing).
+    $total_results = 0;
+    $max_pages     = 1;
+
+    if ( $has_price_range ) {
+        $products      = wc_get_products( $args );
+        $products      = noyona_filter_products_by_price_range( $products, $min_price, $max_price );
+        $total_results = count( $products );
+        $max_pages     = $per_page > 0 ? max( 1, (int) ceil( $total_results / $per_page ) ) : 1;
+    } else {
+        $paginate_args             = $args;
+        $paginate_args['paginate'] = true;
+        $paginate_args['page']     = $paged;
+        unset( $paginate_args['offset'] );
+
+        $result        = wc_get_products( $paginate_args );
+        $products      = is_object( $result ) && isset( $result->products ) ? $result->products : array();
+        $total_results = is_object( $result ) && isset( $result->total ) ? (int) $result->total : count( $products );
+        $max_pages     = is_object( $result ) && isset( $result->max_num_pages ) ? (int) $result->max_num_pages : 1;
+    }
 
     // Ensure visual card order strictly matches the selected catalog sort.
     // For price sorts, use each product's current effective price (sale/current),
@@ -315,18 +346,47 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
         $products = array_slice( $products, ( $paged - 1 ) * $per_page, $per_page );
     }
 
+    // Build the "next page" URL ourselves so infinite-scroll has a guaranteed,
+    // unambiguous source-of-truth. We always prefer ?paged=N over WP's
+    // ?query-{ID}-page=N since the main shop archive uses the main query.
+    $next_url = '';
+    if ( $paged < $max_pages ) {
+        $base_url = home_url( add_query_arg( null, null ) );
+        // Strip both pagination query vars so we never end up with duplicates.
+        $base_url = remove_query_arg( array( 'paged', $page_key ), $base_url );
+        $next_url = add_query_arg( 'paged', $paged + 1, $base_url );
+    }
+
     if ( empty( $products ) ) {
-        return '<div class="wp-block-woocommerce-product-collection noyona-shop-products"><div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;"><div class="wc-block-product" style="grid-column:1/-1;padding:32px;text-align:center;border-radius:16px;background:#f9f9f9;"><p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">No products found in this price range</p></div></div></div>';
+        return '<div class="wp-block-woocommerce-product-collection noyona-shop-products noyona-shop-products-infinite"><div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;"><div class="wc-block-product" style="grid-column:1/-1;padding:32px;text-align:center;border-radius:16px;background:#f9f9f9;"><p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">No products found in this price range</p></div></div></div>';
     }
 
     ob_start();
-    echo '<div class="wp-block-woocommerce-product-collection noyona-shop-products"><div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;">';
+    echo '<div class="wp-block-woocommerce-product-collection noyona-shop-products noyona-shop-products-infinite"'
+        . ' data-per-page="' . esc_attr( (string) $per_page ) . '"'
+        . ' data-current-page="' . esc_attr( (string) $paged ) . '"'
+        . ' data-max-pages="' . esc_attr( (string) $max_pages ) . '"'
+        . ' data-total="' . esc_attr( (string) $total_results ) . '">'
+        . '<div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;">';
     foreach ( $products as $product ) {
         echo noyona_render_product_card( $product );
     }
     echo '</div>';
 
-    // Re-render pagination from the original block output.
+    // Authoritative pagination meta for the JS infinite-scroll loader. This is
+    // independent of the WP query-pagination block (which can render
+    // inconsistently when inner block context is missing for the
+    // product-collection block).
+    echo '<div class="noyona-shop-infinite-meta"'
+        . ' data-next-url="' . esc_url( $next_url ) . '"'
+        . ' data-current-page="' . esc_attr( (string) $paged ) . '"'
+        . ' data-max-pages="' . esc_attr( (string) $max_pages ) . '"'
+        . ' data-total="' . esc_attr( (string) $total_results ) . '"'
+        . ' hidden></div>';
+
+    // Re-render pagination from the original block output too, when present.
+    // It is hidden by CSS when JS is active but still works as a graceful
+    // no-JS fallback.
     if ( preg_match( '/<nav[^>]*wp-block-query-pagination.*?<\/nav>/s', $block_content, $matches ) ) {
         echo $matches[0];
     }
