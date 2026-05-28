@@ -99,11 +99,43 @@ function noyona_render_landing_page_products_block( $block_content, $block ) {
 
     $has_price_range = null !== $min_price || null !== $max_price;
 
+    $selected_orderby = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '';
+    $orderby          = 'title';
+    $order            = 'ASC';
+
+    // Keep dedicated category pages aligned with the shop archive sorter.
+    switch ( $selected_orderby ) {
+        case 'popularity':
+            $orderby = 'popularity';
+            $order   = 'DESC';
+            break;
+        case 'rating':
+            $orderby = 'rating';
+            $order   = 'DESC';
+            break;
+        case 'date':
+            $orderby = 'date';
+            $order   = 'DESC';
+            break;
+        case 'price':
+            $orderby = 'price';
+            $order   = 'ASC';
+            break;
+        case 'price-desc':
+            $orderby = 'price';
+            $order   = 'DESC';
+            break;
+        case 'menu_order':
+        case 'title':
+            $orderby = $selected_orderby;
+            break;
+    }
+
     $query_args = array(
         'status'   => 'publish',
         'limit'    => $has_price_range ? -1 : 4,
-        'orderby'  => 'title',
-        'order'    => 'ASC',
+        'orderby'  => $orderby,
+        'order'    => $order,
         'category' => array( $slug_lower ),
         'return'   => 'objects',
     );
@@ -112,6 +144,29 @@ function noyona_render_landing_page_products_block( $block_content, $block ) {
 
     $products = wc_get_products( $query_args );
     $products = noyona_filter_products_by_price_range( $products, $min_price, $max_price );
+
+    // Ensure visual order follows effective current price like the shop archive.
+    if ( in_array( $selected_orderby, array( 'price', 'price-desc' ), true ) ) {
+        usort(
+            $products,
+            static function ( $a, $b ) use ( $selected_orderby ) {
+                $a_price = ( is_object( $a ) && method_exists( $a, 'get_price' ) ) ? (float) $a->get_price() : 0.0;
+                $b_price = ( is_object( $b ) && method_exists( $b, 'get_price' ) ) ? (float) $b->get_price() : 0.0;
+
+                if ( $a_price === $b_price ) {
+                    $a_name = ( is_object( $a ) && method_exists( $a, 'get_name' ) ) ? (string) $a->get_name() : '';
+                    $b_name = ( is_object( $b ) && method_exists( $b, 'get_name' ) ) ? (string) $b->get_name() : '';
+                    return strcasecmp( $a_name, $b_name );
+                }
+
+                if ( 'price-desc' === $selected_orderby ) {
+                    return $b_price <=> $a_price;
+                }
+
+                return $a_price <=> $b_price;
+            }
+        );
+    }
 
     if ( $has_price_range ) {
         $products = array_slice( $products, 0, 4 );
@@ -167,6 +222,119 @@ function noyona_render_landing_page_products_block( $block_content, $block ) {
     }
     echo '</div>';
     return ob_get_clean();
+}
+
+/* ----- Render toolbar blocks on dedicated category pages ----- */
+/**
+ * Dedicated pages (face/lips/eyes/hair/body) are regular pages, not archive
+ * queries, so Woo blocks like product-results-count and catalog-sorting can
+ * render empty. Provide explicit renderers so the toolbar matches shop pages.
+ */
+add_filter( 'render_block', 'noyona_render_landing_page_toolbar_blocks', 11, 2 );
+function noyona_render_landing_page_toolbar_blocks( $block_content, $block ) {
+    if ( ! isset( $block['blockName'] ) ) {
+        return $block_content;
+    }
+
+    $block_name = $block['blockName'];
+    if ( 'woocommerce/product-results-count' !== $block_name && 'woocommerce/catalog-sorting' !== $block_name ) {
+        return $block_content;
+    }
+
+    $post = get_queried_object();
+    if ( ! $post instanceof WP_Post || 'page' !== $post->post_type ) {
+        return $block_content;
+    }
+
+    $slug      = strtolower( $post->post_name );
+    $page_slugs = noyona_get_shop_category_page_slugs();
+    if ( ! in_array( $slug, $page_slugs, true ) ) {
+        return $block_content;
+    }
+
+    if ( ! function_exists( 'wc_get_products' ) ) {
+        return $block_content;
+    }
+
+    $attrs     = isset( $block['attrs'] ) ? $block['attrs'] : array();
+    $class     = isset( $attrs['className'] ) ? trim( (string) $attrs['className'] ) : '';
+    $min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : null;
+    $max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : null;
+
+    if ( 'woocommerce/product-results-count' === $block_name ) {
+        $count_args = array(
+            'status'   => 'publish',
+            'limit'    => -1,
+            'category' => array( $slug ),
+            'return'   => 'ids',
+        );
+        $count_args = noyona_apply_price_range_to_product_query_args( $count_args, $min_price, $max_price );
+        $total      = count( wc_get_products( $count_args ) );
+        $per_page   = 4;
+
+        if ( $total < 1 ) {
+            $count_text = __( 'Showing 0 results', 'noyona-childtheme' );
+        } elseif ( $total <= $per_page ) {
+            $count_text = sprintf(
+                /* translators: %d: total matching products. */
+                _n( 'Showing all %d result', 'Showing all %d results', $total, 'noyona-childtheme' ),
+                $total
+            );
+        } else {
+            $count_text = sprintf(
+                /* translators: 1: visible products on first page, 2: total matching products. */
+                __( 'Showing 1-%1$d of %2$d results', 'noyona-childtheme' ),
+                $per_page,
+                $total
+            );
+        }
+
+        $classes = trim( 'woocommerce-result-count ' . $class );
+        return '<p class="' . esc_attr( $classes ) . '">' . esc_html( $count_text ) . '</p>';
+    }
+
+    $ordering_options = apply_filters(
+        'woocommerce_catalog_orderby',
+        array(
+            'menu_order' => __( 'Default sorting', 'woocommerce' ),
+            'popularity' => __( 'Sort by popularity', 'woocommerce' ),
+            'rating'     => __( 'Sort by average rating', 'woocommerce' ),
+            'date'       => __( 'Sort by latest', 'woocommerce' ),
+            'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
+            'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
+        )
+    );
+
+    $selected_orderby = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '';
+    if ( ! isset( $ordering_options[ $selected_orderby ] ) ) {
+        $selected_orderby = 'menu_order';
+    }
+
+    $classes = trim( 'woocommerce-ordering ' . $class );
+    $html    = '<form class="' . esc_attr( $classes ) . '" method="get">';
+    $html   .= '<select name="orderby" class="orderby" aria-label="' . esc_attr__( 'Shop order', 'woocommerce' ) . '" onchange="this.form.submit()">';
+    foreach ( $ordering_options as $value => $label ) {
+        $html .= '<option value="' . esc_attr( $value ) . '"' . selected( $selected_orderby, $value, false ) . '>' . esc_html( $label ) . '</option>';
+    }
+    $html .= '</select>';
+
+    foreach ( $_GET as $key => $value ) {
+        if ( in_array( $key, array( 'orderby', 'submit', 'paged', 'product-page' ), true ) ) {
+            continue;
+        }
+
+        if ( is_array( $value ) ) {
+            foreach ( $value as $single_value ) {
+                $html .= '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( wp_unslash( (string) $single_value ) ) . '" />';
+            }
+            continue;
+        }
+
+        $html .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( wp_unslash( (string) $value ) ) . '" />';
+    }
+
+    $html .= '</form>';
+    return $html;
 }
 
 /* ----- Replace shop archive product cards ----- */
