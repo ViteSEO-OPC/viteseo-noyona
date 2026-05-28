@@ -35,26 +35,26 @@ $tabs = array();
 
 $tabs[] = array(
 	'id'      => 'description',
-	'label'   => __( 'Description', 'viteseo-noyona-childtheme' ),
-	'content' => '' !== $desc_html ? $desc_html : '<p class="noyona-pdp-tabs__empty">' . esc_html__( 'No detailed description yet.', 'viteseo-noyona-childtheme' ) . '</p>',
+	'label'   => __( 'Description', 'viteseo-noyona-childtheme-2.0' ),
+	'content' => '' !== $desc_html ? $desc_html : '<p class="noyona-pdp-tabs__empty">' . esc_html__( 'No detailed description yet.', 'viteseo-noyona-childtheme-2.0' ) . '</p>',
 );
 
 $tabs[] = array(
 	'id'      => 'ingredients',
-	'label'   => __( 'Ingredients', 'viteseo-noyona-childtheme' ),
-	'content' => '' !== $ing_html ? $ing_html : '<p class="noyona-pdp-tabs__empty">' . esc_html__( 'No ingredients listed yet. Add them under Product data → General.', 'viteseo-noyona-childtheme' ) . '</p>',
+	'label'   => __( 'Ingredients', 'viteseo-noyona-childtheme-2.0' ),
+	'content' => '' !== $ing_html ? $ing_html : '<p class="noyona-pdp-tabs__empty">' . esc_html__( 'No ingredients listed yet. Add them under Product data → General.', 'viteseo-noyona-childtheme-2.0' ) . '</p>',
 );
 
 $tabs[] = array(
 	'id'      => 'how-to-use',
-	'label'   => __( 'How to use', 'viteseo-noyona-childtheme' ),
-	'content' => '' !== $how_html ? $how_html : '<p class="noyona-pdp-tabs__empty">' . esc_html__( 'No usage instructions yet. Add them under Product data → General.', 'viteseo-noyona-childtheme' ) . '</p>',
+	'label'   => __( 'How to use', 'viteseo-noyona-childtheme-2.0' ),
+	'content' => '' !== $how_html ? $how_html : '<p class="noyona-pdp-tabs__empty">' . esc_html__( 'No usage instructions yet. Add them under Product data → General.', 'viteseo-noyona-childtheme-2.0' ) . '</p>',
 );
 
 $uid = 'noyona-pdp-tabs-' . $pid;
 ?>
 <div class="wp-block-noyona-product-tabs noyona-pdp-tabs alignwide" data-noyona-pdp-tabs="<?php echo esc_attr( $uid ); ?>">
-	<div class="noyona-pdp-tabs__list" role="tablist" aria-label="<?php esc_attr_e( 'Product information', 'viteseo-noyona-childtheme' ); ?>">
+	<div class="noyona-pdp-tabs__list" role="tablist" aria-label="<?php esc_attr_e( 'Product information', 'viteseo-noyona-childtheme-2.0' ); ?>">
 		<?php foreach ( $tabs as $i => $tab ) : ?>
 			<button
 				type="button"

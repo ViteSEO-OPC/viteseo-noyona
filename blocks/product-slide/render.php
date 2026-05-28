@@ -10,6 +10,9 @@ $defaults = array(
     'useWooProducts' => false,
     'wooOnlyFeatured' => true,
     'wooProductsLimit' => 8,
+    'wooProductCategories' => array(),
+    'wooProductBrands' => array(),
+    'wooBrandTaxonomy' => '',
     'wooColorAttribute' => 'pa_color',
     'items' => array(),
 );
@@ -20,6 +23,25 @@ $cards_to_show = max(1, intval($atts['cardsToShow']));
 $use_woo_products = !empty($atts['useWooProducts']);
 $woo_only_featured = !empty($atts['wooOnlyFeatured']);
 $woo_products_limit = isset($atts['wooProductsLimit']) ? max(1, (int) $atts['wooProductsLimit']) : 8;
+$woo_product_categories = array();
+if (isset($atts['wooProductCategories'])) {
+    $raw_woo_product_categories = is_array($atts['wooProductCategories'])
+        ? $atts['wooProductCategories']
+        : preg_split('/[\s,]+/', (string) $atts['wooProductCategories']);
+    if (is_array($raw_woo_product_categories)) {
+        $woo_product_categories = array_values(array_unique(array_filter(array_map('sanitize_title', $raw_woo_product_categories))));
+    }
+}
+$woo_product_brands = array();
+if (isset($atts['wooProductBrands'])) {
+    $raw_woo_product_brands = is_array($atts['wooProductBrands'])
+        ? $atts['wooProductBrands']
+        : preg_split('/[\s,]+/', (string) $atts['wooProductBrands']);
+    if (is_array($raw_woo_product_brands)) {
+        $woo_product_brands = array_values(array_unique(array_filter(array_map('sanitize_title', $raw_woo_product_brands))));
+    }
+}
+$woo_brand_taxonomy = isset($atts['wooBrandTaxonomy']) ? sanitize_key((string) $atts['wooBrandTaxonomy']) : '';
 $woo_color_attribute = isset($atts['wooColorAttribute']) ? sanitize_title((string) $atts['wooColorAttribute']) : 'pa_color';
 
 if (class_exists('WooCommerce')) {
@@ -604,6 +626,7 @@ if (!function_exists('noyona_ps_get_variation_choice_map')) {
 }
 
 if ($use_woo_products && class_exists('WooCommerce')) {
+    $tax_query = array();
     $args = array(
         'post_type' => 'product',
         'post_status' => 'publish',
@@ -613,14 +636,49 @@ if ($use_woo_products && class_exists('WooCommerce')) {
     );
 
     if ($woo_only_featured) {
-        $args['tax_query'] = array(
-            array(
-                'taxonomy' => 'product_visibility',
-                'field' => 'name',
-                'terms' => array('featured'),
-                'operator' => 'IN',
-            ),
+        $tax_query[] = array(
+            'taxonomy' => 'product_visibility',
+            'field' => 'name',
+            'terms' => array('featured'),
+            'operator' => 'IN',
         );
+    }
+
+    if (!empty($woo_product_categories)) {
+        $tax_query[] = array(
+            'taxonomy' => 'product_cat',
+            'field' => 'slug',
+            'terms' => $woo_product_categories,
+            'operator' => 'IN',
+        );
+    }
+
+    if (!empty($woo_product_brands)) {
+        $brand_taxonomy_candidates = array_filter(array_unique(array(
+            $woo_brand_taxonomy,
+            'product_brand',
+            'pwb-brand',
+            'yith_product_brand',
+            'pa_brand',
+        )));
+        foreach ($brand_taxonomy_candidates as $brand_taxonomy) {
+            if (taxonomy_exists($brand_taxonomy)) {
+                $tax_query[] = array(
+                    'taxonomy' => $brand_taxonomy,
+                    'field' => 'slug',
+                    'terms' => $woo_product_brands,
+                    'operator' => 'IN',
+                );
+                break;
+            }
+        }
+    }
+
+    if (!empty($tax_query)) {
+        if (count($tax_query) > 1) {
+            $tax_query['relation'] = 'AND';
+        }
+        $args['tax_query'] = $tax_query;
     }
 
     $woo_query = new WP_Query($args);
@@ -681,6 +739,8 @@ if ($use_woo_products && class_exists('WooCommerce')) {
 
     if (!empty($woo_items)) {
         $items = $woo_items;
+    } elseif (!empty($woo_product_categories) || !empty($woo_product_brands)) {
+        $items = array();
     }
 }
 
@@ -692,6 +752,12 @@ if (empty($items)) {
 }
 
 $unique_id = 'ps-' . uniqid();
+$carousel_classes = array('product-slide__carousel');
+if (count($items) > 4) {
+    $carousel_classes[] = 'product-slide__carousel--has-nav-space';
+} else {
+    $carousel_classes[] = 'product-slide__carousel--centered';
+}
 ?>
 <div class="wp-block-noyona-product-slide product-slide alignwide" id="<?php echo esc_attr($unique_id); ?>"
     data-cards-to-show="<?php echo esc_attr($cards_to_show); ?>">
@@ -727,7 +793,7 @@ $unique_id = 'ps-' . uniqid();
         <?php endif; ?>
     </div>
 
-    <div class="product-slide__carousel">
+    <div class="<?php echo esc_attr(implode(' ', $carousel_classes)); ?>">
         <button class="ps-nav-btn ps-prev" aria-label="Previous">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
@@ -867,7 +933,7 @@ $unique_id = 'ps-' . uniqid();
 
                             <div class="ps-card__body">
                                 <?php if (!empty($swatches) && is_array($swatches)): ?>
-                                    <div class="ps-card__swatches" role="radiogroup" aria-label="<?php echo esc_attr__('Select shade', 'viteseo-noyona-childtheme'); ?>">
+                                    <div class="ps-card__swatches" role="radiogroup" aria-label="<?php echo esc_attr__('Select shade', 'viteseo-noyona-childtheme-2.0'); ?>">
                                         <?php foreach ($swatches as $index => $swatch): ?>
                                             <?php
                                             if (!is_array($swatch) || empty($swatch['hex'])) {
@@ -922,7 +988,7 @@ $unique_id = 'ps-' . uniqid();
                                 <?php endif; ?>
 
                                 <?php if ($title): ?>
-                                    <h3 class="ps-card__title"><?php echo esc_html($title); ?></h3>
+                                    <h5 class="ps-card__title"><?php echo esc_html($title); ?></h5>
                                 <?php endif; ?>
 
                                 <?php if (!empty($item['description'])): ?>

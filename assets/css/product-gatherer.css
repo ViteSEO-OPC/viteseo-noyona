@@ -17,14 +17,16 @@
 }
 
 .pg-title {
-    font-size: 1.6rem;
+    font-size: var(--wp--preset--font-size--h-2);
+    font-weight: 700;
+    line-height: normal;
     margin: 0 0 0.15rem;
 }
 
 .pg-subtitle {
     margin: 0;
     color: #777;
-    font-size: 0.9rem;
+    font-size: var(--wp--preset--font-size--body);
 }
 
 /* toolbar container (right side) */
@@ -63,7 +65,7 @@
     padding: 0 2.2rem 0 0.9rem;
     border-radius: 999px;
     border: 1px solid #ddd;
-    font-size: 0.85rem;
+    font-size: var(--wp--preset--font-size--input);
     line-height: var(--pg-control-height);
     outline: none;
     box-shadow: none;
@@ -72,7 +74,7 @@
 }
 
 .pg-search input:focus {
-    border-color: #ff4b81;
+    border-color: var(--noyona-color-pink-accent);
     box-shadow: 0 0 0 2px rgba(255, 75, 129, 0.12);
 }
 
@@ -91,7 +93,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
+    font-size: var(--wp--preset--font-size--label);
     color: #666;
 }
 
@@ -109,7 +111,7 @@
     padding: 0 1.6rem 0 0.9rem;
     border-radius: 999px;
     border: 1px solid #ddd !important;
-    font-size: 0.8rem;
+    font-size: var(--wp--preset--font-size--input);
     background-color: #fff !important;
     background-image: none;
     box-shadow: none;
@@ -134,7 +136,7 @@
 
 .pg-card {
     background: #fff;
-    border-radius: 18px;
+    border-radius: var(--noyona-radius-card);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     display: flex;
@@ -183,9 +185,9 @@
     position: absolute;
     top: 0.5rem;
     left: 0.5rem;
-    background: #ff4b81;
+    background: var(--noyona-color-pink-accent);
     color: #fff;
-    font-size: 0.7rem;
+    font-size: var(--wp--preset--font-size--caption);
     padding: 0.2rem 0.6rem;
     border-radius: 999px;
 }
@@ -226,25 +228,27 @@
 }
 
 .pg-product-title {
-    font-size: 0.98rem;
+    font-size: var(--wp--preset--font-size--h-5);
+    font-weight: 700;
+    line-height: normal;
 }
 
 .pg-product-title a {
     text-decoration: none;
-    color: #222;
+    color: #000000;
 }
 
 .pg-product-title a:hover {
-    color: #ff4b81;
+    color: var(--noyona-color-pink-accent);
 }
 
 .pg-rating {
-    font-size: 0.8rem;
+    font-size: var(--wp--preset--font-size--caption);
 }
 
 /* tighten excerpt */
 .pg-excerpt {
-    font-size: 0.85rem;
+    font-size: var(--wp--preset--font-size--body);
     color: #555;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -266,14 +270,14 @@
 
 .pg-price {
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: var(--wp--preset--font-size--caption);
 }
 
 .pg-price del,
 .pg-price ins {
     display: block;
     margin: 0;
-    line-height: 1.2;
+    line-height: normal;
 }
 
 /* ADD TO CART BUTTON – icon/text aligned */
@@ -283,13 +287,14 @@
     align-items: center;
     justify-content: center;
     gap: 0.35rem;
-    padding: 0.45rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.85rem;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 700;
     line-height: 1;
     border: none;
-    background: #ff4b81;
-    color: #fff;
+    background: #EFB5BE;
+    color: #D81B60;
     text-decoration: none;
     cursor: pointer;
     white-space: nowrap;
@@ -297,11 +302,12 @@
 
 .pg-add-to-cart-button i {
     line-height: 0;
-    font-size: 0.9rem;
+    font-size: var(--wp--preset--font-size--caption);
 }
 
 .pg-add-to-cart-button:hover {
-    background: #e63c72;
+    background: #D81B60;
+    color: #FFFFFF;
 }
 
 /* =========================
@@ -335,15 +341,15 @@
     padding: 0.4rem 0.8rem;
     border-radius: 999px;
     border: 1px solid #ddd;
-    font-size: 0.85rem;
+    font-size: var(--wp--preset--font-size--nav-button);
     text-decoration: none;
     color: #333;
 }
 
 .pg-pagination li span.current {
-    background: #ff4b81;
+    background: var(--noyona-color-pink-accent);
     color: #fff;
-    border-color: #ff4b81;
+    border-color: var(--noyona-color-pink-accent);
 }
 
 /* =========================

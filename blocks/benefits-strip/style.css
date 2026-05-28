@@ -3,8 +3,8 @@
 }
 
 .noyona-benefits-strip {
-  background: var(--noyona-benefits-bg, #e9a3ad);
-  color: #ffffff;
+  background: var(--noyona-benefits-bg, #FBDDE2);
+  color: #333333;
   padding: clamp(34px, 4.2vw, 52px) var(--page-gutter-right);
 }
 
@@ -24,10 +24,10 @@
 .noyona-benefits-strip__title {
   margin: 0 0 clamp(20px, 2.5vw, 34px);
   text-align: center;
-  color: #ffffff;
-  font-size: var(--wp--preset--font-size--h-2, clamp(32px, 4.2vw, 55px));
+  color: #000000;
+  font-size: var(--wp--preset--font-size--h-2, clamp(32px, 3.75vw, 48px));
   font-weight: 700;
-  line-height: 1.1;
+  line-height: normal;
 }
 
 .noyona-benefits-strip__grid {
@@ -100,7 +100,7 @@
   height: 62px;
   border-radius: 50%;
   background: #ffffff;
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   margin: 0 auto 12px;
   display: inline-flex;
   align-items: center;
@@ -116,19 +116,19 @@
 
 .noyona-benefits-strip__item-title {
   margin: 0 0 8px;
-  color: #ffffff;
-  font-size: var(--wp--preset--font-size--h-3, clamp(18px, 2vw, 24px));
-  font-weight: 600;
-  line-height: 1.2;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  color: #000000;
+  font-size: var(--wp--preset--font-size--h-5, clamp(20px, 1.9vw, 24px));
+  font-weight: 700;
+  line-height: normal;
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .noyona-benefits-strip__item-desc {
   margin: 0;
-  color: rgba(255, 255, 255, 0.95);
-  font-size: clamp(16px, 1.4vw, 20px);
-  line-height: 1.45;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  color: #333333;
+  font-size: var(--wp--preset--font-size--body);
+  line-height: normal;
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 @media (max-width: 640px) {

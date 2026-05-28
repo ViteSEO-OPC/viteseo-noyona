@@ -1,13 +1,14 @@
 .noyona-landing-feature-banner {
-  margin: var(--section-mt) 0 0 0 !important;
+  margin: 0 !important;
   position: relative;
   width: 100%;
-  min-height: 1080px;
+  min-height: 80svh;
   overflow: hidden;
   color: #ffffff;
-  background:
-    linear-gradient(120deg, rgba(255, 214, 221, 0.28) 0%, rgba(231, 154, 168, 0.16) 45%, rgba(194, 118, 136, 0.12) 100%),
-    radial-gradient(circle at 22% 20%, #ffd9e1 0%, #f8beca 45%, #e7a5b4 100%);
+  background-image: url(/wp-content/themes/viteseo-noyona2.0/assets/images/category-banner.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .noyona-landing-feature-banner::before {
@@ -21,7 +22,7 @@
 .noyona-landing-feature-banner__inner {
   position: relative;
   z-index: 1;
-  min-height: 1080px;
+  min-height: 80svh;
   width: min(1400px, calc(100vw - 80px));
   margin: 0 var(--page-gutter-left);
   display: flex;
@@ -55,19 +56,19 @@
 
 .noyona-landing-feature-banner__label {
   margin: 0 0 14px;
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   font-size: clamp(20px, 2.4vw, 24px);
   font-weight: 600;
   text-transform: uppercase;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .noyona-landing-feature-banner__title {
   margin: 0 0 14px;
   color: #ffffff;
-  font-size: clamp(44px, 6vw, 96px);
-  font-weight: 700;
-  line-height: 1.04;
+  font-size: var(--wp--preset--font-size--h-1);
+  font-weight: 400;
+  line-height: normal;
 }
 
 .noyona-landing-feature-banner__subheading {
@@ -75,7 +76,7 @@
   color: #ffffff;
   font-size: clamp(24px, 2.4vw, 36px);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: normal;
 }
 
 .noyona-landing-feature-banner__subheading-accent {
@@ -86,21 +87,25 @@
   margin: 0;
   color: rgba(255, 255, 255, 0.95);
   font-size: clamp(16px, 1.35vw, 20px);
-  line-height: 1.55;
+  line-height: normal;
   max-width: 680px;
 }
 
 @media (max-width: 1100px) {
   .noyona-landing-feature-banner,
   .noyona-landing-feature-banner__inner {
-    min-height: 760px;
+    min-height: 100svh;
   }
 }
 
 @media (max-width: 782px) {
+  .noyona-landing-feature-banner {
+    background-position: right center;
+  }
+
   .noyona-landing-feature-banner,
   .noyona-landing-feature-banner__inner {
-    min-height: 560px;
+    min-height: 100svh;
   }
 
   .noyona-landing-feature-banner__inner {

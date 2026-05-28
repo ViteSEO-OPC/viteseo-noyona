@@ -17,13 +17,13 @@
     -webkit-appearance: none;
     appearance: none;
     border: 0;
-    border-bottom: 1px solid #e6c7ce;
+    border-bottom: 1px solid var(--noyona-color-pink-light-blush);
     border-radius: 0;
     background: transparent;
     background-image: none !important;
     padding: 0.35rem 0;
-    font-size: 0.88rem;
-    line-height: 1.1;
+    font-size: var(--wp--preset--font-size--input);
+    line-height: normal;
     color: #1f1f1f;
     outline: none;
 }
@@ -37,14 +37,14 @@
 }
 
 .search-inline-input::placeholder {
-    color: #d9a2ad;
+    color: #E199A4;
     opacity: 1;
 }
 
 .search-inline-submit {
     border: 0;
     background: transparent;
-    color: #e199a4;
+    color: var(--noyona-color-pink-muted-rose);
     cursor: pointer;
 }
 
@@ -55,8 +55,9 @@
     display: none !important;
 }
 
-.search-inline-submit:hover {
-    background: rgba(144, 30, 88, 0.08);
+.search-inline-submit:hover,
+.search-inline-submit:focus-visible {
+    background: rgba(216, 27, 96, 0.08);
 }
 
 /* Keep the search icon visually beside wishlist icon */
@@ -73,7 +74,7 @@
     overflow: auto;
     z-index: 2200;
     border: 1px solid #f0d5db;
-    border-radius: 18px;
+    border-radius: var(--noyona-radius-card);
     background: #fff;
     box-shadow: 0 18px 40px rgba(56, 32, 42, 0.13);
     padding: 0.45rem;
@@ -100,8 +101,8 @@
     width: 0.72rem;
     height: 0.72rem;
     margin-right: 0.5rem;
-    border: 2px solid #f2d6dc;
-    border-top-color: #e199a4;
+    border: 2px solid var(--noyona-color-pink-light-blush);
+    border-top-color: var(--noyona-color-pink-muted-rose);
     border-radius: 999px;
     vertical-align: -0.08em;
     animation: noyona-search-spin 0.7s linear infinite;
@@ -136,19 +137,19 @@
 .search-inline-suggestion:hover,
 .search-inline-suggestion:focus-visible,
 .search-inline-suggestions__item.is-active .search-inline-suggestion {
-    background: #fff5f8;
+    background: var(--noyona-color-pink-light-blush);
     transform: translateY(-1px);
 }
 
 .search-inline-suggestion:focus-visible {
-    outline: 2px solid rgba(225, 153, 164, 0.55);
+    outline: 2px solid rgba(216, 27, 96, 0.55);
     outline-offset: 2px;
 }
 
 .search-inline-suggestion__media {
     width: 48px;
     height: 48px;
-    border-radius: 12px;
+    border-radius: var(--noyona-radius-input);
     background: #fff7fa;
     overflow: hidden;
 }
@@ -170,21 +171,21 @@
     color: #2b2226;
     font-size: 0.86rem;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: normal;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .search-inline-suggestion__price {
-    color: #e199a4;
-    font-size: 0.78rem;
+    color: var(--noyona-color-pink-muted-rose);
+    font-size: var(--wp--preset--font-size--caption);
     font-weight: 700;
 }
 
 .search-inline-suggestion__stock {
     color: #777;
-    font-size: 0.7rem;
+    font-size: var(--wp--preset--font-size--caption);
     font-weight: 600;
 }
 
@@ -193,7 +194,7 @@
 }
 
 .search-inline-suggestion__stock.is-out-of-stock {
-    color: #9f3f4d;
+    color: #D81B60;
 }
 
 .search-inline-suggestions__view-all {
@@ -202,8 +203,8 @@
     justify-content: center;
     margin-top: 0.35rem;
     padding: 0.7rem 0.85rem;
-    border-top: 1px solid #f4e1e6;
-    color: #d78395;
+    border-top: 1px solid var(--noyona-color-pink-light-blush);
+    color: var(--noyona-color-pink-muted-rose);
     font-size: 0.82rem;
     font-weight: 700;
     text-decoration: none;
@@ -211,11 +212,11 @@
 
 .search-inline-suggestions__view-all:hover,
 .search-inline-suggestions__view-all:focus-visible {
-    color: #e11a63;
+    color: var(--noyona-color-pink-accent);
 }
 
 .search-inline-suggestions__view-all:focus-visible {
-    outline: 2px solid rgba(225, 153, 164, 0.55);
+    outline: 2px solid rgba(216, 27, 96, 0.55);
     outline-offset: 2px;
 }
 
@@ -247,8 +248,8 @@
         border-radius: 999px;
         background: #fff;
         color: #1f1f1f;
-        font-size: 0.88rem;
-        line-height: 1.2;
+        font-size: var(--wp--preset--font-size--nav-button);
+        line-height: normal;
         box-shadow: 0 10px 26px rgba(0, 0, 0, 0.10);
         z-index: 2100;
         transition: opacity 0.18s ease, transform 0.18s ease;
@@ -283,11 +284,11 @@
 .search-expand-trigger {
     background: transparent;
     border: 0;
-    border-bottom: 1px solid #e6c7ce;
+    border-bottom: 1px solid var(--noyona-color-pink-light-blush);
     border-radius: 0;
     cursor: pointer;
-    font-size: 1rem;
-    color: #d9a2ad;
+    font-size: var(--wp--preset--font-size--nav-button);
+    color: #E199A4;
     padding: 0.35rem 0 0.4rem;
     display: inline-flex;
     align-items: center;
@@ -303,24 +304,24 @@
 }
 
 .search-expand-trigger:focus-visible {
-    outline: 2px solid rgba(225, 153, 164, 0.7);
+    outline: 2px solid rgba(216, 27, 96, 0.7);
     outline-offset: 3px;
 }
 
 .search-expand-trigger:hover {
-    border-bottom-color: #e199a4;
-    color: #e199a4;
+    border-bottom-color: var(--noyona-color-pink-muted-rose);
+    color: var(--noyona-color-pink-muted-rose);
 }
 
 .search-expand-trigger-text {
-    font-size: 0.9rem;
+    font-size: var(--wp--preset--font-size--nav-button);
     line-height: 1;
     white-space: nowrap;
     color: currentColor;
 }
 
 .search-expand-trigger i {
-    font-size: 0.95rem;
+    font-size: var(--wp--preset--font-size--caption);
     color: currentColor;
 }
 
@@ -370,7 +371,7 @@
     /* max-height: calc(100dvh - (var(--noyona-header-total-offset, 96px) + 24px)); */
   
     background: #fff;
-    border-radius: 18px;
+    border-radius: var(--noyona-radius-card);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
     border: 1px solid #f0f0f0;
   
@@ -398,29 +399,29 @@
     align-items: center;
     gap: 0.75rem;
     border: 0;
-    border-bottom: 1px solid #e6c7ce;
+    border-bottom: 1px solid var(--noyona-color-pink-light-blush);
     border-radius: 0;
     padding: 0.4rem 0;
     background: transparent;
 }
 
 .search-icon-input {
-    font-size: 1rem;
-    color: #d9a2ad;
+    font-size: var(--wp--preset--font-size--caption);
+    color: #E199A4;
 }
 
 .search-expand-input {
     width: 100%;
     border: none;
     background: transparent;
-    font-size: 1rem;
+    font-size: var(--wp--preset--font-size--input);
     outline: none;
     color: #1f1f1f;
     font-family: inherit;
 }
 
 .search-expand-input::placeholder {
-    color: #d9a2ad;
+    color: #E199A4;
     opacity: 1;
 }
 
@@ -429,7 +430,7 @@
     border: none;
     font-size: 1.1rem;
     cursor: pointer;
-    color: #d9a2ad;
+    color: #E199A4;
     transition: color 0.15s ease;
 }
 
@@ -461,7 +462,7 @@
 }
 
 .suggestions-column h4 {
-    font-size: 0.85rem;
+    font-size: var(--wp--preset--font-size--label);
     text-transform: uppercase;
     color: #9a7d6a;
     margin-bottom: 0.75rem;
@@ -481,7 +482,7 @@
 .suggestions-list a {
     text-decoration: none;
     color: #4b2f1e;
-    font-size: 1rem;
+    font-size: var(--wp--preset--font-size--body);
     transition: color 0.15s ease;
     display: flex;
     align-items: center;
@@ -507,7 +508,7 @@
     align-items: center;
     border-top: 1px solid #eee;
     padding-top: 0.9rem;
-    font-size: 0.9rem;
+    font-size: var(--wp--preset--font-size--helper);
     color: #9a7d6a;
 }
 
@@ -554,7 +555,7 @@
 
     .search-expand-container {
         padding: 0.9rem 1rem 1rem;
-        border-radius: 14px;
+        border-radius: var(--noyona-radius-card);
     }
 
     .search-input-wrapper {

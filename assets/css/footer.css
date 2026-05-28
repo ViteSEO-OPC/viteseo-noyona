@@ -1,10 +1,10 @@
 /* Footer Styles (moved out of style.css) */
 
 .noyona-footer {
-  background-color: #EFB5BE;
+  background-color: var(--noyona-color-pink-soft);
   color: var(--footer-text);
   padding-bottom: 2rem;
-  font-family: var(--wp--preset--font-family--proxima-nova, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-family: var(--wp--preset--font-family--poppins, system-ui, -apple-system, "Segoe UI", sans-serif);
 }
 
 .noyona-footer a {
@@ -32,11 +32,11 @@
 }
 
 .noyona-footer__newsletter h2 {
-  font-family: var(--wp--preset--font-family--proxima-nova, sans-serif);
-  font-size: 48px;
+  font-family: var(--wp--preset--font-family--poppins, sans-serif);
+  font-size: var(--wp--preset--font-size--h-2);
   font-weight: 700;
   margin: 0 0 1.5rem;
-  line-height: 1.1;
+  line-height: normal;
 }
 
 .noyona-footer__form {
@@ -54,8 +54,8 @@
   border: 1px solid rgba(0, 0, 0, 0.18);
   border-radius: 50px;
   background: rgba(255, 255, 255, 0.22);
-  font-size: clamp(16px, 1.2vw, 18px);
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: var(--wp--preset--font-size--body);
+  font-family: var(--wp--preset--font-family--poppins);
   color: inherit;
   outline: none;
 }
@@ -70,10 +70,10 @@
   background: #333333;
   color: #fff;
   border: none;
-  border-radius: 16px;
-  font-weight: 600;
-  font-size: clamp(16px, 1.2vw, 18px);
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  border-radius: var(--noyona-radius-cta);
+  font-weight: 700;
+  font-size: var(--wp--preset--font-size--body);
+  font-family: var(--wp--preset--font-family--poppins);
   cursor: pointer;
   transition: filter 0.2s, transform 0.2s;
   width: 107px;
@@ -86,9 +86,9 @@
 }
 
 .noyona-footer__newsletter p {
-  font-size: clamp(16px, 1.2vw, 18px);
-  font-family: var(--wp--preset--font-family--proxima-nova);
-  line-height: 1.5;
+  font-size: var(--wp--preset--font-size--body);
+  font-family: var(--wp--preset--font-family--poppins);
+  line-height: normal;
   opacity: 0.85;
   width: 100%;
   margin: 0;
@@ -113,9 +113,9 @@
   margin: 0 0 1.25rem;
   display: block;
   text-transform: uppercase;
-  font-size: clamp(18px, 1.4vw, 24px);
+  font-size: var(--wp--preset--font-size--h-5);
   letter-spacing: -1.2px;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .noyona-footer__nav {
@@ -214,7 +214,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   font-size: 1.15rem;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -238,7 +238,7 @@
   color: #fff;
   padding: 6px 12px;
   border-radius: 8px;
-  font-size: 0.75rem;
+  font-size: var(--wp--preset--font-size--caption);
   font-weight: 600;
   white-space: nowrap;
   opacity: 0;
@@ -407,7 +407,7 @@
 /* ------------------------------------------------------------------ */
 
 .noyona-footer {
-  background: #EFB5BE;
+  background: var(--noyona-color-pink-soft);
   color: #111;
   padding-top: 2rem;
   padding-bottom: 1rem;
@@ -423,7 +423,7 @@
 .noyona-footer .noyona-footer__newsletter {
   max-width: 760px;
   margin: 0 auto;
-  background: #EFB5BE;
+  background: var(--noyona-color-pink-soft);
   border-radius: 999px 999px 24px 24px;
   padding: 2rem 2rem 2.2rem;
   text-align: center;
@@ -431,19 +431,20 @@
 
 .noyona-footer .noyona-footer__newsletter h2 {
   margin: 0;
-  font-size: clamp(38px, 3.5vw, 56px);
-  line-height: 1.05;
+  font-size: var(--wp--preset--font-size--h-2);
+  line-height: normal;
   font-weight: 700;
 }
 
 .noyona-footer .noyona-footer__newsletter h2 em {
   font-style: italic;
-  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .noyona-footer .noyona-footer__newsletter p {
   margin: 0.6rem 0 1.1rem;
-  font-size: 1rem;
+  font-size: var(--wp--preset--font-size--body);
   opacity: 0.86;
   width: 100% !important;
 }
@@ -462,17 +463,17 @@
   background: rgba(255, 255, 255, 0.5);
   border: 1px solid rgba(17, 17, 17, 0.25);
   padding: 0.6rem 0.95rem;
-  font-size: 0.95rem;
+  font-size: var(--wp--preset--font-size--input);
 }
 
 .noyona-footer .noyona-footer__btn {
   width: auto;
   min-width: 88px;
   border-radius: 10px;
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   background: #fff;
   padding: 0.62rem 1rem;
-  font-size: 0.9rem;
+  font-size: var(--wp--preset--font-size--nav-button);
   pointer-events: auto;
 }
 
@@ -504,16 +505,18 @@
 }
 
 .noyona-footer .noyona-footer__col-title {
-  font-size: clamp(18px, 1.4vw, 24px);
+  font-size: var(--wp--preset--font-size--h-5);
+  font-weight: 700;
+  line-height: normal;
   letter-spacing: -1.2px;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   margin-bottom: 0.85rem;
 }
 
 .noyona-footer .noyona-footer__nav a {
-  font-size: clamp(16px, 1.4vw, 20px);
+  font-size: var(--wp--preset--font-size--body);
   letter-spacing: -1px;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   font-weight: 400;
   text-transform: uppercase;
   text-decoration-color: transparent;
@@ -562,7 +565,7 @@
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: var(--wp--preset--font-size--nav-button);
   transform: none;
   box-shadow: none !important;
 }
@@ -582,7 +585,7 @@
 
 .noyona-footer .noyona-footer__copyright {
   padding-top: 0.65rem;
-  font-size: 0.95rem;
+  font-size: var(--wp--preset--font-size--body);
 }
 
 @media (max-width: 900px) {
@@ -610,12 +613,12 @@
 
 @media (max-width: 640px) {
   .noyona-footer .noyona-footer__newsletter {
-    border-radius: 28px;
+    border-radius: var(--noyona-radius-card);
     padding: 1.35rem 1rem 1.45rem;
   }
 
   .noyona-footer .noyona-footer__newsletter h2 {
-    font-size: clamp(30px, 9vw, 42px);
+    font-size: var(--wp--preset--font-size--h-2);
   }
 
   .noyona-footer .noyona-footer__form {
@@ -664,7 +667,7 @@
   transform: translateX(-50%) translateY(4px);
   background: #111111;
   color: #ffffff;
-  font-size: 12px;
+  font-size: var(--wp--preset--font-size--caption);
   line-height: 1;
   font-weight: 600;
   padding: 7px 10px;

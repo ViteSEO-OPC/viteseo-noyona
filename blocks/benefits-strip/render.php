@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $defaults = array(
     'title'           => 'Why Noyona Face Makeup Work For You',
-    'backgroundColor' => '#E9A3AD',
+    'backgroundColor' => '#FBDDE2',
     'items'           => array(),
 );
 
@@ -21,7 +21,7 @@ $bg    = sanitize_hex_color( isset( $atts['backgroundColor'] ) ? (string) $atts[
 $items = isset( $atts['items'] ) && is_array( $atts['items'] ) ? $atts['items'] : array();
 
 if ( ! $bg ) {
-    $bg = '#E9A3AD';
+    $bg = '#FBDDE2';
 }
 
 $align = '';

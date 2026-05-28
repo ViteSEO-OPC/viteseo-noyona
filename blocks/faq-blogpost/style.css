@@ -1,7 +1,7 @@
 .wp-block-noyona-faq-blogpost.faq-blogpost {
   /* padding-inline: var(--page-gutter-inline); */
   padding-block: clamp(2.5rem, 5vw, 4rem);
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   color: var(--wp--preset--color--ink, #333333);
 }
 
@@ -12,17 +12,17 @@
 
 .faq-blogpost__heading {
   margin: 0;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-2);
   font-weight: 700;
-  line-height: 1.1;
-  color: #101010;
+  line-height: normal;
+  color: #000000;
 }
 
 .faq-blogpost__subheading {
   margin: 0.75rem 0 2rem;
   font-size: var(--wp--preset--font-size--body);
-  line-height: 1.45;
+  line-height: normal;
   color: #3f3f3f;
 }
 
@@ -36,7 +36,7 @@
   border-radius: 0.85rem;
   background: #ffffff;
   box-shadow:
-    3px 3px 0 rgba(225, 153, 164, 0.28),
+    3px 3px 0 rgba(216, 27, 96, 0.28),
     0 6px 14px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
@@ -45,7 +45,7 @@
 .faq-blogpost__item[open] {
   border-color: #e4b0b7;
   box-shadow:
-    5px 5px 0 rgba(225, 153, 164, 0.34),
+    5px 5px 0 rgba(216, 27, 96, 0.34),
     0 10px 18px rgba(0, 0, 0, 0.06);
 }
 
@@ -71,7 +71,7 @@
 .faq-blogpost__question {
   font-size: var(--wp--preset--font-size--h-3);
   font-weight: 700;
-  line-height: 1.2;
+  line-height: normal;
   color: #101010;
 }
 
@@ -123,7 +123,7 @@
 .faq-blogpost__answer p {
   margin: 0;
   font-size: var(--wp--preset--font-size--body);
-  line-height: 1.45;
+  line-height: normal;
 }
 
 .faq-blogpost__placeholder {

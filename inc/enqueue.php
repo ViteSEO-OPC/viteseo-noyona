@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Load parent + child styles and our custom assets
 add_action( 'wp_enqueue_scripts', 'woocom_ct_enqueue_assets' );
 function woocom_ct_enqueue_assets() {
-    // Local font faces (self-hosted Proxima Nova).
+    // Local font faces (self-hosted Poppins).
     wp_enqueue_style(
         'noyona-fonts-local',
         get_stylesheet_directory_uri() . '/assets/css/fonts.css',

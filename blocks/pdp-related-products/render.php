@@ -14,9 +14,9 @@ if ( ! function_exists( 'wc_get_product' ) ) {
 }
 
 $defaults = array(
-	'heading'    => __( 'You Might Also Like', 'viteseo-noyona-childtheme' ),
-	'subheading' => __( 'Complete your look with these favorites', 'viteseo-noyona-childtheme' ),
-	'viewAllText'=> __( 'View All', 'viteseo-noyona-childtheme' ),
+	'heading'    => __( 'You Might Also Like', 'viteseo-noyona-childtheme-2.0' ),
+	'subheading' => __( 'Complete your look with these favorites', 'viteseo-noyona-childtheme-2.0' ),
+	'viewAllText'=> __( 'View All', 'viteseo-noyona-childtheme-2.0' ),
 	'viewAllUrl' => '/shop/',
 	'limit'      => 3,
 );
@@ -132,9 +132,9 @@ if ( empty( $related_ids ) ) {
 						<span class="noyona-pdp-related__rating-text">
 							<?php echo esc_html( $rating_label ); ?>/5
 							<?php if ( $rating_count > 0 ) : ?>
-								<?php echo esc_html( sprintf( __( '(%d reviews)', 'viteseo-noyona-childtheme' ), $rating_count ) ); ?>
+								<?php echo esc_html( sprintf( __( '(%d reviews)', 'viteseo-noyona-childtheme-2.0' ), $rating_count ) ); ?>
 							<?php else : ?>
-								<?php esc_html_e( '(No reviews yet)', 'viteseo-noyona-childtheme' ); ?>
+								<?php esc_html_e( '(No reviews yet)', 'viteseo-noyona-childtheme-2.0' ); ?>
 							<?php endif; ?>
 						</span>
 					</div>
@@ -148,17 +148,17 @@ if ( empty( $related_ids ) ) {
 						data-product_sku="<?php echo esc_attr( $related->get_sku() ); ?>"
 						data-quantity="1"
 						data-cart-url="<?php echo esc_url( $cart_url ); ?>"
-						aria-label="<?php echo esc_attr( sprintf( __( 'Add %s to cart', 'viteseo-noyona-childtheme' ), $title ) ); ?>"
+						aria-label="<?php echo esc_attr( sprintf( __( 'Add %s to cart', 'viteseo-noyona-childtheme-2.0' ), $title ) ); ?>"
 					>
-						<span class="screen-reader-text"><?php esc_html_e( 'Add to cart', 'viteseo-noyona-childtheme' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Add to cart', 'viteseo-noyona-childtheme-2.0' ); ?></span>
 					</button>
 				<?php else : ?>
 					<a
 						href="<?php echo esc_url( $item_link ); ?>"
 						class="<?php echo esc_attr( $cart_classes ); ?>"
-						aria-label="<?php echo esc_attr( sprintf( __( 'View %s', 'viteseo-noyona-childtheme' ), $title ) ); ?>"
+						aria-label="<?php echo esc_attr( sprintf( __( 'View %s', 'viteseo-noyona-childtheme-2.0' ), $title ) ); ?>"
 					>
-						<span class="screen-reader-text"><?php esc_html_e( 'View product', 'viteseo-noyona-childtheme' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'View product', 'viteseo-noyona-childtheme-2.0' ); ?></span>
 					</a>
 				<?php endif; ?>
 			</article>

@@ -4,12 +4,12 @@
  */
 
 :root {
-  --noyona-cart-pink: #e199a4;
-  --noyona-cart-pink-dark: #cc848f;
-  --noyona-cart-pink-soft: #fef0f2;
+  --noyona-cart-pink: var(--noyona-color-pink-soft);
+  --noyona-cart-pink-dark: var(--noyona-color-pink-accent);
+  --noyona-cart-pink-soft: var(--noyona-color-pink-light-blush);
   --noyona-cart-line: #efefef;
   --noyona-cart-inactive: #d6dbe0;
-  --noyona-cart-card-radius: 28px;
+  --noyona-cart-card-radius: var(--noyona-radius-card);
 }
 
 /* ───────────────────────────────────────
@@ -17,7 +17,7 @@
    ─────────────────────────────────────── */
 .noyona-cart-shell,
 body.woocommerce-cart .wp-site-blocks {
-  --wp--style--global--wide-size: min(1200px, 94vw);
+  --wp--style--global--wide-size: min(1200px, calc(100vw - (var(--page-gutter-left) + var(--page-gutter-right))));
 }
 
 .noyona-cart-shell {
@@ -50,9 +50,9 @@ body.woocommerce-cart .wp-site-blocks {
   gap: 0.5rem;
   padding: 0.6rem 1.25rem;
   border-radius: 999px;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
-  font-size: 13px;
+  font-size: var(--wp--preset--font-size--caption);
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -75,8 +75,8 @@ body.woocommerce-cart .wp-site-blocks {
 }
 
 .noyona-checkout-steps li.is-active {
-  background: var(--noyona-cart-pink);
-  color: #fff;
+  background: var(--noyona-color-pink-accent);
+  color: #ffffff;
 }
 
 .noyona-checkout-steps__icon {
@@ -109,12 +109,12 @@ body.woocommerce-cart .noyona-cart-summary-card > .noyona-cart-page-title {
 .noyona-cart-shell .noyona-cart-page-title,
 body.woocommerce-cart .noyona-cart-page-title {
   margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(1.35rem, 3vw, 1.65rem);
-  line-height: 1.2;
-  color: #111;
+  font-size: var(--wp--preset--font-size--h-2);
+  line-height: normal;
+  color: #000000;
 }
 
 /* ───────────────────────────────────────
@@ -155,11 +155,11 @@ body.woocommerce-cart .noyona-cart-page-title {
 }
 
 .noyona-cart-item__name {
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
   font-size: clamp(1.1rem, 2.2vw, 1.25rem);
   font-weight: 800;
-  line-height: 1.2;
+  line-height: normal;
 }
 
 .noyona-cart-item__name a {
@@ -168,7 +168,7 @@ body.woocommerce-cart .noyona-cart-page-title {
 }
 
 .noyona-cart-item__price {
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
   font-size: 1.15rem;
   margin: 0.25rem 0;
@@ -190,10 +190,10 @@ body.woocommerce-cart .noyona-cart-page-title {
 /* Variation / meta data */
 .noyona-cart-item__details .variation,
 .noyona-cart-item__details dl.variation {
-  font-size: 0.8125rem;
+  font-size: var(--wp--preset--font-size--caption);
   color: #666;
   margin-top: 0.35rem;
-  line-height: 1.45;
+  line-height: normal;
 }
 
 /* Actions row: quantity + remove */
@@ -212,9 +212,9 @@ body.woocommerce-cart .noyona-cart-page-title {
 }
 
 .noyona-qty-label {
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
-  font-size: 0.9rem;
+  font-size: var(--wp--preset--font-size--label);
   font-weight: 600;
   color: #555;
 }
@@ -223,7 +223,7 @@ body.woocommerce-cart .noyona-cart-page-title {
 .noyona-cart-item__qty .quantity {
   display: flex;
   align-items: center;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   border: 1px solid #efefef;
   background: #fff;
   overflow: hidden;
@@ -237,7 +237,7 @@ body.woocommerce-cart .noyona-cart-page-title {
   text-align: center;
   border: none;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: var(--wp--preset--font-size--input);
   background: transparent;
   -moz-appearance: textfield;
 }
@@ -257,7 +257,7 @@ body.woocommerce-cart .noyona-cart-page-title {
   height: 36px;
   border-radius: 10px;
   color: #999;
-  font-size: 1rem;
+  font-size: var(--wp--preset--font-size--nav-button);
   transition: color 0.15s ease, background 0.15s ease;
 }
 
@@ -298,7 +298,7 @@ body.woocommerce-cart .noyona-cart-page-title {
   align-items: center;
   gap: 0.65rem;
   margin-bottom: 0.75rem;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
   font-size: 1.125rem;
   font-weight: 700;
@@ -320,11 +320,11 @@ body.woocommerce-cart .noyona-cart-page-title {
   height: 48px;
   padding: 0 1rem;
   border: 1px solid #efefef;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   background: #fff;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
-  font-size: 0.95rem;
+  font-size: var(--wp--preset--font-size--body);
   color: #333;
   outline: none;
   transition: border-color 0.15s ease;
@@ -342,13 +342,13 @@ body.woocommerce-cart .noyona-cart-page-title {
   height: 48px;
   padding: 0 1.5rem;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   background: #dfe3e8;
   color: #8da1b5;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: var(--wp--preset--font-size--nav-button);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
@@ -374,9 +374,9 @@ body.woocommerce-cart .noyona-cart-page-title {
   background: #f8e6ea;
   color: #c76f7a;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: var(--wp--preset--font-size--caption);
   font-weight: 600;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
   text-transform: uppercase;
 }
@@ -386,7 +386,7 @@ body.woocommerce-cart .noyona-cart-page-title {
   align-items: center;
   justify-content: center;
   color: #c76f7a;
-  font-size: 1rem;
+  font-size: var(--wp--preset--font-size--nav-button);
   line-height: 1;
   text-decoration: none;
   opacity: 0.6;
@@ -409,22 +409,22 @@ body.woocommerce-cart .noyona-cart-page-title {
   justify-content: space-between;
   align-items: baseline;
   padding: 0.7rem 0;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
 }
 
 .noyona-summary-row__label {
   color: #555;
-  font-size: 1rem;
+  font-size: var(--wp--preset--font-size--label);
   font-weight: 500;
-  line-height: 1.4;
+  line-height: normal;
 }
 
 .noyona-summary-row__value {
   color: #111;
-  font-size: 1rem;
+  font-size: var(--wp--preset--font-size--body);
   font-weight: 500;
-  line-height: 1.4;
+  line-height: normal;
   text-align: right;
 }
 
@@ -446,7 +446,7 @@ body.woocommerce-cart .noyona-cart-page-title {
   margin-top: 0.5rem;
   padding-top: 0.85rem;
   border-top: 1px solid #ece7e8;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
 }
 
@@ -475,25 +475,26 @@ body.woocommerce-cart .noyona-cart-page-title {
   justify-content: center;
   width: 100%;
   min-height: 58px;
-  border-radius: 20px;
-  background: var(--noyona-cart-pink);
+  border-radius: 16px;
+  background: #EFB5BE;
   border: none;
-  color: #fff;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  color: #D81B60;
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
   font-weight: 700;
-  font-size: 1.15rem;
+  font-size: 16px;
   text-decoration: none;
-  box-shadow: 0 10px 25px rgba(225, 153, 164, 0.5);
+  box-shadow: 0 10px 25px rgba(216, 27, 96, 0.5);
   transition: background 0.15s ease, box-shadow 0.15s ease,
     transform 0.1s ease;
   cursor: pointer;
 }
 
-.noyona-checkout-btn:hover {
-  background: var(--noyona-cart-pink-dark);
-  color: #fff;
-  box-shadow: 0 12px 30px rgba(225, 153, 164, 0.6);
+.noyona-checkout-btn:hover,
+.noyona-checkout-btn:focus-visible {
+  background: #D81B60;
+  color: #FFFFFF;
+  box-shadow: 0 12px 30px rgba(216, 27, 96, 0.6);
   transform: translateY(-1px);
 }
 
@@ -504,7 +505,7 @@ body.woocommerce-cart .noyona-cart-page-title {
 .noyona-cart-summary-card .cart-empty {
   text-align: center;
   padding: 2rem 1rem;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
 }
 
@@ -519,19 +520,21 @@ body.woocommerce-cart .noyona-cart-page-title {
   justify-content: center;
   min-height: 48px;
   padding: 0 2rem;
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   background: var(--noyona-cart-pink);
-  color: #fff;
+  color: #333333;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: var(--wp--preset--font-size--nav-button);
   text-decoration: none;
   border: none;
-  box-shadow: 0 8px 20px rgba(225, 153, 164, 0.4);
-  transition: background 0.15s ease;
+  box-shadow: 0 8px 20px rgba(216, 27, 96, 0.4);
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.noyona-cart-summary-card .return-to-shop .button:hover {
+.noyona-cart-summary-card .return-to-shop .button:hover,
+.noyona-cart-summary-card .return-to-shop .button:focus-visible {
   background: var(--noyona-cart-pink-dark);
+  color: #ffffff;
 }
 
 /* ───────────────────────────────────────
@@ -540,12 +543,12 @@ body.woocommerce-cart .noyona-cart-page-title {
 .noyona-cart-summary-card .woocommerce-message,
 .noyona-cart-summary-card .woocommerce-error,
 .noyona-cart-summary-card .woocommerce-info {
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   padding: 0.85rem 1.25rem;
   margin-bottom: 1rem;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova",
+  font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
-  font-size: 0.9rem;
+  font-size: var(--wp--preset--font-size--body);
 }
 
 .noyona-cart-summary-card .woocommerce-message {
@@ -594,7 +597,7 @@ body.woocommerce-cart .noyona-cart-page-title {
   }
 
   .noyona-checkout-steps li {
-    font-size: 11px;
+    font-size: var(--wp--preset--font-size--caption);
     padding: 0.45rem 0.85rem;
   }
 

@@ -3505,7 +3505,7 @@ function noyona_download_einvoice_handler() {
         $totals_html .= '</tr>';
     }
 
-    $invoice_html  = '<!doctype html><html><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '"><meta http-equiv="Content-Type" content="text/html; charset=' . esc_attr( get_bloginfo( 'charset' ) ) . '"><title>' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</title></head><body style="font-family:Arial,sans-serif;color:#1d1d1d;line-height:1.45;padding:28px;">';
+    $invoice_html  = '<!doctype html><html><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '"><meta http-equiv="Content-Type" content="text/html; charset=' . esc_attr( get_bloginfo( 'charset' ) ) . '"><title>' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</title></head><body style="font-family:Arial,sans-serif;color:#1d1d1d;line-height:normal;padding:28px;">';
     $invoice_html .= '<h1 style="margin:0 0 4px;">' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</h1>';
     $invoice_html .= '<p style="margin:0 0 16px;">' . esc_html__( 'Order', 'noyona-childtheme' ) . ' #' . esc_html( $order->get_order_number() ) . '</p>';
     $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Order Date:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $order_date ) . '</p>';

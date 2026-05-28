@@ -17,7 +17,7 @@
     },
     "backgroundColor": {
       "type": "string",
-      "default": "#E9A3AD"
+      "default": "#FBDDE2"
     },
     "items": {
       "type": "array",

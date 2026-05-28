@@ -27,7 +27,7 @@ $text_position = in_array( $atts['textPosition'], $allowed_positions, true ) ? $
             <?php endif; ?>
 
             <?php if ( ! empty( $atts['title'] ) ) : ?>
-                <h2 class="noyona-landing-feature-banner__title"><?php echo esc_html( $atts['title'] ); ?></h2>
+                <h1 class="noyona-landing-feature-banner__title"><?php echo esc_html( $atts['title'] ); ?></h1>
             <?php endif; ?>
 
             <?php if ( ! empty( $atts['subheading'] ) ) : ?>

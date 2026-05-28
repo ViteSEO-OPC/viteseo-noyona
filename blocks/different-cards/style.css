@@ -1,7 +1,7 @@
 .wp-block-noyona-different-cards.different-cards {
   background: #ffffff;
   color: var(--wp--preset--color--ink, #333333);
-  font-family: var(--wp--preset--font-family--proxima-nova, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-family: var(--wp--preset--font-family--poppins, system-ui, -apple-system, "Segoe UI", sans-serif);
 
   padding-top: clamp(44px, 6vw, 84px);
   padding-bottom: clamp(44px, 6vw, 84px);
@@ -22,19 +22,20 @@
 
 .different-cards__title {
   margin: 0 0 12px;
-  font-size: var(--wp--preset--font-size--h-2, clamp(32px, 4.2vw, 55px));
+  font-size: var(--wp--preset--font-size--h-2, clamp(32px, 3.75vw, 48px));
   font-weight: 700;
-  line-height: 1.1;
+  line-height: normal;
 }
 
 .different-cards__accent {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .different-cards__subtitle {
   margin: 0;
-  font-size: var(--wp--preset--font-size--body, clamp(16px, 1.4vw, 20px));
-  line-height: 1.65;
+  font-size: var(--wp--preset--font-size--body, 16px);
+  font-weight: 400;
+  line-height: normal;
   opacity: 0.9;
 }
 
@@ -46,9 +47,9 @@
 }
 
 .different-cards__card {
-  --diff-card-bg: #f7d7ea;
+  --diff-card-bg: #FBDDE2;
   background: var(--diff-card-bg);
-  border-radius: 18px;
+  border-radius: var(--noyona-radius-card);
   overflow: hidden;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
   display: flex;
@@ -75,15 +76,15 @@
 
 .different-cards__card-title {
   margin: 0 0 10px;
-  font-size: var(--wp--preset--font-size--h-3, clamp(18px, 2vw, 24px));
+  font-size: var(--wp--preset--font-size--h-4, clamp(24px, 2.5vw, 32px));
   font-weight: 700;
-  line-height: 1.2;
+  line-height: normal;
 }
 
 .different-cards__card-text {
   margin: 0;
   font-size: var(--wp--preset--font-size--body, clamp(16px, 1.4vw, 20px));
-  line-height: 1.65;
+  line-height: normal;
   opacity: 0.88;
 }
 

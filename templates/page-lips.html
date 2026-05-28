@@ -2,159 +2,30 @@
 
 <!-- wp:group {"tagName":"main","className":"noyona-shop-archive noyona-lips-page","layout":{"inherit":true,"type":"constrained"}} -->
 <main class="wp-block-group noyona-shop-archive noyona-lips-page">
-    <!-- wp:group {"align":"wide","className":"noyona-shop-top","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"wrap"}} -->
-    <div class="wp-block-group alignwide noyona-shop-top">
-        <!-- wp:post-title {"level":1,"className":"noyona-shop-title"} /-->
-    </div>
-    <!-- /wp:group -->
-
-    <!-- wp:columns {"align":"wide","className":"noyona-shop-layout"} -->
-    <div class="wp-block-columns alignwide noyona-shop-layout">
-        <!-- wp:column {"width":"28%","className":"noyona-shop-sidebar"} -->
-        <div class="wp-block-column noyona-shop-sidebar" style="flex-basis:28%">
-            <!-- wp:html -->
-            <button type="button" class="noyona-shop-filter-overlay" aria-label="Close filter panel"></button>
-            <!-- /wp:html -->
-            <!-- wp:group {"className":"noyona-shop-filters","layout":{"type":"constrained"}} -->
-            <div id="noyona-shop-filter-panel" class="wp-block-group noyona-shop-filters">
-                <!-- wp:html -->
-                <button type="button" class="noyona-shop-filter-close" aria-label="Close filters">✕</button>
-                <!-- /wp:html -->
-                <!-- wp:html -->
-                <div class="noyona-shop-filter-sections" aria-hidden="true">
-                    <section class="noyona-shop-filter-section">
-                        <h5>Stock Status</h5>
-                        <label><input type="radio" name="noyona-stock-status" checked> In Stock</label>
-                        <label><input type="radio" name="noyona-stock-status"> Out of Stock</label>
-                    </section>
-
-                    <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
-                        <h5 class="noyona-shop-filter-price-title">Price</h5>
-                        <div class="noyona-shop-filter-price" data-min="0" data-step="50">
-                            <div class="noyona-shop-filter-price-slider" role="group" aria-label="Price range">
-                                <div class="noyona-shop-filter-price-track"></div>
-                                <div class="noyona-shop-filter-price-track-fill"></div>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="Minimum price handle"></button>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="Maximum price handle"></button>
-                            </div>
-                            <div class="noyona-shop-filter-price-inputs">
-                                <label class="noyona-shop-filter-price-input">
-                                    <span aria-hidden="true">₱</span>
-                                    <input type="number" inputmode="numeric" min="0" step="1" value="0" name="noyona-price-min" aria-label="Minimum price">
-                                </label>
-                                <span class="noyona-shop-filter-price-separator" aria-hidden="true">-</span>
-                                <label class="noyona-shop-filter-price-input">
-                                    <span aria-hidden="true">₱</span>
-                                    <input type="number" inputmode="numeric" min="0" step="1" value="0" name="noyona-price-max" aria-label="Maximum price">
-                                </label>
-                            </div>
-                            
-                            <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
-                        </div>
-                    </section>
-
-                    <!-- <section class="noyona-shop-filter-section">
-                        <h5>Star Rating</h5>
-                        <label><input type="radio" name="noyona-star-rating"> Bestsellers</label>
-                        <label><input type="radio" name="noyona-star-rating"> Top Rated</label>
-                        <label><input type="radio" name="noyona-star-rating"> High Volume</label>
-                        <label><input type="radio" name="noyona-star-rating"> Customer Favorites</label>
-                        <label><input type="radio" name="noyona-star-rating"> Community Verified</label>
-                    </section> -->
-                </div>
-                <!-- /wp:html -->
-
-                <!-- wp:group {"className":"noyona-shop-filter-blocks","layout":{"type":"constrained"}} -->
-                <div class="wp-block-group noyona-shop-filter-blocks">
-                    <!-- wp:woocommerce/product-filter-active /-->
-                    <!-- wp:woocommerce/product-filter-stock-status /-->
-                    <!-- wp:woocommerce/product-filter-price /-->
-                    <!-- wp:woocommerce/product-filter-rating /-->
-                </div>
-                <!-- /wp:group -->
-            </div>
-            <!-- /wp:group -->
-        </div>
-        <!-- /wp:column -->
-
-        <!-- wp:column {"width":"72%","className":"noyona-shop-products-column"} -->
-        <div class="wp-block-column noyona-shop-products-column" style="flex-basis:72%">
-            <!-- wp:group {"className":"noyona-shop-toolbar","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"wrap"}} -->
-            <div class="wp-block-group noyona-shop-toolbar">
-                <!-- wp:woocommerce/product-results-count {"className":"noyona-shop-count"} /-->
-
-                <!-- wp:group {"className":"noyona-shop-toolbar-right","layout":{"type":"flex","verticalAlignment":"center","justifyContent":"right","flexWrap":"nowrap"}} -->
-                <div class="wp-block-group noyona-shop-toolbar-right">
-                    <!-- wp:html -->
-                    <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
-                        <span class="noyona-shop-view-label" style="color: #E199A4; font-weight: 600; font-size: 14px;">View As</span>
-                        <div class="noyona-shop-view-toggle" aria-label="View">
-                            <button type="button" class="is-active" data-shop-view="grid" aria-pressed="true">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
-                            </button>
-                            <button type="button" data-shop-view="list" aria-pressed="false">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h18v4H3z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- /wp:html -->
-
-                    <!-- wp:html -->
-                    <button type="button" class="noyona-shop-filter-toggle" aria-expanded="false" aria-controls="noyona-shop-filter-panel">Filter</button>
-                    <!-- /wp:html -->
-
-                    <!-- wp:woocommerce/catalog-sorting {"className":"noyona-shop-sort"} /-->
-                </div>
-                <!-- /wp:group -->
-            </div>
-            <!-- /wp:group -->
-
-            <!-- wp:woocommerce/product-collection {"queryId":2,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","outofstock","onbackorder"],"taxQuery":[{"taxonomy":"product_cat","field":"slug","terms":["lips"],"operator":"IN"}],"isProductCollectionBlock":true,"perPage":4,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false},"tagName":"div","dimensions":{"widthType":"fill","fixedWidth":""},"displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},"convertedFromProducts":false,"queryContextIncludes":["collection"],"className":"noyona-shop-products"} -->
-            <div class="wp-block-woocommerce-product-collection noyona-shop-products">
-                <!-- wp:woocommerce/product-template -->
-                <!-- wp:woocommerce/product-image {"showSaleBadge":true,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
-                <!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
-                <!-- /wp:woocommerce/product-image -->
-                <!-- wp:post-title {"level":3,"isLink":true,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title","style":{"typography":{"lineHeight":"1.25"}}} /-->
-                <!-- wp:post-excerpt {"excerptLength":22,"showMoreOnNewLine":false} /-->
-                <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
-                <!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
-                <!-- /wp:woocommerce/product-template -->
-
-                <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
-                <!-- wp:query-pagination-previous /-->
-                <!-- wp:query-pagination-numbers /-->
-                <!-- wp:query-pagination-next /-->
-                <!-- /wp:query-pagination -->
-
-                <!-- wp:woocommerce/product-collection-no-results -->
-                <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","flexWrap":"wrap"}} -->
-                <div class="wp-block-group">
-                    <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"30px","fontWeight":"700"}},"textColor":"vivid-pink-cyan"} -->
-                    <p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">Coming Soon</p>
-                    <!-- /wp:paragraph -->
-                </div>
-                <!-- /wp:group -->
-                <!-- /wp:woocommerce/product-collection-no-results -->
-            </div>
-            <!-- /wp:woocommerce/product-collection -->
-        </div>
-        <!-- /wp:column -->
-    </div>
-    <!-- /wp:columns -->
-
     <!-- wp:noyona/landing-feature-banner {
         "align":"full",
-        "label":"Noyona Essentials",
+        "label":"",
         "title":"Best Lip Makeup",
-        "subheading":"Discover Lip Makeup Designed for <span class=\"noyona-landing-feature-banner__subheading-accent\">Filipino Skin</span>",
-        "paragraph":"Finding lip products that complement morena undertones and withstand Manila’s heat and humidity can be challenging. Noyona Essentials creates climate-adapted formulas enriched with hydrating oils, SPF, and bold pigments, delivering comfort, vibrant color, and confidence for Filipino lifestyles.",
+        "subheading":"Discover Lip Makeup Designed for <span class=\"noyona-landing-feature-banner__subheading-accent\">All Skin Types</span>",
+        "paragraph":"Finding lip products that complement your undertones and withstand tropical heat and humidity can be challenging. Noyona Essentials creates climate-adapted formulas enriched with hydrating oils, SPF, and bold pigments, delivering comfort, vibrant color, and confidence for everyday tropical lifestyles.",
         "textPosition":"left"
+    } /-->
+
+    <!-- wp:noyona/product-slide {
+        "align":"wide",
+        "heading":"Your Perfect Pout",
+        "subheading":"Noyona lip colors are made to last, comfort, and complement every skin tone perfectly.",
+        "cardsToShow":4,
+        "useWooProducts":true,
+        "wooOnlyFeatured":true,
+        "wooProductsLimit":8,
+        "wooProductCategories":["lips"],
+        "wooColorAttribute":"pa_color"
     } /-->
 
     <!-- wp:noyona/types-cards {
      "align":"full",
-     "title":"Types of Face Makeup",
+     "title":"Types of Lip Makeup",
      "cards":[
         {
             "imageId":0,
@@ -166,13 +37,13 @@
             "imageId":0,
             "image":"",
             "title":"Liquid Lipstick",
-            "text":"Offers intense, transfer-proof pigment that resists Manila’s heat and humidity, ideal for long-lasting, tropical-proof wear, and suits normal to combination skin with Noyona Wonder Lip Wand."
+            "text":"Offers intense, transfer-proof pigment that resists tropical heat and humidity, ideal for long-lasting, tropical-proof wear, and suits normal to combination skin with Noyona Wonder Lip Wand."
         },
         {
             "imageId":0,
             "image":"",
             "title":"Creamy Lipstick",
-            "text":"Glides on with a satin finish, keeping morena lips soft and hydrated for everyday casual wear, and is great for dry to normal skin with Noyona Dewy Lip Color."
+            "text":"Glides on with a satin finish, keeping yout lips soft and hydrated for everyday casual wear, and is great for dry to normal skin with Noyona Dewy Lip Color."
         }
     ]} /-->
 
@@ -183,8 +54,8 @@
       "items":[
         {
           "iconClass":"fa-solid fa-wand-magic-sparkles",
-          "title":"Flattering Shades for Morena Skin",
-          "description":"Warm nudes, berry reds, and deep plums are formulated to complement Filipino undertones, ensuring your lips always look vibrant and natural."
+          "title":"Flattering Shades for All Skin.",
+          "description":"Warm nudes, berry reds, and deep plums are formulated to complement your undertones, ensuring your lips always look vibrant and natural."
         },
         {
           "iconClass":"fa-regular fa-clock",
@@ -210,10 +81,10 @@
       "align":"wide",
       "heading":"Discover Lip",
       "subheading":"Makeup Essentials",
-      "paragraphOne":"Choosing the right lip makeup for morena skin and humid weather ensures your look lasts all day. From matte lipsticks to hydrating glosses and precision wands, Noyona Essentials delivers products designed for Filipino lifestyles.",
+      "paragraphOne":"Choosing the right lip makeup for your skin and humid weather ensures your look lasts all day. From matte lipsticks to hydrating glosses and precision wands, Noyona Essentials delivers products designed for everyday tropical lifestyles",
       "paragraphTwo":"Browse our full collection online and enjoy fast, reliable delivery via Tiktok, Shopee and Lazada — so your next flawless look is just a click away.",
       "buttonText":"View all products",
-      "buttonUrl":"/coming-soon/",
+      "buttonUrl":"/shop/lips/",
       "backgroundImage":"https://noyonacosmetics.com/wp-content/uploads/2026/02/dewylipcolor.webp",
       "cards":[
         {

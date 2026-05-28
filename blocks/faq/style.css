@@ -3,7 +3,7 @@
     padding-block: clamp(2.5rem, 5vw, 3.5rem);
     padding-right: var(--page-gutter-right);
     padding-left: var(--page-gutter-left);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-family: var(--wp--preset--font-family--poppins);
 }
 
 .faq-block--dropdown {
@@ -18,17 +18,17 @@
 
 .faq-block__title {
     margin: 0 0 1rem;
-    font-size: clamp(45px, 6vw, 55px);
+    font-size: var(--wp--preset--font-size--h-2);
     font-weight: 700;
     color: #000;
 }
 
 .faq-block__subtitle {
     margin: 0 0 2rem;
-    font-size: clamp(18px, 2vw, 24px);
-    font-weight: 500;
+    font-size: var(--wp--preset--font-size--body);
+    font-weight: 400;
     color: #111;
-    line-height: 1.5;
+    line-height: normal;
 }
 
 .faq-block__button {
@@ -36,20 +36,23 @@
     align-items: center;
     justify-content: center;
     padding: 0.75rem 3.5rem;
-    border-radius: 6px;
-    background: #E199A4;
-    color: #fff;
+    border-radius: 16px;
+    background: #EFB5BE;
+    color: #D81B60;
+    border: none;
     text-decoration: none;
     font-weight: 700;
-    font-size: clamp(18px, 2vw, 24px);
+    font-size: 16px;
     box-shadow: none;
     transition: transform 0.2s ease;
     margin-top: 1.5rem;
-    border-radius: 12px;
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    border-radius: 16px;
+    font-family: var(--wp--preset--font-family--poppins);
 }
 
 .faq-block__button:hover {
+    background-color: #D81B60;
+    color: #FFFFFF;
     transform: translateY(-2px);
 }
 
@@ -82,7 +85,7 @@
 }
 
 .faq-accordion__item:hover {
-    border-color: #E199A4;
+    border-color: var(--noyona-color-pink-muted-rose);
 }
 
 .faq-accordion__summary {
@@ -95,12 +98,12 @@
     gap: 1rem;
     font-weight: 600;
     color: #333;
-    font-size: clamp(18px, 2vw, 24px);
+    font-size: var(--wp--preset--font-size--h-5);
     transition: color 0.2s ease;
 }
 
 .faq-accordion__summary:hover {
-    color: #E199A4;
+    color: var(--noyona-color-pink-muted-rose);
 }
 
 .faq-accordion__summary::-webkit-details-marker {
@@ -133,30 +136,30 @@
 }
 
 .faq-accordion__item[open] {
-    border-color: #E199A4;
+    border-color: var(--noyona-color-pink-muted-rose);
     box-shadow: 0 4px 12px rgba(227, 11, 93, 0.1);
 }
 
 .faq-accordion__item[open] .faq-accordion__summary {
-    color: #E199A4;
+    color: var(--noyona-color-pink-muted-rose);
     border-bottom: 1px solid rgba(227, 11, 93, 0.1);
 }
 
 .faq-accordion__item[open] .faq-accordion__icon {
     transform: rotate(45deg);
-    color: #E199A4;
+    color: var(--noyona-color-pink-muted-rose);
 }
 
 .faq-accordion__answer {
     padding: 0 1.25rem;
     color: #555;
-    font-size: 0.95rem;
-    line-height: 1.6;
+    font-size: var(--wp--preset--font-size--body);
+    line-height: normal;
 }
 
 /* Links inside answers (e.g. mailto:) */
 .faq-accordion__answer a {
-    color: #E199A4;
+    color: var(--noyona-color-pink-muted-rose);
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -191,13 +194,13 @@
 /* Active answer text color - making it slightly tinted or just clear dark */
 .faq-accordion__item[open] .faq-accordion__answer p {
     color: #444;
-    font-size: clamp(16px, 2vw, 20px); 
+    font-size: var(--wp--preset--font-size--body); 
 }
 
 .faq-block__placeholder {
     padding: 1rem;
     border: 1px dashed #ccc;
-    border-radius: 12px;
+    border-radius: var(--noyona-radius-input);
     color: #777;
 }
 
@@ -207,10 +210,10 @@
     }
 
     .faq-block__title {
-        font-size: 2rem;
+        font-size: var(--wp--preset--font-size--h-2);
     }
     
     .faq-block__subtitle {
-        font-size: 0.95rem;
+        font-size: var(--wp--preset--font-size--body);
     }
 }

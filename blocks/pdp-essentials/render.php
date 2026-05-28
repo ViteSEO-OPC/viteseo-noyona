@@ -10,27 +10,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $defaults = array(
-	'heading' => __( 'Why Noyona Essentials?', 'viteseo-noyona-childtheme' ),
+	'heading' => __( 'Why Noyona Essentials?', 'viteseo-noyona-childtheme-2.0' ),
 	'items'   => array(
 		array(
 			'icon'        => 'fa-solid fa-paw',
-			'title'       => __( 'Cruelty-free', 'viteseo-noyona-childtheme' ),
-			'description' => __( 'We love animals as much as you do. Never tested on friends with fur.', 'viteseo-noyona-childtheme' ),
+			'title'       => __( 'Cruelty-free', 'viteseo-noyona-childtheme-2.0' ),
+			'description' => __( 'We love animals as much as you do. Never tested on friends with fur.', 'viteseo-noyona-childtheme-2.0' ),
 		),
 		array(
 			'icon'        => 'fa-solid fa-leaf',
-			'title'       => __( 'Sustainable', 'viteseo-noyona-childtheme' ),
-			'description' => __( 'Responsibly sourced ingredients and eco-conscious packaging.', 'viteseo-noyona-childtheme' ),
+			'title'       => __( 'Sustainable', 'viteseo-noyona-childtheme-2.0' ),
+			'description' => __( 'Responsibly sourced ingredients and eco-conscious packaging.', 'viteseo-noyona-childtheme-2.0' ),
 		),
 		array(
 			'icon'        => 'fa-solid fa-seedling',
-			'title'       => __( 'Vegan', 'viteseo-noyona-childtheme' ),
-			'description' => __( '100% plant-based formulas without any animal-derived ingredients.', 'viteseo-noyona-childtheme' ),
+			'title'       => __( 'Vegan', 'viteseo-noyona-childtheme-2.0' ),
+			'description' => __( '100% plant-based formulas without any animal-derived ingredients.', 'viteseo-noyona-childtheme-2.0' ),
 		),
 		array(
 			'icon'        => 'fa-solid fa-ban',
-			'title'       => __( 'Paraben-free', 'viteseo-noyona-childtheme' ),
-			'description' => __( 'Formulated without harmful parabens or sulfates. Safe for sensitive skin.', 'viteseo-noyona-childtheme' ),
+			'title'       => __( 'Paraben-free', 'viteseo-noyona-childtheme-2.0' ),
+			'description' => __( 'Formulated without harmful parabens or sulfates. Safe for sensitive skin.', 'viteseo-noyona-childtheme-2.0' ),
 		),
 	),
 );

@@ -1,6 +1,6 @@
 .product-highlight {
     padding-block: 3rem;
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-family: var(--wp--preset--font-family--poppins);
     padding-right: var(--page-gutter-right);
     padding-left: var(--page-gutter-left);
 }
@@ -11,7 +11,7 @@
 }
 
 .product-highlight__heading {
-    font-size: 2.5rem;
+    font-size: var(--wp--preset--font-size--h-2);
     font-weight: 700;
     margin: 0 0 0.5rem;
     color: #000;
@@ -19,7 +19,7 @@
 
 .product-highlight__subheading {
     color: #666;
-    font-size: 1rem;
+    font-size: var(--wp--preset--font-size--body);
     margin: 0;
 }
 
@@ -57,8 +57,8 @@
 /* Card Styling */
 .ph-card__media {
     position: relative;
-    background: #E5989B; /* Pinkish bg from image */
-    border-radius: 12px;
+    background: #FBDDE2; /* Pinkish bg from image */
+    border-radius: var(--noyona-radius-input);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -75,7 +75,7 @@
     color: #fff;
     padding: 4px 12px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: var(--wp--preset--font-size--caption);
     font-weight: 600;
     text-transform: uppercase;
 }
@@ -106,16 +106,16 @@
 }
 
 .ph-card__title {
-    font-size: 1.1rem;
+    font-size: var(--wp--preset--font-size--h-5);
     font-weight: 700;
     margin: 0 0 0.5rem;
     color: #000;
 }
 
 .ph-card__desc {
-    font-size: 0.9rem;
+    font-size: var(--wp--preset--font-size--body);
     color: #555;
-    line-height: 1.4;
+    line-height: normal;
     margin-bottom: 0.8rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -139,12 +139,12 @@
 .ph-compare-price {
     text-decoration: line-through;
     color: #999;
-    font-size: 0.95rem;
+    font-size: var(--wp--preset--font-size--caption);
 }
 
 .ph-card__rating {
     color: #ffc107; /* Star color */
-    font-size: 0.9rem;
+    font-size: var(--wp--preset--font-size--caption);
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
@@ -153,7 +153,7 @@
 
 .ph-rating-count {
     color: #777;
-    font-size: 0.8rem;
+    font-size: var(--wp--preset--font-size--caption);
     margin-left: 4px;
 }
 
@@ -164,20 +164,23 @@
 
 .ph-btn-primary {
     flex: 1;
-    background: #E199A4;
-    color: #fff;
+    background: #EFB5BE;
+    color: #D81B60;
     text-decoration: none;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: 600;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-weight: 700;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 16px;
     text-transform: uppercase;
-    transition: opacity 0.2s;
+    border: none;
+    transition: background 0.2s, color 0.2s;
 }
 
 .ph-btn-primary:hover {
-    opacity: 0.8;
+    background: #D81B60;
+    color: #FFFFFF;
+    border: none;
 }
 
 .ph-btn-cart {
@@ -185,22 +188,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #E199A4;
-    color: #fff;
-    border-radius: 8px;
+    background: #EFB5BE;
+    color: #D81B60;
+    border-radius: 16px;
     text-decoration: none;
-    transition: opacity 0.2s;
+    border: none;
+    transition: background 0.2s, color 0.2s;
 }
 
 .ph-btn-cart:hover {
-    opacity: 0.9;
+    background: #D81B60;
+    color: #FFFFFF;
+    border: none;
 }
 
 /* Navigation Buttons */
 .ph-nav-btn {
     background: transparent;
     border: none;
-    color: #E199A4; /* Pinkish arrow */
+    color: var(--noyona-color-pink-muted-rose); /* Pinkish arrow */
     font-size: 2rem;
     cursor: pointer;
     padding: 0 10px;

@@ -98,7 +98,7 @@ $total = $subtotal - $discount + ( $has_real_rate ? $shipping_cost : 0.0 );
 				} elseif ( $has_real_rate ) {
 					echo wp_kses_post( wc_price( $shipping_cost ) );
 				} else {
-					esc_html_e( 'Calculated at checkout', 'viteseo-noyona-childtheme' );
+					esc_html_e( 'Calculated at checkout', 'viteseo-noyona-childtheme-2.0' );
 				}
 				?>
 			</span>

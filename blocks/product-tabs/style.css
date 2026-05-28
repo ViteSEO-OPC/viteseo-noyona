@@ -3,7 +3,7 @@
   width: 100%;
   max-width: 100%;
   border: 1px solid #e5e5e5;
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   padding: 1rem 1.15rem 1.25rem;
   background: #fff;
   box-sizing: border-box;
@@ -26,7 +26,7 @@
   border: none;
   background: transparent;
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: var(--wp--preset--font-size--nav-button);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -35,11 +35,11 @@
 }
 
 .noyona-pdp-tabs__tab:hover {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .noyona-pdp-tabs__tab.is-active {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .noyona-pdp-tabs__tab.is-active::after {
@@ -49,7 +49,7 @@
   right: 0;
   bottom: -0.55rem;
   height: 2px;
-  background: #E199A4;
+  background: var(--noyona-color-pink-muted-rose);
   border-radius: 1px;
 }
 
@@ -71,7 +71,7 @@
 
 .noyona-pdp-tabs__panel-inner {
   font-size: 0.9375rem;
-  line-height: 1.6;
+  line-height: normal;
   color: #333;
 }
 
@@ -86,5 +86,5 @@
 .noyona-pdp-tabs__empty {
   margin: 0;
   color: #888;
-  font-size: 0.875rem;
+  font-size: var(--wp--preset--font-size--body);
 }

@@ -16,7 +16,7 @@ if ( ! $product ) {
 
 $shop_id = function_exists( 'wc_get_page_id' ) ? (int) wc_get_page_id( 'shop' ) : 0;
 $shop_url = $shop_id > 0 ? get_permalink( $shop_id ) : home_url( '/shop/' );
-$shop_label = $shop_id > 0 ? get_the_title( $shop_id ) : __( 'Shop', 'viteseo-noyona-childtheme' );
+$shop_label = $shop_id > 0 ? get_the_title( $shop_id ) : __( 'Shop', 'viteseo-noyona-childtheme-2.0' );
 
 $cat_link = null;
 $cat_name = '';
@@ -50,7 +50,7 @@ if ( $terms && ! is_wp_error( $terms ) ) {
 
 $parts = array(
 	array(
-		'label' => __( 'Home', 'viteseo-noyona-childtheme' ),
+		'label' => __( 'Home', 'viteseo-noyona-childtheme-2.0' ),
 		'url'   => home_url( '/' ),
 	),
 	array(
@@ -72,7 +72,7 @@ $parts[] = array(
 );
 
 ?>
-<nav class="wp-block-noyona-product-breadcrumbs noyona-pdp-breadcrumbs" aria-label="<?php esc_attr_e( 'Breadcrumb', 'viteseo-noyona-childtheme' ); ?>">
+<nav class="wp-block-noyona-product-breadcrumbs noyona-pdp-breadcrumbs" aria-label="<?php esc_attr_e( 'Breadcrumb', 'viteseo-noyona-childtheme-2.0' ); ?>">
 	<ol class="noyona-pdp-breadcrumbs__list">
 		<?php foreach ( $parts as $i => $p ) : ?>
 			<li class="noyona-pdp-breadcrumbs__item">

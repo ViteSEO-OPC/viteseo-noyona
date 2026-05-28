@@ -3,7 +3,7 @@
     overflow: hidden;
     min-height: 70vh;
     padding: clamp(96px, 14vw, 170px) 24px 120px;
-    background: linear-gradient(135deg, #fdecef 0%, #ffffff 55%, #ffffff 100%);
+    background: linear-gradient(135deg, var(--noyona-color-pink-light-blush) 0%, #ffffff 55%, #ffffff 100%);
     text-align: center;
     color: #2b2b2b;
 }
@@ -30,7 +30,7 @@
     bottom: 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(90deg, #f8a8bc 0%, #ff4d6d 50%, #f8a8bc 100%);
+    background: linear-gradient(90deg, var(--noyona-color-pink-soft) 0%, var(--noyona-color-pink-accent) 50%, var(--noyona-color-pink-soft) 100%);
 }
 
 .noyona-coming-soon__inner {
@@ -47,23 +47,23 @@
 
 .noyona-coming-soon__title {
     margin: 0;
-    font-size: clamp(36px, 6vw, 64px);
-    font-weight: 600;
-    line-height: 1.1;
+    font-size: var(--wp--preset--font-size--h-1);
+    font-weight: 400;
+    line-height: normal;
     letter-spacing: -0.02em;
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    color: #1f1f1f;
+    font-family: var(--wp--preset--font-family--poppins);
+    color: #000000;
 }
 
 .noyona-coming-soon__title-highlight {
-    color: #ff4d6d;
+    color: var(--noyona-color-pink-accent);
 }
 
 .noyona-coming-soon__copy {
     margin: 0;
     font-size: 20px;
     font-weight: 500;
-    line-height: 1.6;
+    line-height: normal;
     color: #5b4b4b;
     max-width: 720px;
 }
@@ -77,7 +77,7 @@
     background: #ffffff;
     border: 1px solid #f2d7dd;
     border-radius: 999px;
-    box-shadow: 0 10px 24px rgba(255, 77, 109, 0.12);
+    box-shadow: 0 10px 24px rgba(216, 27, 96, 0.12);
 }
 
 .noyona-coming-soon__input {
@@ -85,7 +85,7 @@
     border: 0;
     background: transparent;
     padding: 10px 12px;
-    font-size: 14px;
+    font-size: var(--wp--preset--font-size--input);
     font-weight: 500;
     color: #4f4f4f;
     outline: none;
@@ -97,23 +97,24 @@
 }
 
 .noyona-coming-soon__button {
-    border: 0;
-    border-radius: 999px;
-    padding: 10px 24px;
-    background: #E199A4;
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 600;
+    border: none;
+    border-radius: 16px;
+    padding: 12px 24px;
+    background: #EFB5BE;
+    color: #D81B60;
+    font-size: var(--wp--preset--font-size--nav-button);
+    font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 8px 16px rgba(227, 11, 93, 0.28);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 8px 16px rgba(216, 27, 96, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
 .noyona-coming-soon__button:hover,
 .noyona-coming-soon__button:focus-visible {
     transform: translateY(-1px);
-    box-shadow: 0 10px 20px rgba(227, 11, 93, 0.35);
-    background-color: #cc0a53;
+    box-shadow: 0 10px 20px rgba(216, 27, 96, 0.35);
+    background-color: var(--noyona-color-pink-accent);
+    color: #ffffff;
 }
 
 @media (max-width: 960px) {
@@ -138,13 +139,13 @@
     }
 
     .noyona-coming-soon__copy {
-        font-size: 16px;
+        font-size: var(--wp--preset--font-size--body);
     }
 
     .noyona-coming-soon__form {
         flex-direction: column;
-        padding: 10px;
-        border-radius: 24px;
+        padding: var(--noyona-card-pad-mobile);
+        border-radius: var(--noyona-radius-card);
     }
 
     .noyona-coming-soon__input {

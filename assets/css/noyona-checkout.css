@@ -4,12 +4,12 @@
  */
 
 /* ═══════════════════════════════════════
-   SHELL — match cart page width: 1200px / 94vw
+   SHELL — match cart page width: 1200px, gutter 24/24/16
    ═══════════════════════════════════════ */
 .noyona-checkout-shell,
 body.woocommerce-checkout .wp-site-blocks {
-  --wp--style--global--content-size: min(1200px, 94vw);
-  --wp--style--global--wide-size: min(1200px, 94vw);
+  --wp--style--global--content-size: min(1200px, calc(100vw - (var(--page-gutter-left) + var(--page-gutter-right))));
+  --wp--style--global--wide-size: min(1200px, calc(100vw - (var(--page-gutter-left) + var(--page-gutter-right))));
 }
 
 .noyona-checkout-shell {
@@ -135,7 +135,9 @@ body.noyona-review-step .noyona-checkout-card--summary {
 
 body.noyona-review-step .noyona-review-heading {
   justify-content: center;
-  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-size: var(--wp--preset--font-size--h-2);
+  font-weight: 700;
+  line-height: normal;
   margin-bottom: 1.5rem;
 }
 
@@ -156,7 +158,7 @@ body.noyona-review-step .noyona-checkout-card--review-totals .noyona-order-total
 
 body.noyona-review-step .noyona-checkout-actions__submit {
   background: #f8dce3;
-  color: #e199a4;
+  color: var(--noyona-color-pink-muted-rose);
   box-shadow: none;
 }
 
@@ -171,7 +173,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 .noyona-checkout-card {
   background: #fff;
   border: 1px solid var(--noyona-cart-line, #efefef);
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   padding:  20px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
   margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
@@ -233,8 +235,8 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   background-size: 6px 6px, 6px 6px;
   background-repeat: no-repeat;
   padding: 0 2.4rem 0 0.95rem;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.9rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--input);
   color: #1f2933;
   appearance: none;
   -webkit-appearance: none;
@@ -243,7 +245,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 
 .noyona-saved-address-picker__select:focus {
   border-color: var(--noyona-cart-pink, #e199a4);
-  box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.12);
+  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.12);
   background-color: #fff;
   outline: none;
 }
@@ -252,7 +254,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   margin: 0.45rem 0 0;
   font-size: 0.76rem;
   color: #8a94a6;
-  line-height: 1.35;
+  line-height: normal;
 }
 
 /* Card title */
@@ -261,11 +263,11 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   align-items: center;
   gap: 0.6rem;
   margin: 0 0 clamp(1rem, 2.5vw, 1.5rem);
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
-  line-height: 1.2;
-  color: #1a1a1a;
+  font-size: var(--wp--preset--font-size--h-5);
+  line-height: normal;
+  color: #000000;
 }
 
 .noyona-checkout-card__title i {
@@ -281,15 +283,15 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 /* Subtitle and hint text */
 .noyona-checkout-card__subtitle {
   margin: -0.5rem 0 0.85rem;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.85rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--label);
   font-weight: 700;
   color: #444;
 }
 
 .noyona-checkout-card__hint {
   margin: 0.65rem 0 0;
-  font-size: 0.78rem;
+  font-size: var(--wp--preset--font-size--helper);
   color: #aaa;
   font-style: italic;
 }
@@ -305,8 +307,8 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   border: 1px solid var(--noyona-cart-line, #efefef);
   border-radius: 8px;
   background: #fafafa;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.78rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--input);
   font-weight: 600;
   color: var(--noyona-cart-pink, #e199a4);
   cursor: pointer;
@@ -343,10 +345,10 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   background: #eef6ff;
   border: 1px solid #d4e8fc;
   border-radius: 10px;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.85rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--caption);
   color: #1a6bb5;
-  line-height: 1.4;
+  line-height: normal;
 }
 
 .noyona-delivery-bar i {
@@ -366,7 +368,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 
 .noyona-review-meta__title {
   margin: 0 0 0.45rem;
-  font-size: 0.92rem;
+  font-size: var(--wp--preset--font-size--h-5);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -383,7 +385,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 .noyona-review-meta__text {
   margin: 0.15rem 0;
   font-size: 0.92rem;
-  line-height: 1.35;
+  line-height: normal;
   color: #666;
 }
 
@@ -403,13 +405,13 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   width: 16px;
   height: 16px;
   margin-top: 2px;
-  accent-color: var(--noyona-cart-pink, #e199a4);
+  accent-color: var(--noyona-color-pink-accent);
   flex-shrink: 0;
 }
 
 .noyona-review-terms__text {
   font-size: 0.84rem;
-  line-height: 1.45;
+  line-height: normal;
   color: #666;
 }
 
@@ -437,15 +439,15 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.875rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--label);
   font-weight: 500;
   color: #555;
-  line-height: 1.4;
+  line-height: normal;
 }
 
 .noyona-checkout-optin__input {
-  accent-color: var(--noyona-cart-pink, #e199a4);
+  accent-color: var(--noyona-color-pink-accent);
   width: 18px;
   height: 18px;
   flex-shrink: 0;
@@ -526,8 +528,8 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 .noyona-checkout-form .form-row label {
   display: block;
   margin-bottom: 8px;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.85rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--label);
   font-weight: 600;
   color: #666;
   letter-spacing: 0.02em;
@@ -553,8 +555,8 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fafafa;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--input);
   color: #1a1a1a;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -572,7 +574,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 .noyona-checkout-form .form-row textarea:focus,
 .noyona-checkout-form .form-row select:focus {
   border-color: var(--noyona-cart-pink, #e199a4);
-  box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.12);
+  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.12);
   background-color: #fff;
 }
 
@@ -603,7 +605,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 .noyona-checkout-form .form-row .error {
   display: block;
   margin-top: 4px;
-  font-size: 0.78rem;
+  font-size: var(--wp--preset--font-size--helper);
   font-weight: 500;
   color: #d4636f;
 }
@@ -645,8 +647,8 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 .noyona-checkout-form .select2-container--default .select2-selection--single .select2-selection__rendered {
   line-height: 48px;
   padding-left: 0;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--input);
   color: #1a1a1a;
 }
 
@@ -658,7 +660,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 .noyona-checkout-form .select2-container--default.select2-container--focus .select2-selection--single,
 .noyona-checkout-form .select2-container--default.select2-container--open .select2-selection--single {
   border-color: var(--noyona-cart-pink, #e199a4);
-  box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.12);
+  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.12);
   background: #fff;
 }
 
@@ -676,7 +678,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 .noyona-checkout-form .wc_payment_method {
   margin-bottom: 0;
   border: 1px solid #eceff3;
-  border-radius: 14px;
+  border-radius: var(--noyona-radius-card);
   overflow: hidden;
   background: #fff;
   position: relative;
@@ -690,8 +692,8 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 
 .noyona-checkout-form .wc_payment_method.payment_method_selected,
 .noyona-checkout-form .wc_payment_method:has(input:checked) {
-  border-color: var(--noyona-cart-pink, #e199a4);
-  box-shadow: 0 0 0 2px rgba(225, 153, 164, 0.18), 0 6px 18px rgba(225, 153, 164, 0.12);
+  border-color: var(--noyona-color-pink-accent);
+  box-shadow: 0 0 0 2px rgba(216, 27, 96, 0.18), 0 6px 18px rgba(216, 27, 96, 0.12);
   transform: translateY(-1px);
 }
 
@@ -712,7 +714,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   font-size: 1rem !important;
   color: #1a1a1a !important;
   position: relative;
-  line-height: 1.35;
+  line-height: normal;
 }
 
 .noyona-checkout-form .wc_payment_method > label::before {
@@ -738,20 +740,20 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--noyona-cart-pink, #e199a4);
+  background: var(--noyona-color-pink-accent);
   transform: translateY(-50%) scale(0);
   transition: transform 0.2s ease;
 }
 
 .noyona-checkout-form .wc_payment_method > label input[type="radio"] {
-  accent-color: var(--noyona-cart-pink, #e199a4);
+  accent-color: var(--noyona-color-pink-accent);
   width: 18px;
   height: 18px;
   margin: 0;
 }
 
 .noyona-checkout-form .wc_payment_method > input.input-radio:checked + label::before {
-  border-color: var(--noyona-cart-pink, #e199a4);
+  border-color: var(--noyona-color-pink-accent);
 }
 
 .noyona-checkout-form .wc_payment_method > input.input-radio:checked + label::after {
@@ -759,7 +761,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 }
 
 .noyona-checkout-form .wc_payment_method > input.input-radio:focus-visible + label::before {
-  box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.2);
+  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.2);
 }
 
 .noyona-checkout-form .wc_payment_method > label img {
@@ -801,10 +803,10 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   border-left: 3px solid #d4952a;
   border-radius: 10px;
   padding: 16px 20px;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.875rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--helper);
   color: #8a7050;
-  line-height: 1.55;
+  line-height: normal;
 }
 
 /* Payment box inner fields (Stripe, etc.) */
@@ -877,7 +879,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 }
 
 .noyona-checkout-form .woocommerce-terms-and-conditions-wrapper input[type="checkbox"] {
-  accent-color: var(--noyona-cart-pink, #e199a4);
+  accent-color: var(--noyona-color-pink-accent);
   width: 18px;
   height: 18px;
   margin-top: 1px;
@@ -885,9 +887,9 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 }
 
 .noyona-checkout-form .woocommerce-terms-and-conditions-wrapper label {
-  font-size: 0.85rem;
+  font-size: var(--wp--preset--font-size--label);
   color: #666;
-  line-height: 1.5;
+  line-height: normal;
 }
 
 .noyona-checkout-form .woocommerce-terms-and-conditions-wrapper a {
@@ -911,7 +913,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   position: absolute;
   inset: 0;
   background: rgba(255, 255, 255, 0.55);
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   z-index: 10;
 }
 
@@ -949,10 +951,10 @@ box-sizing: border-box;
 flex: 0 0 36%;
 padding: 0 1.25rem;
 border: 2px solid #ddd;
-border-radius: 12px;
+border-radius: var(--noyona-radius-input);
 background: #fff;
-font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-font-size: 0.95rem;
+font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+font-size: var(--wp--preset--font-size--nav-button);
 font-weight: 700;
 color: #666;
 text-decoration: none;
@@ -975,21 +977,23 @@ line-height: 1;
 flex: 1 1 auto;
 padding: 0 1.5rem;
 border: none;
-border-radius: 12px;
+border-radius: var(--noyona-radius-input);
 background: var(--noyona-cart-pink, #e199a4);
-font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-font-size: 0.95rem;
+font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+font-size: var(--wp--preset--font-size--nav-button);
 font-weight: 700;
 letter-spacing: 0.04em;
-color: #fff;
-box-shadow: 0 4px 16px rgba(225, 153, 164, 0.3);
-transition: background 0.2s ease, box-shadow 0.2s ease;
+color: #333333;
+box-shadow: 0 4px 16px rgba(216, 27, 96, 0.3);
+transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 cursor: pointer;
 }
 
-.noyona-checkout-actions__submit:hover {
-background: var(--noyona-cart-pink-dark, #cc848f);
-box-shadow: 0 6px 20px rgba(225, 153, 164, 0.4);
+.noyona-checkout-actions__submit:hover,
+.noyona-checkout-actions__submit:focus-visible {
+background: var(--noyona-cart-pink-dark, #D81B60);
+color: #ffffff;
+box-shadow: 0 6px 20px rgba(216, 27, 96, 0.4);
 }
 
 .noyona-checkout-actions__submit i {
@@ -1026,7 +1030,7 @@ body.noyona-pay-confirm-open {
   position: relative;
   width: min(560px, calc(100vw - 24px));
   padding: 22px 22px 18px;
-  border-radius: 18px;
+  border-radius: var(--noyona-radius-card);
   background: #fff;
   border: 1px solid #edf1f7;
   box-shadow: 0 22px 56px rgba(15, 23, 42, 0.24);
@@ -1048,17 +1052,17 @@ body.noyona-pay-confirm-open {
 .noyona-pay-confirm-modal__title {
   margin: 0 0 10px;
   padding-right: 32px;
-  font-size: 1.1rem;
+  font-size: var(--wp--preset--font-size--h-5);
   font-weight: 700;
-  line-height: 1.3;
-  color: #101828;
+  line-height: normal;
+  color: #000000;
 }
 
 .noyona-pay-confirm-modal__copy {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--wp--preset--font-size--body);
   color: #475467;
-  line-height: 1.55;
+  line-height: normal;
 }
 
 .noyona-pay-confirm-modal__actions {
@@ -1072,7 +1076,7 @@ body.noyona-pay-confirm-open {
   min-height: 44px;
   border-radius: 10px;
   padding: 0 16px;
-  font-size: 0.9rem;
+  font-size: var(--wp--preset--font-size--nav-button);
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
@@ -1096,9 +1100,9 @@ body.noyona-pay-confirm-open {
 }
 
 .noyona-pay-confirm-modal__btn--primary:hover {
-  background: var(--noyona-cart-pink-dark, #cc848f);
-  border-color: var(--noyona-cart-pink-dark, #cc848f);
-  box-shadow: 0 8px 18px rgba(225, 153, 164, 0.24);
+  background: var(--noyona-cart-pink-dark, #D81B60);
+  border-color: var(--noyona-cart-pink-dark, #D81B60);
+  box-shadow: 0 8px 18px rgba(216, 27, 96, 0.24);
 }
 
 /* ═══════════════════════════════════════
@@ -1126,7 +1130,7 @@ body.noyona-pay-confirm-open {
   
   .noyona-trust-badge i {
     display: block;
-    font-size: 1rem;
+    font-size: var(--wp--preset--font-size--caption);
     line-height: 1;
   }
   
@@ -1138,9 +1142,9 @@ body.noyona-pay-confirm-open {
   .noyona-trust-badge span {
     display: block;
     margin: 0;
-    font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+    font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
     font-size: 0.68rem;
-    line-height: 1.2;
+    line-height: normal;
     font-weight: 600;
     color: #888;
     letter-spacing: 0.02em;
@@ -1201,11 +1205,11 @@ body.noyona-pay-confirm-open {
 }
 
 .noyona-order-item__name {
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.9rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--body);
   font-weight: 600;
   color: #1a1a1a;
-  line-height: 1.35;
+  line-height: normal;
   /* Allow multi-line wrap instead of ellipsis truncation */
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -1216,7 +1220,7 @@ body.noyona-pay-confirm-open {
 }
 
 .noyona-order-item__qty {
-  font-size: 0.8rem;
+  font-size: var(--wp--preset--font-size--caption);
   color: #999;
   font-weight: 500;
 }
@@ -1224,9 +1228,9 @@ body.noyona-pay-confirm-open {
 .noyona-order-item__details dl {
   margin: 2px 0 0;
   padding: 0;
-  font-size: 0.78rem;
+  font-size: var(--wp--preset--font-size--caption);
   color: #888;
-  line-height: 1.45;
+  line-height: normal;
 }
 
 .noyona-order-item__details dl dt {
@@ -1275,8 +1279,8 @@ body.noyona-pay-confirm-open {
 
 .noyona-order-item__total {
   flex-shrink: 0;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--body);
   font-weight: 700;
   color: #1a1a1a;
   text-align: right;
@@ -1296,18 +1300,18 @@ body.noyona-pay-confirm-open {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
 }
 
 .noyona-order-totals__label {
   color: #666;
-  font-size: 0.9rem;
+  font-size: var(--wp--preset--font-size--label);
   font-weight: 500;
 }
 
 .noyona-order-totals__value {
   color: #1a1a1a;
-  font-size: 0.9rem;
+  font-size: var(--wp--preset--font-size--body);
   font-weight: 600;
   text-align: right;
 }
@@ -1358,11 +1362,11 @@ body.noyona-pay-confirm-open {
 .noyona-checkout-shell .woocommerce-message,
 .noyona-checkout-shell .woocommerce-error,
 .noyona-checkout-shell .woocommerce-info {
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   padding: 0.85rem 1.25rem;
   margin-bottom: 0.75rem;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.9rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--body);
   list-style: none;
 }
 
@@ -1417,7 +1421,7 @@ body.noyona-pay-confirm-open {
 .noyona-checkout-shell .checkout_coupon {
   background: #fff;
   border: 1px solid var(--noyona-cart-line, #efefef);
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   padding: clamp(1rem, 2.5vw, 1.5rem);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
   margin-bottom: 1rem;
@@ -1438,8 +1442,8 @@ body.noyona-pay-confirm-open {
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fafafa;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--input);
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -1447,7 +1451,7 @@ body.noyona-pay-confirm-open {
 
 .noyona-checkout-shell .checkout_coupon input.input-text:focus {
   border-color: var(--noyona-cart-pink, #e199a4);
-  box-shadow: 0 0 0 3px rgba(225, 153, 164, 0.12);
+  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.12);
   background: #fff;
 }
 
@@ -1458,16 +1462,16 @@ body.noyona-pay-confirm-open {
   border-radius: 10px;
   background: var(--noyona-cart-pink, #e199a4);
   color: #fff;
-  font-family: var(--wp--preset--font-family--proxima-nova), "Proxima Nova", system-ui, sans-serif;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: var(--wp--preset--font-size--nav-button);
   cursor: pointer;
   transition: background 0.2s ease;
   margin-top: 10px;
 }
 
 .noyona-checkout-shell .checkout_coupon .button:hover {
-  background: var(--noyona-cart-pink-dark, #cc848f);
+  background: var(--noyona-cart-pink-dark, #D81B60);
 }
 
 /* ═══════════════════════════════════════
@@ -1501,14 +1505,14 @@ body.noyona-done-step .noyona-done-hero__icon i {
 
 body.noyona-done-step .noyona-done-hero__title {
   margin: 0 0 0.25rem;
-  font-size: clamp(1.8rem, 3vw, 2.2rem);
-  line-height: 1.1;
+  font-size: var(--wp--preset--font-size--h-2);
+  line-height: normal;
 }
 
 body.noyona-done-step .noyona-done-hero__subtitle {
   margin: 0;
   color: #666;
-  font-size: 0.95rem;
+  font-size: var(--wp--preset--font-size--body);
 }
 
 body.noyona-done-step .noyona-done-order-number {
@@ -1516,7 +1520,7 @@ body.noyona-done-step .noyona-done-order-number {
   max-width: 560px;
   background: #fdeef2;
   border: 1px solid #f8d8e0;
-  border-radius: 14px;
+  border-radius: var(--noyona-radius-card);
   padding: 0.95rem 1rem;
   text-align: center;
 }
@@ -1579,13 +1583,13 @@ body.noyona-done-step .noyona-done-info-card__icon {
 }
 
 body.noyona-done-step .noyona-done-meta-grid .noyona-done-info-card:not(.noyona-done-info-card--delivery) .noyona-done-info-card__icon {
-  color: #e199a4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 body.noyona-done-step .noyona-done-info-card__title {
   margin: 0 0 0.5rem;
-  font-size: 1.65rem;
-  line-height: 1.1;
+  font-size: var(--wp--preset--font-size--h-3);
+  line-height: normal;
 }
 
 body.noyona-done-step .noyona-done-info-card__primary {
@@ -1598,7 +1602,7 @@ body.noyona-done-step .noyona-done-info-card__primary {
 body.noyona-done-step .noyona-done-info-card__text {
   margin: 0.4rem 0 0;
   font-size: 0.82rem;
-  line-height: 1.4;
+  line-height: normal;
   color: #666;
 }
 
@@ -1613,7 +1617,7 @@ body.noyona-done-step .noyona-done-actions {
 body.noyona-done-step .noyona-done-actions__btn {
   flex: 1 1 0;
   min-height: 60px;
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1709,23 +1713,23 @@ body.noyona-pay-step .noyona-pay-hero__icon i {
 
 body.noyona-pay-step .noyona-pay-hero__title {
   margin: 0 0 0.2rem;
-  font-size: clamp(1.65rem, 2.5vw, 2.1rem);
-  line-height: 1.1;
+  font-size: var(--wp--preset--font-size--h-2);
+  line-height: normal;
   letter-spacing: 0.01em;
 }
 
 body.noyona-pay-step .noyona-pay-hero__subtitle {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--wp--preset--font-size--body);
   color: #667085;
   max-width: 720px;
   margin-inline: auto;
-  line-height: 1.45;
+  line-height: normal;
 }
 
 body.noyona-pay-step .noyona-pay-meta {
   margin: 1rem auto 1.1rem;
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   border: 1px solid #f8d8e0;
   background: #fdeef2;
   padding: 0.85rem 1rem;
@@ -1752,8 +1756,8 @@ body.noyona-pay-step .noyona-pay-meta__value {
   display: block;
   font-size: 0.94rem;
   font-weight: 600;
-  color: #e199a4;
-  line-height: 1.25;
+  color: var(--noyona-color-pink-muted-rose);
+  line-height: normal;
   overflow-wrap: anywhere;
 }
 
@@ -1773,15 +1777,15 @@ body.noyona-pay-step .noyona-pay-card__head {
 
 body.noyona-pay-step .noyona-pay-card__title {
   margin: 0 0 0.2rem;
-  font-size: clamp(1.55rem, 2.3vw, 2rem);
-  line-height: 1.1;
+  font-size: var(--wp--preset--font-size--h-3);
+  line-height: normal;
   letter-spacing: 0.01em;
 }
 
 body.noyona-pay-step .noyona-pay-card__copy {
   margin: 0;
   color: #475467;
-  font-size: 0.95rem;
+  font-size: var(--wp--preset--font-size--body);
 }
 
 body.noyona-pay-step .noyona-pay-card__gateway {
@@ -1819,7 +1823,7 @@ body.noyona-pay-step .noyona-pay-card__gateway h3 {
 
 body.noyona-pay-step .noyona-pay-card__gateway p {
   color: #475467;
-  line-height: 1.45;
+  line-height: normal;
 }
 
 body.noyona-pay-step .noyona-pay-expire-time {
@@ -1841,7 +1845,7 @@ body.noyona-pay-step .noyona-pay-card__gateway .woocommerce-thankyou-order-detai
 
 body.noyona-pay-step .noyona-pay-order-details {
   margin-top: 1.1rem;
-  border-radius: 18px;
+  border-radius: var(--noyona-radius-card);
   box-shadow: none;
   border-color: #f1f1f1;
 }
@@ -1856,11 +1860,11 @@ body.noyona-pay-step .noyona-pay-order-details .noyona-order-items {
 }
 
 body.noyona-pay-step .noyona-pay-order-details .noyona-order-item__total {
-  color: #e199a4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 body.noyona-pay-step .noyona-pay-order-details .noyona-order-totals__row--total .noyona-order-totals__value {
-  color: #e199a4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 body.noyona-pay-step .woocommerce-thankyou-order-details,
@@ -1902,7 +1906,7 @@ body.noyona-pay-step h1.wp-block-post-title {
   }
 
   body.noyona-pay-step .noyona-pay-meta__label {
-    font-size: 0.7rem;
+    font-size: var(--wp--preset--font-size--caption);
   }
 
   body.noyona-pay-step .noyona-pay-meta__value {
@@ -1979,7 +1983,7 @@ body.noyona-pay-step h1.wp-block-post-title {
   }
 
   .noyona-checkout-card {
-    border-radius: 14px;
+    border-radius: var(--noyona-radius-card);
   }
 
   /* Collapse notes on mobile */
@@ -1992,7 +1996,7 @@ body.noyona-pay-step h1.wp-block-post-title {
   .noyona-checkout-card--notes .noyona-checkout-card__title {
     margin-bottom: 0;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: var(--wp--preset--font-size--label);
   }
 
   .noyona-checkout-card--notes .noyona-checkout-card__title::after {
@@ -2068,7 +2072,7 @@ body.noyona-pay-step h1.wp-block-post-title {
 
   .noyona-checkout-card {
     padding: clamp(1rem, 3vw, 1.25rem);
-    border-radius: 12px;
+    border-radius: var(--noyona-radius-input);
   }
 
   .noyona-order-item__image {
@@ -2083,7 +2087,7 @@ body.noyona-pay-step h1.wp-block-post-title {
   .noyona-checkout-form .form-row select,
   .noyona-checkout-form .select2-container--default .select2-selection--single {
     height: 52px;
-    font-size: 1rem;
+    font-size: var(--wp--preset--font-size--input);
   }
 
   .noyona-checkout-form .select2-container--default .select2-selection--single .select2-selection__rendered {
@@ -2136,7 +2140,7 @@ body.noyona-pay-step h1.wp-block-post-title {
   }
 
   .noyona-checkout-steps li {
-    font-size: 11px;
+    font-size: var(--wp--preset--font-size--caption);
     padding: 0.45rem 0.75rem;
   }
 }

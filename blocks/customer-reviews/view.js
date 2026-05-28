@@ -85,6 +85,11 @@
         visibleItems[i].element.hidden = false;
       }
 
+      if (cardsWrap) {
+        cardsWrap.classList.toggle('customer-reviews-grid__cards--centered', shownCount > 0 && shownCount < 3);
+        cardsWrap.style.setProperty('--cr-visible-card-count', String(Math.max(1, shownCount)));
+      }
+
       updateShowingLabel(visibleItems, shownCount);
 
       if (readMoreButton) {

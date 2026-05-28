@@ -9,5 +9,5 @@
   "supports": { "html": false, "align": ["wide", "full"] },
   "style": "file:./style.css",
   "render": "file:./render.php",
-  "textdomain": "viteseo-noyona-childtheme"
+  "textdomain": "viteseo-noyona-childtheme-2.0"
 }

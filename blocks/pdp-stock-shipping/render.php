@@ -16,14 +16,14 @@ if ( ! $product ) {
 
 $stock_html = '';
 if ( $product->is_in_stock() ) {
-	$stock_html = '<span class="noyona-pdp-stock-shipping__stock noyona-pdp-stock-shipping__stock--in">' . esc_html__( 'In stock', 'viteseo-noyona-childtheme' ) . '</span>';
+	$stock_html = '<span class="noyona-pdp-stock-shipping__stock noyona-pdp-stock-shipping__stock--in">' . esc_html__( 'In stock', 'viteseo-noyona-childtheme-2.0' ) . '</span>';
 } else {
-	$stock_html = '<span class="noyona-pdp-stock-shipping__stock noyona-pdp-stock-shipping__stock--out">' . esc_html__( 'Out of stock', 'viteseo-noyona-childtheme' ) . '</span>';
+	$stock_html = '<span class="noyona-pdp-stock-shipping__stock noyona-pdp-stock-shipping__stock--out">' . esc_html__( 'Out of stock', 'viteseo-noyona-childtheme-2.0' ) . '</span>';
 }
 
 $shipping_note = apply_filters(
 	'noyona_pdp_shipping_note',
-	__( 'Shipping calculated at checkout', 'viteseo-noyona-childtheme' )
+	__( 'Shipping calculated at checkout', 'viteseo-noyona-childtheme-2.0' )
 );
 
 ?>
