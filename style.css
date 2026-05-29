@@ -387,6 +387,61 @@ body.woocommerce-account .entry-title {
   box-shadow: 0 0 0 3px rgba(156, 180, 218, 0.22);
 }
 
+/* Register password fields: custom show/hide toggle (mirrors login). */
+.noyona-register-form .password-input {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible;
+}
+
+.noyona-register-form .password-input input {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding-right: 2.9rem;
+}
+
+.noyona-register-form .noyona-password-toggle {
+  position: absolute !important;
+  top: 50% !important;
+  right: 0.74rem !important;
+  left: auto !important;
+  transform: translateY(-50%) !important;
+  width: 22px !important;
+  height: 22px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #71809a;
+  cursor: pointer;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.noyona-register-form .noyona-password-toggle i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Hide Woo's auto-injected toggle inside register password wrappers. */
+.noyona-register-form .show-password-input {
+  display: none !important;
+}
+
+/* Hide Edge/IE native password reveal/clear controls on register password fields. */
+.noyona-register-form input[type="password"]::-ms-reveal,
+.noyona-register-form input[type="password"]::-ms-clear {
+  display: none !important;
+}
+
 
 .noyona-register-terms {
   display: flex;
@@ -672,7 +727,8 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  overflow: hidden;
+  /* Keep focus ring behavior consistent with username/email input. */
+  overflow: visible;
 }
 
 body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .password-input .input-text {
@@ -1483,6 +1539,25 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   gap: 18px;
 }
 
+/* Shop archive grid: 3 columns on desktop, scaling down on smaller viewports.
+   Scoped to the infinite-scroll wrapper so the 2-col landing-page grids
+   (Face/Lips/Eyes/Hair/Body and "no products" fallback) are not affected. */
+.noyona-shop-products-infinite .wc-block-product-template {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 1099px) {
+  .noyona-shop-products-infinite .wc-block-product-template {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .noyona-shop-products-infinite .wc-block-product-template {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
 .noyona-shop-products .wc-block-product {
   border: none;
   border-radius: var(--noyona-radius-cta);
@@ -1905,6 +1980,82 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 .noyona-shop-products .wp-block-query-pagination .wp-block-query-pagination-next:hover,
 .noyona-shop-products .wp-block-query-pagination .wp-block-query-pagination-previous:hover {
   color: var(--noyona-color-pink-muted-rose);
+}
+
+/* Hide the native paginator once the infinite-scroll loader has taken over.
+   Without JS, the paginator remains usable as a graceful fallback. */
+.noyona-shop-products-infinite.is-infinite-active .wp-block-query-pagination {
+  display: none !important;
+}
+
+.noyona-shop-infinite-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 80px;
+  margin-top: 24px;
+  color: #888;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.noyona-shop-infinite-loader[hidden] {
+  display: none !important;
+}
+
+/* Always-rendered sentinel that the IntersectionObserver watches. It needs a
+   real bounding box; a tiny height is enough for IO to detect entry. */
+.noyona-shop-infinite-sentinel {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.noyona-shop-infinite-loader .noyona-shop-infinite-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid rgba(225, 153, 164, 0.25);
+  border-top-color: #e199a4;
+  animation: noyona-shop-infinite-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.noyona-shop-infinite-loader[data-state="error"] .noyona-shop-infinite-spinner,
+.noyona-shop-infinite-loader[data-state="end"] .noyona-shop-infinite-spinner {
+  display: none;
+}
+
+.noyona-shop-infinite-loader[data-state="error"] {
+  color: #c0392b;
+}
+
+.noyona-shop-infinite-loader .noyona-shop-infinite-retry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #e199a4;
+  background: #fff;
+  color: #e199a4;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.noyona-shop-infinite-loader .noyona-shop-infinite-retry:hover {
+  background: #e199a4;
+  color: #fff;
+}
+
+@keyframes noyona-shop-infinite-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* =============================================================

@@ -624,6 +624,8 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
 
 .noyona-checkout-shell .woocommerce-error li {
   padding: 4px 0;
+  margin: 0;
+  list-style: none;
 }
 
 .noyona-checkout-shell .woocommerce-error li:not(:last-child) {
@@ -1380,6 +1382,22 @@ body.noyona-pay-confirm-open {
   background: #fef5f4;
   border-left: 3px solid #e8838e;
   color: #c62828;
+  /* Reserve room for the WooCommerce ::before icon so it never overlaps text. */
+  position: relative;
+  padding-left: 3rem;
+  list-style: none;
+}
+
+/* Pin the WooCommerce ::before icon (e.g. the "!" badge) so it sits centered
+   on the left rail instead of overlapping the first <li>. */
+.noyona-checkout-shell .woocommerce-error::before {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  margin: 0;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .noyona-checkout-shell .woocommerce-info {

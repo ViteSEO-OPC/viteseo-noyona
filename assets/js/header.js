@@ -356,6 +356,7 @@
     };
 
     const getMiniCartRoot = () => document.querySelector('.wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-contents');
+    let latestMiniCartStockItems = [];
 
     const getMiniCartItemDisplayPrice = (item, row) => {
       // Prefer rendered Woo price text (already formatted with currency/settings).
@@ -378,6 +379,107 @@
       }
 
       return '';
+    };
+
+    const isMiniCartItemInStock = (item) => {
+      if (!item || typeof item !== 'object') return true;
+      const extensions = item.extensions && item.extensions.noyona
+        ? item.extensions.noyona
+        : null;
+      if (extensions && Object.prototype.hasOwnProperty.call(extensions, 'in_stock')) {
+        return !!extensions.in_stock;
+      }
+      return true;
+    };
+
+    const syncMiniCartStockBadges = (root, cart, stockItems = []) => {
+      if (!root) return;
+      const items = cart && Array.isArray(cart.items) ? cart.items : [];
+      const rows = root.querySelectorAll('.wc-block-cart-items__row, .wc-block-mini-cart-items__row');
+
+      rows.forEach((row, index) => {
+        const stockItem = stockItems[index] || null;
+        const item = items[index] || null;
+        const inStock = stockItem && Object.prototype.hasOwnProperty.call(stockItem, 'in_stock')
+          ? !!stockItem.in_stock
+          : isMiniCartItemInStock(item);
+        row.classList.toggle('noyona-mini-cart-row--out-of-stock', !inStock);
+        row.dataset.noyonaInStock = inStock ? '1' : '0';
+
+        const imageWrap = row.querySelector('.wc-block-cart-item__image, .wc-block-components-product-image');
+        if (!imageWrap) return;
+
+        let badge = imageWrap.querySelector('.noyona-sold-out-badge');
+        if (inStock) {
+          if (badge) badge.remove();
+          return;
+        }
+
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'noyona-sold-out-badge';
+          imageWrap.appendChild(badge);
+        }
+        badge.textContent = 'Sold Out';
+      });
+    };
+
+    const hasMiniCartOutOfStockItem = (root) => {
+      if (!root) return false;
+      return !!root.querySelector('[data-noyona-in-stock="0"], .noyona-mini-cart-row--out-of-stock')
+        || latestMiniCartStockItems.some((item) => item && item.in_stock === false);
+    };
+
+    const getMiniCartOutOfStockNames = () => {
+      return latestMiniCartStockItems
+        .filter((item) => item && item.in_stock === false)
+        .map((item) => String(item && item.name ? item.name : '').trim())
+        .filter(Boolean);
+    };
+
+    const buildMiniCartStockMessages = (names) => {
+      const list = Array.isArray(names) ? names.filter(Boolean) : [];
+      if (!list.length) {
+        return ['Please remove sold out items before continuing to checkout.'];
+      }
+      return list.map((name) => `"${name}" is sold out — remove it to continue to checkout.`);
+    };
+
+    const showMiniCartErrorNotice = (root, messages) => {
+      if (!root) return;
+
+      let notice = root.querySelector('.noyona-mini-cart-stock-notice');
+      if (!notice) {
+        notice = document.createElement('ul');
+        notice.className = 'woocommerce-error noyona-mini-cart-stock-notice';
+        notice.setAttribute('role', 'alert');
+
+        const anchor = root.querySelector('.noyona-mini-cart-message');
+        if (anchor && anchor.parentNode) {
+          anchor.parentNode.insertBefore(notice, anchor);
+        } else {
+          const fallback = root.querySelector('.wp-block-woocommerce-mini-cart-items-block')
+            || root.firstElementChild;
+          if (fallback && fallback.parentNode) {
+            fallback.parentNode.insertBefore(notice, fallback);
+          } else {
+            root.prepend(notice);
+          }
+        }
+      }
+
+      const finalMessages = Array.isArray(messages) && messages.length
+        ? [messages[0]]
+        : [buildMiniCartStockMessages(getMiniCartOutOfStockNames())[0]];
+      notice.innerHTML = '';
+      finalMessages.forEach((message) => {
+        const li = document.createElement('li');
+        li.textContent = message;
+        notice.appendChild(li);
+      });
+
+      notice.hidden = false;
+      notice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
     const syncProductTitlePriceRows = (root, cart) => {
@@ -682,11 +784,19 @@
           return;
         }
 
-        // Terms gate.
         const termsBox = root.querySelector('.noyona-mini-cart-terms-checkbox');
+        const messages = [];
+        if (hasMiniCartOutOfStockItem(root)) {
+          messages.push(buildMiniCartStockMessages(getMiniCartOutOfStockNames())[0]);
+        }
         if (termsBox && !termsBox.checked) {
+          messages.push('Please agree to the Terms & Conditions and Shipping & Returns before continuing.');
+        }
+
+        if (messages.length) {
           event.preventDefault();
           event.stopPropagation();
+          showMiniCartErrorNotice(root, messages);
           return;
         }
       }, true); // ← CAPTURE phase: fires before React & browser default
@@ -729,6 +839,22 @@
       headers: { Accept: 'application/json' },
       cache: 'no-store',
     }).then((res) => (res.ok ? res.json() : null)).catch(() => null);
+
+    const fetchMiniCartStockStatuses = () => {
+      const ajaxUrl = (window.noyonaHeader && window.noyonaHeader.ajaxUrl)
+        ? String(window.noyonaHeader.ajaxUrl)
+        : '/wp-admin/admin-ajax.php';
+      const url = ajaxUrl + (ajaxUrl.indexOf('?') === -1 ? '?' : '&') + 'action=noyona_cart_stock_status&_t=' + Date.now();
+
+      return fetch(url, {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
+        cache: 'no-store',
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json) => (json && json.success && json.data && Array.isArray(json.data.items) ? json.data.items : []))
+        .catch(() => []);
+    };
 
     const readCartItemCount = (cart) => {
       if (!cart || typeof cart !== 'object') return 0;
@@ -854,7 +980,8 @@
     };
 
     const refreshMiniCart = () => {
-      fetchStoreCart().then((cart) => {
+      Promise.all([fetchStoreCart(), fetchMiniCartStockStatuses()]).then(([cart, stockItems]) => {
+        latestMiniCartStockItems = Array.isArray(stockItems) ? stockItems : [];
         if (isValidStoreCart(cart)) {
           syncHeaderCartBadge(Number(cart.items_count));
         } else {
@@ -865,6 +992,7 @@
         const root = getMiniCartRoot();
         if (!root) return;
 
+        syncMiniCartStockBadges(root, cart, stockItems);
         syncProductTitlePriceRows(root, cart);
         syncSelectedVariationRows(root, cart);
         reconcileMiniCartRows(root, cart);
@@ -1271,8 +1399,9 @@
     const productCollection = document.querySelector('.noyona-shop-products');
     if (!toggle || !productCollection) return;
 
+    const singleButton = toggle.querySelector('button[data-shop-view-toggle]');
     const buttons = Array.from(toggle.querySelectorAll('button[data-shop-view]'));
-    if (!buttons.length) return;
+    if (!singleButton && !buttons.length) return;
     const storageKey = 'noyonaShopViewMode';
 
     const getStoredView = () => {
@@ -1298,11 +1427,28 @@
       productCollection.setAttribute('data-shop-view', isList ? 'list' : 'grid');
       setStoredView(isList ? 'list' : 'grid');
 
-      buttons.forEach((button) => {
-        const active = button.dataset.shopView === (isList ? 'list' : 'grid');
-        button.classList.toggle('is-active', active);
-        button.setAttribute('aria-pressed', active ? 'true' : 'false');
-      });
+      if (singleButton) {
+        const toList = !isList;
+        singleButton.setAttribute(
+          'aria-label',
+          toList ? 'Switch to list view' : 'Switch to grid view'
+        );
+
+        const gridIcon = singleButton.querySelector('.icon-grid');
+        const listIcon = singleButton.querySelector('.icon-list');
+        if (gridIcon) {
+          gridIcon.style.display = isList ? '' : 'none';
+        }
+        if (listIcon) {
+          listIcon.style.display = isList ? 'none' : '';
+        }
+      } else {
+        buttons.forEach((button) => {
+          const active = button.dataset.shopView === (isList ? 'list' : 'grid');
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+      }
     };
 
     const params = new URLSearchParams(window.location.search);
@@ -1315,9 +1461,16 @@
         : (document.body.classList.contains('noyona-shop-view-list') ? 'list' : 'grid');
     applyView(initial);
 
-    buttons.forEach((button) => {
-      button.addEventListener('click', () => applyView(button.dataset.shopView || 'grid'));
-    });
+    if (singleButton) {
+      singleButton.addEventListener('click', () => {
+        const currentlyList = document.body.classList.contains('noyona-shop-view-list');
+        applyView(currentlyList ? 'grid' : 'list');
+      });
+    } else {
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => applyView(button.dataset.shopView || 'grid'));
+      });
+    }
   }
 
   function initShopCategoryActiveByPath() {
@@ -1506,6 +1659,7 @@
           nextProducts.setAttribute('data-shop-view', isListView ? 'list' : 'grid');
 
           initShopProductActions();
+          initShopArchiveInfiniteScroll();
         })
         .catch((error) => {
           if (error && error.name === 'AbortError') return;
@@ -1712,6 +1866,298 @@
     });
   }
 
+  function initShopArchiveInfiniteScroll() {
+    const container = document.querySelector('.noyona-shop-products-infinite');
+    if (!container) return;
+    if (container.dataset.noyonaInfiniteReady === '1') return;
+
+    const grid = container.querySelector('.wc-block-product-template');
+    if (!grid) return;
+
+    // Skip when there are no real product cards (e.g. "no products in this
+    // price range" fallback). Avoids rendering an awkward "end" message.
+    if (!grid.querySelector('.wc-block-product .wp-block-post-title, .wc-block-product .wc-block-components-product-image')) {
+      return;
+    }
+
+    // The renderer emits a `.noyona-shop-infinite-meta` element with the
+    // canonical "next page" URL. We prefer that over scraping WP's pagination
+    // block (which can render inconsistently). The pagination scrape stays as
+    // a defensive fallback.
+    const findNextUrl = (scope) => {
+      const root = scope || container;
+      const meta = root.querySelector('.noyona-shop-infinite-meta');
+      if (meta && meta.dataset && meta.dataset.nextUrl) {
+        return meta.dataset.nextUrl;
+      }
+      const link = root.querySelector(
+        '.wp-block-query-pagination a.wp-block-query-pagination-next, .wp-block-query-pagination a.next.page-numbers'
+      );
+      return link && link.href ? link.href : null;
+    };
+
+    let nextUrl = findNextUrl();
+
+    // If there is no next URL AND no pagination markup at all, we are showing
+    // a complete result set on a single page. Skip wiring the loader entirely
+    // so we don't render an "end" message under a one-page shop.
+    const hasPaginationNav   = !!container.querySelector('.wp-block-query-pagination');
+    const hasPaginationMeta  = !!container.querySelector('.noyona-shop-infinite-meta');
+    if (!nextUrl && !hasPaginationNav && !hasPaginationMeta) {
+      container.classList.add('is-infinite-active');
+      container.dataset.noyonaInfiniteReady = '1';
+      return;
+    }
+
+    // Keep the WC results-count text ("Showing 1-12 of 15 results") in sync
+    // with the actual number of cards on screen as infinite scroll streams
+    // them in. The total comes from our own meta element (authoritative);
+    // the prefix/separator/suffix are parsed from whatever the initial text
+    // looked like so we preserve any localized wording. If parsing fails we
+    // fall back to a deterministic English rebuild instead of silently
+    // doing nothing.
+    const resultCountEl = document.querySelector('.noyona-shop-count');
+
+    const getTotalProducts = () => {
+      const meta = container.querySelector('.noyona-shop-infinite-meta');
+      if (meta && meta.dataset && meta.dataset.total) {
+        const fromMeta = parseInt(meta.dataset.total, 10);
+        if (!isNaN(fromMeta) && fromMeta > 0) return fromMeta;
+      }
+      if (resultCountEl) {
+        const m = (resultCountEl.textContent || '').match(/of\s+(\d+)/i);
+        if (m) {
+          const n = parseInt(m[1], 10);
+          if (!isNaN(n) && n > 0) return n;
+        }
+      }
+      return 0;
+    };
+
+    // Capture the original text once so each update can re-derive the
+    // surrounding wording (we'd otherwise be parsing strings we just
+    // rewrote).
+    const initialCountText = resultCountEl ? (resultCountEl.textContent || '') : '';
+
+    const updateResultCount = () => {
+      if (!resultCountEl) return;
+      const total = getTotalProducts();
+      if (!total) return;
+      const visibleCount = grid.querySelectorAll('.wc-block-product').length;
+      const clamped      = Math.min(visibleCount, total);
+
+      const match = initialCountText.match(/^(.*?)(\d+)(\s*[\u2013\u2014\-]\s*)(\d+)(\s*of\s*)(\d+)(.*)$/i);
+      if (match) {
+        const prefix    = match[1];
+        const separator = match[3];
+        const ofWord    = match[5];
+        const suffix    = match[7];
+        resultCountEl.textContent =
+          prefix + '1' + separator + clamped + ofWord + total + suffix;
+      } else {
+        // Fallback when the original text didn't include a range (e.g.
+        // "Showing 12 results" on a single-page result set, or a
+        // localized variant we couldn't parse). Use a clean English
+        // rebuild so the count always reflects reality.
+        resultCountEl.textContent =
+          'Showing 1\u2013' + clamped + ' of ' + total + ' results';
+      }
+    };
+
+    container.classList.add('is-infinite-active');
+    container.dataset.noyonaInfiniteReady = '1';
+
+    const loader = document.createElement('div');
+    loader.className = 'noyona-shop-infinite-loader';
+    loader.setAttribute('aria-live', 'polite');
+    loader.setAttribute('role', 'status');
+    loader.hidden = true;
+    container.appendChild(loader);
+
+    // Separate always-rendered sentinel for the IntersectionObserver to watch.
+    // The loader itself toggles `hidden` between fetches, and a hidden element
+    // (display:none) has NO bounding box — IO never fires on it. Keeping
+    // observation and visible messaging on separate elements avoids that.
+    const sentinel = document.createElement('div');
+    sentinel.className = 'noyona-shop-infinite-sentinel';
+    sentinel.setAttribute('aria-hidden', 'true');
+    container.appendChild(sentinel);
+
+    const setLoaderState = (state, message) => {
+      loader.dataset.state = state;
+      if (state === 'idle' || state === 'hidden') {
+        loader.hidden = true;
+        loader.innerHTML = '';
+        return;
+      }
+      loader.hidden = false;
+      if (state === 'loading') {
+        loader.innerHTML = '<span class="noyona-shop-infinite-spinner" aria-hidden="true"></span><span>' + (message || 'Loading more products...') + '</span>';
+      } else if (state === 'end') {
+        loader.innerHTML = '<span>' + (message || "You've reached the end") + '</span>';
+      } else if (state === 'error') {
+        loader.innerHTML = '<span>' + (message || 'Could not load more products.') + '</span><button type="button" class="noyona-shop-infinite-retry">Retry</button>';
+        const retry = loader.querySelector('.noyona-shop-infinite-retry');
+        if (retry) {
+          retry.addEventListener('click', () => {
+            setLoaderState('loading');
+            loadNext();
+          });
+        }
+      }
+    };
+
+    setLoaderState(nextUrl ? 'idle' : 'end');
+
+    let isLoading = false;
+    let abortController = null;
+
+    const loadNext = () => {
+      if (isLoading) return;
+      if (!nextUrl) {
+        setLoaderState('end');
+        teardownObserver();
+        return;
+      }
+
+      isLoading = true;
+      setLoaderState('loading');
+
+      if (abortController) abortController.abort();
+      abortController = new AbortController();
+
+      fetch(nextUrl, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: { Accept: 'text/html' },
+        signal: abortController.signal,
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error('Request failed: ' + response.status);
+          return response.text();
+        })
+        .then((html) => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          const nextContainer = doc.querySelector('.noyona-shop-products-infinite');
+          const nextGrid = nextContainer && nextContainer.querySelector('.wc-block-product-template');
+          if (!nextGrid) {
+            throw new Error('Next page is missing the products grid.');
+          }
+
+          const newCards = Array.from(nextGrid.children).filter((node) =>
+            node.classList && node.classList.contains('wc-block-product')
+          );
+
+          if (!newCards.length) {
+            nextUrl = null;
+            setLoaderState('end');
+            teardownObserver();
+            return;
+          }
+
+          const fragment = document.createDocumentFragment();
+          newCards.forEach((card) => fragment.appendChild(card));
+          grid.appendChild(fragment);
+
+          // Decorate newly appended cards with wishlist/cart actions.
+          if (typeof initShopProductActions === 'function') {
+            initShopProductActions();
+          }
+
+          updateResultCount();
+
+          // Swap the in-DOM pagination meta (our authoritative next-URL source)
+          // with the next page's so findNextUrl() picks up the following page.
+          const oldMeta = container.querySelector('.noyona-shop-infinite-meta');
+          const newMeta = nextContainer.querySelector('.noyona-shop-infinite-meta');
+          if (oldMeta && newMeta) {
+            oldMeta.replaceWith(newMeta);
+          } else if (oldMeta && !newMeta) {
+            oldMeta.remove();
+          }
+
+          // Also swap the WP paginator block, in case anything else relies on
+          // it (e.g. no-JS users falling back through a cached page snapshot).
+          const oldPagination = container.querySelector('.wp-block-query-pagination');
+          const newPagination = nextContainer.querySelector('.wp-block-query-pagination');
+          if (oldPagination && newPagination) {
+            oldPagination.replaceWith(newPagination);
+          } else if (oldPagination && !newPagination) {
+            oldPagination.remove();
+          }
+
+          nextUrl = findNextUrl();
+          if (!nextUrl) {
+            setLoaderState('end');
+            teardownObserver();
+          } else {
+            setLoaderState('idle');
+            // IntersectionObserver only fires on intersection STATE CHANGES
+            // (not-intersecting → intersecting). After the grid grows, the
+            // sentinel often remains in the trigger zone, so IO never fires
+            // a second time. Manually re-check on the next frame and
+            // cascade loadNext() until we either run out of pages or the
+            // sentinel scrolls out of the trigger zone.
+            requestAnimationFrame(() => {
+              if (isLoading || !nextUrl) return;
+              const rect = sentinel.getBoundingClientRect();
+              const viewportH = window.innerHeight || document.documentElement.clientHeight;
+              if (rect.top < viewportH + 600) {
+                loadNext();
+              }
+            });
+          }
+        })
+        .catch((error) => {
+          if (error && error.name === 'AbortError') return;
+          setLoaderState('error');
+        })
+        .finally(() => {
+          isLoading = false;
+          abortController = null;
+        });
+    };
+
+    let observer = null;
+    const teardownObserver = () => {
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+      }
+    };
+
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              loadNext();
+            }
+          });
+        },
+        { rootMargin: '600px 0px 600px 0px', threshold: 0 }
+      );
+      observer.observe(sentinel);
+    } else {
+      // Very old browsers: fallback to a throttled scroll listener.
+      let scrollScheduled = false;
+      const onScroll = () => {
+        if (scrollScheduled) return;
+        scrollScheduled = true;
+        window.requestAnimationFrame(() => {
+          scrollScheduled = false;
+          const rect = sentinel.getBoundingClientRect();
+          if (rect.top < (window.innerHeight || document.documentElement.clientHeight) + 600) {
+            loadNext();
+          }
+        });
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
+  }
+
   function initScrollTopButton() {
     const button = document.querySelector('.noyona-scroll-top');
     if (!button) return;
@@ -1806,6 +2252,7 @@
     initShopCategoryActiveByPath();
     initShopPriceFilter();
     initShopProductActions();
+    initShopArchiveInfiniteScroll();
     initScrollTopButton();
     initShopFilterModal();
   });

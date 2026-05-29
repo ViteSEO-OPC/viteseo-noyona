@@ -137,6 +137,7 @@ body.woocommerce-cart .noyona-cart-page-title {
 
 .noyona-cart-item__image {
   flex: 0 0 clamp(100px, 25vw, 220px);
+  position: relative;
 }
 
 .noyona-cart-item__image img {
@@ -145,6 +146,30 @@ body.woocommerce-cart .noyona-cart-page-title {
   border-radius: 20px;
   object-fit: cover;
   display: block;
+}
+
+/* Sold-out badge overlaid on the product image */
+.noyona-cart-item .noyona-sold-out-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: var(--noyona-sold-out-red, #c62828);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 6px;
+  line-height: 1.35;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+.noyona-cart-item--out-of-stock .noyona-cart-item__image img {
+  filter: grayscale(0.5);
+  opacity: 0.65;
 }
 
 .noyona-cart-item__details {
@@ -559,8 +584,48 @@ body.woocommerce-cart .noyona-cart-page-title {
 
 .noyona-cart-summary-card .woocommerce-error {
   background: #fdecea;
-  border-left: 4px solid #f44336;
+  border-left: 4px solid #c62828;
   color: #c62828;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  column-gap: 0.65rem;
+  row-gap: 0.35rem;
+  list-style: none;
+  padding: 0.85rem 1.25rem;
+  position: relative;
+}
+
+.noyona-cart-summary-card .woocommerce-error::before {
+  content: "!" !important;
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  grid-column: 1;
+  grid-row: 1;
+  width: 18px;
+  height: 18px;
+  margin: 0.05rem 0 0;
+  border-radius: 999px;
+  background: #c62828;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.noyona-cart-summary-card .woocommerce-error li {
+  grid-column: 2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  line-height: 1.45;
+}
+
+.noyona-cart-summary-card .woocommerce-error li:not(:first-child) {
+  margin-top: 0.35rem;
 }
 
 /* ───────────────────────────────────────

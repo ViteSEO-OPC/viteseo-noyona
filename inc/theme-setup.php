@@ -230,6 +230,34 @@ function noyona_account_replace_lost_password_text( $translated_text, $text, $do
     return $translated_text;
 }
 
+/* ----- Lost-password validation (email format + registered account) ----- */
+add_filter( 'lostpassword_post', 'noyona_validate_lost_password_email', 10, 2 );
+function noyona_validate_lost_password_email( $errors, $user_data ) {
+    if ( ! ( $errors instanceof WP_Error ) ) {
+        return $errors;
+    }
+
+    $user_login = isset( $_POST['user_login'] ) ? sanitize_text_field( wp_unslash( $_POST['user_login'] ) ) : '';
+    $email      = sanitize_email( $user_login );
+
+    if ( '' === $email || ! is_email( $email ) ) {
+        $errors->add(
+            'invalid_email',
+            __( 'Please enter a valid email address.', 'noyona-childtheme' )
+        );
+        return $errors;
+    }
+
+    if ( ! email_exists( $email ) ) {
+        $errors->add(
+            'invalidcombo',
+            __( 'No account is registered with that email address.', 'noyona-childtheme' )
+        );
+    }
+
+    return $errors;
+}
+
 /* ----- Hide header/footer template parts on the lost-password / reset-password endpoint only ----- */
 add_filter( 'render_block_core/template-part', 'noyona_hide_header_footer_on_lost_password', 10, 2 );
 function noyona_hide_header_footer_on_lost_password( $block_content, $parsed_block ) {
@@ -303,13 +331,28 @@ function noyona_normalize_login_form_controls() {
           });
         }
 
+        // Purge any stale toggles outside the active wrapper (caused by Woo's re-wrap of #password).
+        if (passwordRow) {
+          passwordRow.querySelectorAll('.noyona-password-toggle').forEach(function (el) {
+            if (!wrapper.contains(el)) {
+              el.remove();
+            }
+          });
+        }
+
+        // De-duplicate any extra toggles inside the active wrapper, keep the first.
+        var wrapperToggles = wrapper.querySelectorAll('.noyona-password-toggle');
+        for (var i = 1; i < wrapperToggles.length; i++) {
+          wrapperToggles[i].remove();
+        }
+
         var customToggle = wrapper.querySelector('.noyona-password-toggle');
         if (!customToggle) {
           customToggle = document.createElement('button');
           customToggle.type = 'button';
           customToggle.className = 'noyona-password-toggle';
           customToggle.setAttribute('aria-label', 'Show password');
-          customToggle.innerHTML = '<i class="fa-regular fa-eye" aria-hidden="true"></i>';
+          customToggle.innerHTML = '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>';
           wrapper.appendChild(customToggle);
 
           customToggle.addEventListener('click', function () {
@@ -317,8 +360,8 @@ function noyona_normalize_login_form_controls() {
             password.setAttribute('type', isHidden ? 'text' : 'password');
             customToggle.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
             customToggle.innerHTML = isHidden
-              ? '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>'
-              : '<i class="fa-regular fa-eye" aria-hidden="true"></i>';
+              ? '<i class="fa-regular fa-eye" aria-hidden="true"></i>'
+              : '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>';
           });
         }
       }
@@ -334,6 +377,97 @@ function noyona_normalize_login_form_controls() {
       if (typeof MutationObserver !== 'undefined') {
         var observer = new MutationObserver(function () {
           normalizeLoginForm();
+        });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+      }
+    })();
+    </script>
+    <?php
+}
+
+/* ----- Normalize register form password toggles (footer script) ----- */
+add_action( 'wp_footer', 'noyona_normalize_register_form_controls', 90 );
+function noyona_normalize_register_form_controls() {
+    if ( is_admin() || is_user_logged_in() || ! is_page( 'register' ) ) {
+        return;
+    }
+    ?>
+    <script>
+    (function () {
+      function normalizeRegisterPasswords() {
+        var form = document.querySelector('.noyona-register-form');
+        if (!form) return;
+
+        var fields = [
+          form.querySelector('#noyona-register-password'),
+          form.querySelector('#noyona-register-confirm-password')
+        ].filter(Boolean);
+
+        fields.forEach(function (password) {
+          var fieldRow = password.closest('.noyona-register-field');
+
+          var wrapper = password.closest('.password-input');
+          if (!wrapper) {
+            wrapper = document.createElement('span');
+            wrapper.className = 'password-input';
+            password.parentNode.insertBefore(wrapper, password);
+            wrapper.appendChild(password);
+          }
+
+          // Remove Woo's auto-injected toggle and password-manager icon roots in this field.
+          if (fieldRow) {
+            fieldRow.querySelectorAll('.show-password-input, [data-lastpass-icon-root], [data-lastpass-root]').forEach(function (el) {
+              el.remove();
+            });
+          }
+
+          // Purge any stale toggles outside the active wrapper.
+          if (fieldRow) {
+            fieldRow.querySelectorAll('.noyona-password-toggle').forEach(function (el) {
+              if (!wrapper.contains(el)) {
+                el.remove();
+              }
+            });
+          }
+
+          // De-duplicate any extra toggles inside the active wrapper, keep the first.
+          var wrapperToggles = wrapper.querySelectorAll('.noyona-password-toggle');
+          for (var i = 1; i < wrapperToggles.length; i++) {
+            wrapperToggles[i].remove();
+          }
+
+          var customToggle = wrapper.querySelector('.noyona-password-toggle');
+          if (!customToggle) {
+            customToggle = document.createElement('button');
+            customToggle.type = 'button';
+            customToggle.className = 'noyona-password-toggle';
+            customToggle.setAttribute('aria-label', 'Show password');
+            customToggle.innerHTML = '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>';
+            wrapper.appendChild(customToggle);
+
+            customToggle.addEventListener('click', function () {
+              var isHidden = password.getAttribute('type') === 'password';
+              password.setAttribute('type', isHidden ? 'text' : 'password');
+              customToggle.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+              customToggle.innerHTML = isHidden
+                ? '<i class="fa-regular fa-eye" aria-hidden="true"></i>'
+                : '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>';
+            });
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', normalizeRegisterPasswords);
+      } else {
+        normalizeRegisterPasswords();
+      }
+      setTimeout(normalizeRegisterPasswords, 250);
+      setTimeout(normalizeRegisterPasswords, 850);
+
+      if (typeof MutationObserver !== 'undefined') {
+        var observer = new MutationObserver(function () {
+          normalizeRegisterPasswords();
         });
         observer.observe(document.documentElement, { childList: true, subtree: true });
       }

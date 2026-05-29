@@ -772,13 +772,10 @@ function noyona_render_product_search_page_shortcode() {
                 </p>
                 <div class="noyona-search-toolbar__right noyona-shop-toolbar-right">
                     <div class="noyona-shop-view-wrapper">
-                        <span class="noyona-shop-view-label"><?php esc_html_e( 'View As', 'noyona-childtheme' ); ?></span>
-                        <div class="noyona-shop-view-toggle" aria-label="<?php esc_attr_e( 'View', 'noyona-childtheme' ); ?>">
-                            <button type="button" class="is-active" data-shop-view="grid" aria-pressed="true">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
-                            </button>
-                            <button type="button" data-shop-view="list" aria-pressed="false">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h18v4H3z"/></svg>
+                        <div class="noyona-shop-view-toggle" aria-label="<?php esc_attr_e( 'Toggle view mode', 'noyona-childtheme' ); ?>">
+                            <button type="button" class="is-active" data-shop-view-toggle="1" aria-label="<?php esc_attr_e( 'Switch to list view', 'noyona-childtheme' ); ?>" aria-pressed="false">
+                                <svg class="icon-grid" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
+                                <svg class="icon-list" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none;"><path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h18v4H3z"/></svg>
                             </button>
                         </div>
                     </div>

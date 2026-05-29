@@ -12,9 +12,11 @@
 defined( 'ABSPATH' ) || exit;
 
 $account_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' );
+
+do_action( 'woocommerce_before_lost_password_form' );
 ?>
 
-<form method="post" class="woocommerce-ResetPassword lost_reset_password noyona-lost-password-form">
+<form method="post" class="woocommerce-ResetPassword lost_reset_password noyona-lost-password-form" novalidate>
 	<div class="noyona-lost-password-head">
 		<a class="noyona-lost-password-back" href="<?php echo esc_url( $account_url ); ?>">
 			<i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
@@ -28,7 +30,7 @@ $account_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalin
 
 	<p class="woocommerce-form-row woocommerce-form-row--first form-row form-row-first">
 		<label for="user_login"><?php esc_html_e( 'Email Address', 'noyona-childtheme' ); ?></label>
-		<input class="woocommerce-Input woocommerce-Input--text input-text" type="text" name="user_login" id="user_login" autocomplete="username" />
+		<input class="woocommerce-Input woocommerce-Input--text input-text" type="email" name="user_login" id="user_login" autocomplete="email" inputmode="email" placeholder="<?php esc_attr_e( 'Enter your email address', 'noyona-childtheme' ); ?>" required />
 	</p>
 
 	<div class="noyona-lost-password-actions">
@@ -44,3 +46,4 @@ $account_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalin
 		<a href="<?php echo esc_url( $account_url ); ?>"><?php esc_html_e( 'Try Another way', 'noyona-childtheme' ); ?></a>
 	</p> -->
 </form>
+<?php do_action( 'woocommerce_after_lost_password_form' ); ?>

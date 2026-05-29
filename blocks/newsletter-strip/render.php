@@ -44,6 +44,7 @@ $cta_text       = sanitize_hex_color( $atts['ctaTextColor'] );
 $cta_bg         = sanitize_hex_color( $atts['ctaBackgroundColor'] );
 $cta_hover_text = sanitize_hex_color( $atts['ctaHoverTextColor'] );
 $cta_hover_bg   = sanitize_hex_color( $atts['ctaHoverBackgroundColor'] );
+$captcha_markup = '';
 
 if ( ! $bg ) {
     $bg = '#E8BCC3';
@@ -86,6 +87,20 @@ $style_vars = array(
 if ( '' !== $inner_height ) {
     $style_vars[] = '--newsletter-strip-height: ' . $inner_height;
 }
+
+$default_newsletter_action = admin_url( 'admin-post.php' );
+if ( '' === trim( $form_action ) || '#' === trim( $form_action ) ) {
+    $form_action = $default_newsletter_action;
+}
+
+if ( function_exists( 'noyona_is_recaptcha_enabled' ) && noyona_is_recaptcha_enabled() ) {
+    if ( function_exists( 'noyona_enqueue_recaptcha_script' ) ) {
+        noyona_enqueue_recaptcha_script();
+    }
+    if ( function_exists( 'noyona_get_recaptcha_widget_markup' ) ) {
+        $captcha_markup = noyona_get_recaptcha_widget_markup( 'newsletter-strip__captcha' );
+    }
+}
 ?>
 
 <section class="wp-block-noyona-newsletter-strip newsletter-strip alignfull" style="<?php echo esc_attr( implode( '; ', $style_vars ) ); ?>">
@@ -113,6 +128,8 @@ if ( '' !== $inner_height ) {
         <?php if ( '' !== trim( $button_text ) ) : ?>
             <?php if ( $show_email ) : ?>
                 <form class="newsletter-strip__form" method="post" action="<?php echo esc_url( $form_action ); ?>">
+                    <input type="hidden" name="action" value="noyona_newsletter_subscribe" />
+                    <?php wp_nonce_field( 'noyona_newsletter_subscribe', 'noyona_newsletter_nonce' ); ?>
                     <input
                         type="email"
                         class="newsletter-strip__input"
@@ -120,6 +137,9 @@ if ( '' !== $inner_height ) {
                         placeholder="<?php echo esc_attr( $placeholder ); ?>"
                         required
                     />
+                    <?php if ( '' !== $captcha_markup ) : ?>
+                        <?php echo $captcha_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    <?php endif; ?>
                     <button type="submit" class="newsletter-strip__button"><?php echo esc_html( $button_text ); ?></button>
                 </form>
             <?php else : ?>

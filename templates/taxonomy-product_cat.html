@@ -114,13 +114,10 @@
                 <div class="wp-block-group noyona-shop-toolbar-right">
                 <!-- wp:html -->
                 <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
-                    <span class="noyona-shop-view-label" style="color: #E199A4; font-weight: 600; font-size: 14px;">View As</span>
-                    <div class="noyona-shop-view-toggle" aria-label="View">
-                        <button type="button" class="is-active" data-shop-view="grid" aria-pressed="true">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
-                        </button>
-                        <button type="button" data-shop-view="list" aria-pressed="false">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h18v4H3z"/></svg>
+                    <div class="noyona-shop-view-toggle" aria-label="Toggle view mode">
+                        <button type="button" class="is-active" data-shop-view-toggle="1" aria-label="Switch to list view" aria-pressed="false">
+                            <svg class="icon-grid" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
+                            <svg class="icon-list" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none;"><path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h18v4H3z"/></svg>
                         </button>
                     </div>
                 </div>
