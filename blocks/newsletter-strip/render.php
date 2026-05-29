@@ -93,12 +93,12 @@ if ( '' === trim( $form_action ) || '#' === trim( $form_action ) ) {
     $form_action = $default_newsletter_action;
 }
 
-if ( function_exists( 'noyona_is_recaptcha_enabled' ) && noyona_is_recaptcha_enabled() ) {
+if ( function_exists( 'noyona_is_recaptcha_enabled' ) && noyona_is_recaptcha_enabled( 'v3' ) ) {
     if ( function_exists( 'noyona_enqueue_recaptcha_script' ) ) {
-        noyona_enqueue_recaptcha_script();
+        noyona_enqueue_recaptcha_script( 'v3' );
     }
     if ( function_exists( 'noyona_get_recaptcha_widget_markup' ) ) {
-        $captcha_markup = noyona_get_recaptcha_widget_markup( 'newsletter-strip__captcha' );
+        $captcha_markup = noyona_get_recaptcha_widget_markup( 'newsletter-strip__captcha', 'v3' );
     }
 }
 ?>

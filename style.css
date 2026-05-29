@@ -893,6 +893,23 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
   text-decoration: underline;
 }
 
+/* ----- reCAPTCHA section style ----- */
+.noyona-login-recaptcha-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.noyona-login-recaptcha-wrap.is-verified {
+  display: none;
+}
+
+.noyona-login-recaptcha {
+  display: inline-flex;
+  justify-content: center;
+}
+/* ----- End reCAPTCHA section style ----- */
+
 @media (max-width: 640px) {
   body.woocommerce-account:not(.logged-in) .woocommerce .u-columns {
     margin-top: 34px;
