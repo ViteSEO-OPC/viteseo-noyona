@@ -41,12 +41,13 @@ function woocom_ct_enqueue_assets() {
         wp_get_theme()->get( 'Version' )
     );
 
-    // Header CSS (assets/css/header.css)
+    // Header CSS (assets/css/header.css) — filemtime-versioned so edits bust browser cache.
+    $header_css_path = get_stylesheet_directory() . '/assets/css/header.css';
     wp_enqueue_style(
         'woocom-ct-header',
         get_stylesheet_directory_uri() . '/assets/css/header.css',
         array( 'woocom-ct-style' ),
-        wp_get_theme()->get( 'Version' )
+        file_exists( $header_css_path ) ? (string) filemtime( $header_css_path ) : wp_get_theme()->get( 'Version' )
     );
 
     // Footer CSS (assets/css/footer.css)

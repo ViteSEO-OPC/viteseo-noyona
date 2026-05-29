@@ -186,3 +186,187 @@ function noyona_redirect_guest_account_to_login_page() {
     exit;
 }
 
+/* ----- Enforce step order in cart/checkout flow ----- */
+/**
+ * Prevent logged-in users from jumping ahead in the multi-step checkout flow:
+ *   - /checkout/  : requires a non-empty cart.
+ *   - /preview/   : requires a non-empty cart AND that the details step was
+ *                   actually completed (billing/shipping captured in session).
+ *   - /thank-you/ : requires a valid order_id + key pair.
+ *
+ * Woo's own order-pay / order-received endpoints already verify ownership
+ * via order key, so they are left untouched here.
+ */
+add_action( 'template_redirect', 'noyona_enforce_checkout_step_flow', 5 );
+function noyona_enforce_checkout_step_flow() {
+    if ( is_admin() || ! is_user_logged_in() || wp_doing_ajax() ) {
+        return;
+    }
+
+    if ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() ) {
+        return;
+    }
+
+    if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+        return;
+    }
+
+    // Only guard plain page navigations. POST submissions (place-order, etc.)
+    // are handled by WooCommerce itself.
+    $method = strtoupper( (string) ( $_SERVER['REQUEST_METHOD'] ?? 'GET' ) );
+    if ( 'GET' !== $method ) {
+        return;
+    }
+
+    // Leave Woo's payment/confirmation endpoints alone — they have their own
+    // order-key validation.
+    if ( function_exists( 'is_wc_endpoint_url' ) && ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) ) ) {
+        return;
+    }
+
+    $request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+    $request_path = untrailingslashit( (string) wp_parse_url( $request_uri, PHP_URL_PATH ) );
+
+    $cart_url     = function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' );
+    $checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' );
+
+    $checkout_path = untrailingslashit( (string) wp_parse_url( $checkout_url, PHP_URL_PATH ) );
+    $preview_path  = untrailingslashit( (string) wp_parse_url( home_url( '/preview/' ), PHP_URL_PATH ) );
+    $thankyou_path = untrailingslashit( (string) wp_parse_url( home_url( '/thank-you/' ), PHP_URL_PATH ) );
+
+    $on_checkout_page = ( '' !== $checkout_path && $request_path === $checkout_path );
+    $on_preview_page  = ( '' !== $preview_path && $request_path === $preview_path );
+    $on_thankyou_page = ( '' !== $thankyou_path && ( $request_path === $thankyou_path || 0 === strpos( $request_path, $thankyou_path . '/' ) ) );
+
+    if ( ! $on_checkout_page && ! $on_preview_page && ! $on_thankyou_page ) {
+        return;
+    }
+
+    // Rule: /thank-you/ is only legitimate when arrived at from a real order.
+    // A direct visit (no order_id/key, or mismatched) means the user is
+    // jumping past payment — bounce back to cart.
+    if ( $on_thankyou_page ) {
+        $order_id  = isset( $_GET['order_id'] ) ? absint( wp_unslash( $_GET['order_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $order_key = ( isset( $_GET['key'] ) && function_exists( 'wc_clean' ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            ? wc_clean( wp_unslash( $_GET['key'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            : '';
+        $order = ( $order_id > 0 && function_exists( 'wc_get_order' ) ) ? wc_get_order( $order_id ) : null;
+
+        if ( ! $order instanceof WC_Order || $order->get_order_key() !== $order_key ) {
+            wp_safe_redirect( $cart_url );
+            exit;
+        }
+        return;
+    }
+
+    // Rule: /checkout/ and /preview/ both require a non-empty cart.
+    $cart = ( function_exists( 'WC' ) && WC()->cart ) ? WC()->cart : null;
+    if ( ! $cart || $cart->is_empty() ) {
+        if ( function_exists( 'wc_add_notice' ) ) {
+            wc_add_notice(
+                __( 'Your cart is empty. Add items before continuing to checkout.', 'noyona' ),
+                'notice'
+            );
+        }
+        wp_safe_redirect( $cart_url );
+        exit;
+    }
+
+    // Rule: /preview/ additionally requires that the details step (/checkout/)
+    // has actually been completed. Both contact and shipping must be in the
+    // customer session; any missing piece means the user is skipping ahead.
+    if ( $on_preview_page ) {
+        $customer = ( function_exists( 'WC' ) && WC()->customer ) ? WC()->customer : null;
+        if ( ! $customer ) {
+            wp_safe_redirect( $checkout_url );
+            exit;
+        }
+
+        $required_values = array(
+            trim( (string) $customer->get_billing_first_name() ),
+            trim( (string) $customer->get_billing_last_name() ),
+            trim( (string) $customer->get_billing_email() ),
+            trim( (string) $customer->get_billing_phone() ),
+            trim( (string) $customer->get_shipping_address_1() ),
+            trim( (string) $customer->get_shipping_city() ),
+            trim( (string) $customer->get_shipping_state() ),
+            trim( (string) $customer->get_shipping_postcode() ),
+        );
+
+        $billing_email = trim( (string) $customer->get_billing_email() );
+        $email_valid   = ( '' !== $billing_email && function_exists( 'is_email' ) && is_email( $billing_email ) );
+
+        $has_blank_required = false;
+        foreach ( $required_values as $value ) {
+            if ( '' === $value ) {
+                $has_blank_required = true;
+                break;
+            }
+        }
+
+        if ( $has_blank_required || ! $email_valid ) {
+            // No wc_add_notice here — the client-side validation on /checkout/
+            // already renders a woocommerce-error toast listing exactly which
+            // field is missing, so a second generic banner would be redundant.
+            wp_safe_redirect( $checkout_url );
+            exit;
+        }
+    }
+}
+
+/* ----- Block guest access to cart/checkout flow routes ----- */
+/**
+ * Enforce login on all checkout-flow entry points so guests cannot bypass
+ * frontend button/login-modal checks by manually entering URLs.
+ */
+add_action( 'template_redirect', 'noyona_require_login_for_cart_checkout_flow', 3 );
+function noyona_require_login_for_cart_checkout_flow() {
+    if ( is_admin() || is_user_logged_in() || wp_doing_ajax() ) {
+        return;
+    }
+
+    if ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() ) {
+        return;
+    }
+
+    if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+        return;
+    }
+
+    $request_uri  = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+    $request_path = (string) wp_parse_url( $request_uri, PHP_URL_PATH );
+    $request_path = untrailingslashit( $request_path );
+
+    $cart_path     = function_exists( 'wc_get_cart_url' ) ? (string) wp_parse_url( wc_get_cart_url(), PHP_URL_PATH ) : '/cart/';
+    $checkout_path = function_exists( 'wc_get_checkout_url' ) ? (string) wp_parse_url( wc_get_checkout_url(), PHP_URL_PATH ) : '/checkout/';
+    $preview_path  = (string) wp_parse_url( home_url( '/preview/' ), PHP_URL_PATH );
+    $thankyou_path = (string) wp_parse_url( home_url( '/thank-you/' ), PHP_URL_PATH );
+
+    $cart_path     = untrailingslashit( $cart_path );
+    $checkout_path = untrailingslashit( $checkout_path );
+    $preview_path  = untrailingslashit( $preview_path );
+    $thankyou_path = untrailingslashit( $thankyou_path );
+
+    $is_checkout_endpoint = function_exists( 'is_wc_endpoint_url' ) && (
+        is_wc_endpoint_url( 'order-pay' )
+        || is_wc_endpoint_url( 'order-received' )
+    );
+
+    $is_checkout_flow_path = (
+        ( '' !== $cart_path && $request_path === $cart_path )
+        || ( '' !== $checkout_path && ( $request_path === $checkout_path || 0 === strpos( $request_path, $checkout_path . '/' ) ) )
+        || ( '' !== $preview_path && ( $request_path === $preview_path || 0 === strpos( $request_path, $preview_path . '/' ) ) )
+        || ( '' !== $thankyou_path && ( $request_path === $thankyou_path || 0 === strpos( $request_path, $thankyou_path . '/' ) ) )
+    );
+
+    if ( ! $is_checkout_endpoint && ! $is_checkout_flow_path ) {
+        return;
+    }
+
+    $redirect_to = home_url( $request_uri );
+    $target_url  = add_query_arg( 'redirect_to', rawurlencode( $redirect_to ), noyona_get_login_page_url() );
+
+    wp_safe_redirect( $target_url );
+    exit;
+}
+

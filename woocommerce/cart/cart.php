@@ -43,7 +43,8 @@ do_action( 'woocommerce_before_cart' );
 			$item_class   = apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key );
 			?>
 
-			<div class="noyona-cart-item <?php echo esc_attr( $item_class ); ?>" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">
+			<?php $is_out_of_stock = ! $_product->is_in_stock(); ?>
+			<div class="noyona-cart-item <?php echo esc_attr( $item_class ); ?><?php echo $is_out_of_stock ? ' noyona-cart-item--out-of-stock' : ''; ?>" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">
 				<div class="noyona-cart-item__image">
 					<?php
 					if ( $product_permalink ) {
@@ -51,7 +52,10 @@ do_action( 'woocommerce_before_cart' );
 					} else {
 						echo $thumbnail; // phpcs:ignore
 					}
-					?>
+					if ( $is_out_of_stock ) :
+						?>
+						<span class="noyona-sold-out-badge"><?php esc_html_e( 'Sold Out', 'noyona' ); ?></span>
+					<?php endif; ?>
 				</div>
 
 				<div class="noyona-cart-item__details">
