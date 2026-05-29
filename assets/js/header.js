@@ -1473,6 +1473,74 @@
     }
   }
 
+  function initShopToolbarControlsPlacement() {
+    const placeToggle = () => {
+      const toolbar = document.querySelector('.noyona-shop-toolbar-right');
+      const wrapper = document.querySelector('.noyona-shop-view-wrapper');
+      const filterToggle = document.querySelector('.noyona-shop-filter-toggle');
+      if (!toolbar || !wrapper) return false;
+
+      if (filterToggle && !toolbar.contains(filterToggle)) {
+        toolbar.appendChild(filterToggle);
+      }
+      if (filterToggle && toolbar.contains(filterToggle) && filterToggle.nextElementSibling !== wrapper) {
+        filterToggle.after(wrapper);
+        return true;
+      }
+      if (toolbar.contains(wrapper)) return true;
+
+      toolbar.appendChild(wrapper);
+      return true;
+    };
+
+    if (placeToggle()) return;
+
+    const root = document.querySelector('.noyona-shop-archive');
+    if (!root || typeof MutationObserver === 'undefined') return;
+
+    const observer = new MutationObserver(() => {
+      if (placeToggle()) {
+        observer.disconnect();
+      }
+    });
+
+    observer.observe(root, { childList: true, subtree: true });
+  }
+
+  function initShopMobileCategoriesPlacement() {
+    const categories = document.querySelector('.noyona-shop-categories');
+    const panel = document.querySelector('#noyona-shop-filter-panel');
+    if (!categories || !panel || !categories.parentNode) return;
+
+    const placeholder = document.createComment('noyona-shop-categories-placeholder');
+    categories.parentNode.insertBefore(placeholder, categories.nextSibling);
+
+    const media = window.matchMedia('(max-width: 999px)');
+
+    const moveCategories = () => {
+      if (media.matches) {
+        const sortSection = panel.querySelector('.noyona-shop-filter-section-sort');
+        if (categories.parentNode !== panel) {
+          if (sortSection) {
+            panel.insertBefore(categories, sortSection);
+          } else {
+            panel.appendChild(categories);
+          }
+        }
+      } else if (categories.parentNode !== placeholder.parentNode) {
+        placeholder.parentNode.insertBefore(categories, placeholder);
+      }
+    };
+
+    moveCategories();
+
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', moveCategories);
+    } else if (typeof media.addListener === 'function') {
+      media.addListener(moveCategories);
+    }
+  }
+
   function initShopCategoryActiveByPath() {
     const categoryWrap = document.querySelector('.noyona-shop-categories');
     if (!categoryWrap) return;
@@ -1964,6 +2032,22 @@
       }
     };
 
+    const getShopStickyOffset = () => {
+      const styles = getComputedStyle(document.documentElement);
+      const rawOffset = styles.getPropertyValue('--noyona-header-total-offset');
+      const offset = parseInt(rawOffset, 10);
+      return (Number.isFinite(offset) ? offset : 0) + 16;
+    };
+
+    const scrollToNewCardsStart = (firstCard) => {
+      if (!firstCard || typeof firstCard.getBoundingClientRect !== 'function') return;
+
+      requestAnimationFrame(() => {
+        const targetTop = firstCard.getBoundingClientRect().top + window.pageYOffset - getShopStickyOffset();
+        window.scrollTo({ top: Math.max(0, targetTop), behavior: 'auto' });
+      });
+    };
+
     container.classList.add('is-infinite-active');
     container.dataset.noyonaInfiniteReady = '1';
 
@@ -2058,6 +2142,7 @@
           }
 
           const fragment = document.createDocumentFragment();
+          const firstNewCard = newCards[0] || null;
           newCards.forEach((card) => fragment.appendChild(card));
           grid.appendChild(fragment);
 
@@ -2067,6 +2152,7 @@
           }
 
           updateResultCount();
+          scrollToNewCardsStart(firstNewCard);
 
           // Swap the in-DOM pagination meta (our authoritative next-URL source)
           // with the next page's so findNextUrl() picks up the following page.
@@ -2094,20 +2180,6 @@
             teardownObserver();
           } else {
             setLoaderState('idle');
-            // IntersectionObserver only fires on intersection STATE CHANGES
-            // (not-intersecting → intersecting). After the grid grows, the
-            // sentinel often remains in the trigger zone, so IO never fires
-            // a second time. Manually re-check on the next frame and
-            // cascade loadNext() until we either run out of pages or the
-            // sentinel scrolls out of the trigger zone.
-            requestAnimationFrame(() => {
-              if (isLoading || !nextUrl) return;
-              const rect = sentinel.getBoundingClientRect();
-              const viewportH = window.innerHeight || document.documentElement.clientHeight;
-              if (rect.top < viewportH + 600) {
-                loadNext();
-              }
-            });
           }
         })
         .catch((error) => {
@@ -2229,6 +2301,48 @@
     closeFilter();
   }
 
+  function initShopSort() {
+    const lists = Array.from(document.querySelectorAll('.noyona-shop-sort-list'));
+    if (!lists.length) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const current = String(params.get('orderby') || 'menu_order').toLowerCase();
+
+    const isPaginationKey = (key) =>
+      key === 'paged' || key === 'product-page' || /^query-\d+-page$/.test(key);
+
+    lists.forEach((list) => {
+      const options = Array.from(list.querySelectorAll('.noyona-shop-sort-option'));
+
+      options.forEach((option) => {
+        const value = String(option.dataset.orderby || 'menu_order').toLowerCase();
+        const isActive = value === current;
+        option.classList.toggle('is-active', isActive);
+        option.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+
+        option.addEventListener('click', () => {
+          const nextParams = new URLSearchParams(window.location.search);
+
+          if (value && value !== 'menu_order') {
+            nextParams.set('orderby', value);
+          } else {
+            nextParams.delete('orderby');
+          }
+
+          // Reset pagination so a new sort always starts on the first page.
+          Array.from(nextParams.keys()).forEach((key) => {
+            if (isPaginationKey(key)) {
+              nextParams.delete(key);
+            }
+          });
+
+          const query = nextParams.toString();
+          window.location.assign(window.location.pathname + (query ? '?' + query : ''));
+        });
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     initBrandStripFallback();
     normalizeHeaderLogos();
@@ -2248,12 +2362,15 @@
     initMobileSubmenus();
     normalizeShopDropdownLinks();
     initActiveNavLinks();
+    initShopToolbarControlsPlacement();
     initShopArchiveViewToggle();
+    initShopMobileCategoriesPlacement();
     initShopCategoryActiveByPath();
     initShopPriceFilter();
     initShopProductActions();
     initShopArchiveInfiniteScroll();
     initScrollTopButton();
     initShopFilterModal();
+    initShopSort();
   });
 })();

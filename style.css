@@ -1213,6 +1213,55 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   gap: 28px;
 }
 
+@media (min-width: 1000px) {
+  .noyona-shop-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 28%);
+    align-items: start;
+  }
+
+  .noyona-shop-layout > .noyona-shop-products-column,
+  .noyona-shop-layout > .noyona-shop-sidebar,
+  .noyona-shop-products {
+    display: contents;
+  }
+
+  .noyona-shop-toolbar {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    margin-bottom: 14px;
+  }
+
+  .noyona-shop-products .wc-block-product-template {
+    grid-column: 1 / 2;
+    grid-row: 2;
+  }
+
+  .noyona-shop-products .wp-block-query-pagination,
+  .noyona-shop-products .woocommerce-pagination,
+  .noyona-shop-products .wp-block-woocommerce-product-collection-no-results,
+  .noyona-shop-products .noyona-shop-infinite-meta,
+  .noyona-shop-products .noyona-shop-infinite-loader,
+  .noyona-shop-products .noyona-shop-infinite-sentinel {
+    grid-column: 1 / 2;
+  }
+
+  .noyona-shop-filter-overlay {
+    display: none;
+  }
+
+  #noyona-shop-filter-panel {
+    grid-column: 2 / 3;
+    grid-row: 2;
+    align-self: start;
+    height: fit-content;
+    max-height: calc(100vh - var(--noyona-header-total-offset, 72px) - 32px);
+    overflow-y: auto;
+    position: sticky;
+    top: calc(var(--noyona-header-total-offset, 72px) + 16px);
+  }
+}
+
 .noyona-shop-filters {
   border: none;
   border-radius: var(--noyona-radius-cta);
@@ -1252,31 +1301,70 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   align-items: center;
   margin: 0 0 10px;
   font-size: var(--wp--preset--font-size--body);
-  color: #222;
+  color: var(--wp--preset--color--text-main, #000);
   cursor: pointer;
 }
 
-.noyona-shop-filter-section input[type="radio"] {
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 1px solid var(--noyona-color-pink-muted-rose);
-  border-radius: 50%;
-  margin: 0 10px 0 0;
-  position: relative;
-  cursor: pointer;
-  background: #fff;
+/* Sort By — clickable list inside the filter panel (replaces the old dropdown). */
+.noyona-shop-filter-section-sort {
+  padding-top: 0;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-top: 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.noyona-shop-filter-section input[type="radio"]:checked::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 8px;
-  height: 8px;
+.noyona-shop-sort-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.noyona-shop-sort-list li {
+  margin: 0;
+}
+
+.noyona-shop-sort-option {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin: 0;
+  padding: 9px 8px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--wp--preset--color--text-main, #000);
+  font-size: var(--wp--preset--font-size--nav-button);
+  font-weight: 700;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.noyona-shop-sort-option:hover {
+  background: var(--wp--preset--color--brand-pink-light-blush, #FBDDE2);
+  color: var(--noyona-color-pink-accent);
+}
+
+.noyona-shop-sort-option:focus-visible {
+  outline: none;
+  border-color: var(--noyona-color-pink-muted-rose);
+}
+
+.noyona-shop-sort-option.is-active {
   background: var(--noyona-color-pink-accent);
-  border-radius: 50%;
+  border-color: var(--noyona-color-pink-accent);
+  color: var(--wp--preset--color--white, #fff);
+  font-weight: 700;
+}
+
+@media (max-width: 1199px) and (min-width: 1000px) {
+  .noyona-shop-sort-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .noyona-shop-filter-price {
@@ -1493,6 +1581,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   font-size: var(--wp--preset--font-size--caption);
   font-weight: 700;
   color: var(--noyona-color-pink-muted-rose);
+  white-space: nowrap;
 }
 
 .noyona-shop-toolbar-right {
@@ -2895,6 +2984,22 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 @media (max-width: 999px) {
+  .noyona-shop-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .noyona-shop-count {
+    min-width: 0;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
   .noyona-shop-layout > .noyona-shop-products-column {
     flex-basis: 100% !important;
   }
@@ -2907,27 +3012,83 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   }
 
   .noyona-shop-toolbar-right {
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    margin-left: auto;
+    justify-content: flex-end;
     flex-wrap: nowrap;
-    gap: 10px;
+    gap: 14px;
+    min-width: max-content;
   }
 
   .noyona-shop-filter-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 36px;
-    padding: 8px 16px;
-    border-radius: var(--noyona-radius-cta);
-    border: 1px solid #e0e0e0;
-    background: #fff;
-    color: #333;
-    font-size: var(--wp--preset--font-size--nav-button);
-    font-weight: 700;
+    width: 24px;
+    height: 24px;
+    min-height: 0;
+    margin-left: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--noyona-color-pink-muted-rose);
     line-height: 1;
     cursor: pointer;
-    white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+
+  .noyona-shop-filter-toggle:hover,
+  .noyona-shop-filter-toggle:focus-visible {
+    color: var(--noyona-color-pink-accent);
+    outline: none;
+  }
+
+  .noyona-shop-filter-toggle svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
+  .noyona-shop-toolbar-right .noyona-shop-view-wrapper {
+    margin-left: 0;
+  }
+
+  #noyona-shop-filter-panel .noyona-shop-categories {
+    display: grid;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 8px;
+    justify-content: stretch;
+    margin: 0 0 20px;
+    padding: 0 0 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  #noyona-shop-filter-panel .noyona-shop-category-all {
+    grid-column: 1 / -1;
+  }
+
+  #noyona-shop-filter-panel .noyona-shop-categories .wc-block-product-categories-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #noyona-shop-filter-panel .noyona-shop-categories .wc-block-product-categories-list-item {
+    min-width: 0;
+  }
+
+  #noyona-shop-filter-panel .noyona-shop-category-all,
+  #noyona-shop-filter-panel .noyona-shop-categories .wc-block-product-categories-list-item > a {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 34px;
+    padding: 8px 12px;
+    font-size: var(--wp--preset--font-size--nav-button);
   }
 
   .noyona-shop-filter-overlay {
@@ -2936,7 +3097,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
     inset: 0;
     border: 0;
     background: rgba(20, 20, 20, 0.36);
-    z-index: 129;
+    z-index: 12990;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -2969,9 +3130,10 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
     width: min(360px, 88vw);
     max-width: 88vw;
     border-radius: 0 18px 18px 0;
+    padding-top: 72px;
     box-shadow: 0 8px 36px rgba(0, 0, 0, 0.22);
     overflow-y: auto;
-    z-index: 130;
+    z-index: 13000;
     transform: translateX(-104%);
     transition: transform 0.24s ease;
   }
