@@ -1,7 +1,7 @@
 /**
  * Phone Video Reviews Block
- * - Click a phone card to open cinematic modal and autoplay with sound (where possible)
- * - YouTube: supports play/pause toggle in-grid via postMessage (enablejsapi=1)
+ * - Cards render lightweight thumbnails.
+ * - Click a phone card to create the embed in the cinematic modal.
  */
 (function () {
   function debounce(fn, wait) {
@@ -19,6 +19,7 @@
   function initPhoneReviews(block) {
     const cards = Array.from(block.querySelectorAll('.phone-card'));
     const grid = block.querySelector('[data-phone-grid]');
+    const dotsContainer = block.querySelector('.phone-reviews__dots');
     const overlay = block.querySelector('.phone-reviews__overlay');
     const carouselMq = window.matchMedia ? window.matchMedia('(max-width: 1240px)') : null;
 
@@ -31,6 +32,7 @@
     let shell = null;
     let controlsTimer = null;
     let suppressCardOpenUntil = 0;
+    let dotsFrame = null;
     const isCoarsePointer = !!(window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches);
 
     if (overlay) {
@@ -67,11 +69,9 @@
       const aspect = card.dataset.aspect || 'portrait';
       if (shell) shell.dataset.aspect = aspect;
 
-      const cardIframe = card.querySelector('iframe');
-      const src = cardIframe ? (cardIframe.dataset.embedSound || '') : '';
+      const src = card.dataset.embedSound || '';
       if (!src) return;
 
-      frame.src = src;
       frame.title = (card.querySelector('.phone-card__label') && card.querySelector('.phone-card__label').textContent) || 'Video review';
 
       const labelEl = card.querySelector('.phone-card__label');
@@ -81,6 +81,10 @@
       overlay.setAttribute('aria-hidden', 'false');
       document.documentElement.classList.add('phone-reviews--overlay-open');
       showOverlayControls();
+
+      requestAnimationFrame(() => {
+        frame.src = src;
+      });
     }
 
     function exitAnyFullscreen() {
@@ -141,111 +145,100 @@
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          const left = target.offsetLeft - grid.clientWidth / 2 + target.clientWidth / 2;
-          grid.scrollTo({ left: Math.max(0, left), behavior: 'auto' });
+          grid.scrollTo({ left: Math.max(0, scrollLeftForCard(target)), behavior: 'auto' });
           grid.dataset.centeredForCarousel = '1';
+          updateDots();
         });
       });
     }
 
+    function scrollLeftForCard(card) {
+      return card.offsetLeft - grid.clientWidth / 2 + card.clientWidth / 2;
+    }
+
+    function getActiveIndex() {
+      if (!grid) return 0;
+
+      const viewportCenter = grid.scrollLeft + grid.clientWidth / 2;
+      let bestIndex = 0;
+      let bestDistance = Infinity;
+
+      cards.forEach((card, index) => {
+        const cardCenter = card.offsetLeft + card.clientWidth / 2;
+        const distance = Math.abs(cardCenter - viewportCenter);
+
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestIndex = index;
+        }
+      });
+
+      return bestIndex;
+    }
+
+    function setActiveDot(index) {
+      if (!dotsContainer) return;
+
+      Array.from(dotsContainer.children || []).forEach((dot, dotIndex) => {
+        const isActive = dotIndex === index;
+        dot.classList.toggle('is-active', isActive);
+        dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+      });
+    }
+
+    function updateDots() {
+      if (!dotsContainer || !carouselMq) return;
+
+      if (!carouselMq.matches) {
+        dotsContainer.style.display = 'none';
+        return;
+      }
+
+      dotsContainer.style.display = '';
+      setActiveDot(getActiveIndex());
+    }
+
+    function requestDotsUpdate() {
+      if (dotsFrame) return;
+
+      dotsFrame = requestAnimationFrame(() => {
+        dotsFrame = null;
+        updateDots();
+      });
+    }
+
+    function buildDots() {
+      if (!dotsContainer || !grid || cards.length < 2) return;
+
+      dotsContainer.innerHTML = '';
+      cards.forEach((card, index) => {
+        const dot = document.createElement('button');
+        dot.className = 'phone-reviews__dot';
+        dot.type = 'button';
+        dot.setAttribute('aria-label', 'Go to video review ' + (index + 1));
+        dot.addEventListener('click', () => {
+          grid.scrollTo({ left: Math.max(0, scrollLeftForCard(card)), behavior: 'smooth' });
+          setActiveDot(index);
+        });
+        dotsContainer.appendChild(dot);
+      });
+
+      updateDots();
+    }
+
     // Card interactions
     cards.forEach((card) => {
-      const iframe = card.querySelector('iframe');
-      const toggleBtn = card.querySelector('.phone-card__toggle');
-      const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
-      const videoType = (card.dataset.videoType || 'youtube').toLowerCase();
-
-      if (!iframe) return;
-
-      const mutedSrc = iframe.dataset.embedMuted || iframe.dataset.src || '';
-      function hydrateIframe() {
-        if (!mutedSrc) return;
-        if (iframe.dataset.hydrated === '1') return;
-        iframe.src = mutedSrc;
-        iframe.dataset.hydrated = '1';
-      }
-
-      if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              hydrateIframe();
-              io.disconnect();
-            }
-          });
-        }, { rootMargin: '300px 0px' });
-        io.observe(card);
-      } else {
-        hydrateIframe();
-      }
-
-      // Initial state
-      card.dataset.videoState = 'playing';
-      if (toggleBtn && icon) {
-        // Playing = show pause icon on hover
-        icon.className = 'fas fa-pause';
-      }
-
       card.addEventListener('click', function (e) {
-        hydrateIframe();
         // Prevent "click-through" re-open after closing the overlay on touch devices.
         if (suppressCardOpenUntil && Date.now() < suppressCardOpenUntil) {
           e.preventDefault();
           return;
         }
 
-        // Toggle play/pause (YouTube only)
-        if (toggleBtn && e.target && e.target.closest && e.target.closest('.phone-card__toggle')) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          if (videoType === 'youtube') {
-            const isPlaying = card.dataset.videoState === 'playing';
-            try {
-              if (isPlaying) {
-                iframe.contentWindow &&
-                  iframe.contentWindow.postMessage(
-                    '{"event":"command","func":"pauseVideo","args":""}',
-                    '*'
-                  );
-                card.dataset.videoState = 'paused';
-                if (icon) icon.className = 'fas fa-play';
-                toggleBtn.style.opacity = '1';
-              } else {
-                iframe.contentWindow &&
-                  iframe.contentWindow.postMessage(
-                    '{"event":"command","func":"playVideo","args":""}',
-                    '*'
-                  );
-                card.dataset.videoState = 'playing';
-                if (icon) icon.className = 'fas fa-pause';
-                toggleBtn.style.opacity = '0';
-              }
-            } catch (_) {}
-          }
-          return;
-        }
-
-        // Otherwise open modal
         if (e.target && e.target.closest && e.target.closest('a, button')) return;
         e.preventDefault();
         openOverlay(card);
       });
-
-      // Hover effect for Pause icon
-      if (toggleBtn) {
-        card.addEventListener('mouseenter', function () {
-          if (card.dataset.videoState === 'playing') {
-            if (icon) icon.className = 'fas fa-pause';
-            toggleBtn.style.opacity = '1';
-          }
-        });
-        card.addEventListener('mouseleave', function () {
-          if (card.dataset.videoState === 'playing') {
-            toggleBtn.style.opacity = '0';
-          }
-        });
-      }
     });
 
     // Overlay listeners
@@ -355,7 +348,12 @@
     // so we keep Close available on touch devices via CSS.
 
     // On first load, if we're already in carousel mode (<=1240px), start in the middle.
+    buildDots();
     centerCarouselToMiddle(false);
+    updateDots();
+    if (grid) {
+      grid.addEventListener('scroll', requestDotsUpdate, { passive: true });
+    }
 
     // When resizing into carousel mode, re-center once.
     if (carouselMq) {
@@ -367,6 +365,7 @@
         } else {
           grid.dataset.centeredForCarousel = '0';
         }
+        updateDots();
       };
       // Safari uses addListener
       if (carouselMq.addEventListener) {

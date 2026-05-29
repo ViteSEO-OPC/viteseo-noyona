@@ -11,6 +11,21 @@ $button_url = isset($attributes['buttonUrl']) ? trim((string) $attributes['butto
 $allowed_button_align = array('left', 'center', 'right');
 $button_align_raw = isset($attributes['buttonAlign']) ? (string) $attributes['buttonAlign'] : 'center';
 $button_align = in_array($button_align_raw, $allowed_button_align, true) ? $button_align_raw : 'center';
+$thumbnail_urls = [
+  trailingslashit(get_stylesheet_directory_uri()) . 'assets/images/phone_1.webp',
+  trailingslashit(get_stylesheet_directory_uri()) . 'assets/images/phone_2.webp',
+  trailingslashit(get_stylesheet_directory_uri()) . 'assets/images/phone_3.webp',
+];
+
+if (!function_exists('noyona_phone_reviews_add_query_args')) {
+  function noyona_phone_reviews_add_query_args($url, $args) {
+    foreach ($args as $key => $value) {
+      $url = add_query_arg($key, $value, $url);
+    }
+
+    return $url;
+  }
+}
 
 $carousel_autoplay = !empty($attributes['carouselAutoPlay']);
 $carousel_autoplay_seconds = isset($attributes['carouselAutoPlaySeconds']) ? (int) $attributes['carouselAutoPlaySeconds'] : 0;
@@ -54,7 +69,7 @@ $wrapper = get_block_wrapper_attributes([
   <?php if ($cards): ?>
     <!-- Desktop: 3 phones -->
     <div class="phone-reviews__grid" data-phone-grid>
-      <?php foreach ($cards as $card):
+      <?php foreach ($cards as $card_index => $card):
         $label = isset($card['label']) ? trim((string) $card['label']) : '';
         $videoUrl = isset($card['videoUrl']) ? trim((string) $card['videoUrl']) : '';
 
@@ -110,33 +125,32 @@ $wrapper = get_block_wrapper_attributes([
           ];
           $embed_src_muted = $base . '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
           $params['autoplay'] = '1';
-          $params['mute'] = '0';
+          $params['mute'] = '1';
           $params['controls'] = '1';
           $embed_src_sound = $base . '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
         } else {
           // Handle Generic/Facebook
           if (preg_match('/src="([^"]+)"/', $videoUrl, $match)) {
-            $embed_src_muted = $match[1];
+            $embed_src_muted = html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
           } else {
             $embed_src_muted = $videoUrl;
           }
 
           // Facebook specific overrides for autoplay/mute
           if ($is_facebook) {
-            if (strpos($embed_src_muted, 'autoplay=') === false) {
-              $embed_src_muted .= (strpos($embed_src_muted, '?') === false ? '?' : '&') . 'autoplay=false';
-            }
-            if (strpos($embed_src_muted, 'muted=') === false && strpos($embed_src_muted, 'mute=') === false) {
-              $embed_src_muted .= '&muted=true';
-            }
+            $embed_src_muted = noyona_phone_reviews_add_query_args($embed_src_muted, [
+              'autoplay' => 'false',
+              'muted' => 'true',
+              'show_text' => 'false',
+            ]);
 
-            // Unmuted for modal
-            $embed_src_sound = str_replace(['muted=true', 'mute=true'], ['muted=false', 'mute=false'], $embed_src_muted);
-            $embed_src_sound = str_replace('autoplay=false', 'autoplay=true', $embed_src_sound);
-            $embed_src_sound = str_replace('autoplay=0', 'autoplay=1', $embed_src_sound);
-            if (strpos($embed_src_sound, 'muted=') === false && strpos($embed_src_sound, 'mute=') === false) {
-              $embed_src_sound .= '&muted=false';
-            }
+            // Browser autoplay policy is reliable only when Facebook starts muted.
+            $embed_src_sound = noyona_phone_reviews_add_query_args($embed_src_muted, [
+              'autoplay' => 'true',
+              'muted' => 'true',
+              'mute' => '1',
+              'show_text' => 'false',
+            ]);
           } else {
             $embed_src_sound = $embed_src_muted;
           }
@@ -151,27 +165,22 @@ $wrapper = get_block_wrapper_attributes([
           }
         }
 
+        $thumbnail_url = $thumbnail_urls[$card_index % count($thumbnail_urls)];
+        $thumbnail_alt = $label !== '' ? $label : __('Video review thumbnail', 'childtheme');
+
         ?>
-        <article class="phone-card" data-video-state="playing" data-video-type="<?= $is_youtube ? 'youtube' : 'generic'; ?>"
-          data-aspect="<?= esc_attr($aspect_ratio); ?>">
+        <article class="phone-card" data-video-type="<?= $is_youtube ? 'youtube' : 'generic'; ?>"
+          data-aspect="<?= esc_attr($aspect_ratio); ?>"
+          data-embed-sound="<?= esc_attr($embed_src_sound); ?>">
           <div class="phone-card__shell">
             <div class="phone-card__screen">
-            <iframe
-              src="about:blank"
-              data-src="<?= esc_url($embed_src_muted); ?>"
-              data-embed-muted="<?= esc_attr($embed_src_muted); ?>"
-              data-embed-sound="<?= esc_attr($embed_src_sound); ?>"
-              title="<?= esc_attr($label ?: 'Video review'); ?>"
-              loading="lazy"
-              allowfullscreen
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              style="pointer-events: none;"
-            ></iframe>
-              <?php if ($is_youtube): ?>
-                <button class="phone-card__toggle" aria-label="Pause video">
-                  <i class="fas fa-pause"></i>
-                </button>
-              <?php endif; ?>
+              <img
+                class="phone-card__thumbnail"
+                src="<?= esc_url($thumbnail_url); ?>"
+                alt="<?= esc_attr($thumbnail_alt); ?>"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           </div>
           <?php if ($label): ?>
@@ -182,6 +191,7 @@ $wrapper = get_block_wrapper_attributes([
         </article>
       <?php endforeach; ?>
     </div>
+    <div class="phone-reviews__dots" aria-label="<?php echo esc_attr__('Video review slides', 'childtheme'); ?>"></div>
   <?php endif; ?>
 
   <?php if ($button_text !== ''): ?>
@@ -204,7 +214,7 @@ $wrapper = get_block_wrapper_attributes([
       <div class="phone-reviews__overlay-screen">
         <div class="phone-reviews__overlay-tapcatcher" aria-hidden="true"></div>
         <iframe src="about:blank" title="" loading="lazy" allowfullscreen
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
       </div>
       <p class="phone-reviews__overlay-label" data-phone-overlay-title></p>
     </div>

@@ -2165,6 +2165,29 @@ function noyona_render_account_page_shortcode() {
                             <span><?php echo esc_html( $filter_label ); ?></span>
                         </a>
                     <?php endforeach; ?>
+                    <label class="screen-reader-text" for="noyona-account-orders-filter-select"><?php esc_html_e( 'Filter orders by status', 'noyona-childtheme' ); ?></label>
+                    <select
+                        id="noyona-account-orders-filter-select"
+                        class="noyona-account-orders-filter-select"
+                        onchange="if (this.value) { window.location.href = this.value; }"
+                    >
+                        <?php foreach ( $order_status_filters as $filter_key => $filter_data ) : ?>
+                            <?php
+                            $is_filter_active = ( $filter_key === $selected_order_filter );
+                            $filter_url       = add_query_arg(
+                                array(
+                                    'order_filter' => $filter_key,
+                                    'orders_page'  => 1,
+                                ),
+                                $orders_url
+                            );
+                            $filter_label = isset( $filter_data['label'] ) ? (string) $filter_data['label'] : ucfirst( str_replace( '-', ' ', (string) $filter_key ) );
+                            ?>
+                            <option value="<?php echo esc_url( $filter_url ); ?>" <?php selected( $is_filter_active ); ?>>
+                                <?php echo esc_html( $filter_label ); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </nav>
             </header>
 
@@ -3342,6 +3365,18 @@ function noyona_clean_account_markup( $html ) {
         $html
     );
 
+    $html = preg_replace_callback(
+        '/(<div\b[^>]*class=(["\'])[^"\']*\bnoyona-account-hero__identity\b[^"\']*\2[^>]*>)(.*?)(<\/div>)/is',
+        static function ( $matches ) {
+            $inner = isset( $matches[3] ) ? (string) $matches[3] : '';
+            $inner = preg_replace( '/<br\s*\/?>/i', '', $inner );
+            $inner = preg_replace( '/<p\b[^>]*>(?:\s|&nbsp;|&#160;|<br\s*\/?>)*<\/p>/i', '', $inner );
+
+            return (string) $matches[1] . (string) $inner . (string) $matches[4];
+        },
+        (string) $html
+    );
+
     $targets = array(
         '/(<nav\b[^>]*class=(["\'])[^"\']*\bnoyona-account-tabs\b[^"\']*\2[^>]*>)(.*?)(<\/nav>)/is',
         '/(<div\b[^>]*class=(["\'])[^"\']*\bnoyona-account-hero__avatar-wrap\b[^"\']*\2[^>]*>)(.*?)(<\/div>)/is',
@@ -3580,8 +3615,8 @@ function noyona_account_modal_runtime_script() {
                 return false;
             };
 
-            var cleanModalArtifacts = function () {
-                document.querySelectorAll('.noyona-account-modal-dialog').forEach(function (dialog) {
+            var cleanWpArtifacts = function () {
+                document.querySelectorAll('.noyona-account-modal-dialog, .noyona-account-hero__identity').forEach(function (dialog) {
                     dialog.querySelectorAll('p').forEach(function (node) {
                         var text = (node.textContent || '').replace(/\u00a0/g, ' ').trim();
                         if (text === '' && node.children.length === 0) {
@@ -3595,8 +3630,8 @@ function noyona_account_modal_runtime_script() {
                 });
             };
 
-            cleanModalArtifacts();
-            var observer = new MutationObserver(cleanModalArtifacts);
+            cleanWpArtifacts();
+            var observer = new MutationObserver(cleanWpArtifacts);
             observer.observe(document.body, { childList: true, subtree: true });
 
             document.addEventListener('click', function (event) {

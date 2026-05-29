@@ -485,7 +485,11 @@
       view = perView(maxCards);
       maxIndex = Math.max(0, cards.length - view);
       totalPositions = Math.max(1, maxIndex + 1);
+      root
+        .querySelector(".product-slide__carousel")
+        ?.classList.toggle("product-slide__carousel--has-nav-space", maxIndex > 0);
       track.style.setProperty("--cards-visible", view);
+      track.style.justifyContent = maxIndex > 0 ? "flex-start" : "";
       cards.forEach((card) => {
         card.style.flexBasis = 100 / view + "%";
         card.style.maxWidth = 100 / view + "%";

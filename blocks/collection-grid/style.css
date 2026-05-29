@@ -215,10 +215,50 @@
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   }
 
+.collection-grid__dots {
+    display: none;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+.collection-grid__dot {
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    border: none;
+    background: transparent;
+    background-image: url("https://noyonacosmetics.com/wp-content/uploads/2026/01/Vector-2.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 10px 10px;
+    padding: 0;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.collection-grid__dot.is-active,
+.collection-grid__dot[aria-current="true"] {
+    background-image: url("https://noyonacosmetics.com/wp-content/uploads/2026/01/Vector-1.png");
+    background-size: 14px 14px;
+    transform: scale(1.1);
+}
+
+.collection-grid__dot:focus,
+.collection-grid__dot:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
 /* =========================================================
    Mobile: swipeable "carousel" (scroll-snap) instead of 1-by-1 stack
 ========================================================= */
-@media (max-width: 768px) {
+@media (max-width: 780px) {
     .collection-grid__header {
         text-align: center;
     }
@@ -262,6 +302,10 @@
         display: none; /* Chrome/Safari/iOS */
         width: 0;
         height: 0;
+    }
+
+    .collection-grid__dots {
+        display: flex;
     }
 }
 

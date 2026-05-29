@@ -1,0 +1,51 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/store-locator-section",
+  "version": "1.0.0",
+  "title": "Store Locator Section",
+  "category": "layout",
+  "icon": "location-alt",
+  "description": "A responsive store locator CTA with copy and map image card.",
+  "supports": {
+    "align": ["wide", "full"],
+    "anchor": true,
+    "html": false
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "attributes": {
+    "align": {
+      "type": "string",
+      "default": "wide"
+    },
+    "heading": {
+      "type": "string",
+      "default": "Experience Beauty, the Noyona Essentials Way."
+    },
+    "description": {
+      "type": "string",
+      "default": "Step into a Noyona Essentials boutique and experience the brand the way it was meant to be. Every product, every shade, all in one place."
+    },
+    "supportingText": {
+      "type": "string",
+      "default": "Looking for something closer? Find Noyona at a partner store near you — because great skin shouldn't be hard to find."
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Find Your Glow Spot"
+    },
+    "buttonUrl": {
+      "type": "string",
+      "default": "/store-location/"
+    },
+    "imageUrl": {
+      "type": "string",
+      "default": "/wp-content/themes/viteseo-noyona/assets/images/noyona-main-store.webp"
+    },
+    "imageAlt": {
+      "type": "string",
+      "default": "Noyona store location map"
+    }
+  },
+  "textdomain": "childtheme"
+}

@@ -57,6 +57,34 @@
       "type": "string",
       "default": "pa_color"
     },
+    "mediaBackgroundColor": {
+      "type": "string",
+      "default": "#F2A0A7"
+    },
+    "cardBorderColor": {
+      "type": "string",
+      "default": "#D91B61"
+    },
+    "ctaBackgroundColor": {
+      "type": "string",
+      "default": "#E199A4"
+    },
+    "ctaTextColor": {
+      "type": "string",
+      "default": "#D81B60"
+    },
+    "ctaHoverBackgroundColor": {
+      "type": "string",
+      "default": "#D81B60"
+    },
+    "ctaHoverTextColor": {
+      "type": "string",
+      "default": "#FFFFFF"
+    },
+    "swatchSelectedColor": {
+      "type": "string",
+      "default": "#D91B61"
+    },
     "items": {
       "type": "array",
       "default": [],

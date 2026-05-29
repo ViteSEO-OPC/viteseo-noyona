@@ -498,6 +498,10 @@
   display: block;
 }
 
+.noyona-footer .noyona-footer__brand-logo--lovial {
+  display: none;
+}
+
 .noyona-footer .noyona-footer__links {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -749,6 +753,10 @@
   display: block;
 }
 
+.noyona-footer .noyona-footer__social-btn .noyona-footer__social-img--lovial {
+  display: none;
+}
+
 .noyona-footer .noyona-footer__social-btn:hover,
 .noyona-footer .noyona-footer__social-btn:focus-visible,
 .noyona-footer .noyona-footer__social-btn.is-active {
@@ -764,6 +772,53 @@
   }
   100% {
     box-shadow: 0 8px 16px rgba(122, 0, 56, 0.22);
+  }
+}
+
+body:has(.noyona-lovial-page) .noyona-footer {
+  background: #AEB89D;
+}
+
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__brand-logo:not(.noyona-footer__brand-logo--lovial) {
+  display: none;
+}
+
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__brand-logo--lovial {
+  display: block;
+  width: clamp(160px, 22vw, 250px);
+}
+
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:hover,
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:focus-visible {
+  color: #003B6E;
+  text-decoration-color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:focus-visible {
+  outline-color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__social-btn .noyona-footer__social-img--default {
+  display: none;
+}
+
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__social-btn .noyona-footer__social-img--lovial {
+  display: block;
+}
+
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__social-btn:hover,
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__social-btn:focus-visible,
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__social-btn.is-active {
+  box-shadow: 0 6px 14px rgba(0, 59, 110, 0.22) !important;
+  animation-name: noyona-footer-social-glow-lovial;
+}
+
+@keyframes noyona-footer-social-glow-lovial {
+  0% {
+    box-shadow: 0 5px 12px rgba(0, 59, 110, 0.14);
+  }
+  100% {
+    box-shadow: 0 8px 16px rgba(0, 59, 110, 0.24);
   }
 }
 

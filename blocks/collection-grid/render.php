@@ -108,6 +108,7 @@ if (empty($items)) {
             </div>
         <?php endforeach; ?>
     </div>
+    <div class="collection-grid__dots" aria-label="<?php echo esc_attr__('Collection slides', 'noyona-childtheme'); ?>"></div>
 
     <?php if ('' !== trim($button_text)): ?>
         <div class="collection-grid__cta collection-grid__cta--<?php echo esc_attr($button_align); ?>">
@@ -132,13 +133,87 @@ if ( ! function_exists( 'noyona_collection_grid_print_view_script' ) ) {
     (function () {
         function initCollectionGrid(block) {
             var track = block.querySelector('.collection-grid__items');
+            var dotsContainer = block.querySelector('.collection-grid__dots');
             if (!track) return;
 
             var cards = Array.prototype.slice.call(track.children || []);
             if (cards.length < 2) return;
 
-            var mq = window.matchMedia ? window.matchMedia('(max-width: 768px)') : null;
+            var mq = window.matchMedia ? window.matchMedia('(max-width: 780px)') : null;
             if (!mq) return;
+            var rafId = null;
+
+            function scrollLeftForCard(card) {
+                return card.offsetLeft - (track.clientWidth / 2) + (card.clientWidth / 2);
+            }
+
+            function setActiveDot(index) {
+                if (!dotsContainer) return;
+
+                Array.prototype.slice.call(dotsContainer.children || []).forEach(function (dot, dotIndex) {
+                    var isActive = dotIndex === index;
+                    dot.classList.toggle('is-active', isActive);
+                    dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+                });
+            }
+
+            function getActiveIndex() {
+                var viewportCenter = track.scrollLeft + (track.clientWidth / 2);
+                var bestIndex = 0;
+                var bestDistance = Infinity;
+
+                cards.forEach(function (card, index) {
+                    var cardCenter = card.offsetLeft + (card.clientWidth / 2);
+                    var distance = Math.abs(cardCenter - viewportCenter);
+
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        bestIndex = index;
+                    }
+                });
+
+                return bestIndex;
+            }
+
+            function updateDots() {
+                if (!dotsContainer) return;
+
+                if (!mq.matches) {
+                    dotsContainer.style.display = 'none';
+                    return;
+                }
+
+                dotsContainer.style.display = '';
+                setActiveDot(getActiveIndex());
+            }
+
+            function buildDots() {
+                if (!dotsContainer) return;
+
+                dotsContainer.innerHTML = '';
+                cards.forEach(function (card, index) {
+                    var dot = document.createElement('button');
+                    dot.className = 'collection-grid__dot';
+                    dot.type = 'button';
+                    dot.setAttribute('aria-label', 'Go to collection ' + (index + 1));
+                    dot.addEventListener('click', function () {
+                        track.scrollTo({ left: Math.max(0, scrollLeftForCard(card)), behavior: 'smooth' });
+                        setActiveDot(index);
+                    });
+                    dotsContainer.appendChild(dot);
+                });
+
+                updateDots();
+            }
+
+            function requestDotUpdate() {
+                if (rafId) return;
+
+                rafId = requestAnimationFrame(function () {
+                    rafId = null;
+                    updateDots();
+                });
+            }
 
             function centerToMiddle(force) {
                 if (!mq.matches) return;
@@ -151,15 +226,19 @@ if ( ! function_exists( 'noyona_collection_grid_print_view_script' ) ) {
 
                 requestAnimationFrame(function () {
                     requestAnimationFrame(function () {
-                        var left = target.offsetLeft - (track.clientWidth / 2) + (target.clientWidth / 2);
-                        track.scrollTo({ left: Math.max(0, left), behavior: 'auto' });
+                        track.scrollTo({ left: Math.max(0, scrollLeftForCard(target)), behavior: 'auto' });
                         track.dataset.centeredForCarousel = '1';
+                        updateDots();
                     });
                 });
             }
 
+            buildDots();
+
             // If we load already in carousel mode, start centered
             centerToMiddle(false);
+            updateDots();
+            track.addEventListener('scroll', requestDotUpdate, { passive: true });
 
             // When entering carousel mode, center once
             if (mq.addEventListener) {
@@ -168,6 +247,7 @@ if ( ! function_exists( 'noyona_collection_grid_print_view_script' ) ) {
                     if (e.matches) {
                         centerToMiddle(true);
                     }
+                    updateDots();
                 });
             }
         }

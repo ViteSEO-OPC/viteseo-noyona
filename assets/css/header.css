@@ -187,6 +187,11 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
   width: clamp(120px, 8vw, 150px);
 }
 
+.site-logo-img--lovial {
+  display: none;
+  width: clamp(120px, 8vw, 150px);
+}
+
 /* White-logo-on-scroll scaling disabled while logo swapping is disabled.
 .site-logo-img.is-scrolled-logo {
   transform: scale(1.08);
@@ -606,8 +611,8 @@ body:not(.logged-in) .header-account--logged-out {
 
 .noyona-cart-count-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: -2px;
+  right: -4px;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
@@ -1883,6 +1888,15 @@ body:not(.logged-in) .only-logged-in {
   }
 }
 
+body:has(.noyona-lovial-page) .site-logo-img--desktop,
+body:has(.noyona-lovial-page) .site-logo-img--mobile {
+  display: none !important;
+}
+
+body:has(.noyona-lovial-page) .site-logo-img--lovial {
+  display: inline-block !important;
+}
+
 
 /* =========================================================
    SEARCH EXPAND FIX (mobile)
@@ -1981,4 +1995,52 @@ body:not(.logged-in) .only-logged-in {
     width: 48px;
     height: 48px;
   }
+}
+
+body:has(.noyona-lovial-page) .nav-link,
+body:has(.noyona-lovial-page) .dropdown-menu li a {
+  color: #000000;
+}
+
+body:has(.noyona-lovial-page) .nav-link:hover,
+body:has(.noyona-lovial-page) .nav-link.is-active,
+body:has(.noyona-lovial-page) .dropdown-menu li a:hover,
+body:has(.noyona-lovial-page) .dropdown-menu li a.is-active,
+body:has(.noyona-lovial-page) .mobile-drawer-links a:hover,
+body:has(.noyona-lovial-page) .mobile-drawer-links a.is-active {
+  color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .nav-link.is-active,
+body:has(.noyona-lovial-page) .nav-item.has-active-child > .nav-link-wrapper > .nav-link {
+  color: #003B6E;
+  border-bottom-color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .header-icons,
+body:has(.noyona-lovial-page) .header-icon,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button,
+body:has(.noyona-lovial-page) .search-icon,
+body:has(.noyona-lovial-page) .mobile-menu-toggle,
+body:has(.noyona-lovial-page) .submenu-toggle {
+  color: #000000;
+}
+
+body:has(.noyona-lovial-page) .header-icon:hover,
+body:has(.noyona-lovial-page) .header-icon:focus-visible,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:hover,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:focus-visible,
+body:has(.noyona-lovial-page) .search-icon:hover,
+body:has(.noyona-lovial-page) .search-icon:focus-visible,
+body:has(.noyona-lovial-page) .mobile-menu-toggle:hover,
+body:has(.noyona-lovial-page) .mobile-menu-toggle:focus-visible,
+body:has(.noyona-lovial-page) .submenu-toggle:hover,
+body:has(.noyona-lovial-page) .submenu-toggle:focus-visible {
+  color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .header-icon:hover,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:hover,
+body:has(.noyona-lovial-page) .search-icon:hover {
+  background: rgba(0, 59, 110, 0.08);
 }

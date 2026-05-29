@@ -37,6 +37,7 @@
 .noyona-discover-face-banner__cards {
   position: relative;
   z-index: 1;
+  min-width: 0;
 }
 
 .noyona-discover-face-banner__heading {
@@ -85,6 +86,8 @@
   font-size: 16px;
   font-weight: 700;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .noyona-discover-face-banner__cta:hover,
@@ -101,6 +104,8 @@
   gap: 5px;
   align-content: center;
   justify-items: center;
+  width: 100%;
+  min-width: 0;
 }
 
 .noyona-discover-face-banner__card {
@@ -118,6 +123,7 @@
   gap: 5px;
   justify-content: center;
   text-align: left;
+  box-sizing: border-box;
 }
 
 .noyona-discover-face-banner__card:nth-child(1) {
@@ -222,16 +228,62 @@
 @media (max-width: 1100px) {
   .noyona-discover-face-banner__inner {
     grid-template-columns: 1fr;
-    gap: 22px;
+    justify-items: center;
+    gap: clamp(22px, 4vw, 34px);
+    padding: clamp(28px, 5vw, 48px);
+  }
+
+  .noyona-discover-face-banner__content {
+    display: contents;
+    max-width: 760px;
+    text-align: center;
+  }
+
+  .noyona-discover-face-banner__heading,
+  .noyona-discover-face-banner__subheading,
+  .noyona-discover-face-banner__paragraph {
+    text-align: center;
+  }
+
+  .noyona-discover-face-banner__heading {
+    order: 1;
+  }
+
+  .noyona-discover-face-banner__subheading {
+    order: 2;
+  }
+
+  .noyona-discover-face-banner__paragraph {
+    order: 3;
+  }
+
+  .noyona-discover-face-banner__paragraph {
+    max-width: 680px;
+    margin-inline: auto;
+  }
+
+  .noyona-discover-face-banner__cta {
+    order: 5;
+    margin-inline: auto;
+    margin-top: 0;
   }
 
   .noyona-discover-face-banner__cards {
-    width: min(100%, 640px);
+    order: 4;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(100%, 860px);
+    gap: clamp(14px, 2.5vw, 22px);
   }
 
   .noyona-discover-face-banner__card:nth-child(1),
   .noyona-discover-face-banner__card:nth-child(2) {
     transform: none;
+  }
+
+  .noyona-discover-face-banner__card {
+    max-width: none;
+    min-height: 0;
+    padding: clamp(20px, 3vw, 26px);
   }
 }
 
@@ -239,5 +291,46 @@
   .noyona-discover-face-banner__inner {
     border-radius: var(--noyona-radius-card);
     min-height: auto;
+    padding: clamp(22px, 6vw, 32px);
+  }
+
+  .noyona-discover-face-banner__cards {
+    grid-template-columns: 1fr;
+    width: min(100%, 460px);
+  }
+
+  .noyona-discover-face-banner__card {
+    text-align: center;
+  }
+
+  .noyona-discover-face-banner__card-header {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .noyona-discover-face-banner__chips {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 430px) {
+  .noyona-discover-face-banner {
+    padding-inline: max(16px, var(--page-gutter-left, 16px));
+  }
+
+  .noyona-discover-face-banner__heading,
+  .noyona-discover-face-banner__subheading {
+    font-size: clamp(1.8rem, 9vw, 2.4rem);
+  }
+
+  .noyona-discover-face-banner__cta {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .noyona-discover-face-banner__chip {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
   }
 }

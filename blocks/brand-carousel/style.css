@@ -61,7 +61,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #fff; /* var(--brand-font-color, #4b2f1e); */
+    color: var(--brand-font-color, #fff);
     font-size: var(--wp--preset--font-size--body);
     white-space: nowrap;
     letter-spacing: var(--noyona-letter-spacing-bugfix);
@@ -311,4 +311,16 @@
     .review-card__product {
         font-size: var(--wp--preset--font-size--caption);
     }
+}
+
+body:has(.noyona-lovial-page) .brand-carousel {
+    --brand-bg-color: #BAD8F2;
+    --brand-font-color: #000000;
+    background: #BAD8F2 !important;
+}
+
+body:has(.noyona-lovial-page) .brand-carousel__heading,
+body:has(.noyona-lovial-page) .brand-carousel__description,
+body:has(.noyona-lovial-page) .brand-carousel__text {
+    color: #000000 !important;
 }

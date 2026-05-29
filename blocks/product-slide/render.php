@@ -14,6 +14,13 @@ $defaults = array(
     'wooProductBrands' => array(),
     'wooBrandTaxonomy' => '',
     'wooColorAttribute' => 'pa_color',
+    'mediaBackgroundColor' => '#F2A0A7',
+    'cardBorderColor' => '#D91B61',
+    'ctaBackgroundColor' => '#E199A4',
+    'ctaTextColor' => '#D81B60',
+    'ctaHoverBackgroundColor' => '#D81B60',
+    'ctaHoverTextColor' => '#FFFFFF',
+    'swatchSelectedColor' => '#D91B61',
     'items' => array(),
 );
 
@@ -625,6 +632,14 @@ if (!function_exists('noyona_ps_get_variation_choice_map')) {
     }
 }
 
+$media_background_color = noyona_ps_normalize_hex_color($atts['mediaBackgroundColor'] ?? '') ?: '#F2A0A7';
+$card_border_color = noyona_ps_normalize_hex_color($atts['cardBorderColor'] ?? '') ?: '#D91B61';
+$cta_background_color = noyona_ps_normalize_hex_color($atts['ctaBackgroundColor'] ?? '') ?: '#E199A4';
+$cta_text_color = noyona_ps_normalize_hex_color($atts['ctaTextColor'] ?? '') ?: '#D81B60';
+$cta_hover_background_color = noyona_ps_normalize_hex_color($atts['ctaHoverBackgroundColor'] ?? '') ?: '#D81B60';
+$cta_hover_text_color = noyona_ps_normalize_hex_color($atts['ctaHoverTextColor'] ?? '') ?: '#FFFFFF';
+$swatch_selected_color = noyona_ps_normalize_hex_color($atts['swatchSelectedColor'] ?? '') ?: '#D91B61';
+
 if ($use_woo_products && class_exists('WooCommerce')) {
     $tax_query = array();
     $args = array(
@@ -722,11 +737,11 @@ if ($use_woo_products && class_exists('WooCommerce')) {
                 'attributeParam' => $attribute_param,
                 'primaryText' => 'BUY NOW!',
                 'primaryUrl' => get_permalink($product_id),
-                'primaryBg' => '#E199A4',
+                'primaryBg' => $cta_background_color,
                 'cartEnabled' => true,
                 'cartUrl' => $product->add_to_cart_url(),
                 'cartAjax' => $can_ajax_cart,
-                'cartBg' => '#E199A4',
+                'cartBg' => $cta_background_color,
                 'productId' => $product_id,
                 'productSku' => $product->get_sku(),
                 'productType' => $product->get_type(),
@@ -758,8 +773,18 @@ if (count($items) > 4) {
 } else {
     $carousel_classes[] = 'product-slide__carousel--centered';
 }
+$block_style = sprintf(
+    '--ps-media-bg:%1$s;--ps-card-border-color:%2$s;--ps-cta-bg:%3$s;--ps-cta-color:%4$s;--ps-cta-hover-bg:%5$s;--ps-cta-hover-color:%6$s;--ps-swatch-selected-color:%7$s;',
+    esc_attr($media_background_color),
+    esc_attr($card_border_color),
+    esc_attr($cta_background_color),
+    esc_attr($cta_text_color),
+    esc_attr($cta_hover_background_color),
+    esc_attr($cta_hover_text_color),
+    esc_attr($swatch_selected_color)
+);
 ?>
-<div class="wp-block-noyona-product-slide product-slide alignwide" id="<?php echo esc_attr($unique_id); ?>"
+<div class="wp-block-noyona-product-slide product-slide alignwide" id="<?php echo esc_attr($unique_id); ?>" style="<?php echo esc_attr($block_style); ?>"
     data-cards-to-show="<?php echo esc_attr($cards_to_show); ?>">
     <div class="product-slide__header">
         <?php if ($atts['heading']): ?>
@@ -822,12 +847,12 @@ if (count($items) > 4) {
                     $image_alt = $title ? $title : 'Product image';
                     $primary_text = !empty($item['primaryText']) ? $item['primaryText'] : 'Buy Now';
                     $primary_url = !empty($item['primaryUrl']) ? $item['primaryUrl'] : '#';
-                    $primary_bg = !empty($item['primaryBg']) ? $item['primaryBg'] : '#E199A4';
+                    $primary_bg = noyona_ps_normalize_hex_color($item['primaryBg'] ?? '') ?: $cta_background_color;
                     $cart_enabled = !empty($item['cartEnabled']);
                     $cart_url = !empty($item['cartUrl']) ? $item['cartUrl'] : '#';
                     $cart_ajax = !empty($item['cartAjax']);
-                    $cart_bg = !empty($item['cartBg']) ? $item['cartBg'] : $primary_bg;
-                    $media_bg = !empty($item['mediaBg']) ? $item['mediaBg'] : '';
+                    $cart_bg = noyona_ps_normalize_hex_color($item['cartBg'] ?? '') ?: $primary_bg;
+                    $media_bg = noyona_ps_normalize_hex_color($item['mediaBg'] ?? '');
                     $media_style = $media_bg ? ' style="--ps-media-bg: ' . esc_attr($media_bg) . ';"' : '';
                     $product_id = isset($item['productId']) ? absint($item['productId']) : 0;
                     $ajax_cart_url = $product_id > 0 ? add_query_arg('add-to-cart', $product_id, home_url('/')) : $cart_url;

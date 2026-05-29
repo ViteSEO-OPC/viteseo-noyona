@@ -217,7 +217,8 @@
     text-decoration: none;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
-    width: clamp(160px, 20vw, 250px);
+    min-width: clamp(160px, 20vw, 250px);
+    max-width: 100%;
 }
 
 .hero-banner--button-center .hero-banner__cta {

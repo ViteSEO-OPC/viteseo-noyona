@@ -2,6 +2,7 @@
 .wp-block-noyona-search-expand {
     display: inline-flex;
     align-items: center;
+    min-width: 0;
 }
 
 .search-inline-form {
@@ -10,10 +11,12 @@
     align-items: center;
     gap: 0.35rem;
     margin: 0;
+    min-width: 0;
 }
 
 .search-inline-input {
-    width: clamp(150px, 16vw, 220px);
+    width: clamp(210px, 22vw, 260px);
+    min-width: 210px;
     -webkit-appearance: none;
     appearance: none;
     border: 0;
@@ -26,6 +29,8 @@
     line-height: normal;
     color: #1f1f1f;
     outline: none;
+    text-overflow: clip;
+    box-sizing: border-box;
 }
 
 .search-inline-input::-webkit-search-decoration,
@@ -226,7 +231,7 @@
     }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 640px) {
     .search-inline-form {
         position: static;
     }
@@ -519,6 +524,65 @@
 
 .hidden {
     display: none !important;
+}
+
+body:has(.noyona-lovial-page) .search-inline-input {
+    border-bottom-color: #000000;
+    color: #000000;
+}
+
+body:has(.noyona-lovial-page) .search-inline-input::placeholder {
+    color: #000000;
+}
+
+body:has(.noyona-lovial-page) .search-inline-input:focus,
+body:has(.noyona-lovial-page) .search-inline-input:focus-visible {
+    border-bottom-color: #003B6E;
+    outline: 2px solid #003B6E;
+    outline-offset: 3px;
+}
+
+body:has(.noyona-lovial-page) .search-inline-submit,
+body:has(.noyona-lovial-page) .search-expand-trigger,
+body:has(.noyona-lovial-page) .search-icon-input,
+body:has(.noyona-lovial-page) .search-expand-input,
+body:has(.noyona-lovial-page) .search-expand-close {
+    color: #000000;
+}
+
+body:has(.noyona-lovial-page) .search-expand-trigger {
+    border-bottom-color: #000000;
+}
+
+body:has(.noyona-lovial-page) .search-expand-trigger-text,
+body:has(.noyona-lovial-page) .search-expand-input::placeholder {
+    color: #000000;
+}
+
+body:has(.noyona-lovial-page) .search-inline-submit:hover,
+body:has(.noyona-lovial-page) .search-inline-submit:focus-visible,
+body:has(.noyona-lovial-page) .search-expand-trigger:hover,
+body:has(.noyona-lovial-page) .search-expand-trigger:focus-visible,
+body:has(.noyona-lovial-page) .search-expand-close:hover,
+body:has(.noyona-lovial-page) .search-expand-close:focus-visible {
+    color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .search-expand-trigger:hover,
+body:has(.noyona-lovial-page) .search-expand-trigger:focus-visible {
+    border-bottom-color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .search-expand-trigger:focus-visible,
+body:has(.noyona-lovial-page) .search-expand-input:focus,
+body:has(.noyona-lovial-page) .search-expand-input:focus-visible,
+body:has(.noyona-lovial-page) .search-input-wrapper:focus-within {
+    outline: 2px solid #003B6E;
+    outline-offset: 3px;
+}
+
+body:has(.noyona-lovial-page) .search-input-wrapper:focus-within {
+    border-bottom-color: #003B6E;
 }
 
 /* Header pushes down slightly when search is open */

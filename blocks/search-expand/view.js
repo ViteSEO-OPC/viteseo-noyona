@@ -25,7 +25,7 @@
         const inlineInput = block.querySelector('.search-inline-input');
         const inlineSubmit = block.querySelector('.search-inline-submit');
         if (inlineForm && inlineInput && inlineSubmit) {
-            const mobileQuery = window.matchMedia('(max-width: 500px)');
+            const mobileQuery = window.matchMedia('(max-width: 640px)');
             const suggestions = block.querySelector('[data-search-suggestions]');
             const resultsList = block.querySelector('[data-search-results]');
             const status = block.querySelector('[data-search-status]');
