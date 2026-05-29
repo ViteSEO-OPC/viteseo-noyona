@@ -356,6 +356,7 @@
     };
 
     const getMiniCartRoot = () => document.querySelector('.wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-contents');
+    let latestMiniCartStockItems = [];
 
     const getMiniCartItemDisplayPrice = (item, row) => {
       // Prefer rendered Woo price text (already formatted with currency/settings).
@@ -378,6 +379,107 @@
       }
 
       return '';
+    };
+
+    const isMiniCartItemInStock = (item) => {
+      if (!item || typeof item !== 'object') return true;
+      const extensions = item.extensions && item.extensions.noyona
+        ? item.extensions.noyona
+        : null;
+      if (extensions && Object.prototype.hasOwnProperty.call(extensions, 'in_stock')) {
+        return !!extensions.in_stock;
+      }
+      return true;
+    };
+
+    const syncMiniCartStockBadges = (root, cart, stockItems = []) => {
+      if (!root) return;
+      const items = cart && Array.isArray(cart.items) ? cart.items : [];
+      const rows = root.querySelectorAll('.wc-block-cart-items__row, .wc-block-mini-cart-items__row');
+
+      rows.forEach((row, index) => {
+        const stockItem = stockItems[index] || null;
+        const item = items[index] || null;
+        const inStock = stockItem && Object.prototype.hasOwnProperty.call(stockItem, 'in_stock')
+          ? !!stockItem.in_stock
+          : isMiniCartItemInStock(item);
+        row.classList.toggle('noyona-mini-cart-row--out-of-stock', !inStock);
+        row.dataset.noyonaInStock = inStock ? '1' : '0';
+
+        const imageWrap = row.querySelector('.wc-block-cart-item__image, .wc-block-components-product-image');
+        if (!imageWrap) return;
+
+        let badge = imageWrap.querySelector('.noyona-sold-out-badge');
+        if (inStock) {
+          if (badge) badge.remove();
+          return;
+        }
+
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'noyona-sold-out-badge';
+          imageWrap.appendChild(badge);
+        }
+        badge.textContent = 'Sold Out';
+      });
+    };
+
+    const hasMiniCartOutOfStockItem = (root) => {
+      if (!root) return false;
+      return !!root.querySelector('[data-noyona-in-stock="0"], .noyona-mini-cart-row--out-of-stock')
+        || latestMiniCartStockItems.some((item) => item && item.in_stock === false);
+    };
+
+    const getMiniCartOutOfStockNames = () => {
+      return latestMiniCartStockItems
+        .filter((item) => item && item.in_stock === false)
+        .map((item) => String(item && item.name ? item.name : '').trim())
+        .filter(Boolean);
+    };
+
+    const buildMiniCartStockMessages = (names) => {
+      const list = Array.isArray(names) ? names.filter(Boolean) : [];
+      if (!list.length) {
+        return ['Please remove sold out items before continuing to checkout.'];
+      }
+      return list.map((name) => `"${name}" is sold out — remove it to continue to checkout.`);
+    };
+
+    const showMiniCartErrorNotice = (root, messages) => {
+      if (!root) return;
+
+      let notice = root.querySelector('.noyona-mini-cart-stock-notice');
+      if (!notice) {
+        notice = document.createElement('ul');
+        notice.className = 'woocommerce-error noyona-mini-cart-stock-notice';
+        notice.setAttribute('role', 'alert');
+
+        const anchor = root.querySelector('.noyona-mini-cart-message');
+        if (anchor && anchor.parentNode) {
+          anchor.parentNode.insertBefore(notice, anchor);
+        } else {
+          const fallback = root.querySelector('.wp-block-woocommerce-mini-cart-items-block')
+            || root.firstElementChild;
+          if (fallback && fallback.parentNode) {
+            fallback.parentNode.insertBefore(notice, fallback);
+          } else {
+            root.prepend(notice);
+          }
+        }
+      }
+
+      const finalMessages = Array.isArray(messages) && messages.length
+        ? [messages[0]]
+        : [buildMiniCartStockMessages(getMiniCartOutOfStockNames())[0]];
+      notice.innerHTML = '';
+      finalMessages.forEach((message) => {
+        const li = document.createElement('li');
+        li.textContent = message;
+        notice.appendChild(li);
+      });
+
+      notice.hidden = false;
+      notice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
     const syncProductTitlePriceRows = (root, cart) => {
@@ -682,11 +784,19 @@
           return;
         }
 
-        // Terms gate.
         const termsBox = root.querySelector('.noyona-mini-cart-terms-checkbox');
+        const messages = [];
+        if (hasMiniCartOutOfStockItem(root)) {
+          messages.push(buildMiniCartStockMessages(getMiniCartOutOfStockNames())[0]);
+        }
         if (termsBox && !termsBox.checked) {
+          messages.push('Please agree to the Terms & Conditions and Shipping & Returns before continuing.');
+        }
+
+        if (messages.length) {
           event.preventDefault();
           event.stopPropagation();
+          showMiniCartErrorNotice(root, messages);
           return;
         }
       }, true); // ← CAPTURE phase: fires before React & browser default
@@ -729,6 +839,22 @@
       headers: { Accept: 'application/json' },
       cache: 'no-store',
     }).then((res) => (res.ok ? res.json() : null)).catch(() => null);
+
+    const fetchMiniCartStockStatuses = () => {
+      const ajaxUrl = (window.noyonaHeader && window.noyonaHeader.ajaxUrl)
+        ? String(window.noyonaHeader.ajaxUrl)
+        : '/wp-admin/admin-ajax.php';
+      const url = ajaxUrl + (ajaxUrl.indexOf('?') === -1 ? '?' : '&') + 'action=noyona_cart_stock_status&_t=' + Date.now();
+
+      return fetch(url, {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
+        cache: 'no-store',
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((json) => (json && json.success && json.data && Array.isArray(json.data.items) ? json.data.items : []))
+        .catch(() => []);
+    };
 
     const readCartItemCount = (cart) => {
       if (!cart || typeof cart !== 'object') return 0;
@@ -854,7 +980,8 @@
     };
 
     const refreshMiniCart = () => {
-      fetchStoreCart().then((cart) => {
+      Promise.all([fetchStoreCart(), fetchMiniCartStockStatuses()]).then(([cart, stockItems]) => {
+        latestMiniCartStockItems = Array.isArray(stockItems) ? stockItems : [];
         if (isValidStoreCart(cart)) {
           syncHeaderCartBadge(Number(cart.items_count));
         } else {
@@ -865,6 +992,7 @@
         const root = getMiniCartRoot();
         if (!root) return;
 
+        syncMiniCartStockBadges(root, cart, stockItems);
         syncProductTitlePriceRows(root, cart);
         syncSelectedVariationRows(root, cart);
         reconcileMiniCartRows(root, cart);

@@ -121,6 +121,45 @@ function noyona_check_order_payment_status() {
 	);
 }
 
+/**
+ * AJAX: persist checkout form fields into the WC customer session so that the
+ * server-side guard on /preview/ sees populated values and doesn't redirect
+ * the user back to /checkout/.
+ */
+add_action( 'wp_ajax_noyona_sync_checkout_fields', 'noyona_sync_checkout_fields' );
+add_action( 'wp_ajax_nopriv_noyona_sync_checkout_fields', 'noyona_sync_checkout_fields' );
+function noyona_sync_checkout_fields() {
+	if ( ! function_exists( 'WC' ) || ! WC()->customer ) {
+		wp_send_json_error( array( 'message' => 'No customer session.' ), 400 );
+	}
+
+	$customer = WC()->customer;
+
+	// phpcs:disable WordPress.Security.NonceVerification.Missing -- mirrors WooCommerce's own update_order_review handler.
+	$map = array(
+		'billing_first_name' => 'set_billing_first_name',
+		'billing_last_name'  => 'set_billing_last_name',
+		'billing_email'      => 'set_billing_email',
+		'billing_phone'      => 'set_billing_phone',
+		'shipping_address_1' => 'set_shipping_address_1',
+		'shipping_city'      => 'set_shipping_city',
+		'shipping_state'     => 'set_shipping_state',
+		'shipping_postcode'  => 'set_shipping_postcode',
+		'shipping_country'   => 'set_shipping_country',
+	);
+
+	foreach ( $map as $post_key => $setter ) {
+		if ( isset( $_POST[ $post_key ] ) && is_callable( array( $customer, $setter ) ) ) {
+			$customer->$setter( wc_clean( wp_unslash( $_POST[ $post_key ] ) ) );
+		}
+	}
+	// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+	$customer->save();
+
+	wp_send_json_success();
+}
+
 /* ─── Assets ──────────────────────────────────────── */
 
 /**
@@ -963,6 +1002,40 @@ function noyona_checkout_inline_js() {
 			}
 		}
 
+		/**
+		 * Push checkout form data to the WC server session via the
+		 * update_order_review AJAX endpoint so that WC()->customer
+		 * is populated before the browser navigates to /preview/.
+		 */
+		function syncCheckoutToServer(checkoutForm, onDone) {
+			if (!checkoutForm) { if (onDone) onDone(); return; }
+
+			var formData = '';
+			try {
+				formData = window.jQuery
+					? window.jQuery(checkoutForm).serialize()
+					: new URLSearchParams(new FormData(checkoutForm)).toString();
+			} catch (e) {
+				if (onDone) onDone();
+				return;
+			}
+
+			var ajaxUrl = (typeof wc_checkout_params !== 'undefined' && wc_checkout_params.ajax_url)
+				? wc_checkout_params.ajax_url
+				: (typeof wc_cart_fragments_params !== 'undefined' && wc_cart_fragments_params.ajax_url
+					? wc_cart_fragments_params.ajax_url
+					: '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>');
+
+			var body = 'action=noyona_sync_checkout_fields&' + formData;
+
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', ajaxUrl, true);
+			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			xhr.onload = function () { if (onDone) onDone(); };
+			xhr.onerror = function () { if (onDone) onDone(); };
+			xhr.send(body);
+		}
+
 		function restoreCheckoutDraft(checkoutForm) {
 			if (!checkoutForm || !window.sessionStorage) return;
 			var raw = '';
@@ -1510,12 +1583,178 @@ function noyona_checkout_inline_js() {
 				});
 			} else {
 				reviewBtn.addEventListener('click', function() {
+					var validation = validateNoyonaCheckoutDetails(form);
+					if (!validation.ok) {
+						renderNoyonaCheckoutValidationNotice(form, validation);
+						focusFirstInvalidField(validation.firstField);
+						return;
+					}
 					if (form && typeof form.reportValidity === 'function' && !form.reportValidity()) {
 						return;
 					}
+					clearNoyonaCheckoutValidationNotice(form);
 					persistCheckoutDraft(form);
-					window.location.assign(reviewUrl);
+
+					// Sync the form data to the WC server session via the
+					// update_order_review AJAX endpoint before navigating.
+					// Without this the server-side guard on /preview/ sees
+					// empty customer fields and redirects back to /checkout/.
+					syncCheckoutToServer(form, function() {
+						window.location.assign(reviewUrl);
+					});
 				});
+			}
+		}
+
+		function validateNoyonaCheckoutDetails(checkoutForm) {
+			if (!checkoutForm) {
+				return { ok: false, errors: [{ message: 'Checkout form not found.' }], firstField: null };
+			}
+
+			var requiredFields = [
+				{ name: 'billing_first_name', label: 'First name' },
+				{ name: 'billing_last_name',  label: 'Last name' },
+				{ name: 'billing_email',      label: 'Email address' },
+				{ name: 'billing_phone',      label: 'Phone number' },
+				{ name: 'shipping_address_1', label: 'Shipping address' },
+				{ name: 'shipping_city',      label: 'City' },
+				{ name: 'shipping_state',     label: 'Province / State' },
+				{ name: 'shipping_postcode',  label: 'ZIP code' }
+			];
+
+			var errors = [];
+			var firstField = null;
+			var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			var phonePattern = /^(\+?63|0)?9\d{9}$/;
+			var zipPattern   = /^\d{4,5}$/;
+
+			requiredFields.forEach(function(spec) {
+				var field = checkoutForm.querySelector('[name="' + spec.name + '"]');
+				if (!field) return;
+				var value = String(field.value || '').trim();
+				if (!value) {
+					markCheckoutFieldRow(field, true);
+					errors.push({ field: field, message: spec.label + ' is required.' });
+					if (!firstField) firstField = field;
+				} else {
+					markCheckoutFieldRow(field, false);
+				}
+			});
+
+			var emailField = checkoutForm.querySelector('[name="billing_email"]');
+			if (emailField) {
+				var emailValue = String(emailField.value || '').trim();
+				if (emailValue && !emailPattern.test(emailValue)) {
+					markCheckoutFieldRow(emailField, true);
+					errors.push({ field: emailField, message: 'Please enter a valid email address.' });
+					if (!firstField) firstField = emailField;
+				}
+			}
+
+			var phoneField = checkoutForm.querySelector('[name="billing_phone"]');
+			if (phoneField) {
+				var rawPhone = String(phoneField.value || '').replace(/[\s\-()]/g, '');
+				if (rawPhone && !phonePattern.test(rawPhone)) {
+					markCheckoutFieldRow(phoneField, true);
+					errors.push({ field: phoneField, message: 'Please enter a valid Philippine phone number (e.g. 09171234567).' });
+					if (!firstField) firstField = phoneField;
+				}
+			}
+
+			var postcodeField = checkoutForm.querySelector('[name="shipping_postcode"]');
+			if (postcodeField) {
+				var rawZip = String(postcodeField.value || '').trim();
+				if (rawZip && !zipPattern.test(rawZip)) {
+					markCheckoutFieldRow(postcodeField, true);
+					errors.push({ field: postcodeField, message: 'Please enter a valid ZIP code (4-5 digits).' });
+					if (!firstField) firstField = postcodeField;
+				}
+			}
+
+			// Sort errors by DOM document order so the "first" error always
+			// matches the topmost-on-screen field, regardless of push order
+			// (required-field checks vs. format checks).
+			errors.sort(function(a, b) {
+				if (!a.field || !b.field) return 0;
+				if (a.field === b.field) return 0;
+				var pos = a.field.compareDocumentPosition(b.field);
+				if (pos & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+				if (pos & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+				return 0;
+			});
+			firstField = errors.length > 0 ? (errors[0].field || firstField) : firstField;
+
+			return {
+				ok: errors.length === 0,
+				errors: errors,
+				firstField: firstField
+			};
+		}
+
+		function markCheckoutFieldRow(field, isInvalid) {
+			if (!field) return;
+			var row = field.closest('.form-row');
+			if (!row) return;
+			if (isInvalid) {
+				row.classList.add('woocommerce-invalid');
+				row.classList.add('woocommerce-invalid-required-field');
+				row.classList.remove('woocommerce-validated');
+			} else {
+				row.classList.remove('woocommerce-invalid');
+				row.classList.remove('woocommerce-invalid-required-field');
+				row.classList.remove('woocommerce-invalid-email');
+				row.classList.remove('woocommerce-invalid-phone');
+				row.classList.add('woocommerce-validated');
+			}
+		}
+
+		function focusFirstInvalidField(field) {
+			if (!field) return;
+			try {
+				field.focus({ preventScroll: true });
+			} catch (e) {
+				field.focus();
+			}
+			if (typeof field.scrollIntoView === 'function') {
+				field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+		}
+
+		function clearNoyonaCheckoutValidationNotice(checkoutForm) {
+			var scope = checkoutForm && checkoutForm.parentNode ? checkoutForm.parentNode : document;
+			var existing = scope.querySelector('.noyona-checkout-validation-notice');
+			if (existing) existing.remove();
+		}
+
+		function renderNoyonaCheckoutValidationNotice(checkoutForm, validation) {
+			if (!checkoutForm) return;
+			clearNoyonaCheckoutValidationNotice(checkoutForm);
+
+			var notice = document.createElement('div');
+			notice.className = 'woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout noyona-checkout-validation-notice';
+			notice.setAttribute('role', 'alert');
+
+			var list = document.createElement('ul');
+			list.className = 'woocommerce-error';
+			list.setAttribute('role', 'alert');
+
+			// Show only the first error so the toast surfaces issues one-at-a-time,
+			// top-to-bottom, as the user resolves each field.
+			var firstError = (validation.errors && validation.errors[0]) || null;
+			var firstMessage = firstError && firstError.message
+				? String(firstError.message)
+				: 'Please correct the highlighted fields.';
+			var item = document.createElement('li');
+			item.textContent = firstMessage;
+			list.appendChild(item);
+
+			notice.appendChild(list);
+
+			var anchor = checkoutForm.querySelector('.noyona-checkout-card--contact') || checkoutForm.firstElementChild;
+			if (anchor && anchor.parentNode) {
+				anchor.parentNode.insertBefore(notice, anchor);
+			} else {
+				checkoutForm.insertBefore(notice, checkoutForm.firstChild);
 			}
 		}
 
