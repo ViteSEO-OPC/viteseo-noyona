@@ -3,6 +3,7 @@
   position: relative;
   z-index: 3;
   pointer-events: none;
+  border: 0px;
 }
 
 .newsletter-strip__inner {
@@ -11,36 +12,39 @@
   flex-direction: column;
   justify-content: center;
   margin: auto;
-  background: #F6CACE;
+  background: var(--newsletter-strip-bg, var(--noyona-color-pink-light-blush));
+  border: var(--newsletter-strip-border-width, 0) solid var(--newsletter-strip-border-color, transparent);
+  border-bottom-width: var(--newsletter-strip-border-bottom-width, var(--newsletter-strip-border-width, 0));
   border-radius: 200px 200px 0px 0px;
   text-align: center;
   box-sizing: border-box;
   pointer-events: auto;
-  height: clamp(245px, 30vw, 327px);
+  height: var(--newsletter-strip-height, clamp(245px, 30vw, 327px));
 }
 
 .newsletter-strip__title {
   margin: 0;
-  font-size: clamp(38px, 3.5vw, 56px);
-  line-height: 1.05;
+  font-size: var(--wp--preset--font-size--h-2);
+  line-height: normal;
   font-weight: 700;
   display: flex;
   align-items: baseline;
   justify-content: center;
   gap: 0.35rem;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .newsletter-strip__title em {
-  font-style: italic;
-  font-family: "Times New Roman", serif;
+  font-style: normal;
+  font-weight: 700;
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .newsletter-strip__subtitle {
   margin: 0.6rem 0 1.1rem;
-  font-size: clamp(18px, 1.4vw, 20px);
+  font-size: var(--wp--preset--font-size--body);
   color: #525252;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .newsletter-strip__form {
@@ -53,30 +57,42 @@
 
 .newsletter-strip__input {
   flex: 0 1 420px;
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   border: 1px solid rgba(17, 17, 17, 0.25);
   background: rgba(255, 255, 255, 0.5);
   padding: 0.6rem 0.95rem;
-  font-size: clamp(16px, 1.4vw, 18px);
+  font-size: var(--wp--preset--font-size--body);
   box-sizing: border-box;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .newsletter-strip__button {
-  border: 0;
+  border: none;
   border-radius: 16px;
-  color: #fff;
-  background: #E199A4;
-  padding: 10px 20px;
-  font-size: clamp(16px, 1.4vw, 18px);
-  font-weight: 600;
+  color: var(--newsletter-strip-cta-color, #D81B60);
+  background: var(--newsletter-strip-cta-bg, #EFB5BE);
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
   line-height: 1;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+  max-width: 200px;
 }
 
-.newsletter-strip__button:hover {
-  filter: brightness(1.05);
+.newsletter-strip__inner > .newsletter-strip__button {
+  margin-inline: auto;
+}
+
+.newsletter-strip__button:hover,
+.newsletter-strip__button:focus-visible {
+  background: var(--newsletter-strip-cta-hover-bg, var(--noyona-color-pink-accent));
+  color: var(--newsletter-strip-cta-hover-color, #ffffff);
 }
 
 @media (max-width: 900px) {
@@ -97,7 +113,7 @@
   }
 
   .newsletter-strip__title {
-    font-size: clamp(30px, 9vw, 42px);
+    font-size: var(--wp--preset--font-size--h-2);
     flex-wrap: wrap;
     gap: 0.2rem;
   }

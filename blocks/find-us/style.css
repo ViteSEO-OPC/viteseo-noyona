@@ -1,13 +1,13 @@
 .find-us {
-    --find-us-accent: #E199A4;
+    --find-us-accent: var(--noyona-color-pink-muted-rose);
     --find-us-bg: linear-gradient(135deg, #fce4e6 0%, #ffffff 100%);
     padding: clamp(2rem, 5vw, 4rem) var(--page-gutter-left);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-family: var(--wp--preset--font-family--poppins);
 }
 
 .find-us__container {
-  background: #FBDDE2;
-  border-radius: 24px;
+  background: var(--noyona-color-pink-light-blush);
+  border-radius: var(--noyona-radius-card);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   display: grid;
   grid-template-columns: minmax(0, 40%) minmax(0, 60%);
@@ -24,7 +24,7 @@
 
 .find-us__image-box {
     /* background: #fff; */
-    /* border-radius: 12px; */
+    /* border-radius: var(--noyona-radius-input); */
     /* padding: 1.5rem; */
     /* width: 100%; */
     aspect-ratio: 1/1;
@@ -45,13 +45,13 @@
 }
 
 .find-us__title {
-    font-size: clamp(32px, 4vw, 48px);
+    font-size: var(--wp--preset--font-size--h-2);
     font-weight: 700;
     color: #000;
     margin: 0;
     line-height: 72px;
     letter-spacing: -0.02em;
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-family: var(--wp--preset--font-family--poppins);
 }
 
 .find-us__accent {
@@ -60,19 +60,19 @@
 
 .find-us__description {
     color: #525252;
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-family: var(--wp--preset--font-family--poppins);
     font-size: clamp(24px, 2.4vw, 32px);
     text-align: left;
     font-weight: 400;
-    line-height: 1.2;
+    line-height: normal;
     letter-spacing: -0.02em;
     margin: 0 0 2rem;
 }
 
 .find-us__store-name {
     font-size: clamp(32px, 4vw, 48px);
-    color: #E199A4;
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    color: var(--noyona-color-pink-muted-rose);
+    font-family: var(--wp--preset--font-family--poppins);
     font-style: normal;
     font-weight: 700;
     line-height: 72px;
@@ -94,11 +94,11 @@
 
 .find-us__address {
     color: #525252;
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-family: var(--wp--preset--font-family--poppins);
     font-size: clamp(24px, 2.4vw, 32px);
     text-align: left;
     font-weight: 400;
-    line-height: 1.2;
+    line-height: normal;
     letter-spacing: -0.02em;
     margin: 0 0 2rem;
 }

@@ -20,9 +20,9 @@
   padding: 0.55rem 0.65rem;
   text-align: left;
   border: 1px solid #e8e8e8;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   background: #fff;
-  font-size: 0.75rem;
+  font-size: var(--wp--preset--font-size--caption);
   font-weight: 600;
   color: #333;
 }
@@ -35,11 +35,11 @@
   height: 32px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--noyona-trust-icon-color, #E199A4) 18%, transparent);
-  color: var(--noyona-trust-icon-color, #E199A4);
+  background: color-mix(in srgb, var(--noyona-trust-icon-color, var(--noyona-color-pink-muted-rose)) 18%, transparent);
+  color: var(--noyona-trust-icon-color, var(--noyona-color-pink-muted-rose));
   font-size: 0.9rem;
 }
 
 .noyona-pdp-trust__label {
-  line-height: 1.25;
+  line-height: normal;
 }

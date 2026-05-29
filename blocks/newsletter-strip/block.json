@@ -1,7 +1,7 @@
 {
   "apiVersion": 3,
   "name": "noyona/newsletter-strip",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "Newsletter Strip",
   "category": "design",
   "icon": "email-alt",
@@ -11,6 +11,10 @@
     "html": false
   },
   "attributes": {
+    "heading": {
+      "type": "string",
+      "default": ""
+    },
     "headingBefore": {
       "type": "string",
       "default": "Join the"
@@ -35,13 +39,49 @@
       "type": "string",
       "default": "Notify"
     },
+    "showEmailInput": {
+      "type": "boolean",
+      "default": true
+    },
     "formAction": {
       "type": "string",
       "default": "#"
     },
     "backgroundColor": {
       "type": "string",
-      "default": "#E8BCC3"
+      "default": "#FBDDE2"
+    },
+    "innerBorderColor": {
+      "type": "string",
+      "default": ""
+    },
+    "innerBorderWidth": {
+      "type": "string",
+      "default": "0"
+    },
+    "innerBorderStyle": {
+      "type": "string",
+      "default": "all"
+    },
+    "innerHeight": {
+      "type": "string",
+      "default": ""
+    },
+    "ctaTextColor": {
+      "type": "string",
+      "default": "#D81B60"
+    },
+    "ctaBackgroundColor": {
+      "type": "string",
+      "default": "#EFB5BE"
+    },
+    "ctaHoverTextColor": {
+      "type": "string",
+      "default": "#ffffff"
+    },
+    "ctaHoverBackgroundColor": {
+      "type": "string",
+      "default": "#D81B60"
     }
   },
   "style": "file:./style.css",

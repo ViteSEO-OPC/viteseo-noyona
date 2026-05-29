@@ -4,16 +4,11 @@
   "$schema": "https://schemas.wp.org/wp/6.9/theme.json",
   "settings": {
     "layout": {
-      "contentSize": "72rem",
-      "wideSize": "96rem"
+      "contentSize": "min(72rem, calc(100vw - (var(--page-gutter-left) + var(--page-gutter-right))))",
+      "wideSize": "calc(100vw - (var(--page-gutter-left) + var(--page-gutter-right)))"
     },
     "typography": {
       "fontFamilies": [
-        {
-          "fontFamily": "\"Proxima Nova\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
-          "name": "Proxima Nova",
-          "slug": "proxima-nova"
-        },
         {
           "fontFamily": "\"Noto Serif SemiCondensed\", \"Noto Serif\", \"Times New Roman\", serif",
           "name": "Noto Serif SemiCondensed",
@@ -27,10 +22,10 @@
       ],
       "fluid": true,
       "fontSizes": [
-        { "slug": "body", "name": "Body", "size": "clamp(16px, 1.4vw, 20px)" },
-        { "slug": "h-3", "name": "H3", "size": "clamp(18px, 2vw, 24px)" },
-        { "slug": "h-2", "name": "H2", "size": "clamp(32px, 4.2vw, 55px)" },
-        { "slug": "h-1", "name": "H1", "size": "clamp(44px, 6vw, 96px)" },
+        { "slug": "body", "name": "Body", "size": "16px" },
+        { "slug": "h-3", "name": "H3", "size": "clamp(28px, 2.8vw, 36px)" },
+        { "slug": "h-2", "name": "H2", "size": "clamp(32px, 3.75vw, 48px)" },
+        { "slug": "h-1", "name": "H1", "size": "clamp(40px, 5vw, 64px)" },
         { "slug": "h-4", "name": "H4", "size": "clamp(24px, 2.5vw, 32px)" },
         { "slug": "h-5", "name": "H5", "size": "clamp(20px, 1.9vw, 24px)" },
         { "slug": "nav-button", "name": "Navigation / Button", "size": "16px" },
@@ -46,6 +41,7 @@
         { "slug": "brand-pink-soft", "name": "Brand Pink Soft / Primary", "color": "#EFB5BE" },
         { "slug": "brand-pink-muted-rose", "name": "Brand Pink Muted Rose / Secondary", "color": "#E199A4" },
         { "slug": "brand-pink-light-blush", "name": "Brand Pink Light Blush / Secondary", "color": "#FBDDE2" },
+        { "slug": "brand-pink-accent", "name": "Brand Pink Accent / Badge", "color": "#D81B60" },
         { "slug": "text-main", "name": "Text Main", "color": "#000000" },
         { "slug": "text-muted", "name": "Text Muted", "color": "#525252" },
         { "slug": "white", "name": "White", "color": "#FFFFFF" },
@@ -64,33 +60,53 @@
     "typography": {
       "fontSize": "var(--wp--preset--font-size--body)",
       "fontWeight": "400",
-      "fontFamily": "var(--wp--preset--font-family--poppins)"
+      "fontFamily": "var(--wp--preset--font-family--poppins)",
+      "lineHeight": "normal"
     },
     "elements": {
       "h1": {
-        "color": { "text": "inherit" },
+        "color": { "text": "#000000" },
         "typography": {
           "fontSize": "var(--wp--preset--font-size--h-1)",
-          "fontWeight": "700",
-          "lineHeight": "1.05",
-          "fontFamily": "var(--wp--preset--font-family--noto-serif-semicondensed)"
+          "fontWeight": "400",
+          "fontFamily": "var(--wp--preset--font-family--poppins)",
+          "lineHeight": "normal"
         }
       },
       "h2": {
-        "color": { "text": "inherit" },
+        "color": { "text": "#000000" },
         "typography": {
           "fontSize": "var(--wp--preset--font-size--h-2)",
           "fontWeight": "700",
-          "fontFamily": "var(--wp--preset--font-family--poppins)"
+          "fontFamily": "var(--wp--preset--font-family--poppins)",
+          "lineHeight": "normal"
         }
       },
       "h3": {
-        "color": { "text": "inherit" },
+        "color": { "text": "#000000" },
         "typography": {
           "fontSize": "var(--wp--preset--font-size--h-3)",
-          "fontWeight": "600",
-          "lineHeight": "1.15",
-          "fontFamily": "var(--wp--preset--font-family--proxima-nova)"
+          "fontWeight": "700",
+          "fontFamily": "var(--wp--preset--font-family--poppins)",
+          "lineHeight": "normal"
+        }
+      },
+      "h4": {
+        "color": { "text": "#000000" },
+        "typography": {
+          "fontSize": "var(--wp--preset--font-size--h-4)",
+          "fontWeight": "700",
+          "fontFamily": "var(--wp--preset--font-family--poppins)",
+          "lineHeight": "normal"
+        }
+      },
+      "h5": {
+        "color": { "text": "#000000" },
+        "typography": {
+          "fontSize": "var(--wp--preset--font-size--h-5)",
+          "fontWeight": "700",
+          "fontFamily": "var(--wp--preset--font-family--poppins)",
+          "lineHeight": "normal"
         }
       }
     }

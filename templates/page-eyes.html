@@ -2,144 +2,106 @@
 
 <!-- wp:group {"tagName":"main","className":"noyona-shop-archive noyona-eyes-page","layout":{"inherit":true,"type":"constrained"}} -->
 <main class="wp-block-group noyona-shop-archive noyona-eyes-page">
-    <!-- wp:group {"align":"wide","className":"noyona-shop-top","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"wrap"}} -->
-    <div class="wp-block-group alignwide noyona-shop-top">
-        <!-- wp:post-title {"level":1,"className":"noyona-shop-title"} /-->
-    </div>
-    <!-- /wp:group -->
+    <!-- wp:noyona/landing-feature-banner {
+        "align":"full",
+        "label":"",
+        "title":"Best Eyes Makeup",
+        "subheading":"Discover Eyes Makeup Designed for <span class=\"noyona-landing-feature-banner__subheading-accent\">All Eye Shapes and Skin Tones</span>",
+        "paragraph":"Finding eye makeup that defines every eye shape and lasts all day can be challenging in tropical climates. Heat, air-conditioned environments, and daily humidity can cause brows and liner to smudge, crease, or fade throughout the day. Noyona Essentials offers waterproof, sweatproof eye makeup formulas designed for all eye shapes and skin tones. Each product delivers precise definition, long-lasting pigment, and confident wear from sunrise to gabi.",
+        "textPosition":"left"
+    } /-->
 
-    <!-- wp:columns {"align":"wide","className":"noyona-shop-layout"} -->
-    <div class="wp-block-columns alignwide noyona-shop-layout">
-        <!-- wp:column {"width":"28%","className":"noyona-shop-sidebar"} -->
-        <div class="wp-block-column noyona-shop-sidebar" style="flex-basis:28%">
-            <!-- wp:html -->
-            <button type="button" class="noyona-shop-filter-overlay" aria-label="Close filter panel"></button>
-            <!-- /wp:html -->
-            <!-- wp:group {"className":"noyona-shop-filters","layout":{"type":"constrained"}} -->
-            <div id="noyona-shop-filter-panel" class="wp-block-group noyona-shop-filters">
-                <!-- wp:html -->
-                <button type="button" class="noyona-shop-filter-close" aria-label="Close filters">✕</button>
-                <!-- /wp:html -->
-                <!-- wp:html -->
-                <div class="noyona-shop-filter-sections" aria-hidden="true">
-                    <section class="noyona-shop-filter-section">
-                        <h5>Stock Status</h5>
-                        <label><input type="radio" name="noyona-stock-status" checked> In Stock</label>
-                        <label><input type="radio" name="noyona-stock-status"> Out of Stock</label>
-                    </section>
+    <!-- wp:noyona/product-slide {
+        "align":"wide",
+        "heading":"Eyes That Captivate",
+        "subheading":"Define, line, and volumize with eye makeup made to make every glance unforgettable. ",
+        "cardsToShow":4,
+        "useWooProducts":true,
+        "wooOnlyFeatured":true,
+        "wooProductsLimit":8,
+        "wooProductCategories":["lips"],
+        "wooColorAttribute":"pa_color"
+    } /-->
 
-                    <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
-                        <h5 class="noyona-shop-filter-price-title">Price</h5>
-                        <div class="noyona-shop-filter-price" data-min="0" data-step="50">
-                            <div class="noyona-shop-filter-price-slider" role="group" aria-label="Price range">
-                                <div class="noyona-shop-filter-price-track"></div>
-                                <div class="noyona-shop-filter-price-track-fill"></div>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="Minimum price handle"></button>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="Maximum price handle"></button>
-                            </div>
-                            <div class="noyona-shop-filter-price-inputs">
-                                <label class="noyona-shop-filter-price-input">
-                                    <span aria-hidden="true">₱</span>
-                                    <input type="number" inputmode="numeric" min="0" step="1" value="0" name="noyona-price-min" aria-label="Minimum price">
-                                </label>
-                                <span class="noyona-shop-filter-price-separator" aria-hidden="true">-</span>
-                                <label class="noyona-shop-filter-price-input">
-                                    <span aria-hidden="true">₱</span>
-                                    <input type="number" inputmode="numeric" min="0" step="1" value="0" name="noyona-price-max" aria-label="Maximum price">
-                                </label>
-                            </div>
-                            
-                            <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
-                        </div>
-                    </section>
+    <!-- wp:noyona/types-cards {
+     "align":"full",
+     "title":"Types of Eyes Makeup",
+     "cards":[
+        {
+            "imageId":0,
+            "image":"",
+            "title":"Eyebrow Pencil ",
+            "text":"Creates lifelike, hair-stroke definition with a fine triangular tip that sculpts brows naturally, ideal for everyday wear and suitable for beginners to women in their 50s, with Noyona Slim Defining Brow and Noyona Ultra Retractable Brow Pencil."
+        },
+        {
+            "imageId":0,
+            "image":"",
+            "title":"Eyebrow Pomade",
+            "text":"Delivers intense, buildable color in a smooth cream formula that fills sparse areas and shapes brows for up to 16 hours of waterproof, sweatproof wear with Noyona Eyebrow Pomade."
+        },
+        {
+            "imageId":0,
+            "image":"",
+            "title":"Liquid Eyeliner",
+            "text":"Offers ultra-precise, highly pigmented lines with a fine felt-tip applicator that resists heat and humidity, perfect for everyday definition or sharp wing looks."
+        }
+    ]} /-->
 
-                    <!-- <section class="noyona-shop-filter-section">
-                        <h5>Star Rating</h5>
-                        <label><input type="radio" name="noyona-star-rating"> Bestsellers</label>
-                        <label><input type="radio" name="noyona-star-rating"> Top Rated</label>
-                        <label><input type="radio" name="noyona-star-rating"> High Volume</label>
-                        <label><input type="radio" name="noyona-star-rating"> Customer Favorites</label>
-                        <label><input type="radio" name="noyona-star-rating"> Community Verified</label>
-                    </section> -->
-                </div>
-                <!-- /wp:html -->
+    <!-- wp:noyona/benefits-strip {
+      "align":"full",
+      "title":"Why Noyona Eyes Makeup Work for You",
+      "backgroundColor":"#E9A3AD",
+      "items":[
+        {
+          "iconClass":"fa-solid fa-droplet",
+          "title":"Waterproof and Sweatproof for Tropical Climates",
+          "description":"Every Noyona eye makeup product is formulated to resist heat, humidity, and sweat, keeping your brows and liner sharp through commutes, office hours, and outdoor errands."
+        },
+        {
+          "iconClass":"fa-solid fa-eye",
+          "title":"Precision for Every Eye Shape",
+          "description": "The Slim Defining Brow, Ultra Retractable Brow Pencil, and Liquid Eyeliner Pen feature fine, triangular, or felt tips that suit monolid, hooded, and almond eye shapes for all skin types."
+        },
+        {
+          "iconClass":"fa-solid fa-clock",
+          "title":"Long-Lasting and Buildable Wear",
+          "description": "The Eyebrow Pomade delivers up to 16 hours of pigment, while the brow pencils and liner are buildable for soft daytime looks or sharper evening definition."
+        },
+        {
+          "iconClass":"fa-solid fa-leaf",
+          "title":"Beginner-Friendly and Vegan-Conscious Tools",
+          "description": "The Duo-Ended Eyebrow Brush is vegan-friendly with a premium bamboo handle, pairing perfectly with Noyona's brow products for effortless contouring, filling, and blending."
+        }
+      ]
+    } /-->
 
-                <!-- wp:group {"className":"noyona-shop-filter-blocks","layout":{"type":"constrained"}} -->
-                <div class="wp-block-group noyona-shop-filter-blocks">
-                    <!-- wp:woocommerce/product-filter-active /-->
-                    <!-- wp:woocommerce/product-filter-stock-status /-->
-                    <!-- wp:woocommerce/product-filter-price /-->
-                    <!-- wp:woocommerce/product-filter-rating /-->
-                </div>
-                <!-- /wp:group -->
-            </div>
-            <!-- /wp:group -->
-        </div>
-        <!-- /wp:column -->
+    <!-- wp:noyona/customer-reviews {"align":"wide","heading":"Customer Reviews","readMoreText":"Read More Reviews","dataSource":"category","sourceCategories":["lips"],"showWriteReviewCta":false,"showReviewForm":false,"showReadMore":true,"postsPerPage":9,"initialVisible":3} /-->
 
-        <!-- wp:column {"width":"72%","className":"noyona-shop-products-column"} -->
-        <div class="wp-block-column noyona-shop-products-column" style="flex-basis:72%">
-            <!-- wp:group {"className":"noyona-shop-toolbar","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"wrap"}} -->
-            <div class="wp-block-group noyona-shop-toolbar">
-                <!-- wp:woocommerce/product-results-count {"className":"noyona-shop-count"} /-->
-
-                <!-- wp:group {"className":"noyona-shop-toolbar-right","layout":{"type":"flex","verticalAlignment":"center","justifyContent":"right","flexWrap":"nowrap"}} -->
-                <div class="wp-block-group noyona-shop-toolbar-right">
-                    <!-- wp:html -->
-                    <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
-                        <div class="noyona-shop-view-toggle" aria-label="Toggle view mode">
-                            <button type="button" class="is-active" data-shop-view-toggle="1" aria-label="Switch to list view" aria-pressed="false">
-                                <svg class="icon-grid" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
-                                <svg class="icon-list" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none;"><path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h18v4H3z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- /wp:html -->
-
-                    <!-- wp:html -->
-                    <button type="button" class="noyona-shop-filter-toggle" aria-expanded="false" aria-controls="noyona-shop-filter-panel">Filter</button>
-                    <!-- /wp:html -->
-
-                    <!-- wp:woocommerce/catalog-sorting {"className":"noyona-shop-sort"} /-->
-                </div>
-                <!-- /wp:group -->
-            </div>
-            <!-- /wp:group -->
-
-            <!-- wp:woocommerce/product-collection {"queryId":3,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","outofstock","onbackorder"],"taxQuery":[{"taxonomy":"product_cat","field":"slug","terms":["eyes"],"operator":"IN"}],"isProductCollectionBlock":true,"perPage":4,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false},"tagName":"div","dimensions":{"widthType":"fill","fixedWidth":""},"displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},"convertedFromProducts":false,"queryContextIncludes":["collection"],"className":"noyona-shop-products"} -->
-            <div class="wp-block-woocommerce-product-collection noyona-shop-products">
-                <!-- wp:woocommerce/product-template -->
-                <!-- wp:woocommerce/product-image {"showSaleBadge":true,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
-                <!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
-                <!-- /wp:woocommerce/product-image -->
-                <!-- wp:post-title {"level":3,"isLink":true,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title","style":{"typography":{"lineHeight":"1.25"}}} /-->
-                <!-- wp:post-excerpt {"excerptLength":22,"showMoreOnNewLine":false} /-->
-                <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
-                <!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
-                <!-- /wp:woocommerce/product-template -->
-
-                <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
-                <!-- wp:query-pagination-previous /-->
-                <!-- wp:query-pagination-numbers /-->
-                <!-- wp:query-pagination-next /-->
-                <!-- /wp:query-pagination -->
-
-                <!-- wp:woocommerce/product-collection-no-results -->
-                <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","flexWrap":"wrap"}} -->
-                <div class="wp-block-group">
-                    <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"30px","fontWeight":"700"}},"textColor":"vivid-pink-cyan"} -->
-                    <p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">Coming Soon</p>
-                    <!-- /wp:paragraph -->
-                </div>
-                <!-- /wp:group -->
-                <!-- /wp:woocommerce/product-collection-no-results -->
-            </div>
-            <!-- /wp:woocommerce/product-collection -->
-        </div>
-        <!-- /wp:column -->
-    </div>
-    <!-- /wp:columns -->
-
+    <!-- wp:noyona/discover-face-banner {
+      "align":"wide",
+      "heading":"Discover Eyes",
+      "subheading":"Makeup Essentials",
+      "paragraphOne":"Selecting eye makeup that suits your eye shape, skin undertone, and daily climate ensures your look stays sharp all day.",
+      "paragraphTwo":"From precision brow pencils and long-lasting pomades to felt-tip liquid liners and vegan brushes, Noyona Essentials delivers eye makeup designed for everyday confidence.",
+      "buttonText":"View all products",
+      "buttonUrl":"/shop/eyes/",
+      "backgroundImage":"https://noyonacosmetics.com/wp-content/uploads/2026/02/dewylipcolor.webp",
+      "cards":[
+        {
+          "title":"Easy Shopping",
+          "description":"Available on your favorite platforms for seamless checkout.",
+          "iconClass":"fa-solid fa-bag-shopping",
+          "chips":[]
+        },
+        {
+          "title":"Fast Delivery",
+          "description":"Get your essentials delivered straight to your doorstep.",
+          "iconClass":"fa-solid fa-truck-fast",
+          "chips":["TK","SP","LZ"]
+        }
+      ]
+    } /-->
+     
     <!-- wp:html -->
     <button type="button" class="noyona-scroll-top" aria-label="Scroll to top">↑</button>
     <!-- /wp:html -->

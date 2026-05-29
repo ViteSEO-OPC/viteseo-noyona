@@ -12,7 +12,7 @@
   background: linear-gradient(180deg, #ffffff 0%, #fef7f8 100%);
   margin: 0 auto;
   padding: clamp(2rem, 5vw, 4rem) var(--page-gutter-left);
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   color: #222;
 }
 
@@ -34,15 +34,15 @@
 
 .faq-list__heading {
   margin: 0;
-  font-size: clamp(52px, 6vw, 96px);
+  font-size: var(--wp--preset--font-size--h-1);
   text-align: center;
-  font-family: var(--wp--preset--font-family--proxima-nova);
-  font-weight: 700;
-  color: #111;
+  font-family: var(--wp--preset--font-family--poppins);
+  font-weight: 400;
+  color: #000000;
 }
 
 .faq-list__accent {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .faq-list__search {
@@ -57,7 +57,7 @@
   gap: 0.5rem;
   background: #fff;
   border: 1px solid #f1d5dc;
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   padding: 0.3rem 0.4rem;
   width: min(520px, 100%);
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.25);
@@ -68,7 +68,7 @@
   border: none;
   background: transparent;
   padding: 0.55rem 0.8rem;
-  font-size: clamp(16px, 2vw, 20px);
+  font-size: var(--wp--preset--font-size--body);
   color: #333;
 }
 
@@ -78,12 +78,12 @@
 
 .faq-list__search-button {
   border: none;
-  background: #E199A4;
+  background: var(--noyona-color-pink-muted-rose);
   color: #fff;
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   padding: 0.45rem 1.2rem;
-  font-size: clamp(16px, 2vw, 20px);
-  font-weight: 600;
+  font-size: var(--wp--preset--font-size--body);
+  font-weight: 700;
   cursor: pointer;
   box-shadow: 0 8px 16px rgba(227, 11, 93, 0.25);
 }
@@ -142,16 +142,16 @@
 
 .faq-list__category {
   width: 100%;
-  border: 1px solid #f2d6dc;
+  border: 1px solid var(--noyona-color-pink-light-blush);
   background: #fff;
   color: #333;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   padding: 0.6rem 0.9rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
-  font-size: 0.9rem;
+  font-size: var(--wp--preset--font-size--label);
   font-weight: 600;
   text-align: left;
   cursor: pointer;
@@ -164,8 +164,8 @@
 }
 
 .faq-list__category.is-active {
-  background: #E199A4;
-  border-color: #E199A4;
+  background: var(--noyona-color-pink-muted-rose);
+  border-color: var(--noyona-color-pink-muted-rose);
   color: #fff;
 }
 
@@ -205,7 +205,7 @@
 
 .faq-list__disclaimer-title {
   margin: 0 0 0.35rem;
-  font-size: clamp(16px, 2vw, 20px);
+  font-size: var(--wp--preset--font-size--body);
   font-weight: 400;
   color: #444;
 }
@@ -214,7 +214,7 @@
   font-size: clamp(16px, 2vw, 18px);
   font-weight: 400;
   color: #666;
-  line-height: 1.6;
+  line-height: normal;
 }
 
 .faq-list__disclaimer-body p {
@@ -224,15 +224,16 @@
 .faq-list__title {
   margin: 0 0 1.5rem;
   text-align: center;
-  font-family: var(--wp--preset--font-family--proxima-nova);
-  font-size: clamp(32px, 4.2vw, 55px);
+  font-family: var(--wp--preset--font-family--poppins);
+  font-size: var(--wp--preset--font-size--h-2);
   font-weight: 700;
-  color: #111;
+  color: #000000;
 }
 
 .faq-list__subtitle {
   margin: 0.5rem 0 1.4rem;
-  font-size: clamp(18px, 1.2vw, 20px);
+  font-size: var(--wp--preset--font-size--body);
+  font-weight: 400;
   color: #666;
 }
 
@@ -253,7 +254,7 @@
 }
 
 .faq-list__item:hover {
-  border-color: #E199A4;
+  border-color: var(--noyona-color-pink-muted-rose);
 }
 
 .faq-list__summary {
@@ -266,13 +267,13 @@
   gap: 1rem;
   font-weight: 600;
   color: #333;
-  font-size: clamp(18px, 2vw, 24px);
+  font-size: var(--wp--preset--font-size--h-5);
   transition: color 0.2s ease;
   border-bottom: 1px solid transparent;
 }
 
 .faq-list__summary:hover {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .faq-list__summary::-webkit-details-marker {
@@ -309,30 +310,30 @@
 
 /* Open / Active state */
 .faq-list__item[open] {
-  border-color: #E199A4;
+  border-color: var(--noyona-color-pink-muted-rose);
   box-shadow: 0 4px 12px rgba(227, 11, 93, 0.1);
 }
 
 .faq-list__item[open] .faq-list__summary {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   border-bottom-color: rgba(227, 11, 93, 0.1);
 }
 
 .faq-list__item[open] .faq-list__icon {
   transform: rotate(45deg);
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .faq-list__answer {
   padding: 0 1.25rem 1rem;
   color: #555;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: var(--wp--preset--font-size--body);
+  line-height: normal;
 }
 
 .faq-list__item[open] .faq-list__answer p {
   color: #444;
-  font-size: clamp(16px, 2vw, 20px);
+  font-size: var(--wp--preset--font-size--body);
 }
 
 .faq-list__answer p {
@@ -341,7 +342,7 @@
 
 .faq-list__empty {
   margin: 1rem 0 0;
-  font-size: 0.9rem;
+  font-size: var(--wp--preset--font-size--body);
   color: #777;
 }
 
@@ -370,7 +371,7 @@
   max-width: none;
   margin: 0;
   padding: 1.1rem 1rem 1rem;
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.10);
@@ -380,7 +381,7 @@
   width: 54px;
   height: 54px;
   border-radius: 999px;
-  background: #E199A4;
+  background: var(--noyona-color-pink-muted-rose);
   color: #fff;
   display: inline-flex;
   align-items: center;
@@ -390,16 +391,16 @@
 }
 
 .faq-community--sidebar .faq-community__title {
-  font-size: clamp(18px, 2vw, 24px);
+  font-size: var(--wp--preset--font-size--h-5);
   margin: 0 0 0.5rem;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .faq-community--sidebar .faq-community__text {
-  font-size: clamp(16px, 2vw, 20px);
+  font-size: var(--wp--preset--font-size--body);
   margin: 0 auto 0.85rem;
   max-width: 320px;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 /* Community form — stack properly (no overlap) */
@@ -422,7 +423,7 @@
   width: 100%;
   box-sizing: border-box;
   margin: 0;                     /* kill default margins */
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   pointer-events: none;
 }
 
@@ -431,8 +432,8 @@
   display: block;                /* IMPORTANT (not flex) */
   padding: 10px 14px;
   border: 1px solid #525252;
-  font-size: clamp(16px, 2vw, 20px);
-  line-height: 1.2;
+  font-size: var(--wp--preset--font-size--body);
+  line-height: normal;
 }
 
 
@@ -442,7 +443,7 @@
   align-items: center;
   justify-content: center;
   padding: 12px 14px;
-  background: #E199A4;
+  background: var(--noyona-color-pink-muted-rose);
   color: #fff;
   text-decoration: none;
   font-weight: 700;
@@ -456,19 +457,19 @@
   margin: 0;
   font-size: clamp(12px, 1.6vw, 16px);
   color: #8a8a8a;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .faq-community__title {
   margin: 0 0 0.75rem;
   font-weight: 700;
-  font-size: clamp(32px, 4vw, 52px);
-  color: #111;
-  line-height: 1.1;
+  font-size: var(--wp--preset--font-size--h-2);
+  color: #000000;
+  line-height: normal;
 }
 
 .faq-community__accent {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .faq-community__text {
@@ -476,7 +477,7 @@
   max-width: 760px;
   font-size: clamp(14px, 1.6vw, 18px);
   color: #666;
-  line-height: 1.6;
+  line-height: normal;
 }
 
 .faq-community__button {
@@ -484,17 +485,20 @@
   align-items: center;
   justify-content: center;
   padding: 0.9rem 3.2rem;
-  border-radius: 16px;
-  background: #E199A4;
-  color: #fff;
+  border-radius: var(--noyona-radius-cta);
+  background: #EFB5BE;
+  color: #D81B60;
+  border: none;
   text-decoration: none;
   font-weight: 700;
-  font-size: clamp(18px, 2vw, 24px);
+  font-size: 16px;
   box-shadow: 0 10px 7.5px 0 rgba(0, 0, 0, 0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .faq-community__button:hover {
+  background-color: #D81B60;
+  color: #FFFFFF;
   transform: translateY(-1px);
   box-shadow: 0 12px 22px rgba(227, 11, 93, 0.34);
 }
@@ -544,7 +548,7 @@
   }
 
   .faq-list__category {
-    border-radius: 18px;
+    border-radius: var(--noyona-radius-cta);
     padding: 0.85rem 1rem;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
   }
@@ -590,7 +594,7 @@
     margin: -0.35rem 0 0.6rem;
     padding: 0.65rem 0.5rem 0.1rem 1.1rem;
     border-left: 3px solid rgba(227, 11, 93, 0.35);
-    border-radius: 12px;
+    border-radius: var(--noyona-radius-input);
   }
 
   .faq-list__category-panel[hidden] {
@@ -602,13 +606,13 @@
   }
 
   .faq-list__category-panel .faq-list__item {
-    border-radius: 12px;
+    border-radius: var(--noyona-radius-input);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
   }
 
   .faq-list__category-panel .faq-list__summary {
     padding: 0.75rem 0.9rem;
-    font-size: clamp(16px, 2vw, 20px);
+    font-size: var(--wp--preset--font-size--body);
   }
 
   .faq-list__category-panel .faq-list__answer {
@@ -626,13 +630,13 @@
 
   .faq-list__search-field {
     width: 100%;
-    border-radius: 12px;
+    border-radius: var(--noyona-radius-input);
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
     padding: 0.25rem 0.35rem;
   }
 
   .faq-list__category {
-    font-size: 0.9rem;
+    font-size: var(--wp--preset--font-size--nav-button);
     border-radius: 10px;
     padding: 0.5rem 0.75rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -652,12 +656,12 @@
   }
 
   .faq-list__disclaimer-title {
-    font-size: 16px;
+    font-size: var(--wp--preset--font-size--label);
   }
 
   .faq-list__disclaimer-body {
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: var(--wp--preset--font-size--body);
+    line-height: normal;
   }
 }
 

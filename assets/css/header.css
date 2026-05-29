@@ -27,7 +27,7 @@ body.search-expand-open header.wp-block-template-part {
 }
 
 .noyona-brand-strip-fallback {
-  background: #efb5be;
+  background: var(--noyona-color-pink-soft);
   overflow: hidden;
   padding: 0.5rem 0;
 }
@@ -41,8 +41,8 @@ body.search-expand-open header.wp-block-template-part {
 }
 
 .noyona-brand-strip-fallback__item {
-  font-family: "Proxima Nova", var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
-  font-size: 16px;
+  font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
+  font-size: var(--wp--preset--font-size--caption);
   font-weight: 500;
   color: #000;
   text-transform: uppercase;
@@ -194,11 +194,11 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
 */
 
 .site-logo-text {
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   font-size: clamp(20px, 2.25vw, 44px);
   font-weight: 700;
   line-height: 1;
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   white-space: nowrap;
 }
 
@@ -225,7 +225,7 @@ body.has-scrolled-header .site-logo-text {
 .site-logo-link:focus-visible {
   outline: 2px solid rgba(255, 111, 155, 0.75);
   outline-offset: 4px;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
 }
 
 /* =========================================================
@@ -286,8 +286,8 @@ body.has-scrolled-header .site-logo-text {
 }
 
 .nav-link {
-  font-family: "Proxima Nova", var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
-  font-size: clamp(16px, 2vw, 20px);
+  font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
+  font-size: var(--wp--preset--font-size--body);
   font-weight: 600;
   text-decoration: none;
   color: #000;
@@ -297,24 +297,25 @@ body.has-scrolled-header .site-logo-text {
   gap: 0.4rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-bottom: 2px solid transparent;
-  letter-spacing: -0.05em;
+  letter-spacing: var(--noyona-letter-spacing-bugfix);
 }
 
-.nav-link--button {
+.main-nav .nav-link--button {
   appearance: none;
   border: 0;
   border-bottom: 2px solid transparent;
+  border-radius: 0 !important;
   background: transparent;
   cursor: pointer;
 }
 
 .nav-link:hover,
 .nav-link.is-active {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .nav-link.is-active {
-  border-bottom-color: #E199A4;
+  border-bottom-color: var(--noyona-color-pink-muted-rose);
 }
 
 /* Ensure sub-links in dropdown don't have underline */
@@ -343,7 +344,7 @@ body.has-scrolled-header .site-logo-text {
   display: none;
   background: transparent;
   border: none;
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.5rem;
@@ -380,23 +381,23 @@ body.has-scrolled-header .site-logo-text {
   padding: 0.6rem 1.25rem;
   color: #333;
   text-decoration: none;
-  font-family: "Proxima Nova", var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
-  font-size: clamp(18px, 1.4vw, 20px);
+  font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
+  font-size: var(--wp--preset--font-size--body);
   font-weight: 600;
-  letter-spacing: -0.05em;
+  letter-spacing: var(--noyona-letter-spacing-bugfix);
   transition: background 0.2s, color 0.2s;
 }
 
 .dropdown-menu li a:hover,
 .dropdown-menu li a.is-active {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   background: #f9f9f9;
 }
 
 /* Parent active when child is active */
 .nav-item.has-active-child > .nav-link-wrapper > .nav-link {
-  color: #E199A4;
-  border-bottom-color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
+  border-bottom-color: var(--noyona-color-pink-muted-rose);
 }
 
 /* =========================================================
@@ -476,13 +477,13 @@ body.has-scrolled-header .site-logo-text {
 .header-icon,
 .header-mini-cart .wc-block-mini-cart__button,
 .search-icon {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .header-icon:hover,
 .header-mini-cart .wc-block-mini-cart__button:hover,
 .search-icon:hover {
-  background: rgba(144, 30, 88, 0.08);
+  background: rgba(216, 27, 96, 0.08);
 }
 
 /* Account dropdown */
@@ -502,7 +503,7 @@ body.has-scrolled-header .site-logo-text {
 
 .header-account-toggle,
 .header-account--logged-out {
-  font-size: 18px;
+  font-size: 24px;
 }
 
 .header-account--logged-in .header-account-toggle::after {
@@ -523,7 +524,7 @@ body.has-scrolled-header .site-logo-text {
   top: calc(100% + 8px);
   background: #fff;
   border: 1px solid #eee;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   min-width: 160px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
   padding: 6px 0;
@@ -536,12 +537,13 @@ body.has-scrolled-header .site-logo-text {
   padding: 8px 12px;
   color: #222;
   text-decoration: none;
-  font-size: 14px;
+  font-size: var(--wp--preset--font-size--nav-button);
 }
 
-.header-account-menu a:hover {
-  background: rgba(144, 30, 88, 0.05);
-  color: #E199A4;
+.header-account-menu a:hover,
+.header-account-menu a:focus-visible {
+  background: rgba(216, 27, 96, 0.05);
+  color: var(--noyona-color-pink-accent);
 }
 
 .header-account.is-open .header-account-menu {
@@ -610,8 +612,8 @@ body:not(.logged-in) .header-account--logged-out {
   height: 16px;
   padding: 0 4px;
   border-radius: 999px;
-  background: #e199a4;
-  color: #fff;
+  background: var(--noyona-color-pink-accent);
+  color: #ffffff;
   font-size: 0.65rem;
   font-weight: 700;
   line-height: 16px;
@@ -627,7 +629,7 @@ body:not(.logged-in) .header-account--logged-out {
 .header-wishlist-toggle {
   border: none;
   background: transparent;
-  font-size: 20px;
+  font-size: 24px;
 }
 
 /* =========================================================
@@ -675,9 +677,9 @@ body:not(.logged-in) .header-account--logged-out {
 .wishlist-panel__back {
   border: 0;
   background: transparent;
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   font-weight: 600;
-  font-size: 15px;
+  font-size: var(--wp--preset--font-size--nav-button);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -700,20 +702,20 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wishlist-panel__title {
   margin: 0;
-  font-size: 24px;
+  font-size: var(--wp--preset--font-size--h-4);
 }
 
 .wishlist-panel__subtitle {
   margin: 8px 0 0;
   color: #666;
-  font-size: 14px;
+  font-size: var(--wp--preset--font-size--body);
 }
 
 .wishlist-panel__empty {
   margin-top: 22px;
   min-height: 180px;
   border: 1px dashed #ead0d9;
-  border-radius: 14px;
+  border-radius: var(--noyona-radius-card);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -781,24 +783,26 @@ body:not(.logged-in) .header-account--logged-out {
 }
 
 .wc-block-mini-cart__drawer .wc-block-components-button {
-  border-radius: 999px !important;
+  border-radius: var(--noyona-radius-cta) !important;
   min-height: 48px;
 }
 
 .wc-block-mini-cart__drawer .wc-block-components-button--primary {
-  background: #E199A4 !important;
-  border-color: #E199A4 !important;
-  color: #fff !important;
+  background: #EFB5BE !important;
+  border-color: #EFB5BE !important;
+  color: #D81B60 !important;
 }
 
-.wc-block-mini-cart__drawer .wc-block-components-button--primary:hover {
-  background: #c70a52 !important;
-  border-color: #c70a52 !important;
+.wc-block-mini-cart__drawer .wc-block-components-button--primary:hover,
+.wc-block-mini-cart__drawer .wc-block-components-button--primary:focus-visible {
+  background: #D81B60 !important;
+  border-color: #D81B60 !important;
+  color: #FFFFFF !important;
 }
 
 /* Noyona mini-cart template skin */
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-contents {
-  font-family: var(--wp--preset--font-family--proxima-nova), system-ui, sans-serif;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
   color: #2f2f2f;
 }
 
@@ -815,7 +819,7 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .noyona-mini-cart-continue {
   border: 0;
   background: transparent;
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   font-weight: 600;
   font-size: 24px;
   display: inline-flex;
@@ -838,27 +842,27 @@ body:not(.logged-in) .header-account--logged-out {
   background: #dff2e8;
   color: #0a9d53;
   font-weight: 600;
-  font-size: 16px;
+  font-size: var(--wp--preset--font-size--helper);
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-shipping {
   padding: 10px 16px 6px;
-  color: #E199A4;
-  font-size: 16px;
+  color: var(--noyona-color-pink-muted-rose);
+  font-size: var(--wp--preset--font-size--helper);
   font-weight: 600;
-  background: #f7ecf0;
+  background: var(--noyona-color-pink-light-blush);
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-progress {
   padding: 0 16px 12px;
-  background: #f7ecf0;
+  background: var(--noyona-color-pink-light-blush);
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-progress span {
   display: block;
   width: 0;
   height: 7px;
-  background: #E199A4;
+  background: var(--noyona-color-pink-muted-rose);
   border-radius: 999px;
   transition: width 0.25s ease;
 }
@@ -884,7 +888,7 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .wc-block-cart-item__image img,
 .wc-block-mini-cart__drawer .wc-block-components-product-image img {
   width: 92px;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
 }
 
 .wc-block-mini-cart__drawer .wc-block-cart-item__image,
@@ -906,7 +910,7 @@ body:not(.logged-in) .header-account--logged-out {
   font-weight: 700;
   color: #253042;
   text-decoration: none;
-  line-height: 1.2;
+  line-height: normal;
   min-width: 0;
   width: auto !important;
   overflow-wrap: anywhere;
@@ -917,7 +921,7 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .wc-block-components-product-details__value {
   font-size: 24px;
   font-weight: 700;
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   margin: 0 !important;
 }
 
@@ -958,15 +962,15 @@ body:not(.logged-in) .header-account--logged-out {
   align-self: start;
   font-size: 24px;
   font-weight: 700;
-  color: #E199A4;
-  line-height: 1.2;
+  color: var(--noyona-color-pink-muted-rose);
+  line-height: normal;
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row .wc-block-components-product-price__value.is-discounted,
 .wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row .wc-block-components-product-price__value {
   font-size: 24px;
   font-weight: 700;
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   white-space: nowrap;
   display: inline-block;
 }
@@ -974,8 +978,8 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .noyona-mini-cart-variation-meta {
   margin-top: 4px;
   margin-bottom: 6px;
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: var(--wp--preset--font-size--caption);
+  line-height: normal;
   color: #7c4a57;
 }
 
@@ -1075,7 +1079,7 @@ body:not(.logged-in) .header-account--logged-out {
 }
 
 .wc-block-mini-cart__drawer .wc-block-components-quantity-selector {
-  border-radius: 999px;
+  border-radius: var(--noyona-radius-cta);
   border-color: #cfcfcf;
   margin: 0 !important;
 }
@@ -1161,7 +1165,7 @@ body:not(.logged-in) .header-account--logged-out {
   justify-content: space-between;
   gap: 12px;
   color: #4a4a4a;
-  font-size: 16px;
+  font-size: var(--wp--preset--font-size--helper);
   margin-bottom: 6px;
 }
 
@@ -1188,7 +1192,7 @@ body:not(.logged-in) .header-account--logged-out {
   gap: 8px;
   margin-top: 8px;
   color: #8a8a8a;
-  font-size: 14px;
+  font-size: var(--wp--preset--font-size--helper);
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-terms a {
@@ -1214,15 +1218,15 @@ body:not(.logged-in) .header-account--logged-out {
   width: 150px !important;
   min-height: 24px;
   font-size: 0;
-  font-weight: 600;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  border-radius: 26px !important;
-  background: #E199A4 !important;
-  border-color: #E199A4 !important;
-  color: #fff !important;
+  border-radius: var(--noyona-radius-cta) !important;
+  background: #EFB5BE !important;
+  border-color: #EFB5BE !important;
+  color: #D81B60 !important;
   margin-inline: auto !important;
 }
 
@@ -1230,10 +1234,19 @@ body:not(.logged-in) .header-account--logged-out {
   width: 150px !important;
   min-height: 24px !important;
   margin-inline: auto !important;
-  border-radius: 26px !important;
-  background: #E199A4 !important;
-  border-color: #E199A4 !important;
-  color: #fff !important;
+  border-radius: var(--noyona-radius-cta) !important;
+  background: #EFB5BE !important;
+  border-color: #EFB5BE !important;
+  color: #D81B60 !important;
+}
+
+.wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:hover,
+.wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:focus-visible,
+.wc-block-mini-cart__drawer .wc-block-components-button.wc-block-mini-cart__footer-checkout:hover,
+.wc-block-mini-cart__drawer .wc-block-components-button.wc-block-mini-cart__footer-checkout:focus-visible {
+  background: var(--noyona-color-pink-accent) !important;
+  border-color: var(--noyona-color-pink-accent) !important;
+  color: #ffffff !important;
 }
 
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button.is-disabled {
@@ -1244,7 +1257,7 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button > span {
   font-size: 20px;
   line-height: 1;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button .noyona-mini-cart-checkout-arrow {
@@ -1284,7 +1297,7 @@ body:not(.logged-in) .header-account--logged-out {
   width: min(92vw, 440px);
   max-height: 90vh;
   overflow-y: auto;
-  border-radius: 24px;
+  border-radius: var(--noyona-radius-card);
   background: #fff;
   padding: 1.35rem 1.35rem 1.25rem;
   box-shadow: 0 28px 64px rgba(10, 14, 24, 0.22);
@@ -1315,8 +1328,8 @@ body:not(.logged-in) .header-account--logged-out {
   height: 74px;
   margin: 0 auto 0.95rem;
   border-radius: 999px;
-  background: #ffe6ef;
-  color: #e199a4;
+  background: var(--noyona-color-pink-light-blush);
+  color: var(--noyona-color-pink-muted-rose);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1325,19 +1338,19 @@ body:not(.logged-in) .header-account--logged-out {
 
 .noyona-mini-cart-login-title {
   margin: 0 0 0.45rem;
-  color: #0f1728;
-  font-size: clamp(1.6rem, 3.2vw, 2rem);
-  line-height: 1.15;
+  color: #000000;
+  font-size: var(--wp--preset--font-size--h-3);
+  line-height: normal;
   font-weight: 700;
-  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+  font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
 }
 
 .noyona-mini-cart-login-copy {
   margin: 0 0 1rem;
   color: #6e7a91;
-  font-size: 1rem;
-  line-height: 1.4;
-  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+  font-size: var(--wp--preset--font-size--body);
+  line-height: normal;
+  font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
 }
 
 .noyona-mini-cart-login-form {
@@ -1351,17 +1364,17 @@ body:not(.logged-in) .header-account--logged-out {
   color: #101828;
   font-size: 0.96rem;
   font-weight: 700;
-  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+  font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
 }
 
 .noyona-mini-cart-login-form input {
   width: 100%;
   min-height: 52px;
   border: 1.5px solid #e2e8f0;
-  border-radius: 14px;
+  border-radius: var(--noyona-radius-input);
   padding: 0.75rem 0.95rem;
-  font-size: 1rem;
-  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+  font-size: var(--wp--preset--font-size--input);
+  font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
   box-sizing: border-box;
 }
 
@@ -1373,13 +1386,20 @@ body:not(.logged-in) .header-account--logged-out {
   width: 100%;
   min-height: 56px;
   border: 0;
-  border-radius: 999px;
-  background: #e199a4;
-  color: #fff;
+  border-radius: var(--noyona-radius-cta);
+  background: var(--noyona-color-pink-soft);
+  color: #333333;
   font-size: 1.08rem;
   font-weight: 700;
   cursor: pointer;
-  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+  font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.noyona-mini-cart-login-submit:hover,
+.noyona-mini-cart-login-submit:focus-visible {
+  background: var(--noyona-color-pink-accent);
+  color: #ffffff;
 }
 
 .noyona-mini-cart-login-separator {
@@ -1404,7 +1424,7 @@ body:not(.logged-in) .header-account--logged-out {
 .noyona-mini-cart-login-google,
 .noyona-mini-cart-login-register {
   min-height: 54px;
-  border-radius: 999px;
+  border-radius: var(--noyona-radius-cta);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1413,7 +1433,7 @@ body:not(.logged-in) .header-account--logged-out {
   text-decoration: none;
   box-sizing: border-box;
   font-weight: 700;
-  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+  font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
 }
 
 .noyona-mini-cart-login-google {
@@ -1446,8 +1466,8 @@ body:not(.logged-in) .header-account--logged-out {
 .noyona-mini-cart-login-note {
   margin: 0.85rem 0 0;
   color: #97a3b8;
-  font-size: 0.95rem;
-  font-family: var(--wp--preset--font-family--proxima-nova), Arial, sans-serif;
+  font-size: var(--wp--preset--font-size--helper);
+  font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
 }
 
 /* ── Selective checkout: checkboxes ── */
@@ -1466,14 +1486,14 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .noyona-mini-cart-select {
   width: 18px;
   height: 18px;
-  accent-color: #E199A4;
+  accent-color: var(--noyona-color-pink-accent);
   cursor: pointer;
   margin: 0;
   flex-shrink: 0;
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-select-text {
-  font-size: 12px;
+  font-size: var(--wp--preset--font-size--label);
   font-weight: 600;
   color: #7c4a57;
   line-height: 1;
@@ -1500,7 +1520,7 @@ body:not(.logged-in) .header-account--logged-out {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--wp--preset--font-size--label);
   font-weight: 600;
   color: #253042;
   cursor: pointer;
@@ -1510,7 +1530,7 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .noyona-mini-cart-select-all-cb {
   width: 16px;
   height: 16px;
-  accent-color: #E199A4;
+  accent-color: var(--noyona-color-pink-accent);
   cursor: pointer;
   margin: 0;
 }
@@ -1536,11 +1556,11 @@ body:not(.logged-in) .header-account--logged-out {
 
   .wc-block-mini-cart__drawer .noyona-mini-cart-message,
   .wc-block-mini-cart__drawer .noyona-mini-cart-shipping {
-    font-size: 14px;
+    font-size: var(--wp--preset--font-size--helper);
   }
 
   .wc-block-mini-cart__drawer .noyona-mini-cart-summary-row {
-    font-size: 14px;
+    font-size: var(--wp--preset--font-size--body);
   }
 
   .wc-block-mini-cart__drawer .noyona-mini-cart-summary-row--total {
@@ -1704,8 +1724,8 @@ body:not(.logged-in) .header-account--logged-out {
     display: flex;
     background: transparent;
     border: none;
-    color: #E199A4;
-    font-size: 1rem;
+    color: var(--noyona-color-pink-muted-rose);
+    font-size: var(--wp--preset--font-size--nav-button);
     padding: 0.75rem;
     cursor: pointer;
     transform: none;
@@ -1734,7 +1754,7 @@ body:not(.logged-in) .header-account--logged-out {
 
   .dropdown-menu li a {
     padding: 0.6rem 1rem;
-    font-size: 1rem;
+    font-size: var(--wp--preset--font-size--nav-button);
   }
 
   /* Prevent hover opening on mobile */
@@ -1806,7 +1826,7 @@ body:not(.logged-in) .header-account--logged-out {
 
 .drawer-title {
   margin: 0 0 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--wp--preset--font-size--label);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #777;
@@ -1930,5 +1950,35 @@ body:not(.logged-in) .only-logged-in {
 
   .wp-site-blocks {
     padding-top: var(--noyona-header-total-offset, 72px);
+  }
+}
+
+/* Standardize visible header icon glyphs to 24px (FA glyphs in search,
+   wishlist, store, account; WooCommerce mini-cart SVG). Touch targets
+   (32/44/48) are handled separately below. */
+.header-icon i {
+  font-size: 24px;
+}
+
+.header-mini-cart .wc-block-mini-cart__button svg {
+  width: 34px;
+  height: 34px;
+}
+
+/* Header icon touch targets per image/icon spec:
+   24px icon glyph, 32px target desktop / 44px tablet / 48px mobile. */
+@media (max-width: 1024px) {
+  .header-icon,
+  .header-mini-cart .wc-block-mini-cart__button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 767px) {
+  .header-icon,
+  .header-mini-cart .wc-block-mini-cart__button {
+    width: 48px;
+    height: 48px;
   }
 }

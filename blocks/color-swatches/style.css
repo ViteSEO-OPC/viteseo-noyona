@@ -29,9 +29,9 @@
 }
 
 .color-swatches__label {
-    font-size: 0.9rem;
+    font-size: var(--wp--preset--font-size--label);
     color: #4b2f1e;
-    line-height: 1.2;
+    line-height: normal;
 }
 
 @media (max-width: 640px) {
@@ -41,6 +41,6 @@
     }
 
     .color-swatches__label {
-        font-size: 0.85rem;
+        font-size: var(--wp--preset--font-size--label);
     }
 }

@@ -1,6 +1,6 @@
 .collection-grid {
-    padding-block: 4rem;
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    padding-bottom: 4rem;
+    font-family: var(--wp--preset--font-family--poppins);
     padding-right: var(--page-gutter-right, 1rem);
     padding-left: var(--page-gutter-left, 1rem);
 }
@@ -40,7 +40,7 @@
 
 .collection-grid__heading {
     font-size: var(--wp--preset--font-size--h-2) !important;
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-family: var(--wp--preset--font-family--poppins);
     font-weight: 700;
     margin: 0 0 1rem;
     color: #000;
@@ -48,13 +48,13 @@
 }
 
 .collection-grid__heading-accent {
-    color: #E199A4;
+    color: #D91B61;
 }
 
 .collection-grid__description {
     color: #555;
     font-size: var(--wp--preset--font-size--body);
-    line-height: 1.6;
+    line-height: normal;
     margin: 0;
 }
 
@@ -73,9 +73,9 @@
 
 /* Card Styling */
 .collection-card {
-    background: #E199A4;  
+    background: var(--noyona-color-pink-muted-rose);  
     position: relative;
-    border-radius: 24px;
+    border-radius: var(--noyona-radius-card);
     overflow: hidden;
     aspect-ratio: 3 / 3.5; /* Portrait-ish aspect ratio */
     isolation: isolate;
@@ -132,7 +132,7 @@
 /* Pill Button */
 .collection-card__pill {      
     border: 3px solid #fff;
-    border-radius: 16px;
+    border-radius: var(--noyona-radius-cta);
     padding: 0.6rem 1.5rem;
     color: #fff;
     backdrop-filter: blur(4px);
@@ -140,10 +140,9 @@
 }
 
 .collection-card__title {
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    font-weight: 600;
-    font-size: clamp(16px, 1.4vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-family: var(--wp--preset--font-family--poppins);
+    font-weight: 700;
+    font-size: var(--wp--preset--font-size--h-5);
     text-transform: capitalize;
 }
 
@@ -165,11 +164,11 @@
 
 .collection-card__count {
     color: #fff;
-    font-size: clamp(16px, 1.4vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: var(--wp--preset--font-size--body);
+    font-family: var(--wp--preset--font-family--poppins);
     font-weight: 500;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-family: var(--wp--preset--font-family--poppins);
 }
 
 .collection-card__link {
@@ -197,18 +196,20 @@
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    background: #E199A4;
-    color: #fff;
-    border-radius: 12px;
+    background: #EFB5BE;
+    color: #D81B60;
+    border: none;
+    border-radius: 16px;
     padding: 0.75rem 1.25rem;
-    font-size: clamp(16px, 1.1vw, 20px);
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
     line-height: 1;
 }
 
 .collection-grid__button:hover,
 .collection-grid__button:focus-visible{
-    color: #FFF;
+    background-color: #D81B60;
+    color: #FFFFFF;
     filter: brightness(1.04);
     transform: translateY(-1px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);

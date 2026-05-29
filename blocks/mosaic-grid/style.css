@@ -1,5 +1,5 @@
 .mosaic-grid {
-    padding: 48px 24px;
+    padding: 48px var(--page-gutter-left);
 }
 
 .mosaic-grid__grid {
@@ -20,7 +20,7 @@
 
 .mosaic-grid__tile--tl {
     grid-area: tl;
-    background-color: #EBAAAC;
+    background-color: #FBDDE2;
     align-items: flex-start;
 }
 
@@ -32,7 +32,7 @@
 
 .mosaic-grid__tile--tg {
     grid-area: tg;
-    background-color: #E199A4;
+    background-color: var(--noyona-color-pink-muted-rose);
     align-items: center;
 }
 
@@ -57,7 +57,7 @@
 
 .mosaic-grid__tile--rr {
     grid-area: rr;
-    background-color: #EBAAAC;
+    background-color: #FBDDE2;
     align-items: center;
 }
 
@@ -74,16 +74,16 @@
 }
 
 .mosaic-grid__heading {
-    font-family: var(--wp--preset--font-family--noto-serif-semicondensed);
-    font-size: 48px;
+    font-family: var(--wp--preset--font-family--poppins);
+    font-size: var(--wp--preset--font-size--h-2);
     font-weight: 700;
-    color: #333333;
+    color: #000000;
     margin: 0;
 }
 
 .mosaic-grid__body {
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    font-size: 16px;
+    font-family: var(--wp--preset--font-family--poppins);
+    font-size: var(--wp--preset--font-size--body);
     font-weight: 400;
     color: #666666;
     margin: 0;

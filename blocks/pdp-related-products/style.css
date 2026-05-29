@@ -14,22 +14,23 @@
 
 .noyona-pdp-related__title {
   margin: 0;
-  font-family: var(--wp--preset--font-family--proxima-nova);
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-family: var(--wp--preset--font-family--poppins);
+  font-size: var(--wp--preset--font-size--h-2);
   font-weight: 700;
-  line-height: 1.1;
+  line-height: normal;
 }
 
 .noyona-pdp-related__subtitle {
   margin: 0.35rem 0 0;
-  font-size: clamp(0.9rem, 1.2vw, 1rem);
+  font-size: var(--wp--preset--font-size--body);
+  font-weight: 400;
   color: #6f7785;
 }
 
 .noyona-pdp-related__view-all {
   margin-top: 0.6rem;
   color: #d8a8b2;
-  font-size: 0.95rem;
+  font-size: var(--wp--preset--font-size--nav-button);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -43,7 +44,7 @@
 .noyona-pdp-related__card {
   position: relative;
   border: 1px solid #ececec;
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   background: #fff;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   padding: 0.62rem 0.62rem 1rem;
@@ -62,7 +63,7 @@
 
 .noyona-pdp-related__image-wrap {
   display: block;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   overflow: hidden;
   margin-bottom: 0.65rem;
   text-decoration: none;
@@ -77,13 +78,13 @@
 
 .noyona-pdp-related__item-title {
   margin: 0 0 0.4rem;
-  font-size: clamp(1rem, 1.25vw, 1.35rem);
-  line-height: 1.2;
+  font-size: var(--wp--preset--font-size--h-5);
+  line-height: normal;
   font-weight: 700;
 }
 
 .noyona-pdp-related__item-title a {
-  color: #111;
+  color: #000000;
   text-decoration: none;
 }
 
@@ -109,7 +110,7 @@
   margin: 0 0 0.55rem;
   color: #5d646e;
   font-size: clamp(0.86rem, 1.05vw, 1rem);
-  line-height: 1.38;
+  line-height: normal;
 }
 
 .noyona-pdp-related__price {
@@ -134,7 +135,7 @@
 .noyona-pdp-related__stars {
   color: #f6c343;
   letter-spacing: 0.06em;
-  font-size: 0.88rem;
+  font-size: var(--wp--preset--font-size--caption);
 }
 
 .noyona-pdp-related__rating-text {
@@ -151,7 +152,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   /* border: 1px solid #ebebeb;
   background: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); */
@@ -165,13 +166,13 @@
 
 .noyona-pdp-related__cart-btn:hover,
 .noyona-pdp-related__cart-btn:focus-visible {
-  background: #E199A4;
+  background: var(--noyona-color-pink-muted-rose);
   box-shadow: 0 8px 18px rgba(225, 153, 164, 0.28);
   transform: translateY(-1px);
 }
 
 .noyona-pdp-related__cart-btn:focus-visible {
-  outline: 2px solid #E199A4;
+  outline: 2px solid var(--noyona-color-pink-muted-rose);
   outline-offset: 3px;
 }
 

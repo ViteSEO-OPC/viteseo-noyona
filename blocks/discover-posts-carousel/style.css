@@ -4,7 +4,7 @@
 
 /* Scope slider accent to this block only (avoid global :root leakage) */
 .carousel-block.discover-carousel {
-  --slider-accent: #E199A4;
+  --slider-accent: var(--noyona-color-pink-muted-rose);
 }
 
 .carousel-block {
@@ -20,7 +20,7 @@
     text-align: center;
     background: #fdfdfd;
     border: 2px dashed #eee;
-    border-radius: 24px;
+    border-radius: var(--noyona-radius-card);
     margin: 20px 200px;
 }
 
@@ -31,8 +31,10 @@
 }
 
 .empty-state-inner h3 {
-    font-size: 1.5rem;
-    color: #333;
+    font-size: var(--wp--preset--font-size--h-3);
+    font-weight: 700;
+    line-height: normal;
+    color: #000000;
     margin-bottom: 10px;
 }
 
@@ -44,11 +46,11 @@
 .empty-state-inner .filter-reset-btn {
     display: inline-flex;
     padding: 10px 24px;
-    background: #E199A4;
+    background: var(--noyona-color-pink-muted-rose);
     color: #fff;
     border: none;
     border-radius: 99px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: transform 0.2s;
 }
@@ -66,7 +68,7 @@
 
 .discover-carousel {
   width: 100%;
-  font-family: var(--wp--preset--font-family--proxima-nova, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-family: var(--wp--preset--font-family--poppins, system-ui, -apple-system, "Segoe UI", sans-serif);
   position: relative;
 }
 
@@ -83,15 +85,15 @@
 
 .discover-carousel__title {
   margin: 0 0 0.5rem;
-  font-size: 55px;
+  font-size: var(--wp--preset--font-size--h-2);
   font-weight: 700;
   color: #000;
-  line-height: 1.1;
+  line-height: normal;
   letter-spacing: -2.75px;
 }
 
 .discover-carousel__title-accent {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .discover-carousel__subtitle {
@@ -99,7 +101,7 @@
     color: #555;
     max-width: 600px;
     font-size: var(--wp--preset--font-size--body);
-    line-height: 1.5;
+    line-height: normal;
 }
 
 .discover-carousel__filter-wrap {
@@ -110,7 +112,7 @@
 .discover-carousel__filter-btn {
     background: #fff;
     border: 1px solid #000;
-    border-radius: 999px;
+    border-radius: var(--noyona-radius-cta);
     padding: 0.5rem 1.25rem;
     font-size: var(--wp--preset--font-size--body);
     color: #000;
@@ -139,7 +141,7 @@
     z-index: 9999;
     background: #fff;
     border: 1px solid #eee;
-    border-radius: 12px;
+    border-radius: var(--noyona-radius-input);
     box-shadow: 0 10px 40px rgba(0,0,0,0.15);
     min-width: 250px;
     padding: 8px;
@@ -162,8 +164,8 @@
     border: none;
     padding: 8px 12px;
     text-align: left;
-    font-size: clamp(18px, 1.4vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: var(--wp--preset--font-size--body);
+    font-family: var(--wp--preset--font-family--poppins);
     color: #444;
     cursor: pointer;
     border-radius: 6px;
@@ -177,14 +179,14 @@
 }
 
 .filter-item.is-active {
-    background: #E199A4;
+    background: var(--noyona-color-pink-muted-rose);
     color: #fff;
 }
 
 .filter-divider {
     padding: 8px 12px 4px;
-    font-size: clamp(18px, 1.4vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: var(--wp--preset--font-size--body);
+    font-family: var(--wp--preset--font-family--poppins);
     text-transform: uppercase;
     color: #999;
     letter-spacing: 0.5px;
@@ -261,21 +263,21 @@
 @media (max-width: 420px) {
     .filter-item {
         padding: 6px 10px;
-        font-size: 14px;
+        font-size: var(--wp--preset--font-size--nav-button);
         white-space: normal;
     }
 
     .filter-divider {
-        font-size: 12px;
+        font-size: var(--wp--preset--font-size--caption);
         letter-spacing: 0.04em;
     }
 
     .range-labels {
-        font-size: 13px;
+        font-size: var(--wp--preset--font-size--caption);
     }
 
     .filter-reset-btn {
-        font-size: 14px;
+        font-size: var(--wp--preset--font-size--nav-button);
         padding: 8px 10px;
     }
 }
@@ -286,7 +288,7 @@
 
 .product-card {
   width: 100%;
-  border-radius: 24px;
+  border-radius: var(--noyona-radius-card);
   position: relative;
   /* Make sure card stretches to full height of parent slide */
   height: 100%;
@@ -363,8 +365,8 @@
 .range-labels {
     display: flex;
     justify-content: space-between;
-    font-size: clamp(18px, 1.4vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: var(--wp--preset--font-size--body);
+    font-family: var(--wp--preset--font-family--poppins);
     font-weight: 600;
     color: #444;
     margin-bottom: 8px;
@@ -386,7 +388,7 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #E199A4;
+    background: var(--noyona-color-pink-muted-rose);
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     border: 2px solid #fff;
@@ -396,14 +398,14 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #E199A4;
+    background: var(--noyona-color-pink-muted-rose);
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     border: 2px solid #fff;
 }
 
 .filter-footer {
-    padding: 12px;
+    padding: var(--noyona-card-pad-tablet);
     border-top: 1px solid #eee;
     margin-top: 8px;
 }
@@ -414,8 +416,8 @@
     background: #f5f5f5;
     border: 1px solid #ddd;
     border-radius: 6px;
-    font-size: clamp(18px, 1.4vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: var(--wp--preset--font-size--body);
+    font-family: var(--wp--preset--font-family--poppins);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -452,7 +454,7 @@
 .product-card__title {
   margin: 0;
   font-size: var(--wp--preset--font-size--h-3);
-  color: #111827;
+  color: #000000;
 }
 
 .product-card__favorite {
@@ -483,7 +485,7 @@
 .product-card__description {
   margin: 0 0 12px;
   font-size: var(--wp--preset--font-size--body);
-  line-height: 1.5;
+  line-height: normal;
   color: #4b5563;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -568,14 +570,14 @@
 /* icon inside the button */
 .product-card__cart-icon {
   font-size: clamp(1.2rem, 4vw, 1.9rem);
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .product-card__cart:hover {
-  background: #E199A4;
+  background: var(--noyona-color-pink-muted-rose);
   transform: translate(20%, 15%);
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
 }
@@ -622,11 +624,11 @@
 
   .product-card__cart-icon {
     font-size: 2.4rem; /* Make icon slightly larger/visible as standalone */
-    color: #E199A4; /* Softer pink as seen in snapshot */
+    color: var(--noyona-color-pink-muted-rose); /* Softer pink as seen in snapshot */
   }
   
   .product-card__cart:hover .product-card__cart-icon {
-    color: #E199A4; /* Darker pink on hover */
+    color: var(--noyona-color-pink-muted-rose); /* Darker pink on hover */
   }
 }
 
@@ -638,11 +640,11 @@
   }
 
   .product-card__title {
-    font-size: 1rem;
+    font-size: var(--wp--preset--font-size--body);
   }
 
   .product-card__price {
-    font-size: 1rem;
+    font-size: var(--wp--preset--font-size--body);
   }
 
   .product-card__cart {
@@ -883,10 +885,10 @@
   padding: 0.9rem 2.75rem;
   border-radius: 16px;
   border: none;
-  background: #ff2b7b; /* strong pink */
-  color: #ffffff;
-  font-weight: 600;
-  font-size: clamp(18px, 1.4vw, 24px);
+  background: #EFB5BE; /* Frame 83 filled CTA */
+  color: #D81B60;
+  font-weight: 700;
+  font-size: 16px;
   text-decoration: none;
   /* box-shadow: 0 10px 26px rgba(0,0,0,0.18); */
   transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
@@ -894,7 +896,8 @@
 }
 
 .discover-carousel__cta-btn:hover {
-  background: #e12068;
+  background: #D81B60;
+  color: #FFFFFF;
   /* box-shadow: 0 12px 30px rgba(0,0,0,0.24); */
   transform: translateY(-1px);
 }

@@ -23,10 +23,10 @@
 .noyona-types-cards__title {
   margin: 0 0 clamp(24px, 2.5vw, 34px);
   text-align: center;
-  color: #151515;
-  font-size: clamp(32px, 4.2vw, 55px);
+  color: #000000;
+  font-size: var(--wp--preset--font-size--h-2);
   font-weight: 700;
-  line-height: 1.1;
+  line-height: normal;
 }
 
 .noyona-types-cards__grid {
@@ -38,7 +38,7 @@
 
 .noyona-types-cards__card {
   border: 1px solid #f0f0f0;
-  border-radius: 14px;
+  border-radius: var(--noyona-radius-card);
   background: #fff;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
@@ -81,19 +81,19 @@
 
 .noyona-types-cards__card-title {
   margin: 0 0 6px;
-  color: #0f0f0f;
-  font-size: clamp(20px, 1.25vw, 24px);
+  color: #000000;
+  font-size: var(--wp--preset--font-size--h-4);
   font-weight: 700;
-  line-height: 1.2;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  line-height: normal;
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 .noyona-types-cards__card-text {
   margin: 0;
   color: #3b3b3b;
-  font-size: clamp(16px, 1.4vw, 20px);
-  line-height: 1.45;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: var(--wp--preset--font-size--body);
+  line-height: normal;
+  font-family: var(--wp--preset--font-family--poppins);
 }
 
 @media (max-width: 980px) {

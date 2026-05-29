@@ -379,6 +379,10 @@ if ( $summary_average < 0 ) {
 }
 $summary_average_label = number_format_i18n( $summary_average, 1 );
 $initial_shown_count   = min( $initial_visible, $total_reviews );
+$cards_classes         = array( 'customer-reviews-grid__cards' );
+if ( $initial_shown_count > 0 && $initial_shown_count < 3 ) {
+    $cards_classes[] = 'customer-reviews-grid__cards--centered';
+}
 
 if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
     return;
@@ -461,7 +465,7 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
     <?php endif; ?>
 
     <?php if ( $has_reviews ) : ?>
-        <div class="customer-reviews-grid__cards">
+        <div class="<?php echo esc_attr( implode( ' ', $cards_classes ) ); ?>" style="--cr-visible-card-count: <?php echo esc_attr( (string) max( 1, $initial_shown_count ) ); ?>;">
             <?php foreach ( $reviews as $review_index => $review ) : ?>
                 <?php
                 $name          = isset( $review['name'] ) ? trim( (string) $review['name'] ) : '';

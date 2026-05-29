@@ -1,5 +1,5 @@
 .product-slide {
-  --ps-accent: #E199A4;
+  --ps-accent: var(--noyona-color-pink-muted-rose);
   --ps-muted: #525252;
   --ps-card-bg: #fff;
   --ps-shadow:
@@ -8,7 +8,7 @@
     1px 5px 10px 0 rgba(0, 0, 0, 0.05);
   --ps-media-bg: #f2a0a7;
   --ps-radius-card: 20px;
-  --ps-radius-media: 20px;
+  --ps-radius-media: 22px 22px 0px 0px;
   --ps-radius-cta: 16px;
   --ps-cta-h: clamp(44px, 5vw, 56px);
   --ps-nav-w: clamp(44px, 6vw, 60px);
@@ -17,7 +17,7 @@
   --ps-card-h: clamp(460px, 56vw, 665px);
   --ps-media-w: clamp(240px, 26vw, 423px);
   padding-block: clamp(2rem, 4vw, 3.5rem);
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   padding-right: var(--page-gutter-right);
   padding-left: var(--page-gutter-left);
 }
@@ -28,35 +28,42 @@
 }
 .product-slide__heading {
   color: #000;
-  font-family: var(--wp--preset--font-family--proxima-nova);
-  font-size: clamp(32px, 4.2vw, 55px);
+  font-family: var(--wp--preset--font-family--poppins);
+  font-size: var(--wp--preset--font-size--h-2);
   font-style: normal;
   font-weight: 700;
-  line-height: 1.05;
+  line-height: normal;
   letter-spacing: -2.75px;
   margin: 0 0 0.4rem;
 }
 .product-slide__heading_extend,
 .product-slide__heading-accent {
-  color: #E199A4;
+  color: #D91B61;
 }
 
 .product-slide__subheading {
   color: var(--ps-muted);
   text-align: center;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   font-size: clamp(16px, 1.8vw, 20px);
   font-style: normal;
   font-weight: 400;
-  line-height: 1.3;
+  line-height: normal;
   letter-spacing: -1px;
   margin: 0;
 }
 
 .product-slide__carousel {
   position: relative;
+}
+
+.product-slide__carousel--has-nav-space {
   /* Reserve space for prev/next buttons without adding padding to the clipping area */
   padding-inline: var(--ps-nav-w);
+}
+
+.product-slide__carousel--centered .product-slide__track {
+  justify-content: center;
 }
 
 .product-slide__track-wrap {
@@ -86,9 +93,9 @@
 .ps-card {
   background: var(--ps-card-bg);
   border-radius: var(--ps-radius-card);
-  box-shadow: var(--ps-shadow);
-  border: none;
-  padding: 16px;
+  /* box-shadow: var(--ps-shadow); */
+  border: 2px solid #D91B61;
+  border-radius: 24px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -120,13 +127,13 @@
   position: absolute;
   top: 12px;
   left: 12px;
-  background: transparent;
-  border: 1px solid #fff;
+  background: #D91B61;
+  border: 1px solid #D91B61;
   color: #fff;
   padding: 5px 12px;
   border-radius: 50px;
-  font-size: clamp(16px, 1.4vw, 20px);
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: var(--wp--preset--font-size--body);
+  font-family: var(--wp--preset--font-family--poppins);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -144,6 +151,7 @@
   flex-direction: column;
   gap: 0.5rem;
   flex: 1;
+  padding: 16px;
 }
 
 .ps-card__swatches {
@@ -179,13 +187,13 @@
 }
 
 .ps-swatch--option:focus-visible {
-  outline: 2px solid #E199A4;
+  outline: 2px solid var(--noyona-color-pink-muted-rose);
   outline-offset: 2px;
 }
 
 .product-slide .ps-swatch--option.is-selected,
 .product-slide .ps-swatch--option[aria-checked="true"] {
-  outline: 2px solid #E199A4;
+  outline: 2px solid var(--noyona-color-pink-muted-rose);
   outline-offset: 2px;
 }
 
@@ -202,11 +210,11 @@
 
 .ps-card__title {
   color: #000;
-  font-family: var(--wp--preset--font-family--proxima-nova);
-  font-size: clamp(18px, 1.8vw, 24px);
+  font-family: var(--wp--preset--font-family--poppins);
+  font-size: var(--wp--preset--font-size--h-5);
   font-style: normal;
-  font-weight: 600;
-  line-height: 1.15;
+  font-weight: 700;
+  line-height: normal;
   letter-spacing: -1.2px;
   margin: 0;
 }
@@ -218,7 +226,7 @@
   font-weight: 400;
   line-height: normal;
   letter-spacing: -1px;
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   
 }
 
@@ -227,7 +235,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-top: 12px;
+  /* padding-top: 12px; */
   /* margin-top: auto; */
   flex-wrap: wrap;
 }
@@ -241,28 +249,28 @@
 
 .ps-price {
   color: #000;
-  font-family: var(--wp--preset--font-family--proxima-nova);
-  font-size: clamp(22px, 2.6vw, 36px);
+  font-family: var(--wp--preset--font-family--poppins);
+  font-size: var(--wp--preset--font-size--h-3);
   font-style: normal;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: normal;
 }
 
 .ps-compare-price {
   text-decoration: line-through;
   color: #6a6a6a;
   text-align: center;
-  font-family: var(--wp--preset--font-family--proxima-nova);
-  font-size: clamp(16px, 1.8vw, 24px);
+  font-family: var(--wp--preset--font-family--poppins);
+  font-size: var(--wp--preset--font-size--h-5);
   font-style: normal;
   font-weight: 600;
-  line-height: 1.1;
+  line-height: normal;
   letter-spacing: -1.2px;
 }
 
 .ps-card__rating {
   color: #f6b400;
-  font-size: 0.85rem;
+  font-size: var(--wp--preset--font-size--caption);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -272,7 +280,7 @@
 
 .ps-rating-count {
   color: #888;
-  font-size: 0.78rem;
+  font-size: var(--wp--preset--font-size--caption);
 }
 
 .ps-card__actions {
@@ -284,19 +292,20 @@
 
 .ps-btn-primary {
   flex: 1;
-  background: var(--ps-accent);
-  color: #fff;
+  background: #EFB5BE;
+  color: #D81B60;
   text-decoration: none;
   padding: 0 18px;
   height: var(--ps-cta-h);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--ps-radius-cta);
-  font-weight: 600;
+  border-radius: 16px;
+  font-weight: 700;
   text-align: center;
-  font-family: var(--wp--preset--font-family--proxima-nova);
-  font-size: clamp(18px, 1.4vw, 24px);
+  font-family: var(--wp--preset--font-family--poppins);
+  font-size: 16px;
+  border: none;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   transition:
@@ -307,6 +316,9 @@
 }
 
 .ps-btn-primary:hover {
+  background: #D81B60 !important;
+  color: #FFFFFF !important;
+  border: none;
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
@@ -321,9 +333,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--ps-accent);
-  color: #fff;
-  border-radius: var(--ps-radius-cta);
+  background: #EFB5BE;
+  color: #D81B60;
+  border-radius: 16px;
   text-decoration: none;
   transition:
     transform 0.2s,
@@ -333,6 +345,9 @@
 }
 
 .ps-btn-cart:hover {
+  background: #D81B60 !important;
+  color: #FFFFFF !important;
+  border: none;
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
@@ -348,7 +363,7 @@
   background: transparent;
   color: var(--ps-accent);
   font-size: clamp(32px, 4vw, 56px);
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   padding: 0;
   box-shadow: none;
   cursor: pointer;
@@ -366,10 +381,10 @@
 }
 
 .ps-prev {
-  left: -40px;
+  left: 0px;
 }
 .ps-next {
-  right: -40px;
+  right: 0px;
 }
 
 .ps-nav-btn:disabled {
@@ -421,7 +436,7 @@
 .product-slide-placeholder {
   padding: 1.5rem;
   border: 1px dashed #ccc;
-  border-radius: 12px;
+  border-radius: var(--noyona-radius-input);
   text-align: center;
   color: #777;
 }

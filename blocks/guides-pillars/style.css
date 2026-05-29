@@ -1,8 +1,8 @@
 .wp-block-noyona-guides-pillars.guides-pillars {
   /* Full-width soft pink gradient like the provided design */
-  background: #FBDDE2;
+  background: var(--noyona-color-pink-light-blush);
   color: var(--wp--preset--color--ink, #333333);
-  font-family: var(--wp--preset--font-family--proxima-nova, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-family: var(--wp--preset--font-family--poppins, system-ui, -apple-system, "Segoe UI", sans-serif);
 
   padding-top: clamp(48px, 6vw, 88px);
   padding-bottom: clamp(48px, 6vw, 88px);
@@ -23,19 +23,20 @@
 
 .guides-pillars__title {
   margin: 0 0 10px;
-  font-size: var(--wp--preset--font-size--h-2, clamp(32px, 4.2vw, 55px));
+  font-size: var(--wp--preset--font-size--h-2, clamp(32px, 3.75vw, 48px));
   font-weight: 700;
-  line-height: 1.1;
+  line-height: normal;
 }
 
 .guides-pillars__accent {
-  color: #E199A4;
+  color: var(--noyona-color-pink-muted-rose);
 }
 
 .guides-pillars__subtitle {
   margin: 0;
-  font-size: var(--wp--preset--font-size--body, clamp(16px, 1.4vw, 20px));
-  line-height: 1.6;
+  font-size: var(--wp--preset--font-size--body, 16px);
+  font-weight: 400;
+  line-height: normal;
   opacity: 0.9;
 }
 
@@ -67,15 +68,15 @@
 
 .guides-pillars__item-title {
   margin: 0 0 10px;
-  font-size: var(--wp--preset--font-size--h-3, clamp(18px, 2vw, 24px));
-  font-weight: 600;
+  font-size: var(--wp--preset--font-size--h-4, clamp(24px, 2.5vw, 32px));
+  font-weight: 700;
   letter-spacing: 0.08em;
 }
 
 .guides-pillars__item-text {
   margin: 0;
-  font-size: var(--wp--preset--font-size--body, clamp(16px, 1.4vw, 20px));
-  line-height: 1.7;
+  font-size: var(--wp--preset--font-size--body, 16px);
+  line-height: normal;
   opacity: 0.9;
 }
 

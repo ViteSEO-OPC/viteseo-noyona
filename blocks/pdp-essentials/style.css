@@ -1,7 +1,7 @@
 .noyona-pdp-essentials {
   width: 100%;
   border: 1px solid #ececec;
-  border-radius: 16px;
+  border-radius: var(--noyona-radius-cta);
   background: #fff;
   padding: 50px;
   margin: 0 0 0.85rem;
@@ -11,10 +11,10 @@
 .noyona-pdp-essentials__title {
   margin: 0 0 0.85rem;
   text-align: center;
-  font-family: var(--wp--preset--font-family--proxima-nova);
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-family: var(--wp--preset--font-family--poppins);
+  font-size: var(--wp--preset--font-size--h-2);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: normal;
   letter-spacing: -0.02em;
 }
 
@@ -40,8 +40,8 @@
 }
 
 .noyona-pdp-essentials__item:nth-child(1) .noyona-pdp-essentials__icon-wrap {
-  background: #fdeff4;
-  color: #dd7394;
+  background: #FBDDE2;
+  color: #D81B60;
 }
 
 .noyona-pdp-essentials__item:nth-child(2) .noyona-pdp-essentials__icon-wrap {
@@ -61,20 +61,20 @@
 
 .noyona-pdp-essentials__item-title {
   margin: 0 0 0.2rem;
-  font-size: clamp(1rem, 1.4vw, 1.25rem);
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-size: var(--wp--preset--font-size--h-5);
+  font-family: var(--wp--preset--font-family--poppins);
   font-weight: 700;
-  line-height: 1.2;
-  color: #202124;
+  line-height: normal;
+  color: #000000;
 }
 
 .noyona-pdp-essentials__item-desc {
   margin: 0;
   font-size: clamp(0.875rem, 1.15vw, 1rem);
-  font-family: var(--wp--preset--font-family--proxima-nova);
+  font-family: var(--wp--preset--font-family--poppins);
   font-weight: 400;
   color: #6e737c;
-  line-height: 1.4;
+  line-height: normal;
 }
 
 @media (max-width: 900px) {

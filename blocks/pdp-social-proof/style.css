@@ -8,8 +8,8 @@
   gap: 0.35rem;
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
-  background: rgba(225, 26, 99, 0.08);
-  color: #E199A4;
-  font-size: 0.8125rem;
+  background: rgba(216, 27, 96, 0.08);
+  color: var(--noyona-color-pink-muted-rose);
+  font-size: var(--wp--preset--font-size--caption);
   font-weight: 600;
 }

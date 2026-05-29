@@ -204,8 +204,124 @@ function woocom_ct_add_register_link_to_login() {
 
     echo '<div class="noyona-login-form-footer">';
     echo '<a class="noyona-login-google-btn" href="' . esc_url( $google_login_url ) . '"><i class="fa-brands fa-google" aria-hidden="true"></i><span>' . esc_html__( 'Sign In with Google', 'noyona-childtheme' ) . '</span></a>';
+
+    if ( function_exists( 'noyona_is_recaptcha_enabled' ) && noyona_is_recaptcha_enabled( 'v2' ) && function_exists( 'noyona_get_recaptcha_widget_markup' ) ) {
+        if ( function_exists( 'noyona_enqueue_recaptcha_script' ) ) {
+            noyona_enqueue_recaptcha_script( 'v2' );
+        }
+
+        $captcha_markup = noyona_get_recaptcha_widget_markup(
+            'noyona-login-recaptcha',
+            'v2',
+            array(
+                'data-callback' => 'noyonaLoginRecaptchaVerified',
+            )
+        );
+
+        if ( '' !== trim( (string) $captcha_markup ) ) {
+            echo '<div class="noyona-login-recaptcha-wrap">';
+            echo wp_kses_post( $captcha_markup );
+            echo '</div>';
+            ?>
+            <script>
+            (function() {
+              var AUTO_HIDE_DELAY_MS = 6000;
+
+              function findCaptchaErrorNoticeContext() {
+                var wrappers = document.querySelectorAll('.woocommerce-notices-wrapper');
+
+                for (var w = 0; w < wrappers.length; w++) {
+                  var wrapper = wrappers[w];
+                  var notices = wrapper.querySelectorAll('.woocommerce-error, .woocommerce-message, .woocommerce-info, li');
+
+                  for (var i = 0; i < notices.length; i++) {
+                    var text = String(notices[i].textContent || '').toLowerCase();
+                    if (text.indexOf('captcha verification failed') !== -1) {
+                      return { wrapper: wrapper, notice: notices[i] };
+                    }
+                  }
+
+                  var wrapperText = String(wrapper.textContent || '').toLowerCase();
+                  if (wrapperText.indexOf('captcha verification failed') !== -1) {
+                    return { wrapper: wrapper, notice: null };
+                  }
+                }
+
+                return null;
+              }
+
+              function hideCaptchaErrorNotice() {
+                var context = findCaptchaErrorNoticeContext();
+                if (!context || !context.wrapper) return;
+
+                if (context.notice) {
+                  context.notice.style.display = 'none';
+                }
+
+                context.wrapper.style.setProperty('display', 'none', 'important');
+                context.wrapper.classList.add('noyona-captcha-notice-hidden');
+                context.wrapper.setAttribute('aria-hidden', 'true');
+              }
+
+              window.noyonaLoginRecaptchaVerified = function() {
+                var wrappers = document.querySelectorAll('.noyona-login-recaptcha-wrap');
+                wrappers.forEach(function(wrapper) {
+                  wrapper.classList.add('is-verified');
+                });
+                hideCaptchaErrorNotice();
+              };
+
+              var tokenInput = document.querySelector('form.woocommerce-form-login input[name="g-recaptcha-response"]');
+              if (tokenInput) {
+                tokenInput.addEventListener('change', function() {
+                  var hasToken = String(tokenInput.value || '').trim().length > 0;
+                  if (hasToken) {
+                    hideCaptchaErrorNotice();
+                  }
+                });
+
+                var hasInitialToken = String(tokenInput.value || '').trim().length > 0;
+                if (hasInitialToken) {
+                  hideCaptchaErrorNotice();
+                }
+              }
+
+              var captchaNoticeContext = findCaptchaErrorNoticeContext();
+              if (captchaNoticeContext) {
+                setTimeout(function() {
+                  hideCaptchaErrorNotice();
+                }, AUTO_HIDE_DELAY_MS);
+              }
+            })();
+            </script>
+            <?php
+        }
+    }
+
     echo '<p class="noyona-login-register-link">' . esc_html__( "Don't have an account?", 'noyona-childtheme' ) . ' <a href="' . esc_url( $register_url ) . '">' . esc_html__( 'Create an Account', 'noyona-childtheme' ) . '</a></p>';
     echo '</div>';
+}
+
+add_filter( 'woocommerce_process_login_errors', 'noyona_validate_login_recaptcha', 10, 3 );
+function noyona_validate_login_recaptcha( $validation_error, $username, $password ) {
+    if ( is_user_logged_in() || ! noyona_is_login_page_context() ) {
+        return $validation_error;
+    }
+
+    if ( ! function_exists( 'noyona_is_recaptcha_enabled' ) || ! noyona_is_recaptcha_enabled( 'v2' ) ) {
+        return $validation_error;
+    }
+
+    if ( ! function_exists( 'noyona_verify_recaptcha_from_post' ) ) {
+        return $validation_error;
+    }
+
+    $captcha_result = noyona_verify_recaptcha_from_post( 'g-recaptcha-response', '', 'v2' );
+    if ( is_wp_error( $captcha_result ) ) {
+        $validation_error->add( 'recaptcha_failed', __( 'Captcha verification failed. Please try again.', 'noyona-childtheme' ) );
+    }
+
+    return $validation_error;
 }
 
 /* ----- Replace Woo login form labels ----- */

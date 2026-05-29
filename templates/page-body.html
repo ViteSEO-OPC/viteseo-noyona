@@ -2,143 +2,105 @@
 
 <!-- wp:group {"tagName":"main","className":"noyona-shop-archive noyona-body-page","layout":{"inherit":true,"type":"constrained"}} -->
 <main class="wp-block-group noyona-shop-archive noyona-body-page">
-    <!-- wp:group {"align":"wide","className":"noyona-shop-top","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"wrap"}} -->
-    <div class="wp-block-group alignwide noyona-shop-top">
-        <!-- wp:post-title {"level":1,"className":"noyona-shop-title"} /-->
-    </div>
-    <!-- /wp:group -->
+    <!-- wp:noyona/landing-feature-banner {
+        "align":"full",
+        "label":"",
+        "title":"Best Hand & Body Lotion",
+        "subheading":"Discover Hand & Body Lotions Designed for <span class=\"noyona-landing-feature-banner__subheading-accent\">All Skin Types</span>",
+        "paragraph":"Noyona Essentials offers nourishing, climate-adapted hand and body lotions enriched with hydrating actives and brightening ingredients — formulated to combat daily environmental stress, air-conditioning, and tropical humidity. Each formula delivers deep moisture, even-toned radiance, and silky-smooth comfort for all skin types and lifestyles.",
+        "textPosition":"left"
+    } /-->
 
-    <!-- wp:columns {"align":"wide","className":"noyona-shop-layout"} -->
-    <div class="wp-block-columns alignwide noyona-shop-layout">
-        <!-- wp:column {"width":"28%","className":"noyona-shop-sidebar"} -->
-        <div class="wp-block-column noyona-shop-sidebar" style="flex-basis:28%">
-            <!-- wp:html -->
-            <button type="button" class="noyona-shop-filter-overlay" aria-label="Close filter panel"></button>
-            <!-- /wp:html -->
-            <!-- wp:group {"className":"noyona-shop-filters","layout":{"type":"constrained"}} -->
-            <div id="noyona-shop-filter-panel" class="wp-block-group noyona-shop-filters">
-                <!-- wp:html -->
-                <button type="button" class="noyona-shop-filter-close" aria-label="Close filters">✕</button>
-                <!-- /wp:html -->
-                <!-- wp:html -->
-                <div class="noyona-shop-filter-sections" aria-hidden="true">
-                    <section class="noyona-shop-filter-section">
-                        <h5>Stock Status</h5>
-                        <label><input type="radio" name="noyona-stock-status" checked> In Stock</label>
-                        <label><input type="radio" name="noyona-stock-status"> Out of Stock</label>
-                    </section>
+    <!-- wp:noyona/product-slide {
+        "align":"wide",
+        "heading":"Nourish Every Inch",
+        "subheading":"Lightweight, fast-absorbing formulas designed to keep your skin soft, smooth, and hydrated all day.",
+        "cardsToShow":4,
+        "useWooProducts":true,
+        "wooOnlyFeatured":true,
+        "wooProductsLimit":8,
+        "wooProductCategories":["lips"],
+        "wooColorAttribute":"pa_color"
+    } /-->
 
-                    <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
-                        <h5 class="noyona-shop-filter-price-title">Price</h5>
-                        <div class="noyona-shop-filter-price" data-min="0" data-step="50">
-                            <div class="noyona-shop-filter-price-slider" role="group" aria-label="Price range">
-                                <div class="noyona-shop-filter-price-track"></div>
-                                <div class="noyona-shop-filter-price-track-fill"></div>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="Minimum price handle"></button>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="Maximum price handle"></button>
-                            </div>
-                            <div class="noyona-shop-filter-price-inputs">
-                                <label class="noyona-shop-filter-price-input">
-                                    <span aria-hidden="true">₱</span>
-                                    <input type="number" inputmode="numeric" min="0" step="1" value="0" name="noyona-price-min" aria-label="Minimum price">
-                                </label>
-                                <span class="noyona-shop-filter-price-separator" aria-hidden="true">-</span>
-                                <label class="noyona-shop-filter-price-input">
-                                    <span aria-hidden="true">₱</span>
-                                    <input type="number" inputmode="numeric" min="0" step="1" value="0" name="noyona-price-max" aria-label="Maximum price">
-                                </label>
-                            </div>
-                            <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
-                        </div>
-                    </section>
+    <!-- wp:noyona/types-cards {
+     "align":"full",
+     "title":"Types of Hand & Body Lotion",
+     "cards":[
+        {
+            "imageId":0,
+            "image":"",
+            "title":"Moisturizing Lotion",
+            "text":"Delivers lightweight, fast-absorbing hydration that reinforces the skin's moisture barrier, ideal for daily use after showers or aircon exposure, and works well for normal to dry skin with Lovial Goat's Milk and Pearl Hand & Body Lotion."
+        },
+        {
+            "imageId":0,
+            "image":"",
+            "title":"Brightening Lotion",
+            "text":"Combines nourishing humectants with natural brightening activities like Pearl Powder to even out complexion and enhance the skin's glow, perfect for every skin tone seeking radiance."
+        },
+        {
+            "imageId":0,
+            "image":"",
+            "title":"Nourishing Lotion",
+            "text":"Offers richer, deeply replenishing care with Goat's Milk Powder to soften rough patches on elbows, knees, and hands, suited for dry to very dry skin needing extra comfort."
+        }
+    ]} /-->
 
-                    <!-- <section class="noyona-shop-filter-section">
-                        <h5>Star Rating</h5>
-                        <label><input type="radio" name="noyona-star-rating"> Bestsellers</label>
-                        <label><input type="radio" name="noyona-star-rating"> Top Rated</label>
-                        <label><input type="radio" name="noyona-star-rating"> High Volume</label>
-                        <label><input type="radio" name="noyona-star-rating"> Customer Favorites</label>
-                        <label><input type="radio" name="noyona-star-rating"> Community Verified</label>
-                    </section> -->
-                </div>
-                <!-- /wp:html -->
+    <!-- wp:noyona/benefits-strip {
+      "align":"full",
+      "title":"Why Noyona Hand & Body Lotion Work for You",
+      "backgroundColor":"#E9A3AD",
+      "items":[
+        {
+          "iconClass":"fa-solid fa-droplet",
+          "title":"",
+          "description":""
+        },
+        {
+          "iconClass":"fa-solid fa-eye",
+          "title":"",
+          "description": ""
+        },
+        {
+          "iconClass":"fa-solid fa-clock",
+          "title":"",
+          "description": ""
+        },
+        {
+          "iconClass":"fa-solid fa-leaf",
+          "title":"",
+          "description": ""
+        }
+      ]
+    } /-->
 
-                <!-- wp:group {"className":"noyona-shop-filter-blocks","layout":{"type":"constrained"}} -->
-                <div class="wp-block-group noyona-shop-filter-blocks">
-                    <!-- wp:woocommerce/product-filter-active /-->
-                    <!-- wp:woocommerce/product-filter-stock-status /-->
-                    <!-- wp:woocommerce/product-filter-price /-->
-                    <!-- wp:woocommerce/product-filter-rating /-->
-                </div>
-                <!-- /wp:group -->
-            </div>
-            <!-- /wp:group -->
-        </div>
-        <!-- /wp:column -->
+    <!-- wp:noyona/customer-reviews {"align":"wide","heading":"Customer Reviews","readMoreText":"Read More Reviews","dataSource":"category","sourceCategories":["lips"],"showWriteReviewCta":false,"showReviewForm":false,"showReadMore":true,"postsPerPage":9,"initialVisible":3} /-->
 
-        <!-- wp:column {"width":"72%","className":"noyona-shop-products-column"} -->
-        <div class="wp-block-column noyona-shop-products-column" style="flex-basis:72%">
-            <!-- wp:group {"className":"noyona-shop-toolbar","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"wrap"}} -->
-            <div class="wp-block-group noyona-shop-toolbar">
-                <!-- wp:woocommerce/product-results-count {"className":"noyona-shop-count"} /-->
-
-                <!-- wp:group {"className":"noyona-shop-toolbar-right","layout":{"type":"flex","verticalAlignment":"center","justifyContent":"right","flexWrap":"nowrap"}} -->
-                <div class="wp-block-group noyona-shop-toolbar-right">
-                    <!-- wp:html -->
-                    <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
-                        <div class="noyona-shop-view-toggle" aria-label="Toggle view mode">
-                            <button type="button" class="is-active" data-shop-view-toggle="1" aria-label="Switch to list view" aria-pressed="false">
-                                <svg class="icon-grid" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
-                                <svg class="icon-list" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none;"><path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h18v4H3z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- /wp:html -->
-
-                    <!-- wp:html -->
-                    <button type="button" class="noyona-shop-filter-toggle" aria-expanded="false" aria-controls="noyona-shop-filter-panel">Filter</button>
-                    <!-- /wp:html -->
-
-                    <!-- wp:woocommerce/catalog-sorting {"className":"noyona-shop-sort"} /-->
-                </div>
-                <!-- /wp:group -->
-            </div>
-            <!-- /wp:group -->
-
-            <!-- wp:woocommerce/product-collection {"queryId":5,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","outofstock","onbackorder"],"taxQuery":[{"taxonomy":"product_cat","field":"slug","terms":["body"],"operator":"IN"}],"isProductCollectionBlock":true,"perPage":4,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false},"tagName":"div","dimensions":{"widthType":"fill","fixedWidth":""},"displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},"convertedFromProducts":false,"queryContextIncludes":["collection"],"className":"noyona-shop-products"} -->
-            <div class="wp-block-woocommerce-product-collection noyona-shop-products">
-                <!-- wp:woocommerce/product-template -->
-                <!-- wp:woocommerce/product-image {"showSaleBadge":true,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
-                <!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
-                <!-- /wp:woocommerce/product-image -->
-                <!-- wp:post-title {"level":3,"isLink":true,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title","style":{"typography":{"lineHeight":"1.25"}}} /-->
-                <!-- wp:post-excerpt {"excerptLength":22,"showMoreOnNewLine":false} /-->
-                <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
-                <!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
-                <!-- /wp:woocommerce/product-template -->
-
-                <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
-                <!-- wp:query-pagination-previous /-->
-                <!-- wp:query-pagination-numbers /-->
-                <!-- wp:query-pagination-next /-->
-                <!-- /wp:query-pagination -->
-
-                <!-- wp:woocommerce/product-collection-no-results -->
-                <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","flexWrap":"wrap"}} -->
-                <div class="wp-block-group">
-                    <!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"30px","fontWeight":"700"}},"textColor":"vivid-pink-cyan"} -->
-                    <p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">Coming Soon</p>
-                    <!-- /wp:paragraph -->
-                </div>
-                <!-- /wp:group -->
-                <!-- /wp:woocommerce/product-collection-no-results -->
-            </div>
-            <!-- /wp:woocommerce/product-collection -->
-        </div>
-        <!-- /wp:column -->
-    </div>
-    <!-- /wp:columns -->
-
+    <!-- wp:noyona/discover-face-banner {
+      "align":"wide",
+      "heading":"Discover Body",
+      "subheading":"Essentials",
+      "paragraphOne":"Selecting the right hand and body lotion for your skin type, daily climate, and brightening goals helps your routine deliver visible, long-lasting results. Noyona Essentials offers tropical-climate-ready formulas designed to hydrate, brighten, and protect your skin every day.",
+      "buttonText":"View all products",
+      "buttonUrl":"/shop/body/",
+      "backgroundImage":"https://noyonacosmetics.com/wp-content/uploads/2026/02/dewylipcolor.webp",
+      "cards":[
+        {
+          "title":"Easy Shopping",
+          "description":"Available on your favorite platforms for seamless checkout.",
+          "iconClass":"fa-solid fa-bag-shopping",
+          "chips":[]
+        },
+        {
+          "title":"Fast Delivery",
+          "description":"Get your essentials delivered straight to your doorstep.",
+          "iconClass":"fa-solid fa-truck-fast",
+          "chips":["TK","SP","LZ"]
+        }
+      ]
+    } /-->
+     
     <!-- wp:html -->
     <button type="button" class="noyona-scroll-top" aria-label="Scroll to top">↑</button>
     <!-- /wp:html -->

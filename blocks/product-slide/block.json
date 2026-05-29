@@ -1,7 +1,7 @@
 {
   "apiVersion": 3,
   "name": "noyona/product-slide",
-  "version": "1.0.10",
+  "version": "1.0.12",
   "title": "Product Slide",
   "category": "design",
   "icon": "slides",
@@ -34,6 +34,24 @@
     "wooProductsLimit": {
       "type": "number",
       "default": 8
+    },
+    "wooProductCategories": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "wooProductBrands": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "wooBrandTaxonomy": {
+      "type": "string",
+      "default": ""
     },
     "wooColorAttribute": {
       "type": "string",

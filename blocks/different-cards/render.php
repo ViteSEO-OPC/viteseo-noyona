@@ -17,19 +17,19 @@ $defaults = array(
 			'image' => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/made-for-you.webp',
 			'title' => 'Made for You',
 			'text'  => 'Shades and formulas designed to complement diverse skin tones.',
-			'bg'    => '#f7d7ea',
+			'bg'    => '#FBDDE2',
 		),
 		array(
 			'image' => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/clean-beauty.webp',
 			'title' => 'Clean Beauty',
 			'text'  => 'No harsh chemicals, just pure, skin-loving goodness.',
-			'bg'    => '#d9ecfb',
+			'bg'    => '#FBDDE2',
 		),
 		array(
 			'image' => 'https://noyonacosmetics.com/wp-content/uploads/2026/02/affordable-luxury.webp',
 			'title' => 'Affordable Luxury',
 			'text'  => 'Premium quality without the premium price tag.',
-			'bg'    => '#f6f2c5',
+			'bg'    => '#FBDDE2',
 		),
 	),
 );

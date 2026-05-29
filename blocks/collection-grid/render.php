@@ -69,7 +69,7 @@ if (empty($items)) {
             }
             $title = isset($item['title']) ? $item['title'] : '';
             $count = isset($item['count']) ? $item['count'] : '0 Products';
-
+            $url = isset($item['url']) ? $item['url'] : '';
             // sizes: cards are flex 1 1 280px with max 400px, in a 3-up grid on
             // desktop, full-width on mobile. ~92vw under 768, otherwise ~33vw
             // capped at 400px.
@@ -104,7 +104,7 @@ if (empty($items)) {
                     </div>
                 </div>
 
-                <!-- <a href="coming-soon" class="collection-card__link" aria-label="View <?php echo esc_attr($title); ?>"></a> -->
+                <a href="<?php echo esc_url($item['url']); ?>" class="collection-card__link" aria-label="View <?php echo esc_attr($title); ?>"></a>
             </div>
         <?php endforeach; ?>
     </div>

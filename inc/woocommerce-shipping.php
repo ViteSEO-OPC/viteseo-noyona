@@ -358,7 +358,7 @@ if ( ! class_exists( 'Noyona_Shipping' ) ) {
 				}
 			}
 
-			echo '<pre style="background:#f6f7f7;padding:12px;font-size:12px;line-height:1.5;margin-top:16px;border:1px solid #dcdcde;max-width:820px;overflow:auto">';
+			echo '<pre style="background:#f6f7f7;padding:12px;font-size:12px;line-height:normal;margin-top:16px;border:1px solid #dcdcde;max-width:820px;overflow:auto">';
 			echo esc_html( implode( "\n", $lines ) );
 			echo '</pre>';
 		}

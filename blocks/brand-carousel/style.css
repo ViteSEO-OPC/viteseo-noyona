@@ -25,9 +25,9 @@
 }
 
 .brand-carousel__heading {
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-size: var(--wp--preset--font-size--h-2);
     font-weight: 700;
-    color: #2d2d2d;
+    color: #000000;
     margin: 0;
 }
 
@@ -57,14 +57,14 @@
 
 /* Typography driven via CSS variables from block attributes */
 .brand-carousel__text {
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-family: var(--wp--preset--font-family--poppins);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #fff; /* var(--brand-font-color, #4b2f1e); */
-    font-size: clamp(16px, 1.4vw, 18px);
+    font-size: var(--wp--preset--font-size--body);
     white-space: nowrap;
-    letter-spacing: -0.05em;
+    letter-spacing: var(--noyona-letter-spacing-bugfix);
 }
 
 /* Logo wrapper only exists when logo is passed from PHP */
@@ -91,7 +91,7 @@
 .review-card {
     background: #ffffff;
     border: 1px solid #EAEAEA;
-    border-radius: 24px;
+    border-radius: var(--noyona-radius-card);
     padding: 2rem;
     box-shadow: 17px 23px 8px 0 rgba(0, 0, 0, 0.00), 11px 15px 7px 0 rgba(0, 0, 0, 0.01), 6px 8px 6px 0 rgba(0, 0, 0, 0.05), 3px 4px 5px 0 rgba(0, 0, 0, 0.09), 1px 1px 3px 0 rgba(0, 0, 0, 0.10);
     width: 380px;
@@ -114,15 +114,15 @@
 }
 
 .review-card__quote-icon {
-    color: #E199A4;
+    color: var(--noyona-color-pink-muted-rose);
     font-size: 2rem;
     line-height: 1;
 }
 
 .review-card__text {
-    font-size: clamp(16px, 1.4vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
-    line-height: 1.6;
+    font-size: var(--wp--preset--font-size--body);
+    font-family: var(--wp--preset--font-family--poppins);
+    line-height: normal;
     color: #333;
     margin: 0;
     display: -webkit-box;
@@ -136,8 +136,8 @@
 .review-card__rating {
     display: flex;
     gap: 0.25rem;
-    font-size: clamp(16px, 1.4vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: var(--wp--preset--font-size--body);
+    font-family: var(--wp--preset--font-family--poppins);
     color: #ffc107;
 }
 
@@ -225,8 +225,8 @@
 
 .review-card__author {
     font-weight: 600;
-    font-size: clamp(16px, 1.4vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: var(--wp--preset--font-size--body);
+    font-family: var(--wp--preset--font-family--poppins);
     color: #2d2d2d;
     white-space: nowrap;
     overflow: hidden;
@@ -241,8 +241,8 @@
 }
 
 .review-card__product {
-    font-size: clamp(16px, 1.4vw, 20px);
-    font-family: var(--wp--preset--font-family--proxima-nova);
+    font-size: var(--wp--preset--font-size--body);
+    font-family: var(--wp--preset--font-family--poppins);
     color: #5f5f5f;
     white-space: nowrap;
     overflow: hidden;
@@ -291,7 +291,7 @@
     }
 
     .review-card__text {
-        font-size: 0.875rem;
+        font-size: var(--wp--preset--font-size--body);
         min-height: 5rem;
     }
 
@@ -301,14 +301,14 @@
     }
 
     .review-card__avatar i {
-        font-size: 1rem;
+        font-size: var(--wp--preset--font-size--caption);
     }
 
     .review-card__author {
-        font-size: 0.875rem;
+        font-size: var(--wp--preset--font-size--label);
     }
 
     .review-card__product {
-        font-size: 0.8rem;
+        font-size: var(--wp--preset--font-size--caption);
     }
 }
