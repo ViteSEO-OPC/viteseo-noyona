@@ -18,6 +18,22 @@
       "type": "string",
       "default": "Build your everyday glow with lightweight, skin-friendly formulas crafted for tropical weather and morena skin tones."
     },
+    "backgroundImageDesktop": {
+      "type": "string",
+      "default": "/wp-content/themes/viteseo-noyona/assets/images/lp_products-desktop-1920x780px.webp"
+    },
+    "backgroundImageLaptop": {
+      "type": "string",
+      "default": "/wp-content/themes/viteseo-noyona/assets/images/lp_products-hero-laptop-1280x780px.webp"
+    },
+    "backgroundImageTablet": {
+      "type": "string",
+      "default": "/wp-content/themes/viteseo-noyona/assets/images/lp_products-hero-tablet-768x780px.webp"
+    },
+    "backgroundImageMobile": {
+      "type": "string",
+      "default": "/wp-content/themes/viteseo-noyona/assets/images/lp_products-hero-mobile-375x610px.webp"
+    },
     "textPosition": { "type": "string", "default": "left" }
   },
   "style": "file:./style.css",

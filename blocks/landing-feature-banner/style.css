@@ -5,7 +5,7 @@
   min-height: 80svh;
   overflow: hidden;
   color: #ffffff;
-  background-image: url(/wp-content/themes/viteseo-noyona/assets/images/category-banner.png);
+  background-image: var(--lfb-bg-desktop, url(/wp-content/themes/viteseo-noyona/assets/images/lp_products-desktop-1920x780px.webp));
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -92,36 +92,64 @@
 }
 
 @media (max-width: 1100px) {
+  .noyona-landing-feature-banner {
+    background-image: var(--lfb-bg-laptop, var(--lfb-bg-desktop, url(/wp-content/themes/viteseo-noyona/assets/images/lp_products-hero-laptop-1280x780px.webp)));
+  }
+
   .noyona-landing-feature-banner,
   .noyona-landing-feature-banner__inner {
-    min-height: 100svh;
+    min-height: min(780px, 100svh);
   }
 }
 
 @media (max-width: 782px) {
   .noyona-landing-feature-banner {
-    background-position: right center;
+    background-image: var(--lfb-bg-tablet, var(--lfb-bg-laptop, var(--lfb-bg-desktop, url(/wp-content/themes/viteseo-noyona/assets/images/lp_products-hero-tablet-768x780px.webp))));
+    background-position: center center;
+    background-size: cover;
   }
 
   .noyona-landing-feature-banner,
   .noyona-landing-feature-banner__inner {
-    min-height: 100svh;
+    min-height: min(780px, 100svh);
   }
 
   .noyona-landing-feature-banner__inner {
-    width: calc(100vw - 36px);
-    padding: 44px 0;
+    width: calc(100vw - (var(--page-gutter-left, 16px) + var(--page-gutter-right, 16px)));
+    margin-inline: auto;
+    align-items: flex-start;
+    padding: clamp(2rem, 7vw, 3.5rem) 0;
   }
 
   .noyona-landing-feature-banner.is-text-left .noyona-landing-feature-banner__inner,
   .noyona-landing-feature-banner.is-text-center .noyona-landing-feature-banner__inner,
   .noyona-landing-feature-banner.is-text-right .noyona-landing-feature-banner__inner {
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .noyona-landing-feature-banner__content,
+  .noyona-landing-feature-banner.is-text-left .noyona-landing-feature-banner__content,
   .noyona-landing-feature-banner.is-text-center .noyona-landing-feature-banner__content,
   .noyona-landing-feature-banner.is-text-right .noyona-landing-feature-banner__content {
-    text-align: left;
+    max-width: min(100%, 42rem);
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .noyona-landing-feature-banner__paragraph {
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .noyona-landing-feature-banner {
+    background-image: var(--lfb-bg-mobile, var(--lfb-bg-tablet, var(--lfb-bg-laptop, var(--lfb-bg-desktop, url(/wp-content/themes/viteseo-noyona/assets/images/lp_products-hero-mobile-375x610px.webp)))));
+    background-position: center center;
+    background-size: cover;
+  }
+
+  .noyona-landing-feature-banner,
+  .noyona-landing-feature-banner__inner {
+    min-height: min(610px, 100svh);
   }
 }

@@ -314,9 +314,9 @@
 }
 
 body:has(.noyona-lovial-page) .brand-carousel {
-    --brand-bg-color: #BAD8F2;
+    /* --brand-bg-color: #BAD8F2; */
     --brand-font-color: #000000;
-    background: #BAD8F2 !important;
+    /* background: #BAD8F2 !important; */
 }
 
 body:has(.noyona-lovial-page) .brand-carousel__heading,
