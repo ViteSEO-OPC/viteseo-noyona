@@ -300,10 +300,11 @@ body.has-scrolled-header .site-logo-text {
   letter-spacing: var(--noyona-letter-spacing-bugfix);
 }
 
-.nav-link--button {
+.main-nav .nav-link--button {
   appearance: none;
   border: 0;
   border-bottom: 2px solid transparent;
+  border-radius: 0 !important;
   background: transparent;
   cursor: pointer;
 }

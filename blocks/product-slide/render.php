@@ -933,7 +933,7 @@ if (count($items) > 4) {
 
                             <div class="ps-card__body">
                                 <?php if (!empty($swatches) && is_array($swatches)): ?>
-                                    <div class="ps-card__swatches" role="radiogroup" aria-label="<?php echo esc_attr__('Select shade', 'viteseo-noyona-childtheme-2.0'); ?>">
+                                    <div class="ps-card__swatches" role="radiogroup" aria-label="<?php echo esc_attr__('Select shade', 'viteseo-noyona-childtheme'); ?>">
                                         <?php foreach ($swatches as $index => $swatch): ?>
                                             <?php
                                             if (!is_array($swatch) || empty($swatch['hex'])) {

@@ -35,5 +35,5 @@
   "style": "file:./style.css",
   "viewScript": "file:./view.js",
   "render": "file:./render.php",
-  "textdomain": "viteseo-noyona-childtheme-2.0"
+  "textdomain": "viteseo-noyona-childtheme"
 }

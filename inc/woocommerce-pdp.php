@@ -19,8 +19,8 @@ function noyona_pdp_render_product_fields() {
 	woocommerce_wp_text_input(
 		array(
 			'id'          => '_noyona_social_proof',
-			'label'       => __( 'PDP social proof line', 'viteseo-noyona-childtheme-2.0' ),
-			'description' => __( 'Optional. Example: 150+ sold in the last 2 days. Shown above the product title.', 'viteseo-noyona-childtheme-2.0' ),
+			'label'       => __( 'PDP social proof line', 'viteseo-noyona-childtheme' ),
+			'description' => __( 'Optional. Example: 150+ sold in the last 2 days. Shown above the product title.', 'viteseo-noyona-childtheme' ),
 			'desc_tip'    => true,
 		)
 	);
@@ -28,8 +28,8 @@ function noyona_pdp_render_product_fields() {
 	woocommerce_wp_textarea_input(
 		array(
 			'id'          => '_noyona_product_ingredients',
-			'label'       => __( 'Ingredients (PDP tab)', 'viteseo-noyona-childtheme-2.0' ),
-			'description' => __( 'Shown in the Ingredients tab on the product page.', 'viteseo-noyona-childtheme-2.0' ),
+			'label'       => __( 'Ingredients (PDP tab)', 'viteseo-noyona-childtheme' ),
+			'description' => __( 'Shown in the Ingredients tab on the product page.', 'viteseo-noyona-childtheme' ),
 			'rows'        => 6,
 		)
 	);
@@ -37,8 +37,8 @@ function noyona_pdp_render_product_fields() {
 	woocommerce_wp_textarea_input(
 		array(
 			'id'          => '_noyona_product_how_to_use',
-			'label'       => __( 'How to use (PDP tab)', 'viteseo-noyona-childtheme-2.0' ),
-			'description' => __( 'Shown in the How to use tab on the product page.', 'viteseo-noyona-childtheme-2.0' ),
+			'label'       => __( 'How to use (PDP tab)', 'viteseo-noyona-childtheme' ),
+			'description' => __( 'Shown in the How to use tab on the product page.', 'viteseo-noyona-childtheme' ),
 			'rows'        => 6,
 		)
 	);
@@ -111,7 +111,7 @@ function noyona_pdp_append_reviews_link_after_rating( $block_content, $block ) {
 	$url  = get_permalink( $product->get_id() ) . '#reviews';
 	$text = sprintf(
 		/* translators: %d: review count */
-		_n( 'See all %d verified review', 'See all %d verified reviews', $count, 'viteseo-noyona-childtheme-2.0' ),
+		_n( 'See all %d verified review', 'See all %d verified reviews', $count, 'viteseo-noyona-childtheme' ),
 		$count
 	);
 	$link = '<a class="noyona-pdp-reviews-link" href="' . esc_url( $url ) . '">' . esc_html( $text ) . '</a>';
@@ -431,17 +431,17 @@ function noyona_pdp_enqueue_assets() {
 				'loginUrl' => function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' ),
 			),
 			'i18n'        => array(
-				'selectOptions'         => __( 'Please select all product options before continuing.', 'viteseo-noyona-childtheme-2.0' ),
-				'buyNow'                => __( 'Buy now', 'viteseo-noyona-childtheme-2.0' ),
-				'selectShade'           => __( 'Select shade', 'viteseo-noyona-childtheme-2.0' ),
-				'wishlistAdd'           => __( 'Add to wishlist', 'viteseo-noyona-childtheme-2.0' ),
-				'wishlistRemove'        => __( 'Remove from wishlist', 'viteseo-noyona-childtheme-2.0' ),
-				'wishlistSaved'         => __( 'Saved to your wishlist.', 'viteseo-noyona-childtheme-2.0' ),
-				'wishlistRemoved'       => __( 'Removed from your wishlist.', 'viteseo-noyona-childtheme-2.0' ),
-				'wishlistSelectOptions' => __( 'Please select a shade before saving this product.', 'viteseo-noyona-childtheme-2.0' ),
-				'wishlistLoginTitle'    => __( 'Log in to save your wishlist', 'viteseo-noyona-childtheme-2.0' ),
-				'wishlistLoginCopy'     => __( 'Please log in to save products and view them from My Account.', 'viteseo-noyona-childtheme-2.0' ),
-				'wishlistError'         => __( 'Wishlist could not be updated. Please try again.', 'viteseo-noyona-childtheme-2.0' ),
+				'selectOptions'         => __( 'Please select all product options before continuing.', 'viteseo-noyona-childtheme' ),
+				'buyNow'                => __( 'Buy now', 'viteseo-noyona-childtheme' ),
+				'selectShade'           => __( 'Select shade', 'viteseo-noyona-childtheme' ),
+				'wishlistAdd'           => __( 'Add to wishlist', 'viteseo-noyona-childtheme' ),
+				'wishlistRemove'        => __( 'Remove from wishlist', 'viteseo-noyona-childtheme' ),
+				'wishlistSaved'         => __( 'Saved to your wishlist.', 'viteseo-noyona-childtheme' ),
+				'wishlistRemoved'       => __( 'Removed from your wishlist.', 'viteseo-noyona-childtheme' ),
+				'wishlistSelectOptions' => __( 'Please select a shade before saving this product.', 'viteseo-noyona-childtheme' ),
+				'wishlistLoginTitle'    => __( 'Log in to save your wishlist', 'viteseo-noyona-childtheme' ),
+				'wishlistLoginCopy'     => __( 'Please log in to save products and view them from My Account.', 'viteseo-noyona-childtheme' ),
+				'wishlistError'         => __( 'Wishlist could not be updated. Please try again.', 'viteseo-noyona-childtheme' ),
 			),
 		)
 	);
@@ -456,8 +456,8 @@ function noyona_pdp_get_wishlist_button_html( $product ) {
 	$user_id        = get_current_user_id();
 	$saved_keys     = array();
 	$is_saved       = false;
-	$active_label   = __( 'Remove from wishlist', 'viteseo-noyona-childtheme-2.0' );
-	$inactive_label = __( 'Add to wishlist', 'viteseo-noyona-childtheme-2.0' );
+	$active_label   = __( 'Remove from wishlist', 'viteseo-noyona-childtheme' );
+	$inactive_label = __( 'Add to wishlist', 'viteseo-noyona-childtheme' );
 
 	if ( $user_id > 0 && function_exists( 'noyona_get_product_wishlist_items' ) ) {
 		foreach ( noyona_get_product_wishlist_items( $user_id ) as $item ) {
@@ -554,7 +554,7 @@ function noyona_pdp_should_show_best_seller_badge() {
 }
 
 function noyona_pdp_get_best_seller_badge_html() {
-	return '<span class="noyona-pdp-best-seller-badge">' . esc_html__( 'BEST SELLER', 'viteseo-noyona-childtheme-2.0' ) . '</span>';
+	return '<span class="noyona-pdp-best-seller-badge">' . esc_html__( 'BEST SELLER', 'viteseo-noyona-childtheme' ) . '</span>';
 }
 
 add_filter( 'render_block_woocommerce/product-image-gallery', 'noyona_pdp_render_best_seller_gallery_badge', 10, 2 );

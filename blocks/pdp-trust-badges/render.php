@@ -13,17 +13,17 @@ $items = apply_filters(
 	'noyona_pdp_trust_badges',
 	array(
 		array(
-			'label' => __( 'Secure Checkout', 'viteseo-noyona-childtheme-2.0' ),
+			'label' => __( 'Secure Checkout', 'viteseo-noyona-childtheme' ),
 			'icon'  => 'fa-solid fa-shield-halved',
 			'color' => '#1a7a3e',
 		),
 		array(
-			'label' => __( 'Fast Shipping', 'viteseo-noyona-childtheme-2.0' ),
+			'label' => __( 'Fast Shipping', 'viteseo-noyona-childtheme' ),
 			'icon'  => 'fa-solid fa-truck-fast',
 			'color' => '#1d4ed8',
 		),
 		array(
-			'label' => __( 'Easy Returns', 'viteseo-noyona-childtheme-2.0' ),
+			'label' => __( 'Easy Returns', 'viteseo-noyona-childtheme' ),
 			'icon'  => 'fa-solid fa-arrow-rotate-left',
 			'color' => '#c2410c',
 		),
