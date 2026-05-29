@@ -1763,6 +1763,27 @@
     const categoryLinks = Array.from(
       categoryWrap.querySelectorAll('.wc-block-product-categories-list-item > a')
     );
+    const params = new URLSearchParams(window.location.search);
+
+    if (document.querySelector('.noyona-product-search-page')) {
+      const currentCategory = String(params.get('product_cat') || '').toLowerCase();
+      categoryLinks.forEach((link) => {
+        const linkUrl = new URL(link.href, window.location.origin);
+        const linkCategory = String(linkUrl.searchParams.get('product_cat') || '').toLowerCase();
+        const isActive = currentCategory !== '' && linkCategory === currentCategory;
+        link.classList.toggle('is-active', isActive);
+        if (isActive) {
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+
+      if (allProductsLink) {
+        allProductsLink.classList.toggle('is-active', currentCategory === '');
+      }
+      return;
+    }
 
     let hasMatchedCategory = false;
     categoryLinks.forEach((link) => {
@@ -2517,7 +2538,7 @@
     const current = String(params.get('orderby') || 'menu_order').toLowerCase();
 
     const isPaginationKey = (key) =>
-      key === 'paged' || key === 'product-page' || /^query-\d+-page$/.test(key);
+      key === 'paged' || key === 'product-page' || key === 'search_page' || /^query-\d+-page$/.test(key);
 
     lists.forEach((list) => {
       const options = Array.from(list.querySelectorAll('.noyona-shop-sort-option'));
