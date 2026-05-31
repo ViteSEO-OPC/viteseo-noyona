@@ -9,6 +9,7 @@ $defaults = array(
     'cardsToShow' => 3,
     'useWooProducts' => false,
     'wooOnlyFeatured' => true,
+    'wooShowFeaturedBadge' => true,
     'wooProductsLimit' => 8,
     'wooProductCategories' => array(),
     'wooProductBrands' => array(),
@@ -29,6 +30,7 @@ $items = is_array($atts['items']) ? $atts['items'] : array();
 $cards_to_show = max(1, intval($atts['cardsToShow']));
 $use_woo_products = !empty($atts['useWooProducts']);
 $woo_only_featured = !empty($atts['wooOnlyFeatured']);
+$woo_show_featured_badge = !empty($atts['wooShowFeaturedBadge']);
 $woo_products_limit = isset($atts['wooProductsLimit']) ? max(1, (int) $atts['wooProductsLimit']) : 8;
 $woo_product_categories = array();
 if (isset($atts['wooProductCategories'])) {
@@ -722,9 +724,10 @@ if ($use_woo_products && class_exists('WooCommerce')) {
             $variation_map = noyona_ps_get_variation_map_for_attribute($product, $attribute_param, $swatches);
             $variation_choice_map = noyona_ps_get_variation_choice_map($product, $swatches);
             $can_ajax_cart = $product->supports('ajax_add_to_cart') || !empty($variation_map) || !empty($variation_choice_map);
+            $is_featured_product = has_term('featured', 'product_visibility', $product_id);
 
             $woo_items[] = array(
-                'badge' => $woo_only_featured ? 'BEST' : '',
+                'badge' => ($woo_show_featured_badge && $is_featured_product) ? 'BEST' : '',
                 'imageId' => get_post_thumbnail_id($product_id),
                 'title' => get_the_title($product_id),
                 'description' => wp_trim_words(wp_strip_all_tags($product->get_short_description() ?: get_the_excerpt($product_id)), 18),
