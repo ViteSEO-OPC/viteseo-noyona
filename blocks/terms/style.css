@@ -2,6 +2,14 @@
     background: #fff;
     font-family: var(--wp--preset--font-family--poppins);
     color: #222;
+    overflow-x: clip;
+}
+
+.terms,
+.terms *,
+.terms *::before,
+.terms *::after {
+    box-sizing: border-box;
 }
 
 .terms__hero {
@@ -39,16 +47,18 @@
     padding: clamp(1.5rem, 4vw, 2.25rem) var(--page-gutter-right) clamp(3rem, 6vw, 4rem) var(--page-gutter-left);
     /* max-width: 1300px; */
     margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
 }
 
 .terms__breadcrumbs {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.4rem;
     margin-bottom: 1.2rem;
-    font-size: clamp(18px, 1.4vw, 24px);
+    font-size: var(--wp--preset--font-size--body);
     font-weight: 400;
-    letter-spacing: -1px;
     color: #525252;
     font-family: var(--wp--preset--font-family--poppins);
 }
@@ -74,9 +84,22 @@
 
 .terms__layout {
     display: grid;
-    grid-template-columns: 25% 75%;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
     gap: clamp(1.5rem, 4vw, 4rem);
     align-items: start;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.terms__toc,
+.terms__content,
+.terms__sections,
+.terms__section,
+.terms__intro {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .terms__toc {
@@ -124,6 +147,7 @@
     border-radius: 8px;
     padding: 0.08rem 0.25rem;
     transition: color 0.25s ease;
+    overflow-wrap: anywhere;
 }
 
 .terms__toc-link:hover,
@@ -162,6 +186,7 @@
     line-height: normal;
     color: #373737;
     font-family: var(--wp--preset--font-family--poppins);
+    overflow-wrap: anywhere;
 }
 
 .terms__section {
@@ -184,6 +209,7 @@
     color: #2f2f2f;
     white-space: pre-line;
     font-family: var(--wp--preset--font-family--poppins);
+    overflow-wrap: anywhere;
 }
 
 .terms__section-list {
@@ -193,6 +219,7 @@
     line-height: normal;
     color: #2f2f2f;
     font-family: var(--wp--preset--font-family--poppins);
+    overflow-wrap: anywhere;
 }
 
 .terms__section-list li {
@@ -207,6 +234,7 @@
     line-height: normal;
     color: #2f2f2f;
     white-space: pre-line;
+    overflow-wrap: anywhere;
 }
 
 @media (max-width: 980px) {
@@ -227,6 +255,10 @@
     .terms__hero,
     .terms__body {
         padding-inline: 1rem;
+    }
+
+    .terms__section-list {
+        margin-left: 1rem;
     }
 }
 
