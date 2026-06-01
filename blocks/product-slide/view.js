@@ -262,9 +262,88 @@
     return null;
   }
 
+  function parseVariationCombinations(button) {
+    if (!button) return [];
+    if (Object.prototype.hasOwnProperty.call(button, "_noyonaVariationCombinations")) {
+      return button._noyonaVariationCombinations;
+    }
+
+    const raw = button.getAttribute("data-variation-combinations") || "";
+    if (!raw) {
+      button._noyonaVariationCombinations = [];
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+      button._noyonaVariationCombinations = Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      button._noyonaVariationCombinations = [];
+    }
+
+    return button._noyonaVariationCombinations;
+  }
+
+  function getCardSelectedAttributes(card) {
+    const attrs = {};
+
+    card
+      .querySelectorAll(".ps-swatch--option.is-selected, .ps-swatch--option[aria-checked='true']")
+      .forEach((button) => {
+        const param =
+          button.getAttribute("data-cart-attribute-param") ||
+          button.getAttribute("data-attribute-param") ||
+          "";
+        const value =
+          button.getAttribute("data-cart-attribute-value") ||
+          button.getAttribute("data-swatch-value") ||
+          "";
+        if (param && value) attrs[param] = value;
+      });
+
+    card
+      .querySelectorAll(".ps-choice--option.is-selected, .ps-choice--option[aria-checked='true']")
+      .forEach((button) => {
+        const param = button.getAttribute("data-cart-attribute-param") || "";
+        const value =
+          button.getAttribute("data-cart-attribute-value") ||
+          button.getAttribute("data-choice-value") ||
+          "";
+        if (param && value) attrs[param] = value;
+      });
+
+    return attrs;
+  }
+
+  function findMatchingVariationFromAttributes(button, selectedAttributes) {
+    const combinations = parseVariationCombinations(button);
+    const selectedKeys = Object.keys(selectedAttributes || {});
+    if (!combinations.length || !selectedKeys.length) return 0;
+
+    for (let i = 0; i < combinations.length; i++) {
+      const combination = combinations[i] || {};
+      const attrs = combination.attributes || {};
+      const attrKeys = Object.keys(attrs);
+      if (!attrKeys.length) continue;
+
+      const matches = attrKeys.every((param) => {
+        const expected = String(attrs[param] || "");
+        const actual = String(selectedAttributes[param] || "");
+        return expected && actual && expected === actual;
+      });
+
+      if (matches && parseInt(combination.variationId, 10) > 0) {
+        return parseInt(combination.variationId, 10) || 0;
+      }
+    }
+
+    return 0;
+  }
+
   function syncCartButtonSelection(card, attrParam, selectedValue, explicitSelection) {
     const selected = String(selectedValue || "");
     const selectedLower = selected.toLowerCase();
+    const selectedAttributes = getCardSelectedAttributes(card);
 
     card.querySelectorAll(".ps-btn-cart[data-product_id]").forEach((button) => {
       const productType = (button.getAttribute("data-product-type") || "").toLowerCase();
@@ -272,12 +351,29 @@
       let selectedParam = String(attrParam || "");
       let selectedPayloadValue = selected;
 
+      if (Object.keys(selectedAttributes).length) {
+        button.setAttribute("data-selected-attributes", JSON.stringify(selectedAttributes));
+      } else {
+        button.removeAttribute("data-selected-attributes");
+      }
+
       if (!isVariable) {
         if (selectedParam) {
           button.setAttribute("data-selected-attribute-param", selectedParam);
         }
         button.setAttribute("data-selected-attribute-value", selectedPayloadValue);
         button.removeAttribute("data-variation_id");
+        button.classList.remove("is-disabled");
+        button.setAttribute("aria-disabled", "false");
+        return;
+      }
+
+      const combinationVariationId = findMatchingVariationFromAttributes(button, selectedAttributes);
+      if (combinationVariationId > 0) {
+        const firstParam = Object.keys(selectedAttributes)[0] || selectedParam;
+        button.setAttribute("data-selected-attribute-param", firstParam);
+        button.setAttribute("data-selected-attribute-value", selectedAttributes[firstParam] || selectedPayloadValue);
+        button.setAttribute("data-variation_id", String(combinationVariationId));
         button.classList.remove("is-disabled");
         button.setAttribute("aria-disabled", "false");
         return;
@@ -364,12 +460,9 @@
   function updateCardActionUrls(card, selectedValue, explicitSelection) {
     const attrParam = card.getAttribute("data-attribute-param") || "";
     syncCartButtonSelection(card, attrParam, selectedValue, explicitSelection);
-    if (!attrParam) return;
+    const selectedAttributes = getCardSelectedAttributes(card);
 
     card.querySelectorAll(".ps-btn-primary, .ps-btn-cart").forEach((el) => {
-      const ownAttrParam = el.getAttribute("data-attribute-param") || attrParam;
-      if (!ownAttrParam) return;
-
       const baseUrl =
         el.getAttribute("data-base-url") ||
         el.getAttribute("data-base-cart-url") ||
@@ -379,7 +472,18 @@
 
       if (!baseUrl || baseUrl === "#") return;
 
-      const nextUrl = setQueryParam(baseUrl, ownAttrParam, selectedValue || "");
+      let nextUrl = baseUrl;
+      if (Object.keys(selectedAttributes).length) {
+        Object.keys(selectedAttributes).forEach((param) => {
+          nextUrl = setQueryParam(nextUrl, param, selectedAttributes[param] || "");
+        });
+        el.setAttribute("data-selected-attributes", JSON.stringify(selectedAttributes));
+      } else {
+        const ownAttrParam = el.getAttribute("data-attribute-param") || attrParam;
+        if (!ownAttrParam) return;
+        nextUrl = setQueryParam(nextUrl, ownAttrParam, selectedValue || "");
+      }
+
       if (el.tagName === "A") {
         el.setAttribute("href", nextUrl);
       } else if (el.classList.contains("ps-btn-cart")) {
@@ -454,6 +558,62 @@
     });
   }
 
+  function initChoicePills(root) {
+    root.querySelectorAll(".product-slide__card").forEach((card) => {
+      const groups = Array.from(card.querySelectorAll(".ps-choice-group"));
+      if (!groups.length) return;
+
+      groups.forEach((group) => {
+        const choices = Array.from(group.querySelectorAll(".ps-choice--option[data-choice-value]"));
+        if (!choices.length) return;
+
+        function selectChoice(target) {
+          choices.forEach((choice) => {
+            const on = choice === target;
+            choice.classList.toggle("is-selected", on);
+            choice.setAttribute("aria-checked", on ? "true" : "false");
+          });
+          updateCardActionUrls(card, card.dataset.selectedSwatchValue || "");
+        }
+
+        choices.forEach((choice) => {
+          choice.addEventListener("click", () => selectChoice(choice));
+          choice.addEventListener("keydown", (event) => {
+            const currentIndex = choices.indexOf(choice);
+            let nextIndex = currentIndex;
+
+            if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+              nextIndex = (currentIndex + 1) % choices.length;
+            } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+              nextIndex = (currentIndex - 1 + choices.length) % choices.length;
+            } else if (event.key === "Home") {
+              nextIndex = 0;
+            } else if (event.key === "End") {
+              nextIndex = choices.length - 1;
+            } else {
+              return;
+            }
+
+            event.preventDefault();
+            choices[nextIndex].focus();
+            selectChoice(choices[nextIndex]);
+          });
+        });
+
+        const initial =
+          choices.find(
+            (choice) =>
+              choice.classList.contains("is-selected") ||
+              choice.getAttribute("aria-checked") === "true"
+          ) ||
+          choices[0];
+        if (initial) {
+          selectChoice(initial);
+        }
+      });
+    });
+  }
+
   function initCarousel(root) {
     const track = root.querySelector(".product-slide__track");
     const cards = Array.from(root.querySelectorAll(".product-slide__card"));
@@ -525,6 +685,7 @@
     prevBtn.addEventListener("click", () => goTo(currentIndex - 1));
     nextBtn.addEventListener("click", () => goTo(currentIndex + 1));
     initShadeSwatches(root);
+    initChoicePills(root);
 
     root.addEventListener("click", function (event) {
       const cartBtn = event.target.closest(
@@ -551,6 +712,18 @@
         "";
       const selectedAttrValue =
         cartBtn.getAttribute("data-selected-attribute-value") || "";
+      let selectedAttributes = {};
+      const selectedAttributesRaw = cartBtn.getAttribute("data-selected-attributes") || "";
+      if (selectedAttributesRaw) {
+        try {
+          const parsed = JSON.parse(selectedAttributesRaw);
+          if (parsed && typeof parsed === "object") {
+            selectedAttributes = parsed;
+          }
+        } catch (e) {
+          selectedAttributes = {};
+        }
+      }
       const variationId = parseInt(cartBtn.getAttribute("data-variation_id"), 10) || 0;
       const requestProductId =
         productType === "variable" && variationId > 0 ? variationId : productId;
@@ -559,7 +732,10 @@
         cartBtn.classList.add("is-error");
         return;
       }
-      if (productType === "variable" && (!selectedAttrParam || !selectedAttrValue)) {
+      if (
+        productType === "variable" &&
+        (!Object.keys(selectedAttributes).length && (!selectedAttrParam || !selectedAttrValue))
+      ) {
         cartBtn.classList.add("is-error");
         return;
       }
@@ -595,6 +771,11 @@
       if (selectedAttrParam && selectedAttrValue && !payload.has(selectedAttrParam)) {
         payload.append(selectedAttrParam, selectedAttrValue);
       }
+      Object.keys(selectedAttributes).forEach((param) => {
+        if (param && selectedAttributes[param] && !payload.has(param)) {
+          payload.append(param, selectedAttributes[param]);
+        }
+      });
       if (variationId > 0 && !payload.has("variation_id")) {
         payload.append("variation_id", String(variationId));
       }

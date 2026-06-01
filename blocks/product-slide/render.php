@@ -634,6 +634,169 @@ if (!function_exists('noyona_ps_get_variation_choice_map')) {
     }
 }
 
+if (!function_exists('noyona_ps_attribute_param_from_name')) {
+    function noyona_ps_attribute_param_from_name($name)
+    {
+        $name = sanitize_title((string) $name);
+        if ('' === $name) {
+            return '';
+        }
+        return 'attribute_' . $name;
+    }
+}
+
+if (!function_exists('noyona_ps_get_attribute_display_label')) {
+    function noyona_ps_get_attribute_display_label($attribute_name)
+    {
+        $attribute_name = sanitize_title((string) $attribute_name);
+        if ('' === $attribute_name) {
+            return __('Option', 'viteseo-noyona-childtheme');
+        }
+
+        if (function_exists('wc_attribute_label')) {
+            $label = wc_attribute_label($attribute_name);
+            if ('' !== trim((string) $label)) {
+                return (string) $label;
+            }
+        }
+
+        $label = preg_replace('/^pa[_-]/', '', $attribute_name);
+        $label = str_replace(array('-', '_'), ' ', (string) $label);
+        return ucwords($label);
+    }
+}
+
+if (!function_exists('noyona_ps_get_product_choice_groups')) {
+    function noyona_ps_get_product_choice_groups($product, $exclude_attribute = '')
+    {
+        if (!$product instanceof WC_Product) {
+            return array();
+        }
+
+        $exclude_attribute = sanitize_title((string) $exclude_attribute);
+        $exclude_candidates = array_filter(array_unique(array(
+            $exclude_attribute,
+            0 === strpos($exclude_attribute, 'pa_') ? substr($exclude_attribute, 3) : 'pa_' . $exclude_attribute,
+        )));
+
+        $groups = array();
+        $attributes = $product->get_attributes();
+        if (!is_array($attributes) || empty($attributes)) {
+            return array();
+        }
+
+        foreach ($attributes as $product_attribute) {
+            if (!$product_attribute || !method_exists($product_attribute, 'get_name')) {
+                continue;
+            }
+
+            if (method_exists($product_attribute, 'get_variation') && !$product_attribute->get_variation()) {
+                continue;
+            }
+
+            $name = sanitize_title((string) $product_attribute->get_name());
+            if ('' === $name || in_array($name, $exclude_candidates, true)) {
+                continue;
+            }
+
+            $options = method_exists($product_attribute, 'get_options') ? $product_attribute->get_options() : array();
+            if (!is_array($options) || empty($options)) {
+                continue;
+            }
+
+            $choices = array();
+            $seen = array();
+            foreach ($options as $option) {
+                $value = '';
+                $label = '';
+
+                if ($product_attribute->is_taxonomy()) {
+                    $term = get_term_by('id', (int) $option, $name);
+                    if (!$term) {
+                        $term = get_term_by('slug', (string) $option, $name);
+                    }
+                    if (!$term || is_wp_error($term)) {
+                        continue;
+                    }
+                    $value = (string) $term->slug;
+                    $label = (string) $term->name;
+                } else {
+                    $value = trim((string) $option);
+                    $label = $value;
+                }
+
+                $key = sanitize_title($value);
+                if ('' === $key || isset($seen[$key])) {
+                    continue;
+                }
+
+                $choices[] = array(
+                    'value' => $key,
+                    'label' => '' !== trim($label) ? $label : $value,
+                );
+                $seen[$key] = true;
+            }
+
+            if (empty($choices)) {
+                continue;
+            }
+
+            $groups[] = array(
+                'name' => $name,
+                'param' => noyona_ps_attribute_param_from_name($name),
+                'label' => noyona_ps_get_attribute_display_label($name),
+                'options' => $choices,
+            );
+        }
+
+        return $groups;
+    }
+}
+
+if (!function_exists('noyona_ps_get_variation_combinations')) {
+    function noyona_ps_get_variation_combinations($product)
+    {
+        if (!$product instanceof WC_Product || !$product->is_type('variable')) {
+            return array();
+        }
+
+        $combinations = array();
+        $variation_ids = method_exists($product, 'get_children') ? $product->get_children() : array();
+        if (!is_array($variation_ids) || empty($variation_ids)) {
+            return array();
+        }
+
+        foreach ($variation_ids as $variation_id) {
+            $variation = wc_get_product((int) $variation_id);
+            if (!$variation instanceof WC_Product_Variation || !$variation->exists() || 'publish' !== $variation->get_status()) {
+                continue;
+            }
+
+            $attributes = array();
+            foreach ((array) $variation->get_attributes() as $key => $value) {
+                $key = sanitize_key((string) $key);
+                $value = sanitize_title((string) $value);
+                if ('' === $key || '' === $value) {
+                    continue;
+                }
+                if (0 === strpos($key, 'attribute_')) {
+                    $key = substr($key, 10);
+                }
+                $attributes['attribute_' . $key] = $value;
+            }
+
+            if (!empty($attributes)) {
+                $combinations[] = array(
+                    'variationId' => (int) $variation->get_id(),
+                    'attributes' => $attributes,
+                );
+            }
+        }
+
+        return $combinations;
+    }
+}
+
 $media_background_color = noyona_ps_normalize_hex_color($atts['mediaBackgroundColor'] ?? '') ?: '#F2A0A7';
 $card_border_color = noyona_ps_normalize_hex_color($atts['cardBorderColor'] ?? '') ?: '#D91B61';
 $cta_background_color = noyona_ps_normalize_hex_color($atts['ctaBackgroundColor'] ?? '') ?: '#E199A4';
@@ -721,9 +884,11 @@ if ($use_woo_products && class_exists('WooCommerce')) {
                 }
             }
             $attribute_param = 'attribute_' . (0 === strpos($woo_color_attribute, 'pa_') ? $woo_color_attribute : 'pa_' . $woo_color_attribute);
+            $choice_groups = noyona_ps_get_product_choice_groups($product, $woo_color_attribute);
             $variation_map = noyona_ps_get_variation_map_for_attribute($product, $attribute_param, $swatches);
             $variation_choice_map = noyona_ps_get_variation_choice_map($product, $swatches);
-            $can_ajax_cart = $product->supports('ajax_add_to_cart') || !empty($variation_map) || !empty($variation_choice_map);
+            $variation_combinations = noyona_ps_get_variation_combinations($product);
+            $can_ajax_cart = $product->supports('ajax_add_to_cart') || !empty($variation_map) || !empty($variation_choice_map) || !empty($variation_combinations);
             $is_featured_product = has_term('featured', 'product_visibility', $product_id);
 
             $woo_items[] = array(
@@ -737,6 +902,7 @@ if ($use_woo_products && class_exists('WooCommerce')) {
                 'ratingCount' => (int) $product->get_rating_count(),
                 'colors' => array_values(array_unique($swatch_colors)),
                 'swatches' => $swatches,
+                'choiceGroups' => $choice_groups,
                 'attributeParam' => $attribute_param,
                 'primaryText' => 'BUY NOW!',
                 'primaryUrl' => get_permalink($product_id),
@@ -750,6 +916,7 @@ if ($use_woo_products && class_exists('WooCommerce')) {
                 'productType' => $product->get_type(),
                 'variationMap' => $variation_map,
                 'variationChoiceMap' => $variation_choice_map,
+                'variationCombinations' => $variation_combinations,
             );
         }
         wp_reset_postdata();
@@ -862,9 +1029,11 @@ $block_style = sprintf(
                     $product_sku = !empty($item['productSku']) ? sanitize_text_field((string) $item['productSku']) : '';
                     $product_type = !empty($item['productType']) ? sanitize_key((string) $item['productType']) : '';
                     $swatches = (!empty($item['swatches']) && is_array($item['swatches'])) ? $item['swatches'] : array();
+                    $choice_groups = (!empty($item['choiceGroups']) && is_array($item['choiceGroups'])) ? $item['choiceGroups'] : array();
                     $attribute_param = !empty($item['attributeParam']) ? sanitize_key((string) $item['attributeParam']) : '';
                     $variation_map = (!empty($item['variationMap']) && is_array($item['variationMap'])) ? $item['variationMap'] : array();
                     $variation_choice_map = (!empty($item['variationChoiceMap']) && is_array($item['variationChoiceMap'])) ? $item['variationChoiceMap'] : array();
+                    $variation_combinations = (!empty($item['variationCombinations']) && is_array($item['variationCombinations'])) ? $item['variationCombinations'] : array();
                     $variation_map_safe = array();
                     if (!empty($variation_map)) {
                         foreach ($variation_map as $value => $variation_id) {
@@ -895,9 +1064,47 @@ $block_style = sprintf(
                             );
                         }
                     }
+                    $variation_combinations_safe = array();
+                    if (!empty($variation_combinations)) {
+                        foreach ($variation_combinations as $combination) {
+                            if (!is_array($combination) || empty($combination['variationId']) || empty($combination['attributes']) || !is_array($combination['attributes'])) {
+                                continue;
+                            }
+                            $combination_attributes = array();
+                            foreach ($combination['attributes'] as $param => $value) {
+                                $param = sanitize_key((string) $param);
+                                $value = sanitize_title((string) $value);
+                                if ('' !== $param && '' !== $value) {
+                                    $combination_attributes[$param] = $value;
+                                }
+                            }
+                            if (!empty($combination_attributes)) {
+                                $variation_combinations_safe[] = array(
+                                    'variationId' => absint($combination['variationId']),
+                                    'attributes' => $combination_attributes,
+                                );
+                            }
+                        }
+                    }
                     $selected_swatch_value = '';
                     if (!empty($swatches) && !empty($swatches[0]['value'])) {
                         $selected_swatch_value = sanitize_title((string) $swatches[0]['value']);
+                    }
+                    $selected_attributes = array();
+                    if ($attribute_param && $selected_swatch_value) {
+                        $selected_attributes[$attribute_param] = $selected_swatch_value;
+                    }
+                    if (!empty($choice_groups)) {
+                        foreach ($choice_groups as $group) {
+                            if (empty($group['param']) || empty($group['options']) || !is_array($group['options'])) {
+                                continue;
+                            }
+                            $group_param = sanitize_key((string) $group['param']);
+                            $first_option = reset($group['options']);
+                            if ($group_param && is_array($first_option) && !empty($first_option['value'])) {
+                                $selected_attributes[$group_param] = sanitize_title((string) $first_option['value']);
+                            }
+                        }
                     }
                     $selected_attr_param = $attribute_param;
                     $selected_attr_value = $selected_swatch_value;
@@ -910,12 +1117,41 @@ $block_style = sprintf(
                     } elseif (!empty($selected_swatch_value) && isset($variation_map_safe[$selected_swatch_value])) {
                         $selected_variation_id = absint($variation_map_safe[$selected_swatch_value]);
                     }
+                    if (!empty($selected_attributes) && !empty($variation_combinations_safe)) {
+                        foreach ($variation_combinations_safe as $combination) {
+                            $combination_attrs = isset($combination['attributes']) && is_array($combination['attributes']) ? $combination['attributes'] : array();
+                            $matches = true;
+                            foreach ($combination_attrs as $param => $value) {
+                                if (isset($selected_attributes[$param]) && $selected_attributes[$param] !== $value) {
+                                    $matches = false;
+                                    break;
+                                }
+                            }
+                            if ($matches && !empty($combination['variationId'])) {
+                                $selected_variation_id = absint($combination['variationId']);
+                                break;
+                            }
+                        }
+                    }
                     if ($selected_attr_param && $selected_attr_value) {
                         if (!empty($primary_url) && '#' !== $primary_url) {
                             $primary_url = add_query_arg($selected_attr_param, $selected_attr_value, $primary_url);
                         }
                         if (!empty($cart_url) && '#' !== $cart_url) {
                             $cart_url = add_query_arg($selected_attr_param, $selected_attr_value, $cart_url);
+                        }
+                    }
+                    if (!empty($selected_attributes)) {
+                        foreach ($selected_attributes as $param => $value) {
+                            if (!$param || !$value) {
+                                continue;
+                            }
+                            if (!empty($primary_url) && '#' !== $primary_url) {
+                                $primary_url = add_query_arg($param, $value, $primary_url);
+                            }
+                            if (!empty($cart_url) && '#' !== $cart_url) {
+                                $cart_url = add_query_arg($param, $value, $cart_url);
+                            }
                         }
                     }
                     ?>
@@ -1015,6 +1251,46 @@ $block_style = sprintf(
                                     </div>
                                 <?php endif; ?>
 
+                                <?php if (!empty($choice_groups)): ?>
+                                    <div class="ps-card__choices" aria-label="<?php echo esc_attr__('Select product options', 'viteseo-noyona-childtheme'); ?>">
+                                        <?php foreach ($choice_groups as $group): ?>
+                                            <?php
+                                            if (empty($group['param']) || empty($group['options']) || !is_array($group['options'])) {
+                                                continue;
+                                            }
+                                            $group_param = sanitize_key((string) $group['param']);
+                                            $group_label = !empty($group['label']) ? (string) $group['label'] : __('Option', 'viteseo-noyona-childtheme');
+                                            ?>
+                                            <div class="ps-choice-group" role="radiogroup" aria-label="<?php echo esc_attr($group_label); ?>">
+                                                <span class="ps-choice-group__label"><?php echo esc_html($group_label); ?></span>
+                                                <div class="ps-choice-group__options">
+                                                    <?php foreach ($group['options'] as $option_index => $option): ?>
+                                                        <?php
+                                                        if (!is_array($option) || empty($option['value'])) {
+                                                            continue;
+                                                        }
+                                                        $option_value = sanitize_title((string) $option['value']);
+                                                        $option_label = !empty($option['label']) ? (string) $option['label'] : $option_value;
+                                                        $is_selected = 0 === (int) $option_index;
+                                                        ?>
+                                                        <button
+                                                            type="button"
+                                                            class="ps-choice ps-choice--option<?php echo $is_selected ? ' is-selected' : ''; ?>"
+                                                            data-choice-value="<?php echo esc_attr($option_value); ?>"
+                                                            data-cart-attribute-param="<?php echo esc_attr($group_param); ?>"
+                                                            data-cart-attribute-value="<?php echo esc_attr($option_value); ?>"
+                                                            role="radio"
+                                                            aria-label="<?php echo esc_attr($group_label . ': ' . $option_label); ?>"
+                                                            aria-checked="<?php echo $is_selected ? 'true' : 'false'; ?>">
+                                                            <?php echo esc_html($option_label); ?>
+                                                        </button>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+
                                 <?php if ($title): ?>
                                     <h5 class="ps-card__title"><?php echo esc_html($title); ?></h5>
                                 <?php endif; ?>
@@ -1056,6 +1332,9 @@ $block_style = sprintf(
                                     <a href="<?php echo esc_url($primary_url); ?>" class="ps-btn-primary"
                                         data-base-url="<?php echo esc_url(!empty($item['primaryUrl']) ? $item['primaryUrl'] : '#'); ?>"
                                         data-attribute-param="<?php echo esc_attr($attribute_param); ?>"
+                                        <?php if (!empty($selected_attributes)): ?>
+                                            data-selected-attributes="<?php echo esc_attr(wp_json_encode($selected_attributes)); ?>"
+                                        <?php endif; ?>
                                         style="background-color: <?php echo esc_attr($primary_bg); ?>;">
                                         <?php echo esc_html($primary_text); ?>
                                     </a>
@@ -1073,6 +1352,9 @@ $block_style = sprintf(
                                                 data-attribute-param="<?php echo esc_attr($attribute_param); ?>"
                                                 data-selected-attribute-param="<?php echo esc_attr($selected_attr_param); ?>"
                                                 data-selected-attribute-value="<?php echo esc_attr($selected_attr_value); ?>"
+                                                <?php if (!empty($selected_attributes)): ?>
+                                                    data-selected-attributes="<?php echo esc_attr(wp_json_encode($selected_attributes)); ?>"
+                                                <?php endif; ?>
                                                 <?php if ($selected_variation_id > 0): ?>
                                                     data-variation_id="<?php echo esc_attr($selected_variation_id); ?>"
                                                 <?php endif; ?>
@@ -1081,6 +1363,9 @@ $block_style = sprintf(
                                                 <?php endif; ?>
                                                 <?php if (!empty($variation_choice_map_safe)): ?>
                                                     data-variation-choice-map="<?php echo esc_attr(wp_json_encode($variation_choice_map_safe)); ?>"
+                                                <?php endif; ?>
+                                                <?php if (!empty($variation_combinations_safe)): ?>
+                                                    data-variation-combinations="<?php echo esc_attr(wp_json_encode($variation_combinations_safe)); ?>"
                                                 <?php endif; ?>
                                                 style="background-color: <?php echo esc_attr($cart_bg); ?>;"
                                                 aria-label="<?php echo esc_attr('Add ' . ($title ? $title : 'product') . ' to cart'); ?>"
@@ -1091,6 +1376,9 @@ $block_style = sprintf(
                                             <a href="<?php echo esc_url($cart_url); ?>" class="ps-btn-cart"
                                                 data-base-url="<?php echo esc_url(!empty($item['cartUrl']) ? $item['cartUrl'] : '#'); ?>"
                                                 data-attribute-param="<?php echo esc_attr($attribute_param); ?>"
+                                                <?php if (!empty($selected_attributes)): ?>
+                                                    data-selected-attributes="<?php echo esc_attr(wp_json_encode($selected_attributes)); ?>"
+                                                <?php endif; ?>
                                                 style="background-color: <?php echo esc_attr($cart_bg); ?>;"
                                                 aria-label="<?php echo esc_attr('Add ' . ($title ? $title : 'product') . ' to cart'); ?>"
                                                 rel="nofollow">
