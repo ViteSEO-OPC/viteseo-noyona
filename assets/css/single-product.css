@@ -94,7 +94,7 @@ body.single-product .noyona-pdp-tabs__panel-inner {
 }
 
 .single-product .wp-block-post-title {
-  font-size: var(--wp--preset--font-size--h-1);
+  font-size: var(--wp--preset--font-size--h-3);
   font-weight: 400;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
