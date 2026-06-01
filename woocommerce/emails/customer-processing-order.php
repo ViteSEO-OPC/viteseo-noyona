@@ -108,14 +108,18 @@ do_action( 'woocommerce_email_header', '', $email ); ?>
 			<h1 class="noyona-email-title noyona-order-title"><?php esc_html_e( "We're preparing your order ✨", 'noyona-childtheme' ); ?></h1>
 			<p class="noyona-email-copy noyona-order-copy">
 				<?php
-				printf(
-					/* translators: 1: Customer first name, 2: Order number, 3: Order date, 4: Payment method. */
-					esc_html__( "Hi %1$s, we received your order %2$s on %3$s and your payment via %4$s. We're carefully packing everything now and will email you tracking once it ships.", 'noyona-childtheme' ),
-					esc_html( $first_name ),
-					esc_html( $order_number ),
-					esc_html( $order_date_text ),
-					esc_html( $payment_method ? $payment_method : __( 'your selected payment method', 'noyona-childtheme' ) )
+				/* translators: tokens: {first_name}, {order_number}, {order_date}, {payment_method}. */
+				$intro_template = __( "Hi {first_name}, we received your order {order_number} on {order_date} and your payment via {payment_method}. We're carefully packing everything now and will email you tracking once it ships.", 'noyona-childtheme' );
+				$intro_text     = strtr(
+					$intro_template,
+					array(
+						'{first_name}'     => (string) $first_name,
+						'{order_number}'   => (string) $order_number,
+						'{order_date}'     => (string) $order_date_text,
+						'{payment_method}' => (string) ( $payment_method ? $payment_method : __( 'your selected payment method', 'noyona-childtheme' ) ),
+					)
 				);
+				echo esc_html( $intro_text );
 				?>
 			</p>
 

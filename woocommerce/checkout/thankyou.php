@@ -16,21 +16,13 @@ defined( 'ABSPATH' ) || exit;
 	<?php if ( $order ) : ?>
 		<?php do_action( 'woocommerce_before_thankyou', $order->get_id() ); ?>
 		<?php
-		$payment_context     = strtolower( trim( (string) $order->get_payment_method() . ' ' . (string) $order->get_payment_method_title() ) );
-		$is_paymongo_qr      = ( false !== strpos( $payment_context, 'paymongo' ) && false !== strpos( $payment_context, 'qr' ) );
-		$is_awaiting_payment = ( $is_paymongo_qr && ! $order->is_paid() && $order->has_status( array( 'pending', 'on-hold' ) ) );
+		$is_done_order       = $order->is_paid();
+		$is_awaiting_payment = ( ! $is_done_order && $order->has_status( array( 'pending', 'on-hold' ) ) );
 
 		ob_start();
 		do_action( 'woocommerce_thankyou_' . $order->get_payment_method(), $order->get_id() );
 		do_action( 'woocommerce_thankyou', $order->get_id() );
 		$thankyou_hook_markup = trim( (string) ob_get_clean() );
-		$has_qr_markup        = (bool) preg_match( '/<img[^>]+(?:qr|qrcode|qrph|paymongo)[^>]*>|<canvas\b/i', $thankyou_hook_markup );
-
-		// QR is the source of truth for the payment step.
-		// As soon as gateway QR markup is gone, move to Done view on next render.
-		if ( $is_awaiting_payment && ! $has_qr_markup ) {
-			$is_awaiting_payment = false;
-		}
 		?>
 
 		<?php if ( $order->has_status( 'failed' ) ) : ?>
@@ -272,7 +264,8 @@ defined( 'ABSPATH' ) || exit;
 					</div>
 				</section>
 
-			<?php else : ?>
+			<?php elseif ( $is_done_order ) : ?>
+				<div data-noyona-done-order="1"></div>
 				<section class="noyona-done-hero">
 					<div class="noyona-done-hero__icon" aria-hidden="true">
 						<i class="fa-solid fa-check"></i>
@@ -381,13 +374,48 @@ defined( 'ABSPATH' ) || exit;
 						<span class="noyona-done-actions__label"><?php esc_html_e( 'Track Order', 'noyona' ); ?></span>
 					</a>
 				</div>
+			<?php else : ?>
+				<section class="noyona-pay-hero noyona-pay-hero--received">
+					<div class="noyona-pay-hero__icon" aria-hidden="true">
+						<i class="fa-solid fa-clock"></i>
+					</div>
+					<h1 class="noyona-pay-hero__title"><?php esc_html_e( 'Payment Status Pending', 'noyona' ); ?></h1>
+					<p class="noyona-pay-hero__subtitle">
+						<?php esc_html_e( 'We received your order, but payment has not been confirmed yet. Please complete payment before this order is marked done.', 'noyona' ); ?>
+					</p>
+				</section>
+
+				<section class="noyona-pay-meta" aria-label="<?php esc_attr_e( 'Order summary', 'noyona' ); ?>">
+					<div class="noyona-pay-meta__item">
+						<span class="noyona-pay-meta__label"><?php esc_html_e( 'Order Number', 'noyona' ); ?></span>
+						<strong class="noyona-pay-meta__value"><?php echo esc_html( $order->get_order_number() ); ?></strong>
+					</div>
+					<div class="noyona-pay-meta__item">
+						<span class="noyona-pay-meta__label"><?php esc_html_e( 'Status', 'noyona' ); ?></span>
+						<strong class="noyona-pay-meta__value"><?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?></strong>
+					</div>
+					<div class="noyona-pay-meta__item">
+						<span class="noyona-pay-meta__label"><?php esc_html_e( 'Total', 'noyona' ); ?></span>
+						<strong class="noyona-pay-meta__value"><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></strong>
+					</div>
+				</section>
+
+				<section class="noyona-pay-card">
+					<div class="noyona-pay-card__gateway">
+						<?php if ( '' !== $thankyou_hook_markup ) : ?>
+							<?php echo $thankyou_hook_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php else : ?>
+							<p class="woocommerce-info"><?php esc_html_e( 'Payment instructions are not available right now. Please check your account order history or contact support before placing another order.', 'noyona' ); ?></p>
+						<?php endif; ?>
+					</div>
+				</section>
 			<?php endif; ?>
 		<?php endif; ?>
 	<?php else : ?>
 		<?php
 		$is_preview_mode = isset( $_GET['noyona_preview_done'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&& function_exists( 'noyona_checkout_is_local_env' )
-			&& noyona_checkout_is_local_env();
+			&& function_exists( 'noyona_checkout_allow_done_preview_bypass' )
+			&& noyona_checkout_allow_done_preview_bypass();
 		?>
 		<?php if ( $is_preview_mode ) : ?>
 			<?php

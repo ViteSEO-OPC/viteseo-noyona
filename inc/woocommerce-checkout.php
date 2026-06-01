@@ -27,6 +27,69 @@ if ( ! function_exists( 'noyona_checkout_is_local_env' ) ) {
 	}
 }
 
+if ( ! function_exists( 'noyona_checkout_allow_done_preview_bypass' ) ) {
+	/**
+	 * Keep "done preview" bypass opt-in only.
+	 *
+	 * Default is disabled even in local/dev so normal checkout flow remains:
+	 * cart -> details -> preview -> payment -> done.
+	 *
+	 * To enable locally for UI-only testing, define:
+	 * NOYONA_ENABLE_DONE_PREVIEW_BYPASS = true
+	 *
+	 * @return bool
+	 */
+	function noyona_checkout_allow_done_preview_bypass() {
+		$enabled_via_constant = defined( 'NOYONA_ENABLE_DONE_PREVIEW_BYPASS' ) && NOYONA_ENABLE_DONE_PREVIEW_BYPASS;
+		$enabled              = (bool) apply_filters( 'noyona_checkout_allow_done_preview_bypass', $enabled_via_constant );
+
+		return ( $enabled && function_exists( 'noyona_checkout_is_local_env' ) && noyona_checkout_is_local_env() );
+	}
+}
+
+if ( ! function_exists( 'noyona_get_checkout_attempt_id' ) ) {
+	/**
+	 * Return the current checkout attempt id, rotating when the cart changes.
+	 *
+	 * This token is not authentication. It is an idempotency key that lets the
+	 * server recognize duplicate Place Order submissions from the same checkout
+	 * attempt.
+	 *
+	 * @return string
+	 */
+	function noyona_get_checkout_attempt_id() {
+		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+			return function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : wp_hash( uniqid( 'noyona_checkout_', true ) );
+		}
+
+		$cart_hash         = ( WC()->cart && is_callable( array( WC()->cart, 'get_cart_hash' ) ) ) ? (string) WC()->cart->get_cart_hash() : '';
+		$attempt_id        = (string) WC()->session->get( 'noyona_checkout_attempt_id', '' );
+		$attempt_cart_hash = (string) WC()->session->get( 'noyona_checkout_attempt_cart_hash', '' );
+
+		if ( '' === $attempt_id || $attempt_cart_hash !== $cart_hash ) {
+			$attempt_id = function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : wp_hash( uniqid( 'noyona_checkout_', true ) );
+			WC()->session->set( 'noyona_checkout_attempt_id', $attempt_id );
+			WC()->session->set( 'noyona_checkout_attempt_cart_hash', $cart_hash );
+			WC()->session->set( 'noyona_checkout_completed_attempt_id', '' );
+			WC()->session->set( 'noyona_checkout_completed_order_id', 0 );
+		}
+
+		return $attempt_id;
+	}
+}
+
+if ( ! function_exists( 'noyona_checkout_attempt_lock_key' ) ) {
+	/**
+	 * Build a transient key for a checkout attempt lock.
+	 *
+	 * @param string $attempt_id Checkout attempt id.
+	 * @return string
+	 */
+	function noyona_checkout_attempt_lock_key( $attempt_id ) {
+		return 'noyona_checkout_lock_' . hash( 'sha256', (string) $attempt_id );
+	}
+}
+
 /**
  * Guard against external/plugin redirects to generic /thank-you page.
  *
@@ -129,6 +192,11 @@ function noyona_check_order_payment_status() {
 add_action( 'wp_ajax_noyona_sync_checkout_fields', 'noyona_sync_checkout_fields' );
 add_action( 'wp_ajax_nopriv_noyona_sync_checkout_fields', 'noyona_sync_checkout_fields' );
 function noyona_sync_checkout_fields() {
+	$nonce = isset( $_POST['noyona_sync_checkout_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['noyona_sync_checkout_nonce'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	if ( ! wp_verify_nonce( $nonce, 'noyona_sync_checkout_fields' ) ) {
+		wp_send_json_error( array( 'message' => 'Invalid checkout session.' ), 403 );
+	}
+
 	if ( ! function_exists( 'WC' ) || ! WC()->customer ) {
 		wp_send_json_error( array( 'message' => 'No customer session.' ), 400 );
 	}
@@ -670,6 +738,122 @@ function noyona_save_custom_checkout_fields( $order_id ) {
 	}
 }
 
+/**
+ * Prevent duplicate Place Order submissions for the same checkout attempt.
+ *
+ * Woo already validates the checkout nonce. This adds a short-lived idempotency
+ * lock so double-clicks, browser retries, or connection drops do not create
+ * multiple orders from the same cart attempt.
+ *
+ * @param array    $data   Posted checkout data.
+ * @param WP_Error $errors Checkout validation errors.
+ */
+add_action( 'woocommerce_after_checkout_validation', 'noyona_lock_checkout_attempt_after_validation', 999, 2 );
+function noyona_lock_checkout_attempt_after_validation( $data, $errors ) {
+	if ( ! $errors instanceof WP_Error || $errors->has_errors() ) {
+		return;
+	}
+
+	if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+		return;
+	}
+
+	$attempt_id         = isset( $_POST['noyona_checkout_attempt_id'] ) ? sanitize_text_field( wp_unslash( $_POST['noyona_checkout_attempt_id'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	$session_attempt_id = (string) WC()->session->get( 'noyona_checkout_attempt_id', '' );
+
+	if ( '' === $attempt_id || '' === $session_attempt_id || ! hash_equals( $session_attempt_id, $attempt_id ) ) {
+		$errors->add(
+			'noyona_checkout_attempt_invalid',
+			__( 'Your checkout session expired. Please refresh the checkout page and try again.', 'noyona' )
+		);
+		return;
+	}
+
+	$completed_attempt_id = (string) WC()->session->get( 'noyona_checkout_completed_attempt_id', '' );
+	$completed_order_id   = absint( WC()->session->get( 'noyona_checkout_completed_order_id', 0 ) );
+	if ( '' !== $completed_attempt_id && hash_equals( $completed_attempt_id, $attempt_id ) && $completed_order_id > 0 ) {
+		$errors->add(
+			'noyona_checkout_attempt_completed',
+			sprintf(
+				/* translators: %s: order number */
+				__( 'This checkout attempt already created order #%s. Please check your order history before placing another order.', 'noyona' ),
+				esc_html( (string) $completed_order_id )
+			)
+		);
+		return;
+	}
+
+	$lock_key = noyona_checkout_attempt_lock_key( $attempt_id );
+	if ( get_transient( $lock_key ) ) {
+		$errors->add(
+			'noyona_checkout_attempt_locked',
+			__( 'Your order is already being processed. Please wait a moment before trying again.', 'noyona' )
+		);
+		return;
+	}
+
+	set_transient(
+		$lock_key,
+		array(
+			'time'    => time(),
+			'user_id' => get_current_user_id(),
+		),
+		5 * MINUTE_IN_SECONDS
+	);
+
+	WC()->session->set( 'noyona_checkout_attempt_lock_key', $lock_key );
+	WC()->session->set( 'noyona_checkout_attempt_lock_id', $attempt_id );
+}
+
+/**
+ * Remember the order produced by a checkout attempt.
+ *
+ * If the browser retries after the order exists, the duplicate request is
+ * stopped before creating another order.
+ *
+ * @param int      $order_id Order ID.
+ * @param array    $data     Posted checkout data.
+ * @param WC_Order $order    Created order.
+ */
+add_action( 'woocommerce_checkout_order_processed', 'noyona_mark_checkout_attempt_processed', 10, 3 );
+function noyona_mark_checkout_attempt_processed( $order_id, $data, $order ) {
+	if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+		return;
+	}
+
+	$attempt_id = (string) WC()->session->get( 'noyona_checkout_attempt_id', '' );
+	if ( '' === $attempt_id ) {
+		return;
+	}
+
+	$lock_key = (string) WC()->session->get( 'noyona_checkout_attempt_lock_key', '' );
+	if ( '' !== $lock_key ) {
+		delete_transient( $lock_key );
+		WC()->session->set( 'noyona_checkout_attempt_lock_key', '' );
+	}
+
+	WC()->session->set( 'noyona_checkout_completed_attempt_id', $attempt_id );
+	WC()->session->set( 'noyona_checkout_completed_order_id', absint( $order_id ) );
+}
+
+/**
+ * Release the attempt lock when Woo discards an order because creation failed.
+ *
+ * @param WC_Order $order Discarded order.
+ */
+add_action( 'woocommerce_checkout_order_exception', 'noyona_release_checkout_attempt_lock_on_exception' );
+function noyona_release_checkout_attempt_lock_on_exception( $order ) {
+	if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+		return;
+	}
+
+	$lock_key = (string) WC()->session->get( 'noyona_checkout_attempt_lock_key', '' );
+	if ( '' !== $lock_key ) {
+		delete_transient( $lock_key );
+		WC()->session->set( 'noyona_checkout_attempt_lock_key', '' );
+	}
+}
+
 /* ─── Inline JS ───────────────────────────────────── */
 
 add_action( 'wp_footer', 'noyona_checkout_inline_js' );
@@ -720,7 +904,8 @@ function noyona_checkout_inline_js() {
 		var detailsUrl = <?php echo wp_json_encode( function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' ) ); ?>;
 		var cartUrl = <?php echo wp_json_encode( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) ); ?>;
 		var orderStatusProbeUrl = <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
-		var allowDonePreviewBypass = <?php echo wp_json_encode( noyona_checkout_is_local_env() ); ?>;
+		var checkoutSyncNonce = <?php echo wp_json_encode( wp_create_nonce( 'noyona_sync_checkout_fields' ) ); ?>;
+		var allowDonePreviewBypass = <?php echo wp_json_encode( function_exists( 'noyona_checkout_allow_done_preview_bypass' ) && noyona_checkout_allow_done_preview_bypass() ); ?>;
 		var donePreviewUrl = <?php
 			echo wp_json_encode(
 				add_query_arg(
@@ -881,76 +1066,11 @@ function noyona_checkout_inline_js() {
 			}
 		}
 
+		var hasDoneOrderMarker = !!document.querySelector('[data-noyona-done-order="1"]');
 		var isDoneStep = !isAwaitingPayment && (
-			body.classList.contains('woocommerce-order-received') ||
-			window.location.pathname.indexOf('/order-received/') !== -1 ||
-			(window.location.search.indexOf('noyona_preview_done=1') !== -1)
+			hasDoneOrderMarker ||
+			(allowDonePreviewBypass && window.location.search.indexOf('noyona_preview_done=1') !== -1)
 		);
-
-		function getOrderIdFromOrderPayPath() {
-			var match = window.location.pathname.match(/\/order-pay\/(\d+)/);
-			if (!match || !match[1]) return 0;
-			var value = parseInt(match[1], 10);
-			return Number.isFinite(value) ? value : 0;
-		}
-
-		function autoSubmitOrderPayForm() {
-			if (!isOrderPayPath || !orderPayForm) {
-				return;
-			}
-
-			var hasNoyonaAutoPay = false;
-			var hasPayForOrderParam = false;
-			try {
-				var params = new URLSearchParams(window.location.search || '');
-				hasNoyonaAutoPay = String(params.get('noyona_auto_pay') || '') === '1';
-				hasPayForOrderParam = String(params.get('pay_for_order') || '') === 'true';
-			} catch (e) {
-				hasNoyonaAutoPay = window.location.search.indexOf('noyona_auto_pay=1') !== -1;
-				hasPayForOrderParam = window.location.search.indexOf('pay_for_order=true') !== -1;
-			}
-
-			// My Account autopay route is handled in functions.php (dedicated script).
-			if (hasNoyonaAutoPay) {
-				return;
-			}
-
-			if (!hasPayForOrderParam) {
-				return;
-			}
-
-			var payButton = orderPayForm.querySelector('#place_order, button[name="woocommerce_pay"], input[name="woocommerce_pay"]');
-			if (!payButton || payButton.disabled) {
-				return;
-			}
-
-			var selectedGateway = orderPayForm.querySelector('input[name="payment_method"]:checked');
-			var availableGateways = orderPayForm.querySelectorAll('input[name="payment_method"]');
-			if (availableGateways.length > 0 && !selectedGateway) {
-				return;
-			}
-
-			var orderId = getOrderIdFromOrderPayPath();
-			var autoPayKey = 'noyonaOrderPayAutoSubmitted:' + String(orderId || 'unknown');
-			if (window.sessionStorage) {
-				try {
-					if (window.sessionStorage.getItem(autoPayKey) === '1') {
-						return;
-					}
-					window.sessionStorage.setItem(autoPayKey, '1');
-				} catch (e) {
-					// Ignore storage failures.
-				}
-			}
-
-			window.setTimeout(function () {
-				if (typeof orderPayForm.requestSubmit === 'function') {
-					orderPayForm.requestSubmit(payButton);
-				} else {
-					payButton.click();
-				}
-			}, 450);
-		}
 
 		var draftStorageKey = 'noyonaCheckoutDraft';
 		if (window.location.pathname.indexOf('/order-received/') !== -1 && window.sessionStorage) {
@@ -1026,7 +1146,11 @@ function noyona_checkout_inline_js() {
 					? wc_cart_fragments_params.ajax_url
 					: '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>');
 
-			var body = 'action=noyona_sync_checkout_fields&' + formData;
+			var syncPayload = new URLSearchParams(formData);
+			if (checkoutSyncNonce) {
+				syncPayload.set('noyona_sync_checkout_nonce', checkoutSyncNonce);
+			}
+			var body = 'action=noyona_sync_checkout_fields&' + syncPayload.toString();
 
 			var xhr = new XMLHttpRequest();
 			xhr.open('POST', ajaxUrl, true);
@@ -1412,7 +1536,6 @@ function noyona_checkout_inline_js() {
 			body.classList.remove('noyona-review-step');
 			body.classList.remove('noyona-details-step');
 			ensureCheckoutStepper();
-			autoSubmitOrderPayForm();
 
 			var orderPayStepItems = document.querySelectorAll('.noyona-checkout-steps li');
 			if (orderPayStepItems.length >= 4) {
@@ -2076,173 +2199,6 @@ function noyona_strip_checkout_pay_meta_breaks( $block_content, $block ) {
 add_filter( 'woocommerce_get_checkout_url', 'noyona_force_checkout_url', 99 );
 function noyona_force_checkout_url( $url ) {
     return esc_url_raw( home_url( '/checkout/' ) );
-}
-
-/* ----- Order-pay auto-start: detection + chrome hiding ----- */
-/**
- * Detect "order-pay" pages opened via our My Account "Pay Now" CTA.
- *
- * @return bool
- */
-function noyona_is_order_pay_autostart_request() {
-    if ( is_admin() || wp_doing_ajax() ) {
-        return false;
-    }
-
-    if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
-        return false;
-    }
-
-    if ( ! is_wc_endpoint_url( 'order-pay' ) ) {
-        return false;
-    }
-
-    $auto_flag = isset( $_GET['noyona_auto_pay'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['noyona_auto_pay'] ) ) : '';
-    if ( '1' !== $auto_flag ) {
-        return false;
-    }
-
-    return true;
-}
-
-/**
- * Hide order-pay page chrome while we auto-submit payment form.
- */
-add_action( 'wp_head', 'noyona_render_order_pay_autostart_head', 99 );
-function noyona_render_order_pay_autostart_head() {
-    if ( ! noyona_is_order_pay_autostart_request() ) {
-        return;
-    }
-    ?>
-    <script>
-    document.documentElement.classList.add('noyona-order-pay-autostart');
-    </script>
-    <style>
-    html.noyona-order-pay-autostart body.woocommerce-order-pay .wp-site-blocks main,
-    html.noyona-order-pay-autostart body.woocommerce-order-pay .wp-site-blocks .noyona-checkout-shell,
-    html.noyona-order-pay-autostart body.woocommerce-order-pay .wp-site-blocks .woocommerce {
-        opacity: 0;
-        pointer-events: none;
-    }
-    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready .wp-site-blocks main,
-    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready .wp-site-blocks .noyona-checkout-shell,
-    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready .wp-site-blocks .woocommerce {
-        opacity: 1;
-        pointer-events: auto;
-    }
-    html.noyona-order-pay-autostart body.woocommerce-order-pay::before {
-        content: "Opening payment...";
-        position: fixed;
-        inset: 0;
-        z-index: 999999;
-        display: grid;
-        place-items: center;
-        background: rgba(255, 255, 255, 0.96);
-        color: #1f2933;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-    }
-    html.noyona-order-pay-autostart body.woocommerce-order-pay.noyona-order-pay-autostart-ready::before {
-        display: none;
-    }
-    </style>
-    <?php
-}
-
-/* ----- Order-pay auto-start: auto-submit script ----- */
-/**
- * Auto-submit WooCommerce order-pay form so users skip manual "Pay for order".
- */
-add_action( 'wp_footer', 'noyona_render_order_pay_autostart_script', 120 );
-function noyona_render_order_pay_autostart_script() {
-    if ( ! noyona_is_order_pay_autostart_request() ) {
-        return;
-    }
-    ?>
-    <script>
-    (function () {
-        function revealManualScreen() {
-            if (document.body) {
-                document.body.classList.add('noyona-order-pay-autostart-ready');
-            }
-        }
-
-        function autoSubmitOrderPay() {
-            var form = document.querySelector('form#order_review, form.woocommerce-order-pay, form.woocommerce-checkout');
-            if (!form) {
-                revealManualScreen();
-                return;
-            }
-
-            var orderMatch = window.location.pathname.match(/\/order-pay\/(\d+)/);
-            var orderId = orderMatch && orderMatch[1] ? String(orderMatch[1]) : 'unknown';
-            var orderKey = '';
-            try {
-                orderKey = String(new URLSearchParams(window.location.search || '').get('key') || '');
-            } catch (e) {
-                orderKey = '';
-            }
-
-            var storageKey = 'noyonaOrderPayAutoSubmit:' + orderId + ':' + orderKey;
-            if (window.sessionStorage) {
-                try {
-                    if (window.sessionStorage.getItem(storageKey) === '1') {
-                        revealManualScreen();
-                        return;
-                    }
-                    window.sessionStorage.setItem(storageKey, '1');
-                } catch (e) {
-                    // Ignore storage failures.
-                }
-            }
-
-            var methodRadios = form.querySelectorAll('input[name="payment_method"]');
-            var checkedMethod = form.querySelector('input[name="payment_method"]:checked');
-            if (!checkedMethod && methodRadios.length > 0) {
-                methodRadios[0].checked = true;
-                methodRadios[0].dispatchEvent(new Event('change', { bubbles: true }));
-            }
-
-            var terms = form.querySelector('#terms');
-            if (terms && !terms.checked) {
-                terms.checked = true;
-                terms.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-
-            var payButton = form.querySelector('#place_order, button[name="woocommerce_pay"], input[type="submit"][name="woocommerce_pay"], .form-row button[type="submit"]');
-            if (!payButton || payButton.disabled) {
-                revealManualScreen();
-                return;
-            }
-
-            window.setTimeout(function () {
-                try {
-                    if (window.jQuery) {
-                        window.jQuery(form).trigger('submit');
-                    } else if (typeof form.requestSubmit === 'function') {
-                        form.requestSubmit(payButton);
-                    } else {
-                        payButton.click();
-                    }
-                } catch (error) {
-                    revealManualScreen();
-                }
-            }, 180);
-
-            window.setTimeout(function () {
-                // If still on this page after a short delay, allow manual fallback.
-                revealManualScreen();
-            }, 4500);
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', autoSubmitOrderPay);
-        } else {
-            autoSubmitOrderPay();
-        }
-    })();
-    </script>
-    <?php
 }
 
 /* ----- Checkout footer: remove empty <p> tags ----- */
