@@ -22,6 +22,7 @@
     margin: 0 0 0.6rem;
     font-size: var(--wp--preset--font-size--h-1);
     font-weight: 400;
+    color: #ffffff;
 }
 
 .term-overview__hero-subtitle {

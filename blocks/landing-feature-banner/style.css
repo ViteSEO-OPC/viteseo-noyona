@@ -88,7 +88,7 @@
   color: rgba(255, 255, 255, 0.95);
   font-size: clamp(16px, 1.35vw, 20px);
   line-height: normal;
-  max-width: 680px;
+  /* max-width: 680px; */
 }
 
 @media (max-width: 1100px) {

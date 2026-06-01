@@ -86,10 +86,10 @@
   align-items: center;
   justify-content: center;
   transition: background 0.15s ease, color 0.15s ease;
-  max-width: 200px;
+  max-width: none;
   box-sizing: border-box;
   text-align: center;
-  white-space: normal;
+  white-space: nowrap;
 }
 
 .newsletter-strip__inner > .newsletter-strip__button {
@@ -105,6 +105,18 @@
 @media (max-width: 900px) {
   .newsletter-strip {
     margin-bottom: 0;
+  }
+
+  .newsletter-strip__inner {
+    height: auto;
+    min-height: max(var(--newsletter-strip-height, 190px), 190px);
+    padding: clamp(1.75rem, 5vw, 2.5rem) var(--page-gutter-right) clamp(1.5rem, 4vw, 2rem) var(--page-gutter-left);
+    border-radius: clamp(80px, 18vw, 140px) clamp(80px, 18vw, 140px) 0 0;
+  }
+
+  .newsletter-strip__title {
+    font-size: clamp(2rem, 4.8vw, var(--wp--preset--font-size--h-2));
+    line-height: 1.12;
   }
 }
 
