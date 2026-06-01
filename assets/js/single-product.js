@@ -554,7 +554,7 @@
     }) || null;
   }
 
-  function applyShadeGalleryFallback(form, beforeSrc) {
+  function applyShadeGalleryFallback(form) {
     var shadeSelect = getSelectedShadeSelect(form);
     if (!shadeSelect) return;
 
@@ -562,10 +562,6 @@
     if (!gallery) return;
 
     var currentSrc = getCurrentGalleryImageSrc(gallery);
-    if (beforeSrc && currentSrc && !imageUrlsMatch(beforeSrc, currentSrc)) {
-      return;
-    }
-
     var match = findShadeGalleryMatch(gallery, shadeSelect.value, getSelectedOptionText(shadeSelect));
     if (!match) return;
 
@@ -578,9 +574,11 @@
 
   function scheduleShadeGalleryFallback(form, beforeSrc) {
     if (!form || !form.classList.contains('variations_form')) return;
-    window.setTimeout(function () {
-      applyShadeGalleryFallback(form, beforeSrc);
-    }, 260);
+    [80, 260, 520].forEach(function (delay) {
+      window.setTimeout(function () {
+        applyShadeGalleryFallback(form, beforeSrc);
+      }, delay);
+    });
   }
 
   function bindShadeGalleryFallback(form) {
@@ -598,6 +596,12 @@
         scheduleShadeGalleryFallback(form, getCurrentGalleryImageSrc(getPdpGallery()));
       });
     });
+
+    if (window.jQuery) {
+      window.jQuery(form).on('found_variation.noyonaShadeGallery show_variation.noyonaShadeGallery reset_image.noyonaShadeGallery', function () {
+        scheduleShadeGalleryFallback(form, getCurrentGalleryImageSrc(getPdpGallery()));
+      });
+    }
   }
 
   function getVariationFormForSelect(select) {
