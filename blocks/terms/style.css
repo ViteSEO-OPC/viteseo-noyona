@@ -31,6 +31,7 @@
     font-size: var(--wp--preset--font-size--h-1);
     font-family: var(--wp--preset--font-family--poppins);
     font-weight: 400;
+    color: #ffffff;
 }
 
 .terms__hero-subtitle {
