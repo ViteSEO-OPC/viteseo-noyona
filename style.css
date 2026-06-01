@@ -1282,6 +1282,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
     overflow-y: auto;
     position: sticky;
     top: calc(var(--noyona-header-total-offset, 72px) + 16px);
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   }
 }
 
