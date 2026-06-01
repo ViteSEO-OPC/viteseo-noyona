@@ -1070,6 +1070,214 @@
     queueRefresh(0);
   }
 
+  function initAddToCartSuccessAnimation() {
+    const ADD_TO_CART_SELECTOR = [
+      '.add_to_cart_button',
+      '.ajax_add_to_cart',
+      '.single_add_to_cart_button',
+      '.ps-btn-cart',
+      '[name="add-to-cart"]',
+    ].join(',');
+    const PRODUCT_SCOPE_SELECTOR = [
+      '.wc-block-product',
+      '.product',
+      '.type-product',
+      '.noyona-product-slide',
+      '.noyona-pdp-related-card',
+      '.summary',
+      'form.cart',
+    ].join(',');
+    const PRODUCT_IMAGE_SELECTOR = [
+      '.wc-block-components-product-image img',
+      '.woocommerce-product-gallery__image img',
+      '.wp-post-image',
+      '.product img',
+      'img',
+    ].join(',');
+
+    let lastClickedAddToCart = null;
+    let lastClickedAt = 0;
+    let lastAnimatedAt = 0;
+    let toastTimer = null;
+
+    const normalizeEventSource = (source) => {
+      if (!source) return null;
+      if (source.nodeType === 1) return source;
+      if (source.jquery && source[0] && source[0].nodeType === 1) return source[0];
+      if (Array.isArray(source) && source[0] && source[0].nodeType === 1) return source[0];
+      return null;
+    };
+
+    const isVisible = (el) => {
+      if (!el || typeof el.getBoundingClientRect !== 'function') return false;
+      const rect = el.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    };
+
+    const getProductImage = (source) => {
+      if (!source) return null;
+      const scope = source.closest(PRODUCT_SCOPE_SELECTOR) || document;
+      const image = scope.querySelector(PRODUCT_IMAGE_SELECTOR);
+      return isVisible(image) ? image : null;
+    };
+
+    const getSourceElement = (source) => {
+      const explicitSource = normalizeEventSource(source);
+      const recentClickSource = Date.now() - lastClickedAt < 4500 ? lastClickedAddToCart : null;
+      const sourceEl = explicitSource || recentClickSource;
+      return getProductImage(sourceEl) || sourceEl || null;
+    };
+
+    const getCartTargetRect = () => {
+      const target = document.querySelector(
+        '.header-mini-cart .wc-block-mini-cart__button,' +
+          '.header-icons .header-cart-fallback,' +
+          '.header-mini-cart,' +
+          '.wp-block-woocommerce-mini-cart'
+      );
+
+      if (isVisible(target)) {
+        return target.getBoundingClientRect();
+      }
+
+      return {
+        left: window.innerWidth - 48,
+        top: Math.max(16, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--noyona-adminbar-height'), 10) || 16),
+        width: 32,
+        height: 32,
+      };
+    };
+
+    const showSuccessToast = () => {
+      let toast = document.querySelector('.noyona-add-cart-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.className = 'noyona-add-cart-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        toast.innerHTML = '<span class="noyona-add-cart-toast__icon" aria-hidden="true">✓</span><span>Added to cart</span>';
+        document.body.appendChild(toast);
+      }
+
+      toast.classList.remove('is-visible');
+      window.requestAnimationFrame(() => {
+        toast.classList.add('is-visible');
+      });
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('is-visible');
+      }, 1800);
+    };
+
+    const pulseCartIcon = () => {
+      const target = document.querySelector(
+        '.header-mini-cart .wc-block-mini-cart__button,' +
+          '.header-icons .header-cart-fallback,' +
+          '.header-mini-cart'
+      );
+      if (!target) return;
+
+      target.classList.remove('noyona-cart-success-pulse');
+      void target.offsetWidth;
+      target.classList.add('noyona-cart-success-pulse');
+      setTimeout(() => {
+        target.classList.remove('noyona-cart-success-pulse');
+      }, 850);
+    };
+
+    const createFlyer = (sourceEl, sourceRect) => {
+      const sourceImage = sourceEl && sourceEl.tagName === 'IMG'
+        ? sourceEl
+        : getProductImage(sourceEl);
+
+      if (sourceImage && sourceImage.currentSrc) {
+        const flyer = document.createElement('img');
+        flyer.src = sourceImage.currentSrc;
+        flyer.alt = '';
+        flyer.className = 'noyona-add-cart-flyer';
+        return flyer;
+      }
+
+      const flyer = document.createElement('div');
+      flyer.className = 'noyona-add-cart-flyer noyona-add-cart-flyer--fallback';
+      flyer.innerHTML = '<span aria-hidden="true">✓</span>';
+      flyer.style.width = Math.min(54, Math.max(34, sourceRect.width || 44)) + 'px';
+      flyer.style.height = flyer.style.width;
+      return flyer;
+    };
+
+    const animateSuccess = (source) => {
+      const now = Date.now();
+      if (now - lastAnimatedAt < 450) {
+        return;
+      }
+      lastAnimatedAt = now;
+
+      const sourceEl = getSourceElement(source);
+      const sourceRect = isVisible(sourceEl)
+        ? sourceEl.getBoundingClientRect()
+        : {
+            left: window.innerWidth / 2 - 22,
+            top: window.innerHeight / 2 - 22,
+            width: 44,
+            height: 44,
+          };
+      const cartRect = getCartTargetRect();
+      const flyer = createFlyer(sourceEl, sourceRect);
+      const startSize = Math.min(72, Math.max(38, Math.min(sourceRect.width || 48, sourceRect.height || 48)));
+      const startX = sourceRect.left + (sourceRect.width - startSize) / 2;
+      const startY = sourceRect.top + (sourceRect.height - startSize) / 2;
+      const endX = cartRect.left + cartRect.width / 2 - 12;
+      const endY = cartRect.top + cartRect.height / 2 - 12;
+
+      flyer.style.left = startX + 'px';
+      flyer.style.top = startY + 'px';
+      flyer.style.width = startSize + 'px';
+      flyer.style.height = startSize + 'px';
+      document.body.appendChild(flyer);
+
+      window.requestAnimationFrame(() => {
+        flyer.style.setProperty('--noyona-add-cart-x', Math.round(endX - startX) + 'px');
+        flyer.style.setProperty('--noyona-add-cart-y', Math.round(endY - startY) + 'px');
+        flyer.classList.add('is-flying');
+      });
+
+      setTimeout(() => {
+        flyer.remove();
+        pulseCartIcon();
+      }, 820);
+
+      showSuccessToast();
+    };
+
+    document.addEventListener(
+      'click',
+      (event) => {
+        const button = event.target.closest(ADD_TO_CART_SELECTOR);
+        if (!button) return;
+        lastClickedAddToCart = button;
+        lastClickedAt = Date.now();
+      },
+      true
+    );
+
+    if (window.jQuery) {
+      window.jQuery(document.body).on('added_to_cart', (event, fragments, cartHash, button) => {
+        animateSuccess(button);
+      });
+    }
+
+    document.body.addEventListener('wc-blocks_added_to_cart', (event) => {
+      if (event.detail && event.detail.source === 'header-mini-cart-retry') return;
+      animateSuccess(event.detail && event.detail.button ? event.detail.button : null);
+    });
+
+    document.body.addEventListener('noyona_cart_added', (event) => {
+      animateSuccess(event.detail && event.detail.button ? event.detail.button : null);
+    });
+  }
+
   function initHeaderCartFallback() {
     const iconsRoot = document.querySelector('.header-icons');
     if (!iconsRoot) return;
@@ -1555,6 +1763,27 @@
     const categoryLinks = Array.from(
       categoryWrap.querySelectorAll('.wc-block-product-categories-list-item > a')
     );
+    const params = new URLSearchParams(window.location.search);
+
+    if (document.querySelector('.noyona-product-search-page')) {
+      const currentCategory = String(params.get('product_cat') || '').toLowerCase();
+      categoryLinks.forEach((link) => {
+        const linkUrl = new URL(link.href, window.location.origin);
+        const linkCategory = String(linkUrl.searchParams.get('product_cat') || '').toLowerCase();
+        const isActive = currentCategory !== '' && linkCategory === currentCategory;
+        link.classList.toggle('is-active', isActive);
+        if (isActive) {
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+
+      if (allProductsLink) {
+        allProductsLink.classList.toggle('is-active', currentCategory === '');
+      }
+      return;
+    }
 
     let hasMatchedCategory = false;
     categoryLinks.forEach((link) => {
@@ -2309,7 +2538,7 @@
     const current = String(params.get('orderby') || 'menu_order').toLowerCase();
 
     const isPaginationKey = (key) =>
-      key === 'paged' || key === 'product-page' || /^query-\d+-page$/.test(key);
+      key === 'paged' || key === 'product-page' || key === 'search_page' || /^query-\d+-page$/.test(key);
 
     lists.forEach((list) => {
       const options = Array.from(list.querySelectorAll('.noyona-shop-sort-option'));
@@ -2354,6 +2583,7 @@
     initWishlist();
     initMiniCartCloseAction();
     initMiniCartDynamicUi();
+    initAddToCartSuccessAnimation();
     initHeaderCartFallback();
     initMiniCartAutoOpen();
     initAccountDropdown();
