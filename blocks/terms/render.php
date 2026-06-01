@@ -203,5 +203,8 @@ if ( '' === $breadcrumb_current ) {
             </div>
         </div>
     </div>
+    <button class="terms__scroll-top" type="button" aria-label="<?php esc_attr_e( 'Back to top', 'noyona-childtheme' ); ?>">
+        <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+    </button>
 </section>
 

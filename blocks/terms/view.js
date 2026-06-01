@@ -25,6 +25,22 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('resize', applyScrollOffset);
 
     termBlocks.forEach(function (block) {
+        var scrollTopButton = block.querySelector('.terms__scroll-top');
+        var updateScrollTopButton = function () {
+            if (!scrollTopButton) return;
+            var blockTop = block.getBoundingClientRect().top;
+            scrollTopButton.classList.toggle('is-visible', blockTop < -240);
+        };
+
+        if (scrollTopButton) {
+            scrollTopButton.addEventListener('click', function () {
+                block.scrollIntoView({ behavior: scrollBehavior, block: 'start' });
+            });
+            updateScrollTopButton();
+            window.addEventListener('scroll', updateScrollTopButton, { passive: true });
+            window.addEventListener('resize', updateScrollTopButton);
+        }
+
         var links = Array.prototype.slice.call(
             block.querySelectorAll('.terms__toc-link[href^="#"]')
         );
