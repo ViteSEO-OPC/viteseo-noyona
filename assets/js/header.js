@@ -1723,7 +1723,7 @@
     const placeholder = document.createComment('noyona-shop-categories-placeholder');
     categories.parentNode.insertBefore(placeholder, categories.nextSibling);
 
-    const media = window.matchMedia('(max-width: 999px)');
+    const media = window.matchMedia('(max-width: 1201px)');
 
     const moveCategories = () => {
       if (media.matches) {
@@ -2080,6 +2080,212 @@
     render();
   }
 
+  function getShopWishlistConfig() {
+    const header = window.noyonaHeader || {};
+    const wishlist = header.wishlist || {};
+    const i18n = header.i18n || {};
+    return {
+      ajaxUrl: header.ajaxUrl ? String(header.ajaxUrl) : '/wp-admin/admin-ajax.php',
+      nonce: wishlist.nonce ? String(wishlist.nonce) : '',
+      loginUrl: wishlist.loginUrl ? String(wishlist.loginUrl) : (header.accountUrl ? String(header.accountUrl) : '/my-account/'),
+      savedKeys: Array.isArray(wishlist.savedKeys) ? wishlist.savedKeys.map(String) : [],
+      i18n,
+    };
+  }
+
+  function getShopWishlistText(key, fallback) {
+    const cfg = getShopWishlistConfig();
+    return cfg.i18n && cfg.i18n[key] ? String(cfg.i18n[key]) : fallback;
+  }
+
+  function getShopCardProductId(card) {
+    if (!card) return 0;
+
+    const datasetId = parseInt(card.getAttribute('data-product-id') || '0', 10);
+    if (datasetId > 0) return datasetId;
+
+    const addButton = card.querySelector('[data-product_id], [data-product-id]');
+    if (addButton) {
+      const buttonId = parseInt(
+        addButton.getAttribute('data-product_id') || addButton.getAttribute('data-product-id') || '0',
+        10
+      );
+      if (buttonId > 0) return buttonId;
+    }
+
+    const addToCartInput = card.querySelector('[name="add-to-cart"]');
+    if (addToCartInput) {
+      const inputId = parseInt(addToCartInput.value || '0', 10);
+      if (inputId > 0) return inputId;
+    }
+
+    const postClass = Array.from(card.classList).find((className) => /^post-\d+$/.test(className));
+    if (postClass) {
+      return parseInt(postClass.replace('post-', ''), 10) || 0;
+    }
+
+    return 0;
+  }
+
+  function getShopWishlistItemKey(productId, variationId = 0) {
+    return String(productId) + ':' + String(variationId || 0);
+  }
+
+  function isShopWishlistItemSaved(productId, variationId = 0) {
+    const key = getShopWishlistItemKey(productId, variationId);
+    return getShopWishlistConfig().savedKeys.indexOf(key) !== -1;
+  }
+
+  function setShopWishlistSavedKeys(keys) {
+    const header = window.noyonaHeader || {};
+    if (!header.wishlist) {
+      header.wishlist = {};
+    }
+    header.wishlist.savedKeys = keys;
+    window.noyonaHeader = header;
+  }
+
+  function setShopWishlistButtonState(button, saved) {
+    if (!button) return;
+
+    const addLabel = getShopWishlistText('wishlistAdd', 'Add to wishlist');
+    const removeLabel = getShopWishlistText('wishlistRemove', 'Remove from wishlist');
+    const label = saved ? removeLabel : addLabel;
+
+    button.classList.toggle('is-active', !!saved);
+    button.setAttribute('aria-pressed', saved ? 'true' : 'false');
+    button.setAttribute('aria-label', label);
+  }
+
+  function bindGlobalLoginModalOnce() {
+    const modal = document.querySelector('[data-mini-cart-login-modal-global]');
+    if (!modal || modal.dataset.noyonaGlobalLoginBound === '1') return;
+
+    modal.dataset.noyonaGlobalLoginBound = '1';
+    modal.querySelectorAll('[data-mini-cart-login-close]').forEach((button) => {
+      button.addEventListener('click', () => {
+        modal.hidden = true;
+        document.documentElement.classList.remove('noyona-mini-cart-login-open');
+      });
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || modal.hidden) return;
+      modal.hidden = true;
+      document.documentElement.classList.remove('noyona-mini-cart-login-open');
+    });
+  }
+
+  function openShopWishlistLoginModal() {
+    const cfg = getShopWishlistConfig();
+    const modal = document.querySelector('[data-mini-cart-login-modal-global]');
+
+    if (!modal) {
+      window.location.href = cfg.loginUrl;
+      return;
+    }
+
+    bindGlobalLoginModalOnce();
+
+    const title = modal.querySelector('.noyona-mini-cart-login-title');
+    const copy = modal.querySelector('.noyona-mini-cart-login-copy');
+    const redirect = modal.querySelector('[data-mini-cart-login-redirect]');
+
+    if (title) {
+      title.textContent = getShopWishlistText('wishlistLoginTitle', 'Log in to save your wishlist');
+    }
+    if (copy) {
+      copy.textContent = getShopWishlistText('wishlistLoginCopy', 'Please log in to save products and view them from My Account.');
+    }
+    if (redirect) {
+      redirect.setAttribute('value', window.location.href);
+    }
+
+    modal.hidden = false;
+    document.documentElement.classList.add('noyona-mini-cart-login-open');
+  }
+
+  function toggleShopWishlistItem(button, productId) {
+    const cfg = getShopWishlistConfig();
+    const itemKey = getShopWishlistItemKey(productId, 0);
+    const payload = new URLSearchParams();
+
+    payload.set('action', 'noyona_toggle_product_wishlist');
+    payload.set('nonce', cfg.nonce);
+    payload.set('product_id', String(productId));
+    payload.set('variation_id', '0');
+
+    button.disabled = true;
+
+    return fetch(cfg.ajaxUrl, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      },
+      body: payload.toString(),
+    })
+      .then((response) => response.json().catch(() => null).then((data) => ({ ok: response.ok, data })))
+      .then((result) => {
+        if (!result || !result.ok || !result.data || !result.data.success) {
+          const message = result && result.data && result.data.data ? result.data.data.message : '';
+          if (message === 'not_logged_in') {
+            openShopWishlistLoginModal();
+            return null;
+          }
+          window.alert(getShopWishlistText('wishlistError', 'Wishlist could not be updated. Please try again.'));
+          return null;
+        }
+
+        const responseData = result.data.data || {};
+        const saved = !!responseData.saved;
+        const keys = cfg.savedKeys.slice();
+        const resolvedKey = responseData.item_key ? String(responseData.item_key) : itemKey;
+        const keyIndex = keys.indexOf(resolvedKey);
+
+        if (saved && keyIndex === -1) {
+          keys.push(resolvedKey);
+        } else if (!saved && keyIndex !== -1) {
+          keys.splice(keyIndex, 1);
+        }
+
+        setShopWishlistSavedKeys(keys);
+        setShopWishlistButtonState(button, saved);
+        return saved;
+      })
+      .catch(() => {
+        window.alert(getShopWishlistText('wishlistError', 'Wishlist could not be updated. Please try again.'));
+        return null;
+      })
+      .finally(() => {
+        button.disabled = false;
+      });
+  }
+
+  function bindShopWishlistButton(button, card) {
+    if (!button || button.dataset.noyonaWishlistBound === '1') return;
+
+    const productId = getShopCardProductId(card);
+    if (productId < 1) return;
+
+    button.dataset.productId = String(productId);
+    button.dataset.noyonaWishlistBound = '1';
+    setShopWishlistButtonState(button, isShopWishlistItemSaved(productId, 0));
+
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!document.body.classList.contains('logged-in')) {
+        openShopWishlistLoginModal();
+        return;
+      }
+
+      if (button.disabled) return;
+      toggleShopWishlistItem(button, productId);
+    });
+  }
+
   function initShopProductActions() {
     const cards = Array.from(document.querySelectorAll('.noyona-shop-products .wc-block-product'));
     if (!cards.length) return;
@@ -2118,15 +2324,12 @@
       const wishlistButton = document.createElement('button');
       wishlistButton.type = 'button';
       wishlistButton.className = 'noyona-shop-wishlist-btn';
-      wishlistButton.setAttribute('aria-label', 'Add to wishlist');
+      wishlistButton.setAttribute('aria-label', getShopWishlistText('wishlistAdd', 'Add to wishlist'));
       wishlistButton.setAttribute('aria-pressed', 'false');
       wishlistButton.innerHTML = heartSvg;
-      wishlistButton.addEventListener('click', () => {
-        const isOn = wishlistButton.getAttribute('aria-pressed') === 'true';
-        wishlistButton.setAttribute('aria-pressed', isOn ? 'false' : 'true');
-      });
 
       actions.appendChild(wishlistButton);
+      bindShopWishlistButton(wishlistButton, card);
 
       // Cards rendered with the Noyona footer already include the primary Buy Now CTA.
       // Keep only wishlist on those cards to avoid duplicate actions in list view.
@@ -2483,7 +2686,7 @@
     const filterPanel = document.querySelector('.noyona-shop-filters');
     if (!filterToggle || !filterPanel) return;
 
-    const MOBILE_BREAKPOINT = 999;
+    const MOBILE_BREAKPOINT = 1201;
 
     const openFilter = () => {
       if (window.innerWidth > MOBILE_BREAKPOINT) return;

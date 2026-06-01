@@ -349,37 +349,272 @@ function noyona_filter_products_by_price_range( $products, $min_price, $max_pric
     );
 }
 
-/* ----- Render a single product card ----- */
+/* ----- Product card helpers (shop, search, landing grids) ----- */
 /**
- * Render a single product card with the unified layout:
- * image → title → excerpt → footer (price left, buy-now right).
+ * Primary product category label for card chrome (skips "uncategorized").
+ *
+ * @param WC_Product $product Product object.
+ * @return string
  */
-function noyona_render_product_card( $product ) {
-    $image_id   = $product->get_image_id();
-    $image      = $image_id
-        ? wp_get_attachment_image( $image_id, 'woocommerce_thumbnail', false, array( 'class' => 'wc-block-components-product-image' ) )
-        : wc_placeholder_img( 'woocommerce_thumbnail' );
-    $title      = $product->get_name();
-    $link       = $product->get_permalink();
-    $excerpt    = has_excerpt( $product->get_id() ) ? get_the_excerpt( $product->get_id() ) : '';
-    if ( $excerpt ) {
-        $excerpt = wp_trim_words( $excerpt, 22 );
+function noyona_get_product_card_category_name( $product ) {
+    if ( ! $product instanceof WC_Product ) {
+        return '';
     }
-    $price_html    = $product->get_price_html();
-    $buy_now_url   = $link;
-    $buy_now_label = esc_html__( 'Buy Now!', 'noyona' );
+
+    $terms = get_the_terms( $product->get_id(), 'product_cat' );
+    if ( empty( $terms ) || is_wp_error( $terms ) ) {
+        return '';
+    }
+
+    foreach ( $terms as $term ) {
+        if ( $term instanceof WP_Term && 'uncategorized' !== $term->slug ) {
+            return (string) $term->name;
+        }
+    }
+
+    $first = reset( $terms );
+    return $first instanceof WP_Term ? (string) $first->name : '';
+}
+
+/**
+ * Sale discount percentage for simple/variable min prices (0 when not on sale).
+ *
+ * @param WC_Product $product Product object.
+ * @return int
+ */
+function noyona_get_product_card_discount_percent( $product ) {
+    if ( ! $product instanceof WC_Product || ! $product->is_on_sale() ) {
+        return 0;
+    }
+
+    if ( $product->is_type( 'variable' ) ) {
+        $regular = (float) $product->get_variation_regular_price( 'min', true );
+        $sale    = (float) $product->get_variation_sale_price( 'min', true );
+    } else {
+        $regular = (float) $product->get_regular_price();
+        $sale    = (float) $product->get_sale_price();
+    }
+
+    if ( $sale <= 0 ) {
+        $sale = (float) $product->get_price();
+    }
+    if ( $regular <= 0 ) {
+        $regular = $sale;
+    }
+
+    if ( $regular <= 0 || $sale <= 0 || $sale >= $regular ) {
+        return 0;
+    }
+
+    return (int) round( ( ( $regular - $sale ) / $regular ) * 100 );
+}
+
+/**
+ * Rating row for product cards.
+ *
+ * @param WC_Product $product Product object.
+ * @return string
+ */
+function noyona_get_product_card_rating_html( $product ) {
+    if ( ! $product instanceof WC_Product ) {
+        return '';
+    }
+
+    $rating       = (float) $product->get_average_rating();
+    $review_count = (int) $product->get_rating_count();
+
+    if ( $review_count < 1 ) {
+        return '';
+    }
+
+    $rating_html = wc_get_rating_html( $rating, $review_count );
+    if ( ! $rating_html ) {
+        return '';
+    }
 
     ob_start();
     ?>
-    <div class="wc-block-product">
-        <a href="<?php echo esc_url( $link ); ?>" class="wc-block-components-product-image"><?php echo $image; ?></a>
+    <div class="noyona-product-card-meta__rating">
+        <?php echo $rating_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+        <span class="noyona-product-card-meta__rating-count">
+            <?php
+            echo esc_html(
+                sprintf(
+                    /* translators: %d: number of reviews */
+                    _n( '(%d review)', '(%d reviews)', $review_count, 'noyona-childtheme' ),
+                    $review_count
+                )
+            );
+            ?>
+        </span>
+    </div>
+    <?php
+    return trim( (string) ob_get_clean() );
+}
+
+/**
+ * Units sold label for product cards.
+ *
+ * @param WC_Product $product Product object.
+ * @return string
+ */
+function noyona_get_product_card_sold_html( $product ) {
+    if ( ! $product instanceof WC_Product ) {
+        return '';
+    }
+
+    $sold = max( 0, (int) $product->get_total_sales() );
+    if ( $sold < 1 ) {
+        return '';
+    }
+
+    return sprintf(
+        '<span class="noyona-product-card-meta__sold">%s</span>',
+        esc_html(
+            sprintf(
+                /* translators: %d: number of units sold */
+                _n( '%d sold', '%d sold', $sold, 'noyona-childtheme' ),
+                $sold
+            )
+        )
+    );
+}
+
+/**
+ * Meta row: category, rating, and sold count.
+ *
+ * @param WC_Product $product Product object.
+ * @return string
+ */
+function noyona_get_product_card_meta_html( $product ) {
+    if ( ! $product instanceof WC_Product ) {
+        return '';
+    }
+
+    $parts = array();
+
+    $category = noyona_get_product_card_category_name( $product );
+    if ( '' !== $category ) {
+        $parts[] = '<span class="noyona-product-card-meta__category">' . esc_html( $category ) . '</span>';
+    }
+
+    $rating_html = noyona_get_product_card_rating_html( $product );
+    if ( '' !== $rating_html ) {
+        $parts[] = $rating_html;
+    }
+
+    $sold_html = noyona_get_product_card_sold_html( $product );
+    if ( '' !== $sold_html ) {
+        $parts[] = $sold_html;
+    }
+
+    if ( empty( $parts ) ) {
+        return '';
+    }
+
+    return '<div class="noyona-product-card-meta">' . implode( '', $parts ) . '</div>';
+}
+
+/**
+ * Price block with optional discount badge and smaller struck-through regular price.
+ *
+ * @param WC_Product $product Product object.
+ * @return string
+ */
+function noyona_get_product_card_price_html( $product ) {
+    if ( ! $product instanceof WC_Product ) {
+        return '';
+    }
+
+    $discount_pct = noyona_get_product_card_discount_percent( $product );
+
+    if ( $product->is_type( 'variable' ) ) {
+        $min_sale    = (float) $product->get_variation_sale_price( 'min', true );
+        $max_sale    = (float) $product->get_variation_sale_price( 'max', true );
+        $min_regular = (float) $product->get_variation_regular_price( 'min', true );
+        $max_regular = (float) $product->get_variation_regular_price( 'max', true );
+
+        if ( $min_sale <= 0 ) {
+            $min_sale = (float) $product->get_price();
+        }
+        if ( $max_sale <= 0 ) {
+            $max_sale = $min_sale;
+        }
+
+        $has_range = ( $min_sale !== $max_sale ) || ( $min_regular !== $max_regular && $min_regular > 0 );
+
+        if ( $has_range ) {
+            return '<div class="noyona-product-card-price wc-block-components-product-price">' . $product->get_price_html() . '</div>';
+        }
+
+        $regular = $min_regular > 0 ? $min_regular : $min_sale;
+        $sale    = $min_sale;
+    } else {
+        $regular = (float) $product->get_regular_price();
+        $sale    = (float) $product->get_sale_price();
+        if ( $sale <= 0 ) {
+            $sale = (float) $product->get_price();
+        }
+        if ( $regular <= 0 ) {
+            $regular = $sale;
+        }
+    }
+
+    ob_start();
+    ?>
+    <div class="noyona-product-card-price wc-block-components-product-price">
+        <?php if ( $discount_pct > 0 ) : ?>
+            <span class="noyona-product-card-price__badge">-<?php echo esc_html( (string) $discount_pct ); ?>%</span>
+            <del class="noyona-product-card-price__old"><?php echo wp_kses_post( wc_price( $regular ) ); ?></del>
+            <ins class="noyona-product-card-price__current"><?php echo wp_kses_post( wc_price( $sale ) ); ?></ins>
+        <?php else : ?>
+            <span class="noyona-product-card-price__current"><?php echo wp_kses_post( wc_price( $sale ) ); ?></span>
+        <?php endif; ?>
+    </div>
+    <?php
+    return trim( (string) ob_get_clean() );
+}
+
+/* ----- Render a single product card ----- */
+/**
+ * Render a single product card with the unified layout:
+ * image → title → meta → excerpt → footer (price left, buy-now right).
+ */
+function noyona_render_product_card( $product ) {
+    if ( ! $product instanceof WC_Product ) {
+        return '';
+    }
+
+    $image_id      = $product->get_image_id();
+    $image         = $image_id
+        ? wp_get_attachment_image( $image_id, 'woocommerce_thumbnail', false, array( 'class' => 'wc-block-components-product-image' ) )
+        : wc_placeholder_img( 'woocommerce_thumbnail' );
+    $title         = $product->get_name();
+    $link          = $product->get_permalink();
+    $excerpt       = has_excerpt( $product->get_id() ) ? get_the_excerpt( $product->get_id() ) : '';
+    $meta_html     = noyona_get_product_card_meta_html( $product );
+    $price_html    = noyona_get_product_card_price_html( $product );
+    $buy_now_url   = $link;
+    $buy_now_label = esc_html__( 'Buy Now!', 'noyona' );
+
+    if ( $excerpt ) {
+        $excerpt = wp_trim_words( $excerpt, 22 );
+    }
+
+    ob_start();
+    ?>
+    <div class="wc-block-product" data-product-id="<?php echo esc_attr( (string) $product->get_id() ); ?>">
+        <a href="<?php echo esc_url( $link ); ?>" class="wc-block-components-product-image"><?php echo $image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
         <h3 class="wc-block-product-title wp-block-post-title"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $title ); ?></a></h3>
+        <?php if ( '' !== $meta_html ) : ?>
+            <?php echo $meta_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+        <?php endif; ?>
         <?php if ( $excerpt ) : ?>
             <div class="wp-block-post-excerpt"><p><?php echo esc_html( $excerpt ); ?></p></div>
         <?php endif; ?>
         <div class="noyona-product-card-footer">
-            <div class="wc-block-components-product-price"><?php echo $price_html; ?></div>
-            <a href="<?php echo $buy_now_url; ?>" class="noyona-buy-now-btn"><?php echo $buy_now_label; ?></a>
+            <?php echo $price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <a href="<?php echo esc_url( $buy_now_url ); ?>" class="noyona-buy-now-btn"><?php echo $buy_now_label; ?></a>
         </div>
     </div>
     <?php
