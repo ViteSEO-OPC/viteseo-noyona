@@ -71,6 +71,8 @@ $breadcrumb_current = trim( (string) $atts['breadcrumbCurrent'] );
 if ( '' === $breadcrumb_current ) {
     $breadcrumb_current = $atts['contentTitle'];
 }
+
+$toc_panel_id = uniqid( 'terms-toc-panel-' );
 ?>
 
 <section class="wp-block-noyona-terms terms alignfull">
@@ -96,10 +98,29 @@ if ( '' === $breadcrumb_current ) {
             <?php endif; ?>
             <span class="terms__crumb-sep" aria-hidden="true">&gt;</span>
             <span class="terms__crumb-current"><?php echo esc_html( $breadcrumb_current ); ?></span>
+            <button
+                class="terms__toc-toggle"
+                type="button"
+                aria-label="<?php esc_attr_e( 'Open table of contents', 'noyona-childtheme' ); ?>"
+                aria-controls="<?php echo esc_attr( $toc_panel_id ); ?>"
+                aria-expanded="false"
+                data-terms-toc-open
+            >
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </button>
         </nav>
 
         <div class="terms__layout">
-            <aside class="terms__toc" aria-label="Table of contents">
+            <div class="terms__toc-backdrop" data-terms-toc-close></div>
+            <aside class="terms__toc" id="<?php echo esc_attr( $toc_panel_id ); ?>" aria-label="Table of contents">
+                <div class="terms__toc-panel-head">
+                    <span class="terms__toc-panel-title"><?php esc_html_e( '', 'noyona-childtheme' ); ?></span>
+                    <button class="terms__toc-close" type="button" aria-label="<?php esc_attr_e( 'Close table of contents', 'noyona-childtheme' ); ?>" data-terms-toc-close>
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                </div>
                 <?php if ( ! empty( $atts['tocTitle'] ) ) : ?>
                     <span class="terms__toc-pill"><?php echo esc_html( $atts['tocTitle'] ); ?></span>
                 <?php endif; ?>

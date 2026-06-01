@@ -1231,19 +1231,42 @@
       const icon = toggle ? toggle.querySelector('i') : null;
       if (!navItem) return;
 
-      const isOpen = navItem.classList.toggle('is-open');
+      const willOpen = !navItem.classList.contains('is-open');
+      if (willOpen) {
+        $$('.nav-item.has-dropdown.is-open').forEach((openItem) => {
+          if (openItem === navItem) return;
+          openItem.classList.remove('is-open');
+
+          const openToggle = openItem.querySelector('.submenu-toggle');
+          const openIcon = openToggle ? openToggle.querySelector('i') : null;
+          const openTrigger = openItem.querySelector('[data-dropdown-trigger]');
+
+          if (openToggle) {
+            openToggle.setAttribute('aria-expanded', 'false');
+          }
+          if (openTrigger) {
+            openTrigger.setAttribute('aria-expanded', 'false');
+          }
+          if (openIcon) {
+            openIcon.classList.add('fa-plus');
+            openIcon.classList.remove('fa-minus');
+          }
+        });
+      }
+
+      navItem.classList.toggle('is-open', willOpen);
       if (toggle) {
-        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
       }
 
       const trigger = navItem.querySelector('[data-dropdown-trigger]');
       if (trigger) {
-        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
       }
 
       if (icon) {
-        icon.classList.toggle('fa-plus', !isOpen);
-        icon.classList.toggle('fa-minus', isOpen);
+        icon.classList.toggle('fa-plus', !willOpen);
+        icon.classList.toggle('fa-minus', willOpen);
       }
     };
 
