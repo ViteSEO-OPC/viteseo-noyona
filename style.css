@@ -1691,7 +1691,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   border: none;
   border-radius: var(--noyona-radius-cta);
   background: #fff;
-  padding: 16px;
+  /* padding: 16px; */
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
   position: relative;
   display: flex;
@@ -1700,14 +1700,14 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 
 .noyona-shop-products .wc-block-components-product-image {
   position: relative;
-  display: flex;
+  /* display: flex; */
   align-items: center;
   justify-content: center;
   aspect-ratio: 1 / 1;
   margin-bottom: 16px;
-  border-radius: 8px;
+  border-radius: 22px 22px 0px 0px;
   overflow: hidden;
-  background: #fff;
+  background: var(--noyona-color-pink-muted-rose);
 }
 
 .noyona-shop-products .wc-block-components-product-image a {
@@ -1736,6 +1736,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   color: #000000;
   margin: 0 0 4px;
   line-height: normal;
+  padding: 0 16px;
 }
 
 .noyona-shop-products .wc-block-product .wp-block-post-title a,
@@ -1759,6 +1760,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   color: #666;
   line-height: normal;
   margin: 0 0 12px;
+  padding: 0 16px;
 }
 
 .noyona-shop-products .wc-block-product .wp-block-post-excerpt p {
@@ -1772,6 +1774,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   align-items: center;
   gap: 8px 12px;
   margin: 0 0 10px;
+  padding: 0 16px;
 }
 
 .noyona-shop-products .noyona-product-card-meta__category {
@@ -1822,6 +1825,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   align-items: baseline;
   gap: 4px 8px;
   margin: 0;
+  padding: 0 16px;
 }
 
 .noyona-shop-products .noyona-product-card-price__badge {
@@ -1885,6 +1889,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   gap: 10px;
   margin-top: auto;
   padding-top: 8px;
+  padding: 0 16px;
 }
 
 .noyona-product-card-footer .wc-block-components-product-price,
@@ -1981,7 +1986,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product > .wc-block-c
   margin: 0;
   border-radius: var(--noyona-radius-cta);
   overflow: hidden;
-  background: var(--ps-media-bg);
+  background: #fff;
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-components-product-image img {

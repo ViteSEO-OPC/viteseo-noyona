@@ -117,7 +117,7 @@
 }
 
 .ps-card__media {
-  background: var(--ps-media-bg);
+  background: var(--noyona-color-pink-muted-rose);
   border-radius: var(--ps-radius-media);
   position: relative;
   display: flex;
