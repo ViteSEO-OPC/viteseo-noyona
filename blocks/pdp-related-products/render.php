@@ -18,7 +18,7 @@ $defaults = array(
 	'subheading' => __( 'Complete your look with these favorites', 'viteseo-noyona-childtheme' ),
 	'viewAllText'=> __( 'View All', 'viteseo-noyona-childtheme' ),
 	'viewAllUrl' => '/shop/',
-	'limit'      => 3,
+	'limit'      => 4,
 );
 
 $atts      = wp_parse_args( is_array( $attributes ) ? $attributes : array(), $defaults );
