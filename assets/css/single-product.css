@@ -745,7 +745,7 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   font-size: 16px !important;
   background: #FFFFFF !important;
   color: #D81B60 !important;
-  border: 3px solid #D81B60 !important;
+  border: 1px solid #D81B60 !important;
   box-shadow: none !important;
   margin-top: 0;
 }

@@ -1562,7 +1562,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 
 .noyona-shop-filter-section-price .noyona-shop-filter-price-input {
   min-height: 54px;
-  border-width: 2px;
+  border-width: 1px;
   border-color: #e9a3af;
   padding: 0 16px;
 }

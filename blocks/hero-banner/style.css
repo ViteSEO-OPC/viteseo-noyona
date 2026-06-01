@@ -210,7 +210,7 @@
     padding: clamp(12px, 1.1vw, 0.85rem) clamp(1rem, 1.8vw, 1.4rem);
     background: #FFFFFF;
     color: #D81B60;
-    border: 3px solid #D81B60;
+    border: 1px solid #D81B60;
     border-radius: 16px !important;
     font-weight: 700;
     font-size: 16px;
