@@ -20,7 +20,7 @@ function noyona_pdp_render_product_fields() {
 		array(
 			'id'          => '_noyona_social_proof',
 			'label'       => __( 'PDP social proof line', 'viteseo-noyona-childtheme' ),
-			'description' => __( 'Optional. Example: 150+ sold in the last 2 days. Shown above the product title.', 'viteseo-noyona-childtheme' ),
+			'description' => __( 'Optional. Example: A top-rated favorite. Shown above the product title.', 'viteseo-noyona-childtheme' ),
 			'desc_tip'    => true,
 		)
 	);
@@ -577,4 +577,71 @@ function noyona_pdp_render_best_seller_gallery_badge( $block_content, $block ) {
 	}
 
 	return $block_content;
+}
+
+/**
+ * Mobile/tablet sticky buy bar + slide-up buy sheet shell.
+ *
+ * Renders a fixed bottom bar (Add to cart / Buy now) and an EMPTY slide-up
+ * sheet on product pages. The sheet body is just a slot — single-product.js
+ * relocates the real `form.cart` node into it on viewports <= 781px
+ * (Strategy A: no form duplication, no cloned variation/add-to-cart logic) and
+ * restores it to its original position on wider viewports.
+ *
+ * All visibility is CSS-gated to <= 781px, so desktop renders this markup
+ * hidden and the desktop PDP is unchanged.
+ */
+add_action( 'wp_footer', 'noyona_pdp_render_buy_bar_and_sheet', 20 );
+function noyona_pdp_render_buy_bar_and_sheet() {
+	if ( is_admin() || ! function_exists( 'is_product' ) || ! is_product() ) {
+		return;
+	}
+
+	$product = function_exists( 'wc_get_product' ) ? wc_get_product( get_queried_object_id() ) : null;
+	if ( ! $product instanceof WC_Product ) {
+		return;
+	}
+
+	$add_label   = esc_html__( 'Add to cart', 'viteseo-noyona-childtheme' );
+	$buy_label   = esc_html__( 'Buy now', 'viteseo-noyona-childtheme' );
+	$close_label = esc_attr__( 'Close', 'viteseo-noyona-childtheme' );
+	$sheet_label = esc_attr__( 'Add to cart options', 'viteseo-noyona-childtheme' );
+	$region_label = esc_attr__( 'Purchase options', 'viteseo-noyona-childtheme' );
+
+	$thumb_html = $product->get_image(
+		'woocommerce_thumbnail',
+		array(
+			'class'   => 'noyona-pdp-buysheet__thumb-img',
+			'loading' => 'lazy',
+		)
+	);
+	$title = esc_html( $product->get_name() );
+	?>
+	<div class="noyona-pdp-buybar" data-noyona-buybar role="region" aria-label="<?php echo $region_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+		<button type="button" class="noyona-pdp-buybar__btn noyona-pdp-buybar__btn--cart" data-noyona-buybar-add>
+			<?php echo $add_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</button>
+		<button type="button" class="noyona-pdp-buybar__btn noyona-pdp-buybar__btn--buy" data-noyona-buybar-buy>
+			<?php echo $buy_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</button>
+	</div>
+
+	<div class="noyona-pdp-buysheet" data-noyona-buysheet hidden>
+		<div class="noyona-pdp-buysheet__backdrop" data-noyona-buysheet-backdrop></div>
+		<div class="noyona-pdp-buysheet__panel" role="dialog" aria-modal="true" aria-label="<?php echo $sheet_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+			<button type="button" class="noyona-pdp-buysheet__close" data-noyona-buysheet-close aria-label="<?php echo $close_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
+				<i class="fa-solid fa-xmark" aria-hidden="true"></i>
+			</button>
+			<div class="noyona-pdp-buysheet__header">
+				<div class="noyona-pdp-buysheet__thumb"><?php echo $thumb_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+				<div class="noyona-pdp-buysheet__meta">
+					<div class="noyona-pdp-buysheet__title"><?php echo $title; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+					<div class="noyona-pdp-buysheet__price" data-noyona-buysheet-price></div>
+					<div class="noyona-pdp-buysheet__variant" data-noyona-buysheet-variant></div>
+				</div>
+			</div>
+			<div class="noyona-pdp-buysheet__body" data-noyona-buysheet-form-slot></div>
+		</div>
+	</div>
+	<?php
 }

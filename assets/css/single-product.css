@@ -1577,3 +1577,292 @@ body.single-product .related.products ul.products li.product .onsale {
     padding: 0.35rem 0.8rem;
   }
 }
+
+/* ====================================================================
+ * Mobile/tablet sticky buy bar + slide-up buy sheet (<= 781px only).
+ * Desktop (>= 782px) never displays these — the shell stays hidden and
+ * the relocated form is restored to its original PDP position by JS.
+ * ================================================================== */
+
+/* Hidden by default on every viewport; shown only inside the media query. */
+.noyona-pdp-buybar {
+  display: none;
+}
+
+.noyona-pdp-buysheet {
+  display: none;
+}
+
+/* Lock background scroll while the sheet is open (any viewport, harmless). */
+html.noyona-pdp-buysheet-open,
+html.noyona-pdp-buysheet-open body {
+  overflow: hidden;
+}
+
+@media (max-width: 781px) {
+  /* Spacer so the fixed bar never covers the last bit of page content. */
+  body.single-product .noyona-pdp-main {
+    padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Hide the now-empty inline add-to-cart wrapper while the form lives in
+     the sheet. The class is toggled by JS only on mobile relocation. */
+  body.single-product .noyona-pdp-form-relocated {
+    display: none !important;
+  }
+
+  /* ---------- Sticky bottom buy bar ---------- */
+  .noyona-pdp-buybar {
+    display: flex;
+    gap: 0.6rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9000;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: #ffffff;
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Sticky bar is only the entry point: show Add to cart only. The Buy now
+     CTA lives inside the sheet (the in-form button), not on the bar. */
+  .noyona-pdp-buybar__btn--buy {
+    display: none;
+  }
+
+  .noyona-pdp-buybar__btn {
+    flex: 1 1 100%;
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.1;
+    border-radius: 16px;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  /* Frame 82 — Add to cart (outline) */
+  .noyona-pdp-buybar__btn--cart {
+    background: #ffffff;
+    color: #d81b60;
+    border: 3px solid #d81b60;
+  }
+
+  .noyona-pdp-buybar__btn--cart:hover,
+  .noyona-pdp-buybar__btn--cart:active {
+    background: #efb5be;
+    color: #d81b60;
+    border: 3px solid #d81b60;
+  }
+
+  /* Frame 83 — Buy now (filled) */
+  .noyona-pdp-buybar__btn--buy {
+    background: #efb5be;
+    color: #d81b60;
+    border: none;
+  }
+
+  .noyona-pdp-buybar__btn--buy:hover,
+  .noyona-pdp-buybar__btn--buy:active {
+    background: #d81b60;
+    color: #ffffff;
+    border: none;
+  }
+
+  /* ---------- Slide-up buy sheet ---------- */
+  .noyona-pdp-buysheet.is-open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 9500;
+  }
+
+  .noyona-pdp-buysheet__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    animation: noyonaBuySheetFade 0.2s ease;
+  }
+
+  .noyona-pdp-buysheet__panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #ffffff;
+    color: #000000;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
+    animation: noyonaBuySheetUp 0.28s cubic-bezier(0.16, 0.84, 0.44, 1);
+  }
+
+  @keyframes noyonaBuySheetUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes noyonaBuySheetFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .noyona-pdp-buysheet__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.06);
+    color: #000000;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .noyona-pdp-buysheet__close:hover,
+  .noyona-pdp-buysheet__close:active {
+    background: rgba(0, 0, 0, 0.12);
+  }
+
+  .noyona-pdp-buysheet__header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding-right: 48px; /* clear the close button */
+    margin-bottom: 16px;
+  }
+
+  .noyona-pdp-buysheet__thumb {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .noyona-pdp-buysheet__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .noyona-pdp-buysheet__meta {
+    min-width: 0;
+  }
+
+  .noyona-pdp-buysheet__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #000000;
+    margin-bottom: 2px;
+  }
+
+  .noyona-pdp-buysheet__price {
+    font-size: 17px;
+    font-weight: 700;
+    color: #000000;
+  }
+
+  .noyona-pdp-buysheet__price .wc-block-components-product-price__value,
+  .noyona-pdp-buysheet__price .woocommerce-Price-amount,
+  .noyona-pdp-buysheet__price ins,
+  .noyona-pdp-buysheet__price del {
+    color: #000000;
+  }
+
+  .noyona-pdp-buysheet__price del {
+    opacity: 0.55;
+  }
+
+  .noyona-pdp-buysheet__variant {
+    font-size: 13px;
+    color: var(--noyona-color-pink-muted-rose);
+    margin-top: 2px;
+  }
+
+  .noyona-pdp-buysheet__variant:empty {
+    display: none;
+  }
+
+  /* Relocated form: black body text + labels on the white sheet. */
+  .noyona-pdp-buysheet__body {
+    color: #000000;
+  }
+
+  .noyona-pdp-buysheet__body label,
+  .noyona-pdp-buysheet__body .noyona-pdp-variation__shade-label,
+  .noyona-pdp-buysheet__body .noyona-pdp-variation__field-label {
+    color: #000000;
+  }
+
+  /* Selected shade / variant name uses the brand muted-rose accent. */
+  .noyona-pdp-buysheet__body .noyona-pdp-variation__shade-current,
+  .noyona-pdp-buysheet__body .noyona-pdp-variation__field-current {
+    color: var(--noyona-color-pink-muted-rose);
+  }
+
+  /* Quantity label + input stay solid black on the white sheet. */
+  .noyona-pdp-buysheet__body .quantity.noyona-pdp-qty::before,
+  .noyona-pdp-buysheet__body .quantity.noyona-pdp-qty .qty {
+    color: #000000;
+  }
+
+  /* Confirm CTA = the form's existing Add to cart button, full-width,
+     Frame 83 filled. The in-sheet Buy now stacks beneath it. */
+  .noyona-pdp-buysheet__body .noyona-pdp-cart-actions {
+    flex-direction: column;
+    margin-top: 18px;
+  }
+
+  body.single-product .noyona-pdp-buysheet__body form.cart .single_add_to_cart_button {
+    flex: 1 1 100%;
+    width: 100%;
+    min-height: 48px;
+    background: #efb5be !important;
+    color: #d81b60 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  body.single-product .noyona-pdp-buysheet__body form.cart .single_add_to_cart_button:hover,
+  body.single-product .noyona-pdp-buysheet__body form.cart .single_add_to_cart_button:active {
+    background: #d81b60 !important;
+    color: #ffffff !important;
+  }
+
+  /* Inside the sheet the shopper can choose either CTA: keep both the
+     Add to cart (confirm) and the Buy now full-width and stacked. */
+  body.single-product .noyona-pdp-buysheet__body .noyona-pdp-cart-actions .noyona-pdp-buy-now {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}

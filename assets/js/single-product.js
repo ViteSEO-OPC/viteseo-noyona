@@ -2100,6 +2100,396 @@
     });
   }
 
+  /* ===================================================================
+   * Mobile/tablet sticky buy bar + slide-up buy sheet (Strategy A).
+   *
+   * The real `form.cart` is RELOCATED into the sheet on viewports <= 781px
+   * and RESTORED to its original DOM position on wider viewports. No form is
+   * cloned and no variation/add-to-cart logic is duplicated: every existing
+   * binding (swatches, quantity stepper, variation price sync, AJAX add to
+   * cart, buy-now) lives on the form node itself and survives the move.
+   * ================================================================= */
+
+  var NOYONA_BUYSHEET_MQ = '(max-width: 781px)';
+  var noyonaBuySheetLastFocus = null;
+  var noyonaBuySheetKeyHandler = null;
+
+  function noyonaIsMobileViewport() {
+    return typeof window.matchMedia === 'function' && window.matchMedia(NOYONA_BUYSHEET_MQ).matches;
+  }
+
+  function getNoyonaBuyBar() {
+    return document.querySelector('[data-noyona-buybar]');
+  }
+
+  function getNoyonaBuySheet() {
+    return document.querySelector('[data-noyona-buysheet]');
+  }
+
+  function getNoyonaPdpCartForm() {
+    return document.querySelector('.single-product form.cart, body.single-product form.cart');
+  }
+
+  function getNoyonaMainPriceNode() {
+    return document.querySelector(
+      '.single-product .wp-block-woocommerce-product-price .wc-block-components-product-price'
+    );
+  }
+
+  /**
+   * Move the real form.cart into the sheet on mobile, or back to its original
+   * spot on desktop. Idempotent: only touches the DOM when the form is not
+   * already where it should be. A comment node marks the original position so
+   * restoration is exact even if sibling nodes change.
+   */
+  function relocateNoyonaFormForViewport() {
+    var form = getNoyonaPdpCartForm();
+    var sheet = getNoyonaBuySheet();
+    if (!form || !sheet) {
+      return;
+    }
+    var slot = sheet.querySelector('[data-noyona-buysheet-form-slot]');
+    if (!slot) {
+      return;
+    }
+
+    if (!form._noyonaBuysheetOrigin) {
+      var marker = document.createComment('noyona-buysheet-form-origin');
+      form.parentNode.insertBefore(marker, form);
+      form._noyonaBuysheetOrigin = marker;
+      form._noyonaOriginWrapper = form.parentNode;
+    }
+
+    if (noyonaIsMobileViewport()) {
+      if (form.parentNode !== slot) {
+        slot.appendChild(form);
+      }
+      if (form._noyonaOriginWrapper) {
+        form._noyonaOriginWrapper.classList.add('noyona-pdp-form-relocated');
+      }
+    } else {
+      var origin = form._noyonaBuysheetOrigin;
+      if (origin && origin.parentNode && form.parentNode !== origin.parentNode) {
+        origin.parentNode.insertBefore(form, origin.nextSibling);
+      }
+      if (form._noyonaOriginWrapper) {
+        form._noyonaOriginWrapper.classList.remove('noyona-pdp-form-relocated');
+      }
+      // Never leave the sheet open on desktop.
+      closeNoyonaBuySheet(true);
+    }
+  }
+
+  /**
+   * Mirror the live price + selected variant text into the sheet header.
+   * Reads the same nodes the rest of the PDP keeps up to date, so it stays in
+   * sync with WooCommerce variation events without owning any state.
+   */
+  function refreshNoyonaBuySheetHeader() {
+    var sheet = getNoyonaBuySheet();
+    if (!sheet) {
+      return;
+    }
+
+    var priceTarget = sheet.querySelector('[data-noyona-buysheet-price]');
+    var mainPrice = getNoyonaMainPriceNode();
+    if (priceTarget && mainPrice) {
+      priceTarget.innerHTML = mainPrice.innerHTML;
+    }
+
+    var variantTarget = sheet.querySelector('[data-noyona-buysheet-variant]');
+    if (variantTarget) {
+      var parts = [];
+      document
+        .querySelectorAll('.noyona-pdp-variation__shade-current, .noyona-pdp-variation__field-current')
+        .forEach(function (node) {
+          var txt = (node.textContent || '').trim();
+          if (txt) {
+            parts.push(txt);
+          }
+        });
+      variantTarget.textContent = parts.join(' / ');
+    }
+  }
+
+  function openNoyonaBuySheet() {
+    var sheet = getNoyonaBuySheet();
+    if (!sheet || !noyonaIsMobileViewport()) {
+      return;
+    }
+
+    // Make sure the form lives in the sheet before showing it.
+    relocateNoyonaFormForViewport();
+
+    noyonaBuySheetLastFocus = document.activeElement;
+
+    sheet.removeAttribute('hidden');
+    sheet.classList.add('is-open');
+    document.documentElement.classList.add('noyona-pdp-buysheet-open');
+    document.body.classList.add('noyona-pdp-buysheet-open');
+
+    refreshNoyonaBuySheetHeader();
+
+    var closeBtn = sheet.querySelector('[data-noyona-buysheet-close]');
+    window.setTimeout(function () {
+      if (closeBtn) {
+        closeBtn.focus();
+      }
+    }, 0);
+
+    if (!noyonaBuySheetKeyHandler) {
+      noyonaBuySheetKeyHandler = function (event) {
+        if (event.key === 'Escape' || event.key === 'Esc') {
+          closeNoyonaBuySheet();
+        }
+      };
+      document.addEventListener('keydown', noyonaBuySheetKeyHandler);
+    }
+  }
+
+  function closeNoyonaBuySheet(skipFocusReturn) {
+    var sheet = getNoyonaBuySheet();
+    if (!sheet) {
+      return;
+    }
+
+    var wasOpen = sheet.classList.contains('is-open');
+    sheet.classList.remove('is-open');
+    sheet.setAttribute('hidden', '');
+    document.documentElement.classList.remove('noyona-pdp-buysheet-open');
+    document.body.classList.remove('noyona-pdp-buysheet-open');
+
+    if (noyonaBuySheetKeyHandler) {
+      document.removeEventListener('keydown', noyonaBuySheetKeyHandler);
+      noyonaBuySheetKeyHandler = null;
+    }
+
+    if (!skipFocusReturn && wasOpen && noyonaBuySheetLastFocus && typeof noyonaBuySheetLastFocus.focus === 'function') {
+      try {
+        noyonaBuySheetLastFocus.focus();
+      } catch (e) {
+        /* no-op */
+      }
+    }
+    noyonaBuySheetLastFocus = null;
+  }
+
+  /**
+   * Has the shopper actively confirmed a variation on this form?
+   *
+   * A WooCommerce default/preselected variation can populate `variation_id`
+   * on load without any user interaction. We therefore require BOTH a real
+   * variation id AND a user-interaction flag (set only on genuine swatch /
+   * pill clicks or trusted native-select changes — see
+   * bindNoyonaVariationInteraction). Simple products always return true.
+   */
+  function noyonaFormHasConfirmedVariation(form) {
+    if (!form || !form.classList.contains('variations_form')) {
+      return true; // Simple product — nothing to confirm.
+    }
+    if (!form._noyonaUserSelectedVariation) {
+      return false; // Default/preselected only — not user-confirmed yet.
+    }
+    var variationId = form.querySelector('input[name="variation_id"]');
+    return !!(variationId && variationId.value && variationId.value !== '0');
+  }
+
+  /**
+   * Track real user interaction with variation controls on a form, so we can
+   * distinguish a user-chosen variation from a default/preselected one.
+   *
+   *  - Swatch (.noyona-pdp-swatch) and pill (.noyona-pdp-choice) clicks are
+   *    genuine user input. The hidden native select's `change` is dispatched
+   *    programmatically (isTrusted === false), so we cannot rely on it.
+   *  - Dropdown controls keep the native <select> visible; a user change there
+   *    is trusted, so we accept change events with isTrusted === true.
+   *  - On reset_data (variation cleared/invalid) we drop the confirmation so a
+   *    fresh selection is required.
+   *
+   * Also installs a mobile-only capture guard on the in-sheet buy-now button so
+   * it cannot submit a default shade. Desktop is never affected (the guard
+   * no-ops when the viewport is not <=781px and the bar/sheet are absent).
+   */
+  function bindNoyonaVariationInteraction(form) {
+    if (!form || !form.classList.contains('variations_form')) {
+      return;
+    }
+    if (form._noyonaInteractionBound) {
+      return;
+    }
+    form._noyonaInteractionBound = true;
+    form._noyonaUserSelectedVariation = false;
+
+    form.addEventListener(
+      'click',
+      function (event) {
+        var target = event.target;
+        if (target && (target.closest('.noyona-pdp-swatch') || target.closest('.noyona-pdp-choice'))) {
+          form._noyonaUserSelectedVariation = true;
+        }
+      },
+      true
+    );
+
+    form.addEventListener(
+      'change',
+      function (event) {
+        var target = event.target;
+        if (
+          event.isTrusted &&
+          target &&
+          target.matches &&
+          target.matches('select[name^="attribute_"]')
+        ) {
+          form._noyonaUserSelectedVariation = true;
+        }
+      },
+      true
+    );
+
+    // Block the in-sheet buy-now from submitting a default shade (mobile only).
+    form.addEventListener(
+      'click',
+      function (event) {
+        var buyBtn = event.target ? event.target.closest('.noyona-pdp-buy-now') : null;
+        if (!buyBtn) {
+          return;
+        }
+        if (!noyonaIsMobileViewport()) {
+          return; // Desktop PDP unchanged.
+        }
+        if (noyonaFormHasConfirmedVariation(form)) {
+          return; // Confirmed — let the existing buy-now flow run.
+        }
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openNoyonaBuySheet();
+      },
+      true
+    );
+
+    if (typeof window.jQuery !== 'undefined') {
+      window
+        .jQuery(form)
+        .off('reset_data.noyonaBuyGuard')
+        .on('reset_data.noyonaBuyGuard', function () {
+          form._noyonaUserSelectedVariation = false;
+        });
+    }
+  }
+
+  /**
+   * Sticky "Buy now": if the product is variable and the shopper has not
+   * actively confirmed a shade/variant (default/preselected does NOT count),
+   * open the sheet so they can pick one. Otherwise click the existing in-form
+   * buy-now button, which already handles login gating, variation validation,
+   * the noyona_buy_now hidden input, and the WooCommerce cart redirect.
+   */
+  function handleNoyonaStickyBuyNow() {
+    var form = getNoyonaPdpCartForm();
+    if (!form) {
+      return;
+    }
+
+    if (!noyonaFormHasConfirmedVariation(form)) {
+      openNoyonaBuySheet();
+      return;
+    }
+
+    var realBuyNow = form.querySelector('.noyona-pdp-buy-now');
+    if (realBuyNow) {
+      realBuyNow.click();
+    }
+  }
+
+  function bindNoyonaBuyBar() {
+    var bar = getNoyonaBuyBar();
+    if (!bar || bar.getAttribute('data-noyona-bound') === '1') {
+      return;
+    }
+    bar.setAttribute('data-noyona-bound', '1');
+
+    var addBtn = bar.querySelector('[data-noyona-buybar-add]');
+    var buyBtn = bar.querySelector('[data-noyona-buybar-buy]');
+
+    if (addBtn) {
+      addBtn.addEventListener('click', function () {
+        openNoyonaBuySheet();
+      });
+    }
+    if (buyBtn) {
+      buyBtn.addEventListener('click', function () {
+        handleNoyonaStickyBuyNow();
+      });
+    }
+  }
+
+  function bindNoyonaBuySheet() {
+    var sheet = getNoyonaBuySheet();
+    if (!sheet || sheet.getAttribute('data-noyona-bound') === '1') {
+      return;
+    }
+    sheet.setAttribute('data-noyona-bound', '1');
+
+    var closeBtn = sheet.querySelector('[data-noyona-buysheet-close]');
+    var backdrop = sheet.querySelector('[data-noyona-buysheet-backdrop]');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        closeNoyonaBuySheet();
+      });
+    }
+    if (backdrop) {
+      backdrop.addEventListener('click', function () {
+        closeNoyonaBuySheet();
+      });
+    }
+
+    if (typeof window.jQuery !== 'undefined') {
+      // Close the sheet once an add succeeds; the existing flow then opens the
+      // mini-cart drawer (skip focus return so it doesn't fight the drawer).
+      window.jQuery(document.body).off('added_to_cart.noyonaBuySheet').on('added_to_cart.noyonaBuySheet', function () {
+        closeNoyonaBuySheet(true);
+      });
+
+      // Keep the sheet header price + selected variant text in sync.
+      window
+        .jQuery(document.body)
+        .off('found_variation.noyonaBuySheet show_variation.noyonaBuySheet reset_data.noyonaBuySheet hide_variation.noyonaBuySheet')
+        .on(
+          'found_variation.noyonaBuySheet show_variation.noyonaBuySheet reset_data.noyonaBuySheet hide_variation.noyonaBuySheet',
+          'form.variations_form',
+          function () {
+            refreshNoyonaBuySheetHeader();
+          }
+        );
+    }
+  }
+
+  function initNoyonaBuySheet() {
+    var bar = getNoyonaBuyBar();
+    var sheet = getNoyonaBuySheet();
+    if (!bar || !sheet) {
+      return; // Shell not present (not a PDP) — nothing to wire.
+    }
+
+    bindNoyonaBuyBar();
+    bindNoyonaBuySheet();
+    relocateNoyonaFormForViewport();
+
+    if (!window.__noyonaBuySheetMqlBound) {
+      window.__noyonaBuySheetMqlBound = true;
+      var mql = window.matchMedia(NOYONA_BUYSHEET_MQ);
+      var onChange = function () {
+        relocateNoyonaFormForViewport();
+      };
+      if (typeof mql.addEventListener === 'function') {
+        mql.addEventListener('change', onChange);
+      } else if (typeof mql.addListener === 'function') {
+        mql.addListener(onChange);
+      }
+    }
+  }
+
   function initPdp() {
     clearLegacyAddToCartState();
     initTabs(document);
@@ -2111,7 +2501,10 @@
       bindVariationPriceSync(form);
       bindAjaxAddToCart(form);
       addBuyNow(form);
+      bindNoyonaVariationInteraction(form);
     });
+
+    initNoyonaBuySheet();
   }
 
   /**

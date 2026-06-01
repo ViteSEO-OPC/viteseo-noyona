@@ -17,10 +17,14 @@ if ( ! $product ) {
 $line = get_post_meta( $product->get_id(), '_noyona_social_proof', true );
 $line = is_string( $line ) ? trim( $line ) : '';
 
+if ( '150+ sold in the last 2 days' === $line ) {
+	$line = __( 'A top-rated favorite', 'viteseo-noyona-childtheme' );
+}
+
 if ( '' === $line ) {
 	$line = apply_filters(
 		'noyona_pdp_social_proof_default_line',
-		__( '150+ sold in the last 2 days', 'viteseo-noyona-childtheme' ),
+		__( 'A top-rated favorite', 'viteseo-noyona-childtheme' ),
 		$product
 	);
 	$line = is_string( $line ) ? trim( $line ) : '';
