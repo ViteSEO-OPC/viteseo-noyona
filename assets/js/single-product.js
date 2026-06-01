@@ -522,10 +522,13 @@
   function isShadeGalleryAttributeSelect(select) {
     if (!select || !select.getAttribute) return false;
     if (isColorAttributeSelect(select)) return true;
-    if (isSizePackAttributeSelect(select)) return true;
 
     var name = (select.getAttribute('name') || '').toLowerCase();
     return /^attribute_(pa_)?(shade|swatch|tone|tint)$/.test(name);
+  }
+
+  function isGalleryFallbackAttributeSelect(select) {
+    return isShadeGalleryAttributeSelect(select) || isSizePackAttributeSelect(select);
   }
 
   function getSelectedOptionText(select) {
@@ -538,8 +541,16 @@
   function getSelectedShadeSelect(form) {
     if (!form) return null;
     var selects = Array.prototype.slice.call(form.querySelectorAll('select[name^="attribute_"]'));
-    return selects.find(function (select) {
+    var shadeSelect = selects.find(function (select) {
       return isShadeGalleryAttributeSelect(select) && !!select.value;
+    });
+
+    if (shadeSelect) {
+      return shadeSelect;
+    }
+
+    return selects.find(function (select) {
+      return isSizePackAttributeSelect(select) && !!select.value;
     }) || null;
   }
 
@@ -578,7 +589,7 @@
     }
 
     var selects = Array.prototype.slice.call(form.querySelectorAll('select[name^="attribute_"]'))
-      .filter(isShadeGalleryAttributeSelect);
+      .filter(isGalleryFallbackAttributeSelect);
     if (!selects.length) return;
 
     form._noyonaShadeGalleryBound = true;
