@@ -70,7 +70,7 @@
   overflow: hidden;
   margin-bottom: 0.65rem;
   text-decoration: none;
-  background: #fff;
+  background: var(--noyona-color-pink-muted-rose);
 }
 
 .noyona-pdp-related__image-wrap img {

@@ -1093,7 +1093,7 @@ html.noyona-pdp-lightbox-open body {
   width: 100% !important;
   border-radius: clamp(14px, 2.5vw, 22px);
   overflow: hidden;
-  background: #fdf7f8;
+  background: #fff !important;
 }
 
 /* FlexSlider track: no overflow/isolation — would clip translate3d strip or hide slides */
