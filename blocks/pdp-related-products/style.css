@@ -105,7 +105,7 @@
   min-height: 1.25rem;
   padding: 0.12rem 0.62rem;
   border-radius: 999px;
-  background: #eeb2be;
+  background: var(--noyona-color-pink-accent);
   color: #fff;
   font-size: 0.84rem;
   font-weight: 600;

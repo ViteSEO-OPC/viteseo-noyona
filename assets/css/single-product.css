@@ -269,7 +269,7 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 .single-product .woocommerce ins {
   order: 1;
   text-decoration: none;
-  color: var(--noyona-color-pink-muted-rose);
+  color: #000;
 }
 
 /* Short description */
