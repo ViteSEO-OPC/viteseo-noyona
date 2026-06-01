@@ -19,8 +19,8 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 }
 
 $is_done_preview = isset( $_GET['noyona_preview_done'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	&& function_exists( 'noyona_checkout_is_local_env' )
-	&& noyona_checkout_is_local_env();
+	&& function_exists( 'noyona_checkout_allow_done_preview_bypass' )
+	&& noyona_checkout_allow_done_preview_bypass();
 
 if ( $is_done_preview ) {
 	wc_get_template(
@@ -36,6 +36,7 @@ $request_uri    = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUE
 $request_path   = trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' );
 $reviews_path   = trim( (string) wp_parse_url( home_url( '/preview/' ), PHP_URL_PATH ), '/' );
 $is_review_step = ( '' !== $reviews_path && $request_path === $reviews_path );
+$checkout_attempt_id = function_exists( 'noyona_get_checkout_attempt_id' ) ? noyona_get_checkout_attempt_id() : wp_generate_uuid4();
 $saved_checkout_addresses = array();
 $saved_checkout_payload   = array();
 if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses' ) ) {
@@ -111,6 +112,8 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
       aria-label="<?php echo esc_attr__( 'Checkout', 'woocommerce' ); ?>">
 	<input type="hidden" name="ship_to_different_address" value="1" />
 	<input type="hidden" name="shipping_country" value="PH" />
+	<input type="hidden" name="noyona_sync_checkout_nonce" value="<?php echo esc_attr( wp_create_nonce( 'noyona_sync_checkout_fields' ) ); ?>" />
+	<input type="hidden" name="noyona_checkout_attempt_id" value="<?php echo esc_attr( $checkout_attempt_id ); ?>" />
 
 	<div class="noyona-checkout-columns">
 

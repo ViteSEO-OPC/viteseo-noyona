@@ -2388,9 +2388,6 @@ function noyona_render_account_page_shortcode() {
                                 $pay_now_url      = '';
                                 if ( method_exists( $account_order, 'get_checkout_payment_url' ) ) {
                                     $pay_now_url = (string) $account_order->get_checkout_payment_url();
-                                    if ( '' !== trim( $pay_now_url ) ) {
-                                        $pay_now_url = add_query_arg( 'noyona_auto_pay', '1', $pay_now_url );
-                                    }
                                 }
                                 $show_pay_now = ( $is_to_pay_status && ! $account_order->is_paid() && '' !== trim( $pay_now_url ) );
 
