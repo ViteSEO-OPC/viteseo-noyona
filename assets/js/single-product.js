@@ -104,6 +104,17 @@
       .replace(/^-+|-+$/g, '');
   }
 
+  function formatShadeDisplayLabel(value) {
+    var label = String(value || '').trim();
+    var separatorIndex = label.indexOf('_');
+
+    if (separatorIndex > -1) {
+      label = label.slice(separatorIndex + 1).trim();
+    }
+
+    return label;
+  }
+
   function normalizeImageMatchText(value) {
     var text = String(value || '');
     try {
@@ -728,7 +739,7 @@
 
     function updateCurrentLabel() {
       var opt = select.options[select.selectedIndex];
-      current.textContent = opt && opt.text ? opt.text.trim() : '';
+      current.textContent = opt && opt.text ? formatShadeDisplayLabel(opt.text) : '';
     }
 
     var options = Array.prototype.slice.call(select.options, 0);
