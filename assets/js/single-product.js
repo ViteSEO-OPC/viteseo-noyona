@@ -167,7 +167,12 @@
   };
 
   function getShadeImageTokens(value, label) {
-    var combined = normalizeImageMatchText([label, value].join(' '));
+    var combined = normalizeImageMatchText([
+      formatShadeDisplayLabel(label),
+      formatShadeDisplayLabel(value),
+      label,
+      value
+    ].join(' '));
     var seen = {};
     return combined.split(' ').filter(function (token) {
       if (!token || token.length < 2 || weakShadeImageWords[token] || seen[token]) {
@@ -176,6 +181,54 @@
       seen[token] = true;
       return true;
     });
+  }
+
+  function getShadeImagePhrases(value, label) {
+    var candidates = [
+      formatShadeDisplayLabel(label),
+      formatShadeDisplayLabel(value),
+      label,
+      value
+    ];
+    var seen = {};
+
+    return candidates
+      .map(normalizeImageMatchText)
+      .filter(function (phrase) {
+        if (!phrase || phrase.length < 2 || seen[phrase]) {
+          return false;
+        }
+        seen[phrase] = true;
+        return true;
+      });
+  }
+
+  function getSizeImageAliases(value, label) {
+    var text = [value, label].join(' ');
+    var matches = text.match(/\d+(?:\.\d+)?/g) || [];
+    var numbers = matches
+      .map(function (item) {
+        return parseFloat(item);
+      })
+      .filter(function (item) {
+        return !isNaN(item);
+      });
+
+    if (!numbers.length) {
+      return [];
+    }
+
+    var largest = Math.max.apply(Math, numbers);
+
+    if (largest <= 300) {
+      return ['small'];
+    }
+
+    if (largest >= 500) {
+      return ['big', 'large'];
+    }
+
+    return [];
   }
 
   function getPdpGallery() {
@@ -242,13 +295,35 @@
   }
 
   function findShadeGalleryMatch(gallery, value, label) {
+    var phrases = getShadeImagePhrases(value, label);
+    var sizeAliases = getSizeImageAliases(value, label);
+    sizeAliases.forEach(function (alias) {
+      var normalizedAlias = normalizeImageMatchText(alias);
+      if (normalizedAlias && phrases.indexOf(normalizedAlias) === -1) {
+        phrases.push(normalizedAlias);
+      }
+    });
     var tokens = getShadeImageTokens(value, label);
-    if (!tokens.length) return null;
+    if (!phrases.length && !tokens.length) return null;
 
     var images = collectGalleryImageData(gallery);
     var best = null;
     images.forEach(function (image) {
       var score = 0;
+      phrases.forEach(function (phrase) {
+        var fileText = (' ' + image.fileText + ' ');
+        var metaText = (' ' + image.metaText + ' ');
+        var phraseWords = phrase.split(' ').filter(Boolean).length;
+        if (fileText.indexOf(' ' + phrase + ' ') !== -1) {
+          score += 100 + phraseWords;
+        } else if (image.fileText.indexOf(phrase) !== -1) {
+          score += 80 + phraseWords;
+        } else if (metaText.indexOf(' ' + phrase + ' ') !== -1) {
+          score += 60 + phraseWords;
+        } else if (image.metaText.indexOf(phrase) !== -1) {
+          score += 40 + phraseWords;
+        }
+      });
       tokens.forEach(function (token) {
         var fileWords = (' ' + image.fileText + ' ');
         var metaWords = (' ' + image.metaText + ' ');
@@ -447,6 +522,7 @@
   function isShadeGalleryAttributeSelect(select) {
     if (!select || !select.getAttribute) return false;
     if (isColorAttributeSelect(select)) return true;
+    if (isSizePackAttributeSelect(select)) return true;
 
     var name = (select.getAttribute('name') || '').toLowerCase();
     return /^attribute_(pa_)?(shade|swatch|tone|tint)$/.test(name);
