@@ -1262,7 +1262,6 @@ $block_style = sprintf(
                                             $group_label = !empty($group['label']) ? (string) $group['label'] : __('Option', 'viteseo-noyona-childtheme');
                                             ?>
                                             <div class="ps-choice-group" role="radiogroup" aria-label="<?php echo esc_attr($group_label); ?>">
-                                                <span class="ps-choice-group__label"><?php echo esc_html($group_label); ?></span>
                                                 <div class="ps-choice-group__options">
                                                     <?php foreach ($group['options'] as $option_index => $option): ?>
                                                         <?php
