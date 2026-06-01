@@ -139,10 +139,29 @@
     return clean.split('/').pop() || clean;
   }
 
+  function normalizeImageBasenameForCompare(url) {
+    var base = getImageBasename(url);
+    if (!base) {
+      return '';
+    }
+
+    try {
+      base = decodeURIComponent(base);
+    } catch (e) {}
+
+    base = base
+      .replace(/\.[a-z0-9]{2,5}$/i, '')
+      // WordPress image sizes append dimensions to the same attachment slug.
+      .replace(/-\d+x\d+$/i, '')
+      .replace(/-scaled$/i, '');
+
+    return normalizeImageMatchText(base);
+  }
+
   function imageUrlsMatch(a, b) {
-    var left = getImageBasename(a);
-    var right = getImageBasename(b);
-    return !!left && !!right && normalizeImageMatchText(left) === normalizeImageMatchText(right);
+    var left = normalizeImageBasenameForCompare(a);
+    var right = normalizeImageBasenameForCompare(b);
+    return !!left && !!right && left === right;
   }
 
   var weakShadeImageWords = {
@@ -352,6 +371,21 @@
     return gallery._noyonaFallbackSwitchToIndex(image.index);
   }
 
+  var galleryVariationSyncDepth = 0;
+
+  function isGalleryVariationSyncSuppressed() {
+    return galleryVariationSyncDepth > 0;
+  }
+
+  function runWithGalleryVariationSyncSuppressed(fn) {
+    galleryVariationSyncDepth++;
+    try {
+      fn();
+    } finally {
+      galleryVariationSyncDepth--;
+    }
+  }
+
   function switchWooGalleryToImage(gallery, image) {
     if (!gallery || !image) return false;
 
@@ -375,6 +409,305 @@
     }
 
     return false;
+  }
+
+  function getVariationImageUrls(variation) {
+    var img = variation && variation.image ? variation.image : null;
+    if (!img) {
+      return [];
+    }
+
+    return [img.full_src, img.src, img.thumb_src, img.gallery_thumbnail_src, img.url].filter(
+      Boolean
+    );
+  }
+
+  function galleryImageMatchesVariation(image, variation) {
+    if (!image || !variation) {
+      return false;
+    }
+
+    var galleryUrls = [image.full, image.thumb].filter(Boolean);
+    var variationUrls = getVariationImageUrls(variation);
+    if (!galleryUrls.length || !variationUrls.length) {
+      return false;
+    }
+
+    for (var gi = 0; gi < galleryUrls.length; gi++) {
+      for (var vi = 0; vi < variationUrls.length; vi++) {
+        if (imageUrlsMatch(galleryUrls[gi], variationUrls[vi])) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  function scoreImageAgainstTokens(image, tokens) {
+    if (!image || !tokens.length) {
+      return 0;
+    }
+
+    var score = 0;
+    tokens.forEach(function (token) {
+      var fileWords = ' ' + image.fileText + ' ';
+      var metaWords = ' ' + image.metaText + ' ';
+      if (fileWords.indexOf(' ' + token + ' ') !== -1) {
+        score += 8;
+      } else if (image.fileText.indexOf(token) !== -1) {
+        score += 5;
+      } else if (metaWords.indexOf(' ' + token + ' ') !== -1) {
+        score += 4;
+      } else if (image.metaText.indexOf(token) !== -1) {
+        score += 2;
+      }
+    });
+
+    return score;
+  }
+
+  function findVariationForGalleryImage(form, image) {
+    var variations = getInlineVariations(form);
+    if (!variations || !image) {
+      return null;
+    }
+
+    var urlMatch = null;
+    variations.forEach(function (variation) {
+      if (galleryImageMatchesVariation(image, variation)) {
+        urlMatch = variation;
+      }
+    });
+    if (urlMatch) {
+      return urlMatch;
+    }
+
+    var best = null;
+    variations.forEach(function (variation) {
+      var attrs = (variation && variation.attributes) || {};
+      Object.keys(attrs).forEach(function (attrKey) {
+        var attrVal = attrs[attrKey];
+        if (!attrVal) {
+          return;
+        }
+
+        var tokens = getShadeImageTokens(attrVal, attrVal);
+        var score = scoreImageAgainstTokens(image, tokens);
+        if (score > 0 && (!best || score > best.score)) {
+          best = { variation: variation, score: score };
+        }
+      });
+    });
+
+    return best ? best.variation : null;
+  }
+
+  function applyVariationAttributesFromVariation(form, variation) {
+    if (!form || !variation || !variation.attributes) {
+      return false;
+    }
+
+    var attrs = variation.attributes;
+    var normalizedAttrMap = {};
+    Object.keys(attrs).forEach(function (key) {
+      normalizedAttrMap[normalizeAttributeKey(key)] = attrs[key];
+    });
+
+    var selects = Array.prototype.slice.call(
+      form.querySelectorAll('select[name^="attribute_"]')
+    );
+    if (!selects.length) {
+      return false;
+    }
+
+    var changed = false;
+    selects.forEach(function (sel) {
+      var name = sel.getAttribute('name') || '';
+      var val = attrs[name];
+      if (typeof val === 'undefined') {
+        val = normalizedAttrMap[normalizeAttributeKey(name)];
+      }
+      if (!val) {
+        return;
+      }
+
+      if (setSelectValueFromCustomUi(sel, val, null, val, name)) {
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      syncVariationId(form);
+    }
+
+    return changed;
+  }
+
+  function getActiveGalleryImageIndex(gallery, images) {
+    if (!gallery || !images || !images.length) {
+      return -1;
+    }
+
+    var activeThumbBtn = gallery.querySelector(
+      '.noyona-pdp-gallery-thumb.is-active button[data-noyona-thumb-index]'
+    );
+    if (activeThumbBtn) {
+      var thumbIndex = parseInt(activeThumbBtn.getAttribute('data-noyona-thumb-index'), 10);
+      if (!isNaN(thumbIndex)) {
+        return thumbIndex;
+      }
+    }
+
+    var activeFigure = gallery.querySelector('.woocommerce-product-gallery__image.flex-active-slide');
+    if (activeFigure) {
+      for (var i = 0; i < images.length; i++) {
+        if (images[i].figure === activeFigure) {
+          return i;
+        }
+      }
+    }
+
+    var currentSrc = getCurrentGalleryImageSrc(gallery);
+    if (currentSrc) {
+      for (var j = 0; j < images.length; j++) {
+        if (imageUrlsMatch(currentSrc, images[j].full || images[j].thumb)) {
+          return j;
+        }
+      }
+    }
+
+    return 0;
+  }
+
+  function resolveGalleryImageFromEvent(gallery, event) {
+    if (!gallery) {
+      return null;
+    }
+
+    var images = collectGalleryImageData(gallery);
+    if (!images.length) {
+      return null;
+    }
+
+    if (event && event.target) {
+      var thumbBtn = event.target.closest('button[data-noyona-thumb-index]');
+      if (thumbBtn) {
+        var thumbIdx = parseInt(thumbBtn.getAttribute('data-noyona-thumb-index'), 10);
+        if (!isNaN(thumbIdx) && images[thumbIdx]) {
+          return images[thumbIdx];
+        }
+      }
+
+      var thumbImg = event.target.closest('.flex-control-thumbs li img');
+      if (thumbImg) {
+        var thumbList = Array.prototype.slice.call(
+          gallery.querySelectorAll('.flex-control-thumbs li img')
+        );
+        var thumbListIndex = thumbList.indexOf(thumbImg);
+        if (thumbListIndex > -1 && images[thumbListIndex]) {
+          return images[thumbListIndex];
+        }
+      }
+    }
+
+    var activeIndex = getActiveGalleryImageIndex(gallery, images);
+    return activeIndex > -1 && images[activeIndex] ? images[activeIndex] : images[0];
+  }
+
+  function syncVariationFromGallery(gallery, imageOverride) {
+    if (isGalleryVariationSyncSuppressed()) {
+      return;
+    }
+
+    var form = document.querySelector('.single-product form.variations_form');
+    if (!form) {
+      return;
+    }
+
+    gallery = gallery || getPdpGallery();
+    if (!gallery) {
+      return;
+    }
+
+    var image = imageOverride || resolveGalleryImageFromEvent(gallery, null);
+    if (!image) {
+      return;
+    }
+
+    var variation = findVariationForGalleryImage(form, image);
+    if (!variation) {
+      logVariationDebug('gallery-variation-sync-no-match', {
+        imageFile: image.fileText || '',
+        imageMeta: image.metaText || '',
+      });
+      return;
+    }
+
+    logVariationDebug('gallery-variation-sync', {
+      variation_id: variation.variation_id || '',
+      imageFile: image.fileText || '',
+      imageMeta: image.metaText || '',
+    });
+
+    applyVariationAttributesFromVariation(form, variation);
+  }
+
+  function bindGalleryVariationSync(form) {
+    if (!form || !form.classList.contains('variations_form')) {
+      return;
+    }
+    if (form._noyonaGalleryVariationBound) {
+      return;
+    }
+
+    var gallery = getPdpGallery();
+    if (!gallery) {
+      return;
+    }
+
+    form._noyonaGalleryVariationBound = true;
+
+    function scheduleGalleryVariationSync(galleryNode, image) {
+      window.setTimeout(function () {
+        syncVariationFromGallery(galleryNode, image || null);
+      }, 60);
+    }
+
+    gallery.addEventListener('click', function (event) {
+      if (isGalleryVariationSyncSuppressed()) {
+        return;
+      }
+      if (event.target.closest('.noyona-pdp-gallery-magnify')) {
+        return;
+      }
+
+      var isThumbInteraction = !!event.target.closest(
+        '.flex-control-thumbs li, .noyona-pdp-gallery-thumb, button[data-noyona-thumb-index]'
+      );
+      if (!isThumbInteraction) {
+        return;
+      }
+
+      var image = resolveGalleryImageFromEvent(gallery, event);
+      scheduleGalleryVariationSync(gallery, image);
+    });
+
+    if (typeof window.jQuery !== 'undefined') {
+      var $gallery = window.jQuery(gallery);
+      $gallery.on('click.noyonaGalleryVariation', '.flex-control-thumbs li', function () {
+        if (isGalleryVariationSyncSuppressed()) {
+          return;
+        }
+        scheduleGalleryVariationSync(gallery);
+      });
+      $gallery.on('after.noyonaGalleryVariation', function () {
+        if (isGalleryVariationSyncSuppressed()) {
+          return;
+        }
+        scheduleGalleryVariationSync(gallery);
+      });
+    }
   }
 
   function valuesEqualLoose(a, b) {
@@ -569,7 +902,9 @@
       return;
     }
 
-    switchWooGalleryToImage(gallery, match);
+    runWithGalleryVariationSyncSuppressed(function () {
+      switchWooGalleryToImage(gallery, match);
+    });
   }
 
   function scheduleShadeGalleryFallback(form, beforeSrc) {
@@ -1278,6 +1613,7 @@
 
     bindVariationIdSync(form);
     bindShadeGalleryFallback(form);
+    bindGalleryVariationSync(form);
   }
 
   function bindWooCommercePdpHooks() {
@@ -2104,7 +2440,7 @@
       if (!document.body.classList.contains('logged-in')) {
         openGlobalCheckoutLoginModal(window.location.href, {
           title: 'Log In to complete your purchase',
-          copy: 'Please log in to your account so we can verify your purchase and publish your review.',
+          copy: 'Please log in to your account to continue checkout.',
         });
         return;
       }
@@ -2826,6 +3162,7 @@
         if (isNaN(idx) || !imageData[idx]) return;
 
         setFallbackMainImage(idx);
+        syncVariationFromGallery(gallery, imageData[idx]);
       });
 
       // Variation image swap: WC's add-to-cart-variation script fires

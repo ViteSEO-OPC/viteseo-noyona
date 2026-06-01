@@ -42,15 +42,8 @@ if (
     }
 }
 $contact_captcha_markup = '';
-if (
-    function_exists('noyona_is_recaptcha_enabled') &&
-    noyona_is_recaptcha_enabled('v2') &&
-    function_exists('noyona_get_recaptcha_widget_markup')
-) {
-    if (function_exists('noyona_enqueue_recaptcha_script')) {
-        noyona_enqueue_recaptcha_script('v2');
-    }
-    $contact_captcha_markup = noyona_get_recaptcha_widget_markup('contact-form__captcha', 'v2');
+if ( function_exists('noyona_recaptcha_form_widget_html') ) {
+    $contact_captcha_markup = noyona_recaptcha_form_widget_html('contact', 'contact-form__captcha');
 }
 if (!empty($cf7_form_markup) && false !== strpos($cf7_form_markup, '</form>')) {
     $cf7_form_suffix_markup = '<input type="hidden" name="noyona_contact_cf7_form" value="1" />';

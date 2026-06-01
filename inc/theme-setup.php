@@ -205,22 +205,20 @@ function woocom_ct_add_register_link_to_login() {
     echo '<div class="noyona-login-form-footer">';
     echo '<a class="noyona-login-google-btn" href="' . esc_url( $google_login_url ) . '"><i class="fa-brands fa-google" aria-hidden="true"></i><span>' . esc_html__( 'Sign In with Google', 'noyona-childtheme' ) . '</span></a>';
 
-    if ( function_exists( 'noyona_is_recaptcha_enabled' ) && noyona_is_recaptcha_enabled( 'v2' ) && function_exists( 'noyona_get_recaptcha_widget_markup' ) ) {
-        if ( function_exists( 'noyona_enqueue_recaptcha_script' ) ) {
-            noyona_enqueue_recaptcha_script( 'v2' );
-        }
-
-        $captcha_markup = noyona_get_recaptcha_widget_markup(
-            'noyona-login-recaptcha',
-            'v2',
-            array(
-                'data-callback' => 'noyonaLoginRecaptchaVerified',
+    if ( function_exists( 'noyona_recaptcha_form_enabled' ) && noyona_recaptcha_form_enabled( 'login' ) ) {
+        $captcha_markup = function_exists( 'noyona_recaptcha_form_widget_html' )
+            ? noyona_recaptcha_form_widget_html(
+                'login',
+                'noyona-login-recaptcha',
+                array(
+                    'data-callback' => 'noyonaLoginRecaptchaVerified',
+                )
             )
-        );
+            : '';
 
         if ( '' !== trim( (string) $captcha_markup ) ) {
             echo '<div class="noyona-login-recaptcha-wrap">';
-            echo wp_kses_post( $captcha_markup );
+            echo wp_kses( $captcha_markup, noyona_recaptcha_form_allowed_html() );
             echo '</div>';
             ?>
             <script>
@@ -308,15 +306,11 @@ function noyona_validate_login_recaptcha( $validation_error, $username, $passwor
         return $validation_error;
     }
 
-    if ( ! function_exists( 'noyona_is_recaptcha_enabled' ) || ! noyona_is_recaptcha_enabled( 'v2' ) ) {
+    if ( ! function_exists( 'noyona_recaptcha_form_verify_post' ) ) {
         return $validation_error;
     }
 
-    if ( ! function_exists( 'noyona_verify_recaptcha_from_post' ) ) {
-        return $validation_error;
-    }
-
-    $captcha_result = noyona_verify_recaptcha_from_post( 'g-recaptcha-response', '', 'v2' );
+    $captcha_result = noyona_recaptcha_form_verify_post( 'login' );
     if ( is_wp_error( $captcha_result ) ) {
         $validation_error->add( 'recaptcha_failed', __( 'Captcha verification failed. Please try again.', 'noyona-childtheme' ) );
     }

@@ -21,6 +21,66 @@
 
     <!-- wp:columns {"align":"wide","className":"noyona-shop-layout"} -->
     <div class="wp-block-columns alignwide noyona-shop-layout">
+        <!-- wp:column {"width":"72%","className":"noyona-shop-products-column"} -->
+        <div class="wp-block-column noyona-shop-products-column" style="flex-basis:72%">
+            <!-- wp:group {"className":"noyona-shop-toolbar","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"wrap"}} -->
+            <div class="wp-block-group noyona-shop-toolbar">
+                <!-- wp:woocommerce/product-results-count {"className":"noyona-shop-count"} /-->
+
+                <!-- wp:group {"className":"noyona-shop-toolbar-right","layout":{"type":"flex","verticalAlignment":"center","justifyContent":"right","flexWrap":"nowrap"}} -->
+                <div class="wp-block-group noyona-shop-toolbar-right">
+                <!-- wp:html -->
+                <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
+                    <div class="noyona-shop-view-toggle" aria-label="Toggle view mode">
+                        <button type="button" class="is-active" data-shop-view-toggle="1" aria-label="Switch to list view" aria-pressed="false">
+                            <svg class="icon-grid" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
+                            <svg class="icon-list" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none;"><path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h18v4H3z"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- /wp:html -->
+
+                    <!-- wp:html -->
+                    <button type="button" class="noyona-shop-filter-toggle" aria-expanded="false" aria-controls="noyona-shop-filter-panel" aria-label="Open filters">
+                        <svg class="icon-filter" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5h18l-7 8v5.5l-4 2V13L3 5z"/></svg>
+                        <span class="screen-reader-text">Filter</span>
+                    </button>
+                    <!-- /wp:html -->
+                </div>
+                <!-- /wp:group -->
+            </div>
+            <!-- /wp:group -->
+
+            <!-- wp:woocommerce/product-collection {"queryId":0,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","outofstock","onbackorder"],"taxQuery":[],"isProductCollectionBlock":true,"perPage":12,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":true},"tagName":"div","dimensions":{"widthType":"fill","fixedWidth":""},"displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},"convertedFromProducts":false,"queryContextIncludes":["collection"],"className":"noyona-shop-products"} -->
+            <div class="wp-block-woocommerce-product-collection noyona-shop-products">
+                <!-- wp:woocommerce/product-template -->
+                <!-- wp:woocommerce/product-image {"showSaleBadge":true,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
+                <!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
+                <!-- /wp:woocommerce/product-image -->
+                <!-- wp:post-title {"level":3,"isLink":true,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title","style":{"typography":{"lineHeight":"1.25"}}} /-->
+                <!-- wp:post-excerpt {"excerptLength":22,"showMoreOnNewLine":false} /-->
+                <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+                <!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+                <!-- /wp:woocommerce/product-template -->
+
+                <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
+                <!-- wp:query-pagination-previous /-->
+                <!-- wp:query-pagination-numbers /-->
+                <!-- wp:query-pagination-next /-->
+                <!-- /wp:query-pagination -->
+
+                <!-- wp:woocommerce/product-collection-no-results -->
+                <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","flexWrap":"wrap"}} -->
+                <div class="wp-block-group">
+                    <!-- wp:pattern {"slug":"woocommerce/no-products-found-clear-filters"} /-->
+                </div>
+                <!-- /wp:group -->
+                <!-- /wp:woocommerce/product-collection-no-results -->
+            </div>
+            <!-- /wp:woocommerce/product-collection -->
+        </div>
+        <!-- /wp:column -->
+
         <!-- wp:column {"width":"28%","className":"noyona-shop-sidebar"} -->
         <div class="wp-block-column noyona-shop-sidebar" style="flex-basis:28%">
             <!-- wp:html -->
@@ -32,13 +92,20 @@
             <button type="button" class="noyona-shop-filter-close" aria-label="Close filters">✕</button>
             <!-- /wp:html -->
             <!-- wp:html -->
+            <section class="noyona-shop-filter-section noyona-shop-filter-section-sort">
+                <h5>Sort By</h5>
+                <ul class="noyona-shop-sort-list">
+                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="menu_order">Default sorting</button></li>
+                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="popularity">Popularity</button></li>
+                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="rating">Average rating</button></li>
+                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="date">Latest</button></li>
+                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="price">Price: low to high</button></li>
+                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="price-desc">Price: high to low</button></li>
+                </ul>
+            </section>
+            <!-- /wp:html -->
+            <!-- wp:html -->
             <div class="noyona-shop-filter-sections" aria-hidden="true">
-                <section class="noyona-shop-filter-section">
-                    <h5>Stock Status</h5>
-                    <label><input type="radio" name="noyona-stock-status" checked> In Stock</label>
-                    <label><input type="radio" name="noyona-stock-status"> Out of Stock</label>
-                </section>
-
                 <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
                     <h5 class="noyona-shop-filter-price-title">Price</h5>
                     <div class="noyona-shop-filter-price" data-min="0" data-step="50">
@@ -100,65 +167,6 @@
                 <!-- /wp:group -->
             </div>
             <!-- /wp:group -->
-        </div>
-        <!-- /wp:column -->
-
-        <!-- wp:column {"width":"72%","className":"noyona-shop-products-column"} -->
-        <div class="wp-block-column noyona-shop-products-column" style="flex-basis:72%">
-            <!-- wp:group {"className":"noyona-shop-toolbar","layout":{"type":"flex","justifyContent":"space-between","verticalAlignment":"center","flexWrap":"wrap"}} -->
-            <div class="wp-block-group noyona-shop-toolbar">
-                <!-- wp:woocommerce/product-results-count {"className":"noyona-shop-count"} /-->
-
-                <!-- wp:group {"className":"noyona-shop-toolbar-right","layout":{"type":"flex","verticalAlignment":"center","justifyContent":"right","flexWrap":"nowrap"}} -->
-                <div class="wp-block-group noyona-shop-toolbar-right">
-                <!-- wp:html -->
-                <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
-                    <div class="noyona-shop-view-toggle" aria-label="Toggle view mode">
-                        <button type="button" class="is-active" data-shop-view-toggle="1" aria-label="Switch to list view" aria-pressed="false">
-                            <svg class="icon-grid" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
-                            <svg class="icon-list" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none;"><path d="M3 4h18v4H3zM3 10h18v4H3zM3 16h18v4H3z"/></svg>
-                        </button>
-                    </div>
-                </div>
-                <!-- /wp:html -->
-
-                    <!-- wp:html -->
-                    <button type="button" class="noyona-shop-filter-toggle" aria-expanded="false" aria-controls="noyona-shop-filter-panel">Filter</button>
-                    <!-- /wp:html -->
-
-                    <!-- wp:woocommerce/catalog-sorting {"className":"noyona-shop-sort"} /-->
-                </div>
-                <!-- /wp:group -->
-            </div>
-            <!-- /wp:group -->
-
-            <!-- wp:woocommerce/product-collection {"queryId":0,"query":{"woocommerceAttributes":[],"woocommerceStockStatus":["instock","outofstock","onbackorder"],"taxQuery":[],"isProductCollectionBlock":true,"perPage":12,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":true},"tagName":"div","dimensions":{"widthType":"fill","fixedWidth":""},"displayLayout":{"type":"flex","columns":2,"shrinkColumns":true},"convertedFromProducts":false,"queryContextIncludes":["collection"],"className":"noyona-shop-products"} -->
-            <div class="wp-block-woocommerce-product-collection noyona-shop-products">
-                <!-- wp:woocommerce/product-template -->
-                <!-- wp:woocommerce/product-image {"showSaleBadge":true,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
-                <!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
-                <!-- /wp:woocommerce/product-image -->
-                <!-- wp:post-title {"level":3,"isLink":true,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title","style":{"typography":{"lineHeight":"1.25"}}} /-->
-                <!-- wp:post-excerpt {"excerptLength":22,"showMoreOnNewLine":false} /-->
-                <!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
-                <!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
-                <!-- /wp:woocommerce/product-template -->
-
-                <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
-                <!-- wp:query-pagination-previous /-->
-                <!-- wp:query-pagination-numbers /-->
-                <!-- wp:query-pagination-next /-->
-                <!-- /wp:query-pagination -->
-
-                <!-- wp:woocommerce/product-collection-no-results -->
-                <!-- wp:group {"layout":{"type":"flex","orientation":"vertical","justifyContent":"center","flexWrap":"wrap"}} -->
-                <div class="wp-block-group">
-                    <!-- wp:pattern {"slug":"woocommerce/no-products-found-clear-filters"} /-->
-                </div>
-                <!-- /wp:group -->
-                <!-- /wp:woocommerce/product-collection-no-results -->
-            </div>
-            <!-- /wp:woocommerce/product-collection -->
         </div>
         <!-- /wp:column -->
     </div>

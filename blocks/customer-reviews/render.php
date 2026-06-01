@@ -210,8 +210,12 @@ if ( ! function_exists( 'noyona_cr_build_dynamic_reviews' ) ) {
                 }
             }
 
+            $can_edit = function_exists( 'noyona_user_can_edit_product_review' )
+                && noyona_user_can_edit_product_review( (int) $comment->comment_ID );
+
             $results[] = array(
                 'commentId'    => (int) $comment->comment_ID,
+                'canEdit'      => $can_edit,
                 'name'         => trim( (string) $comment->comment_author ),
                 'timeAgo'      => $time_ago,
                 'title'        => $title,
@@ -303,8 +307,14 @@ if ( class_exists( 'WooCommerce' ) && 'static' !== $data_source ) {
     }
 
     if ( 'product' === $resolved_source && $is_product_page ) {
-        $query_args['post_id'] = get_the_ID();
-        $query_args['number']  = 0; // PDP needs complete set for accurate summary/filtering.
+        $pdp_product_id = (int) get_the_ID();
+        if ( function_exists( 'noyona_pdp_get_product_review_comments' ) ) {
+            $dynamic_comments = noyona_pdp_get_product_review_comments( $pdp_product_id );
+            $reviews          = noyona_cr_build_dynamic_reviews( $dynamic_comments );
+        } else {
+            $query_args['post_id'] = $pdp_product_id;
+            $query_args['number']  = 0;
+        }
     } elseif ( 'category' === $resolved_source ) {
         if ( empty( $source_categories ) && is_tax( 'product_cat' ) ) {
             $term = get_queried_object();
@@ -328,8 +338,10 @@ if ( class_exists( 'WooCommerce' ) && 'static' !== $data_source ) {
         }
     }
 
-    $dynamic_comments = get_comments( $query_args );
-    $reviews          = noyona_cr_build_dynamic_reviews( $dynamic_comments );
+    if ( empty( $reviews ) ) {
+        $dynamic_comments = get_comments( $query_args );
+        $reviews          = noyona_cr_build_dynamic_reviews( $dynamic_comments );
+    }
 }
 
 // Keep static cards only as an editor fallback.
@@ -346,11 +358,24 @@ if ( $is_product_page ) {
 }
 $wrapper_args['data-review-helpful-endpoint'] = admin_url( 'admin-ajax.php' );
 $wrapper_args['data-review-helpful-nonce']    = wp_create_nonce( 'noyona-review-helpful' );
+$wrapper_args['data-review-edit-endpoint']    = admin_url( 'admin-ajax.php' );
+$wrapper_args['data-review-edit-nonce']       = wp_create_nonce( 'noyona-review-edit' );
 $wrapper_attrs = get_block_wrapper_attributes( $wrapper_args );
 
 $show_review_form = $show_review_form && $is_product_page;
-$show_write_cta = $show_write_cta && $show_review_form;
 $reviewer_logged_in = is_user_logged_in();
+$can_submit_review  = $is_product_page && function_exists( 'noyona_user_can_review_product' ) && noyona_user_can_review_product( (int) get_the_ID() );
+$has_editable_review = false;
+if ( $is_product_page && $reviewer_logged_in && function_exists( 'noyona_user_can_edit_product_review' ) ) {
+    foreach ( $reviews as $editable_candidate ) {
+        if ( ! empty( $editable_candidate['canEdit'] ) ) {
+            $has_editable_review = true;
+            break;
+        }
+    }
+}
+$show_review_form_modal = $show_review_form && $reviewer_logged_in && ( $can_submit_review || $has_editable_review );
+$show_write_cta     = $show_write_cta && $show_review_form && ( ! $reviewer_logged_in || $can_submit_review );
 $has_reviews      = $total_reviews > 0;
 $summary_average = 0.0;
 $summary_count   = $total_reviews;
@@ -388,9 +413,17 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
     return;
 }
 
+$review_notice = '';
+if ( $is_product_page && isset( $_GET['review_submitted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    $review_notice = __( 'Thank you! Your review has been published.', 'noyona-childtheme' );
+}
+
 ?>
 
 <section <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+    <?php if ( '' !== $review_notice ) : ?>
+        <p class="customer-reviews-grid__notice" role="status"><?php echo esc_html( $review_notice ); ?></p>
+    <?php endif; ?>
     <?php if ( ( $has_reviews && '' !== $heading ) || ( $show_write_cta && '' !== $write_review_text ) ) : ?>
         <div class="customer-reviews-grid__header">
             <?php if ( $has_reviews && '' !== $heading ) : ?>
@@ -474,6 +507,7 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                 $content       = isset( $review['content'] ) ? trim( (string) $review['content'] ) : '';
                 $rating        = isset( $review['rating'] ) ? (int) $review['rating'] : 5;
                 $verified      = ! empty( $review['verified'] );
+                $can_edit      = ! empty( $review['canEdit'] );
                 $helpful_text  = isset( $review['helpfulText'] ) ? trim( (string) $review['helpfulText'] ) : 'Yes';
                 $helpful_count = isset( $review['helpfulCount'] ) ? (int) $review['helpfulCount'] : 0;
                 $viewer_voted  = ! empty( $review['viewerVoted'] );
@@ -500,7 +534,7 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                 $is_initially_hidden = $review_index >= $initial_visible;
                 $has_photo_hint      = $media_count > 0;
                 ?>
-                <article class="customer-reviews-grid__card<?php echo $is_initially_hidden ? ' is-hidden' : ''; ?>" data-review-rating="<?php echo esc_attr( (string) $rating ); ?>" data-review-timestamp="<?php echo esc_attr( (string) $timestamp_raw ); ?>" data-review-helpful-count="<?php echo esc_attr( (string) $helpful_count ); ?>" data-review-has-photos="<?php echo $has_photo_hint ? '1' : '0'; ?>"<?php echo $is_initially_hidden ? ' hidden' : ''; ?>>
+                <article class="customer-reviews-grid__card<?php echo $is_initially_hidden ? ' is-hidden' : ''; ?>" data-review-rating="<?php echo esc_attr( (string) $rating ); ?>" data-review-timestamp="<?php echo esc_attr( (string) $timestamp_raw ); ?>" data-review-helpful-count="<?php echo esc_attr( (string) $helpful_count ); ?>" data-review-has-photos="<?php echo $has_photo_hint ? '1' : '0'; ?>"<?php echo $comment_id > 0 ? ' data-review-comment-id="' . esc_attr( (string) $comment_id ) . '"' : ''; ?><?php echo $is_initially_hidden ? ' hidden' : ''; ?>>
                     <header class="customer-reviews-grid__card-head">
                         <div class="customer-reviews-grid__user">
                             <span class="customer-reviews-grid__avatar" aria-hidden="true">
@@ -520,9 +554,28 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                                 <?php endif; ?>
                             </span>
                         </div>
-                        <?php if ( '' !== $time_ago ) : ?>
-                            <time class="customer-reviews-grid__time"><?php echo esc_html( $time_ago ); ?></time>
-                        <?php endif; ?>
+                        <div class="customer-reviews-grid__card-actions">
+                            <?php if ( '' !== $time_ago ) : ?>
+                                <time class="customer-reviews-grid__time"><?php echo esc_html( $time_ago ); ?></time>
+                            <?php endif; ?>
+                            <?php if ( $can_edit && $comment_id > 0 ) : ?>
+                                <button
+                                    class="customer-reviews-grid__edit"
+                                    type="button"
+                                    data-review-edit-open
+                                    data-review-edit-id="<?php echo esc_attr( (string) $comment_id ); ?>"
+                                    data-review-edit-rating="<?php echo esc_attr( (string) $rating ); ?>"
+                                    data-review-edit-title="<?php echo esc_attr( $title ); ?>"
+                                    data-review-edit-content="<?php echo esc_attr( $content ); ?>"
+                                    aria-label="<?php esc_attr_e( 'Edit review', 'noyona-childtheme' ); ?>"
+                                >
+                                    <svg class="customer-reviews-grid__edit-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            <?php endif; ?>
+                        </div>
                     </header>
 
                     <div class="customer-reviews-grid__stars" aria-label="<?php echo esc_attr( sprintf( '%d out of 5 stars', $rating ) ); ?>">
@@ -668,7 +721,7 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                     <p class="customer-reviews-grid__login-note"><?php esc_html_e( 'You must be logged in to submit a review.', 'noyona-childtheme' ); ?></p>
                 </div>
             </div>
-        <?php else : ?>
+        <?php elseif ( $show_review_form_modal ) : ?>
             <div class="customer-reviews-grid__form-modal" data-review-form-modal hidden>
                 <button class="customer-reviews-grid__modal-backdrop" type="button" data-review-form-close aria-label="<?php esc_attr_e( 'Close review form', 'noyona-childtheme' ); ?>"></button>
                 <div class="customer-reviews-grid__form-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Write a review', 'noyona-childtheme' ); ?>">
@@ -677,13 +730,16 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                     </button>
                     <div id="noyona-review-form" class="customer-reviews-grid__review-form-wrap">
                         <?php
-                        if ( ! comments_open( $product_id ) ) :
-                            ?>
+                        $pdp_form_product_id = (int) get_the_ID();
+                        $show_review_fields  = $can_submit_review || $has_editable_review || comments_open( $pdp_form_product_id );
+                        ?>
+                        <?php if ( ! $show_review_fields ) : ?>
                             <p class="customer-reviews-grid__review-form-note">
                                 <?php esc_html_e( 'Reviews are closed for this product.', 'noyona-childtheme' ); ?>
                             </p>
+                        <?php else : ?>
                             <?php
-                        else :
+                            $product_id = $pdp_form_product_id;
                             $current_user        = wp_get_current_user();
                             $reviewer_name       = trim( (string) $current_user->display_name );
                             $reviewer_email      = trim( (string) $current_user->user_email );
@@ -750,6 +806,7 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                                 '<p class="comment-form-comment customer-reviews-grid__field"><label for="comment">' . esc_html__( 'Your Review', 'noyona-childtheme' ) . '</label>' .
                                 '<textarea id="comment" name="comment" cols="45" rows="6" placeholder="' . esc_attr__( 'Tell others about your experience with this product...', 'noyona-childtheme' ) . '">' . esc_textarea( $posted_review_body ) . '</textarea></p>';
 
+                            $comment_form_args['comment_field'] .= '<input type="hidden" id="noyona_review_comment_id" name="noyona_review_comment_id" value="" />';
                             $comment_form_args['comment_field'] .= wp_nonce_field( 'noyona_review_extras', 'noyona_review_extras_nonce', true, false );
                             $comment_form_args['comment_field'] .=
                                 '<p class="comment-form-noyona-images customer-reviews-grid__field"><label for="noyona_review_images">' . esc_html__( 'Add Photos', 'noyona-childtheme' ) . ' <span class="customer-reviews-grid__optional">(' . esc_html__( 'optional', 'noyona-childtheme' ) . ')</span></label>' .
@@ -758,9 +815,21 @@ if ( ! $has_reviews && ! $show_write_cta && ! is_admin() ) {
                                 '<span data-review-upload-label>' . esc_html__( 'Upload photos of your purchase', 'noyona-childtheme' ) . '</span>' .
                                 '</label>' .
                                 '<input id="noyona_review_images" name="noyona_review_images[]" type="file" accept="image/*" multiple /></p>';
-                            comment_form( apply_filters( 'woocommerce_product_review_comment_form_args', $comment_form_args ), $product_id );
-                        endif;
-                        ?>
+
+                            if ( $can_submit_review ) {
+                                comment_form( apply_filters( 'woocommerce_product_review_comment_form_args', $comment_form_args ), $product_id );
+                            } else {
+                                $comment_form_args['title_reply']       = esc_html__( 'Edit your review', 'noyona-childtheme' );
+                                $comment_form_args['title_reply_before'] = '<h3 class="customer-reviews-grid__review-form-title" id="noyona-review-form-title">';
+                                $comment_form_args['label_submit']    = esc_html__( 'Save changes', 'noyona-childtheme' );
+                                echo '<form class="comment-form customer-reviews-grid__comment-form" method="post" enctype="multipart/form-data">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                                echo $comment_form_args['title_reply_before'] . esc_html( $comment_form_args['title_reply'] ) . $comment_form_args['title_reply_after']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                                echo $comment_form_args['comment_field']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                                echo '<p class="form-submit"><button type="submit" class="customer-reviews-grid__submit submit">' . esc_html( $comment_form_args['label_submit'] ) . '</button></p>';
+                                echo '</form>';
+                            }
+                            ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
