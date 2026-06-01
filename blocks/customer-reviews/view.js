@@ -13,6 +13,8 @@
     var showingLabel = block.querySelector('[data-review-showing]');
     var helpfulEndpoint = block.getAttribute('data-review-helpful-endpoint') || '';
     var helpfulNonce = block.getAttribute('data-review-helpful-nonce') || '';
+    var editEndpoint = block.getAttribute('data-review-edit-endpoint') || '';
+    var editNonce = block.getAttribute('data-review-edit-nonce') || '';
     if (!Number.isFinite(revealStep) || revealStep < 1) {
       revealStep = 3;
     }
@@ -154,6 +156,8 @@
     var reviewLoginModal = block.querySelector('[data-review-login-modal]');
     var reviewLoginOpenButtons = block.querySelectorAll('[data-review-login-open]');
     var reviewLoginCloseButtons = block.querySelectorAll('[data-review-login-close]');
+    var resetReviewFormModeRef = null;
+    var setReviewEditModeRef = null;
 
     if (reviewFormModal) {
       var reviewForm = reviewFormModal.querySelector('form.comment-form');
@@ -166,6 +170,12 @@
         var uploadInput = reviewForm.querySelector('#noyona_review_images');
         var uploadLabel = reviewForm.querySelector('[data-review-upload-label]');
         var submitButton = reviewForm.querySelector('.customer-reviews-grid__submit');
+        var formTitle = reviewFormModal.querySelector('#noyona-review-form-title');
+        var commentIdInput = reviewForm.querySelector('#noyona_review_comment_id');
+        var titleInput = reviewForm.querySelector('#noyona_review_title');
+        var bodyInput = reviewForm.querySelector('#comment');
+        var defaultFormTitle = formTitle ? formTitle.textContent : '';
+        var defaultSubmitLabel = submitButton ? submitButton.textContent : '';
 
         function paintRatingStars(value) {
           if (!ratingStars.length) return;
@@ -251,6 +261,220 @@
           reviewForm.addEventListener('change', syncSubmitState);
           syncSubmitState();
         }
+
+        function resetReviewFormMode() {
+          if (commentIdInput) {
+            commentIdInput.value = '';
+          }
+          if (formTitle && defaultFormTitle) {
+            formTitle.textContent = defaultFormTitle;
+          }
+          if (submitButton && defaultSubmitLabel) {
+            submitButton.textContent = defaultSubmitLabel;
+          }
+          if (titleInput) {
+            titleInput.value = '';
+          }
+          if (bodyInput) {
+            bodyInput.value = '';
+          }
+          if (ratingSelect) {
+            ratingSelect.value = '';
+            paintRatingStars('');
+          }
+          if (uploadInput) {
+            uploadInput.value = '';
+          }
+          if (uploadLabel) {
+            uploadLabel.textContent = 'Upload photos of your purchase';
+          }
+          syncSubmitState();
+        }
+
+        function setReviewEditMode(button) {
+          if (!button) return;
+          var editId = parseInt(button.getAttribute('data-review-edit-id') || '0', 10);
+          if (!editId) return;
+
+          if (commentIdInput) {
+            commentIdInput.value = String(editId);
+          }
+          if (formTitle) {
+            formTitle.textContent = 'Edit your review';
+          }
+          if (submitButton) {
+            submitButton.textContent = 'Save changes';
+          }
+          if (ratingSelect) {
+            ratingSelect.value = button.getAttribute('data-review-edit-rating') || '';
+            paintRatingStars(ratingSelect.value);
+          }
+          if (titleInput) {
+            titleInput.value = button.getAttribute('data-review-edit-title') || '';
+          }
+          if (bodyInput) {
+            bodyInput.value = button.getAttribute('data-review-edit-content') || '';
+          }
+          syncSubmitState();
+        }
+
+        function renderStarIcons(container, ratingValue) {
+          if (!container) return;
+          var rating = parseInt(ratingValue || '0', 10) || 0;
+          var icons = container.querySelectorAll('i');
+          icons.forEach(function (icon, index) {
+            icon.className = index < rating ? 'fa-solid fa-star is-active' : 'fa-regular fa-star';
+          });
+          container.setAttribute('aria-label', rating + ' out of 5 stars');
+        }
+
+        function updateReviewCard(card, data) {
+          if (!card || !data) return;
+
+          var rating = parseInt(data.rating || '0', 10) || 0;
+          var title = String(data.title || '');
+          var content = String(data.content || '');
+          var mediaUrls = Array.isArray(data.mediaUrls) ? data.mediaUrls : [];
+
+          card.setAttribute('data-review-rating', String(rating));
+          card.setAttribute('data-review-has-photos', mediaUrls.length > 0 ? '1' : '0');
+
+          var starsWrap = card.querySelector('.customer-reviews-grid__stars');
+          renderStarIcons(starsWrap, rating);
+
+          var titleNode = card.querySelector('.customer-reviews-grid__review-title');
+          if (title) {
+            if (!titleNode) {
+              titleNode = document.createElement('h3');
+              titleNode.className = 'customer-reviews-grid__review-title';
+              var stars = card.querySelector('.customer-reviews-grid__stars');
+              if (stars && stars.parentNode) {
+                stars.parentNode.insertBefore(titleNode, stars.nextSibling);
+              }
+            }
+            titleNode.textContent = title;
+            titleNode.hidden = false;
+          } else if (titleNode) {
+            titleNode.remove();
+          }
+
+          var copyNode = card.querySelector('.customer-reviews-grid__review-copy');
+          if (content) {
+            if (!copyNode) {
+              copyNode = document.createElement('p');
+              copyNode.className = 'customer-reviews-grid__review-copy';
+              var meta = card.querySelector('.customer-reviews-grid__product-meta');
+              if (meta && meta.parentNode) {
+                meta.parentNode.insertBefore(copyNode, meta.nextSibling);
+              } else if (titleNode && titleNode.parentNode) {
+                titleNode.parentNode.insertBefore(copyNode, titleNode.nextSibling);
+              }
+            }
+            copyNode.textContent = content;
+            copyNode.hidden = false;
+          } else if (copyNode) {
+            copyNode.remove();
+          }
+
+          var editButton = card.querySelector('[data-review-edit-open]');
+          if (editButton) {
+            editButton.setAttribute('data-review-edit-rating', String(rating));
+            editButton.setAttribute('data-review-edit-title', title);
+            editButton.setAttribute('data-review-edit-content', content);
+          }
+
+          cardItems.forEach(function (item) {
+            if (item.element === card) {
+              item.rating = rating;
+              item.hasPhotos = mediaUrls.length > 0;
+            }
+          });
+          syncVisibleCards();
+        }
+
+        reviewForm.addEventListener('submit', function (event) {
+          var editId = commentIdInput ? parseInt(commentIdInput.value || '0', 10) : 0;
+          if (!editId || !editEndpoint || !editNonce) {
+            return;
+          }
+
+          event.preventDefault();
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.classList.add('is-loading');
+          }
+
+          var payload = new FormData(reviewForm);
+          payload.set('action', 'noyona_update_product_review');
+          payload.set('nonce', editNonce);
+          payload.set('comment_id', String(editId));
+
+          fetch(editEndpoint, {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: payload
+          })
+            .then(function (response) {
+              return response
+                .json()
+                .catch(function () {
+                  return null;
+                })
+                .then(function (json) {
+                  if (!response.ok) {
+                    var message =
+                      json && json.data && json.data.message
+                        ? String(json.data.message)
+                        : 'Could not save your review. Please try again.';
+                    throw new Error(message);
+                  }
+                  return json;
+                });
+            })
+            .then(function (json) {
+              if (!json || !json.success || !json.data) {
+                var message =
+                  json && json.data && json.data.message
+                    ? String(json.data.message)
+                    : 'Could not save your review. Please try again.';
+                window.alert(message);
+                return;
+              }
+
+              var card = block.querySelector(
+                '.customer-reviews-grid__card[data-review-comment-id="' + String(editId) + '"]'
+              );
+              updateReviewCard(card, json.data);
+              resetReviewFormMode();
+              closeReviewFormModal();
+
+              var notice = document.createElement('p');
+              notice.className = 'customer-reviews-grid__notice';
+              notice.setAttribute('role', 'status');
+              notice.textContent = 'Your review has been updated.';
+              var existingNotice = block.querySelector('.customer-reviews-grid__notice');
+              if (existingNotice) {
+                existingNotice.remove();
+              }
+              block.insertBefore(notice, block.firstChild);
+            })
+            .catch(function (error) {
+              window.alert(
+                error && error.message
+                  ? error.message
+                  : 'Could not save your review. Please try again.'
+              );
+            })
+            .finally(function () {
+              if (submitButton) {
+                submitButton.classList.remove('is-loading');
+                syncSubmitState();
+              }
+            });
+        });
+
+        resetReviewFormModeRef = resetReviewFormMode;
+        setReviewEditModeRef = setReviewEditMode;
       }
     }
 
@@ -340,6 +564,9 @@
     function closeReviewFormModal() {
       if (!reviewFormModal) return;
       reviewFormModal.hidden = true;
+      if (typeof resetReviewFormModeRef === 'function') {
+        resetReviewFormModeRef();
+      }
       syncModalScrollLock();
     }
 
@@ -385,10 +612,27 @@
       });
     }
 
+    var reviewEditOpenButtons = block.querySelectorAll('[data-review-edit-open]');
+
+    if (reviewFormModal && reviewEditOpenButtons.length) {
+      reviewEditOpenButtons.forEach(function (button) {
+        button.addEventListener('click', function (event) {
+          event.preventDefault();
+          if (typeof setReviewEditModeRef === 'function') {
+            setReviewEditModeRef(button);
+          }
+          openReviewFormModal();
+        });
+      });
+    }
+
     if (reviewFormModal && reviewFormOpenButtons.length) {
       reviewFormOpenButtons.forEach(function (button) {
         button.addEventListener('click', function (event) {
           event.preventDefault();
+          if (typeof resetReviewFormModeRef === 'function') {
+            resetReviewFormModeRef();
+          }
           openReviewFormModal();
         });
       });
