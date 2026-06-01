@@ -634,3 +634,93 @@ function noyona_strip_br_from_woo_item_data( $item_data, $cart_item ) {
     }
     return $item_data;
 }
+
+/* ----- Branded WooCommerce account email subject ----- */
+add_filter( 'woocommerce_email_subject_customer_new_account', 'noyona_customer_new_account_email_subject', 10, 3 );
+function noyona_customer_new_account_email_subject( $subject, $user, $email ) {
+    $first_name = '';
+
+    if ( $user instanceof WP_User ) {
+        $first_name = trim( (string) $user->first_name );
+        if ( '' === $first_name ) {
+            $first_name = trim( strtok( (string) $user->display_name, ' ' ) );
+        }
+    } elseif ( $email && ! empty( $email->object ) && $email->object instanceof WP_User ) {
+        $first_name = trim( (string) $email->object->first_name );
+        if ( '' === $first_name ) {
+            $first_name = trim( strtok( (string) $email->object->display_name, ' ' ) );
+        }
+    }
+
+    if ( '' === $first_name ) {
+        $first_name = __( 'there', 'noyona-childtheme' );
+    }
+
+    return sprintf(
+        /* translators: %s: Customer first name. */
+        __( 'Welcome to Noyona, %s!', 'noyona-childtheme' ),
+        $first_name
+    );
+}
+
+/* ----- Branded WooCommerce password reset email subject ----- */
+add_filter( 'woocommerce_email_subject_customer_reset_password', 'noyona_customer_reset_password_email_subject', 10, 3 );
+function noyona_customer_reset_password_email_subject( $subject, $user, $email ) {
+    return __( 'Reset your Noyona password', 'noyona-childtheme' );
+}
+
+/* ----- Branded WooCommerce processing order email subject ----- */
+add_filter( 'woocommerce_email_subject_customer_processing_order', 'noyona_customer_processing_order_email_subject', 10, 3 );
+function noyona_customer_processing_order_email_subject( $subject, $order, $email ) {
+    if ( $order instanceof WC_Order ) {
+        return sprintf(
+            /* translators: %s: Order number. */
+            __( "We're preparing your Noyona order %s", 'noyona-childtheme' ),
+            $order->get_order_number()
+        );
+    }
+
+    return __( "We're preparing your Noyona order", 'noyona-childtheme' );
+}
+
+/* ----- Branded WooCommerce delivered order email subject ----- */
+add_filter( 'woocommerce_email_subject_customer_completed_order', 'noyona_customer_completed_order_email_subject', 10, 3 );
+function noyona_customer_completed_order_email_subject( $subject, $order, $email ) {
+    if ( $order instanceof WC_Order ) {
+        return sprintf(
+            /* translators: %s: Order number. */
+            __( 'Your Noyona order %s has been delivered', 'noyona-childtheme' ),
+            $order->get_order_number()
+        );
+    }
+
+    return __( 'Your Noyona order has been delivered', 'noyona-childtheme' );
+}
+
+/* ----- Branded WooCommerce failed payment email subject ----- */
+add_filter( 'woocommerce_email_subject_customer_failed_order', 'noyona_customer_failed_order_email_subject', 10, 3 );
+function noyona_customer_failed_order_email_subject( $subject, $order, $email ) {
+    if ( $order instanceof WC_Order ) {
+        return sprintf(
+            /* translators: %s: Order number. */
+            __( 'Payment failed for your Noyona order %s', 'noyona-childtheme' ),
+            $order->get_order_number()
+        );
+    }
+
+    return __( 'Payment failed for your Noyona order', 'noyona-childtheme' );
+}
+
+/* ----- Branded WooCommerce cancelled order email subject ----- */
+add_filter( 'woocommerce_email_subject_customer_cancelled_order', 'noyona_customer_cancelled_order_email_subject', 10, 3 );
+function noyona_customer_cancelled_order_email_subject( $subject, $order, $email ) {
+    if ( $order instanceof WC_Order ) {
+        return sprintf(
+            /* translators: %s: Order number. */
+            __( 'Your Noyona order %s has been cancelled', 'noyona-childtheme' ),
+            $order->get_order_number()
+        );
+    }
+
+    return __( 'Your Noyona order has been cancelled', 'noyona-childtheme' );
+}
