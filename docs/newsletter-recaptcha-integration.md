@@ -1,203 +1,208 @@
-# Newsletter reCAPTCHA integration
+# reCAPTCHA integration (per-form v2/v3 switcher)
 
-**Project:** Noyona (WordPress + WooCommerce child theme `viteseo-noyona`)  
-**Feature scope:** Newsletter strip submit flow + WooCommerce login form captcha (`blocks/newsletter-strip`, login hooks in `inc/theme-setup.php`)  
-**Security layer:** Google reCAPTCHA (`v2` or `v3`) + nonce + server-side verification
+**Project:** Noyona (WordPress + WooCommerce child theme `viteseo-noyona`)
+**Feature scope:** Contact form, Login form, Register form, Newsletter strip
+**Security layer:** Google reCAPTCHA (`v2` checkbox or `v3` invisible) + nonce + server-side verification
 
 ## Purpose
 
-This implementation adds server-validated form protection using Google reCAPTCHA for:
+This implementation protects every public-facing form with Google reCAPTCHA and lets
+each form independently use **v2** (checkbox) or **v3** (invisible score) — switchable
+from a single map, with no changes to `wp-config.php` keys and no inline reCAPTCHA logic
+inside the form files.
 
-- newsletter submission (v3), and
-- login form verification (v2).
+Covered forms:
 
-The `newsletter-strip` block remains primarily a UI template, while submit handling and captcha verification are moved into shared `inc/` modules and login hooks.
+| Form       | Slug         | Default version | Where it lives |
+|------------|--------------|-----------------|----------------|
+| Contact    | `contact`    | `v2`            | `blocks/contact-form/render.php`, `inc/contact-form.php` (incl. Contact Form 7) |
+| Login      | `login`      | `v3`            | `inc/theme-setup.php` (WooCommerce login hooks) |
+| Register   | `register`   | `v2`            | `inc/shortcodes.php` (custom register shortcode) |
+| Newsletter | `newsletter` | `v3`            | `blocks/newsletter-strip/render.php`, `inc/newsletter.php` |
 
----
-
-## What was implemented
-
-### 1) Newsletter submit handler
-
-File: `inc/newsletter.php`
-
-- Registers both guest and logged-in handlers:
-  - `admin_post_nopriv_noyona_newsletter_subscribe`
-  - `admin_post_noyona_newsletter_subscribe`
-- Handles all server-side processing in `noyona_handle_newsletter_subscribe()`.
-
-### 2) Reusable reCAPTCHA module
-
-File: `inc/recaptcha.php`
-
-- Centralized key access, script enqueue, widget markup, and verification logic.
-- Can be reused by other forms by calling helper functions instead of duplicating captcha code.
-
-### 3) v3 token generation script
-
-File: `assets/js/recaptcha-v3.js`
-
-- Intercepts newsletter form submit.
-- Calls `grecaptcha.execute(...)`.
-- Stores token in hidden `g-recaptcha-response`.
-- Continues submit only when token is attached.
-
-### 4) Newsletter block integration
-
-File: `blocks/newsletter-strip/render.php`
-
-- Keeps UI rendering intact.
-- Adds:
-  - hidden form action (`noyona_newsletter_subscribe`)
-  - nonce field (`noyona_newsletter_nonce`)
-  - captcha markup from helper
-
-### 5) Theme loader wiring
-
-File: `functions.php`
-
-- Loads:
-  - `inc/recaptcha.php`
-  - `inc/newsletter.php`
-
-### 6) Login form integration (v2)
-
-File: `inc/theme-setup.php`
-
-- Renders reCAPTCHA v2 widget inside WooCommerce login form using hooks.
-- Verifies captcha server-side via `woocommerce_process_login_errors`.
-- Adds login error message when captcha fails.
-- Places captcha in the login footer block (between Google sign-in and "Create an Account").
-- Keeps captcha UI visible before verification and hides it after successful human verification.
+> Defaults above reflect the current `noyona_recaptcha_form_version_map()`. They can be changed at any time (see "How to switch").
 
 ---
 
-## End-to-end flow (how it works)
+## File / folder structure
 
-### Newsletter flow (v3)
+All reCAPTCHA code is grouped under dedicated folders:
 
-1. User submits `newsletter-strip` form.
-2. Form posts to `admin-post.php` with action `noyona_newsletter_subscribe`.
-3. WordPress routes action to `noyona_handle_newsletter_subscribe()`.
-4. Handler validates nonce.
-5. Handler verifies reCAPTCHA response (if captcha is configured).
-6. Handler sanitizes and validates email.
-7. Handler sends email via `wp_mail()` to `get_option('admin_email')`.
-8. User is redirected with:
-   - success: `newsletter_success=1`
-   - failure: `newsletter_error=...`
+```
+inc/recaptcha/
+  loader.php           ← single entry point (the only thing functions.php includes)
+  recaptcha.php        ← shared base layer (keys, enqueue, widget markup, verify API)
+  recaptcha-forms.php  ← per-form switcher + thin wrapper functions (this is the feature layer)
 
-### Login flow (v2)
+assets/js/recaptcha/
+  recaptcha-v3.js        ← newsletter-only v3 handler (intercepts submit, runs execute)
+  recaptcha-forms-v3.js  ← generic v3 token generator for login / register / contact
+```
 
-1. User opens `/login/` (WooCommerce account login form context).
-2. Theme hook renders reCAPTCHA v2 widget in login form.
-3. User verifies the widget (checkbox challenge).
-4. On submit, WooCommerce login validation runs and theme checks captcha token server-side.
-5. If captcha fails, login is blocked and form error is shown.
-6. If captcha passes, normal login validation/authentication continues.
+`functions.php` loads the whole module with one line:
+
+```php
+'recaptcha/loader.php',
+```
+
+`loader.php` then includes `recaptcha.php` first (base) and `recaptcha-forms.php` second (depends on the base).
 
 ---
 
-## Guards and security checks included
+## How to switch a form's version
 
-### CSRF guard
+Edit the single map in `inc/recaptcha/recaptcha-forms.php`:
 
-- Nonce field is added in form.
-- Nonce is validated server-side before processing.
+```php
+function noyona_recaptcha_form_version_map() {
+    $map = array(
+        'contact'    => 'v2',
+        'login'      => 'v3',
+        'register'   => 'v2',
+        'newsletter' => 'v3',
+    );
+    return (array) apply_filters( 'noyona_recaptcha_form_version_map', $map );
+}
+```
 
-### Bot/spam guard
+Change a value to `'v2'` or `'v3'` and save. That single change updates, for that form:
 
-- reCAPTCHA token is validated server-side using Google verify endpoint.
-- Client-side token alone is not trusted without backend verification.
+- which Google script loads (v2 checkbox API vs v3 `render=KEY`),
+- the rendered widget (visible checkbox vs invisible hidden token field),
+- the server-side verification (plain pass/fail vs action + score check).
 
-### Input validation guard
+Any value other than `'v2'`/`'v3'` safely falls back to `'v2'`.
 
-- `newsletter_email` is sanitized with `sanitize_email()`.
-- Email format is validated with `is_email()`.
+**Runtime override (no file edit):** use the `noyona_recaptcha_form_version_map` or
+`noyona_recaptcha_form_version` filters.
 
-### Fail-safe redirects
+---
 
-- Invalid nonce, captcha failure, invalid email, and mail failure all exit safely via redirect.
+## Architecture: the wrapper layer
 
-### Login fail-safe validation
+Form files never contain reCAPTCHA logic — they only **call** wrappers from
+`inc/recaptcha/recaptcha-forms.php`:
 
-- Login captcha is validated server-side before authentication completes.
-- Failed captcha adds a login error via WooCommerce validation pipeline.
+| Function | Purpose |
+|----------|---------|
+| `noyona_recaptcha_form_version_map()` | The switch (per-form version). |
+| `noyona_recaptcha_form_version( $form )` | Normalized `v2`/`v3` for a form. |
+| `noyona_recaptcha_form_action( $form )` | v3 action name (used by JS `execute` + server verify). |
+| `noyona_recaptcha_form_enabled( $form )` | Whether keys exist for the form's version. |
+| `noyona_recaptcha_form_enqueue_assets( $form )` | Loads the right Google script (+ generic v3 JS for non-newsletter v3). |
+| `noyona_recaptcha_form_widget_html( $form, $class, $attrs )` | Returns widget markup (and enqueues). |
+| `noyona_recaptcha_form_render_widget( $form, $class, $attrs )` | Echoes widget markup, escaped via `wp_kses`. |
+| `noyona_recaptcha_form_verify_post( $form )` | Verifies `$_POST` token (returns `true` or `WP_Error`). |
+| `noyona_recaptcha_form_verify_token( $form, $token, $ip )` | Verifies an already-extracted token (e.g. Contact Form 7). |
+| `noyona_recaptcha_register_token_field()` | Register-only: hidden token field that sits INSIDE the form. |
+| `noyona_recaptcha_register_external_widget( $class )` | Register-only: visible v2 checkbox placed OUTSIDE the form. |
+
+These wrap the shared base helpers in `inc/recaptcha/recaptcha.php`
+(`noyona_get_recaptcha_site_key`, `noyona_enqueue_recaptcha_script`,
+`noyona_get_recaptcha_widget_markup`, `noyona_verify_recaptcha_token`,
+`noyona_verify_recaptcha_from_post`, etc.).
+
+---
+
+## Per-form integration
+
+### Contact (`contact`)
+
+- `blocks/contact-form/render.php` builds the widget via `noyona_recaptcha_form_widget_html('contact', 'contact-form__captcha')`.
+- The same markup is injected into the Contact Form 7 variant (`.contact-form__form--cf7`).
+- `inc/contact-form.php`:
+  - native handler verifies via `noyona_recaptcha_form_verify_post('contact')`,
+  - CF7 validation (`wpcf7_validate`) verifies via `noyona_recaptcha_form_verify_token('contact', $token, $ip)`.
+
+### Login (`login`)
+
+- `inc/theme-setup.php` renders the widget inside the WooCommerce login form footer via
+  `noyona_recaptcha_form_widget_html('login', 'noyona-login-recaptcha', ['data-callback' => 'noyonaLoginRecaptchaVerified'])`,
+  echoed through `wp_kses( ..., noyona_recaptcha_form_allowed_html() )` (the allowlist permits both the v2 `div` and the v3 hidden `input`).
+- Server check runs in `noyona_validate_login_recaptcha()` via `noyona_recaptcha_form_verify_post('login')`.
+- For v3 (default) there is no checkbox; the hidden token field is filled by the generic v3 JS.
+
+### Register (`register`) — split placement
+
+On the register page the "Sign Up with Google" button and the "Log In" link live **outside**
+the `<form>`, but the token must submit **with** the form. So it is rendered in two pieces:
+
+1. `noyona_recaptcha_register_token_field()` — a hidden `g-recaptcha-response` field placed **inside** the form (before the Sign Up button).
+2. `noyona_recaptcha_register_external_widget()` — the visible **v2 checkbox** placed **below the Google button** (and above the Log In link). Its `data-callback` copies the solved token into the in-form hidden field; `data-expired/error-callback` clears it.
+
+For **v3**, the external widget outputs nothing (invisible) and the hidden field is filled by the generic v3 JS.
+
+Server check runs in `woocom_ct_handle_register_form()` via `noyona_recaptcha_form_verify_post('register')`; failure redirects with `register_error=captcha_failed`.
+
+CSS: `.noyona-register-recaptcha` (in `style.css`) centers the checkbox and adds a gap above it.
+
+### Newsletter (`newsletter`)
+
+- `blocks/newsletter-strip/render.php` builds the widget via `noyona_recaptcha_form_widget_html('newsletter', 'newsletter-strip__captcha')`.
+- `inc/newsletter.php` verifies via `noyona_recaptcha_form_verify_post('newsletter')`.
+- Newsletter keeps its **own** front-end handler (`assets/js/recaptcha/recaptcha-v3.js`), which intercepts the submit, runs `grecaptcha.execute(action: 'newsletter_subscribe')`, and submits once the token is attached.
+
+---
+
+## Front-end token flow (v3)
+
+- **Newsletter:** `recaptcha-v3.js` intercepts submit, generates the token on demand, then submits.
+- **Login / Register / Contact:** `recaptcha-forms-v3.js` reads `noyonaRecaptchaForms.forms`
+  (selector + action, localized from PHP) and `noyonaRecaptchaV3.siteKey`, then generates a token
+  on page load and refreshes it every ~100s (v3 tokens expire after ~2 min), writing it into each
+  form's hidden `g-recaptcha-response`. It only touches forms that actually contain that hidden field,
+  so listing a non-present or v2 form selector is harmless.
+
+For **v2**, no token JS is needed — the checkbox writes its own response (register being the
+exception, where the checkbox sits outside the form and uses a callback to sync the in-form field).
+
+---
+
+## Guards and security
+
+- **Server-side verification is the source of truth.** A client token alone is never trusted; every
+  form calls Google's `siteverify`. v3 additionally enforces **action match** and **score ≥ threshold**.
+- **CSRF:** nonce fields on contact (`noyona_contact_form_nonce`), newsletter (`noyona_newsletter_nonce`),
+  register (`noyona_register_nonce`); login uses the WooCommerce login pipeline.
+- **Output escaping:** widget markup is echoed via `wp_kses()` with an explicit allowlist
+  (`noyona_recaptcha_form_allowed_html()` — `div` + `input` with `data-*`), or via `esc_attr()` for the
+  register external widget. The inline sync scripts contain no user input.
+- **Secret key is never output** — only the public site key appears in markup (as intended).
+- **Fail-safe:** missing/empty/invalid tokens fail verification and exit via safe redirect or a form error.
+- **Graceful disable:** if keys are not configured for a form's version, the wrappers return `true`
+  (skip) so the site keeps working; protection is simply inactive until keys exist.
+
+---
+
+## Audit notes (known, non-blocking considerations)
+
+- **Mixed v2 + v3 on the same page:** loading both Google API variants on one page is unofficial and
+  best avoided. In this theme the newsletter strip only appears on the `page-home`/`page-lovial`
+  templates, which do not contain the login/register/contact forms, so no collision occurs with the
+  current layout. If you ever place a v3 form and a v2 form on the same page, set them to the same version.
+- **Login notice-hider on v3:** the inline script that hides the "captcha failed" notice on a `change`
+  event won't fire for invisible v3 (programmatic value sets don't trigger `change`). This is cosmetic
+  only and does not affect verification.
+- **Register cleanup regex:** the register markup passes through `noyona_clean_register_markup()` which
+  collapses whitespace between tags (`>\s+<`). The current inline scripts contain no `>`/`<` comparison
+  patterns, so they are safe; avoid adding HTML-like comparisons inside those inline scripts.
 
 ---
 
 ## Development guardrails
 
-To keep this integration maintainable and safe, apply these rules for future updates:
-
-- Do not change unrelated global behavior while updating newsletter captcha flow.
-- Avoid over-engineering; prefer the smallest change that preserves security and readability.
-- Do not add or change styles unless a developer/designer explicitly requests styling changes.
-- Do not modify WordPress core files (`wp-admin`, `wp-includes`, core `wp-*.php` files).
-- Keep block templates focused on markup/UI and keep business logic in `inc/` modules.
-- Reuse existing helpers before introducing new utility functions.
-- Do not delete or rewrite existing unrelated code; append/integrate changes with minimal impact.
-- If requirements are unclear or there is a conflict with existing behavior, ask for clarification first before applying changes.
+- Switch versions only via `noyona_recaptcha_form_version_map()` (or its filters) — do not hardcode versions in form files.
+- Keep all reCAPTCHA logic inside `inc/recaptcha/`; form files should only **call** the wrappers.
+- Do not modify `wp-config.php` reCAPTCHA constants or unrelated configuration.
+- Keep block templates focused on markup/UI; keep verification/logic in the module.
+- Do not add or change styles unless explicitly requested.
+- Reuse existing wrappers before adding new ones.
 
 ---
 
-## Function reference and purpose
+## Configuration (wp-config.php)
 
-### `inc/newsletter.php`
-
-- `noyona_handle_newsletter_subscribe()`
-  - Main submit controller for newsletter.
-  - Performs validation, captcha verify, email sending, and redirect result.
-
-### `inc/theme-setup.php` (login-related hooks)
-
-- `woocom_ct_add_register_link_to_login()`
-  - Renders the Google sign-in button and register link block.
-  - Injects the reCAPTCHA v2 widget into that same block for stable ordering.
-  - Enqueues v2 script through shared helper.
-  - Includes callback/fallback script to hide captcha UI after successful verification.
-
-- `noyona_validate_login_recaptcha()`
-  - Verifies v2 token server-side using shared helper during login validation.
-  - Blocks login and adds error when captcha verification fails.
-
-### `inc/recaptcha.php`
-
-- `noyona_get_recaptcha_site_key()`
-  - Reads site key by requested captcha version, with fallback constants.
-
-- `noyona_get_recaptcha_secret_key()`
-  - Reads secret key by requested captcha version, with fallback constants.
-
-- `noyona_get_recaptcha_version()`
-  - Reads captcha version (`v2` or `v3`), defaults safely if invalid.
-
-- `noyona_get_recaptcha_score_threshold()`
-  - Provides configurable score threshold for v3 checks.
-
-- `noyona_is_recaptcha_enabled()`
-  - Ensures both site and secret keys are available for the requested version.
-
-- `noyona_enqueue_recaptcha_script()`
-  - Enqueues version-specific script (`v2` checkbox script or `v3` execute flow script).
-
-- `noyona_get_recaptcha_widget_markup()`
-  - Returns markup:
-    - v3: hidden token field
-    - v2: checkbox widget markup (supports data attributes like callback)
-
-- `noyona_verify_recaptcha_token()`
-  - Performs server-side verification call to Google.
-  - For v3, validates action and score threshold.
-
-- `noyona_verify_recaptcha_from_post()`
-  - Convenience wrapper reading token from `$_POST`.
-
----
-
-## Configuration used
-
-Current expected constants:
+Generic constants:
 
 - `NOYONA_RECAPTCHA_SITE_KEY`
 - `NOYONA_RECAPTCHA_SECRET_KEY`
@@ -210,7 +215,11 @@ Version-specific constants (recommended when running mixed versions across forms
 - `NOYONA_RECAPTCHA_V3_SITE_KEY`
 - `NOYONA_RECAPTCHA_V3_SECRET_KEY`
 
-Note: `NOYONA_RECAPTCHA_V2_VERSION` is not required by this implementation.
+Optional:
+
+- `NOYONA_RECAPTCHA_SCORE_THRESHOLD` (defaults to `0.5`, clamped to `0..1`).
+
+Key resolution: a version-specific key is used when present, otherwise it falls back to the generic key.
 
 ---
 
@@ -218,92 +227,40 @@ Note: `NOYONA_RECAPTCHA_V2_VERSION` is not required by this implementation.
 
 ### Official links
 
-- reCAPTCHA Admin Console (manage keys, domains, analytics):
-  - [https://www.google.com/recaptcha/admin](https://www.google.com/recaptcha/admin)
-- reCAPTCHA v3 guide:
-  - [https://developers.google.com/recaptcha/docs/v3](https://developers.google.com/recaptcha/docs/v3)
-- reCAPTCHA v2 guide:
-  - [https://developers.google.com/recaptcha/docs/display](https://developers.google.com/recaptcha/docs/display)
-- Server-side verify response reference:
-  - [https://developers.google.com/recaptcha/docs/verify](https://developers.google.com/recaptcha/docs/verify)
-- Domain/package name validation notes:
-  - [https://developers.google.com/recaptcha/docs/domain_validation](https://developers.google.com/recaptcha/docs/domain_validation)
+- reCAPTCHA Admin Console: [https://www.google.com/recaptcha/admin](https://www.google.com/recaptcha/admin)
+- reCAPTCHA v3 guide: [https://developers.google.com/recaptcha/docs/v3](https://developers.google.com/recaptcha/docs/v3)
+- reCAPTCHA v2 guide: [https://developers.google.com/recaptcha/docs/display](https://developers.google.com/recaptcha/docs/display)
+- Server-side verify reference: [https://developers.google.com/recaptcha/docs/verify](https://developers.google.com/recaptcha/docs/verify)
+- Domain validation notes: [https://developers.google.com/recaptcha/docs/domain_validation](https://developers.google.com/recaptcha/docs/domain_validation)
 
-### How to update allowed domains
+### Update allowed domains
 
-1. Open [reCAPTCHA Admin Console](https://www.google.com/recaptcha/admin).
+1. Open the [reCAPTCHA Admin Console](https://www.google.com/recaptcha/admin).
 2. Select the key pair used by this project.
-3. In key settings, update the **Domains** list.
-4. Save changes.
-5. Retest submit flow on target host.
+3. Update the **Domains** list and save.
+4. Retest the submit flow on the target host.
 
-Recommended local/dev entries when needed:
+Recommended local/dev entries: `noyonaqa.local`, `localhost`, `127.0.0.1`.
 
-- `noyonaqa.local`
-- `localhost`
-- `127.0.0.1`
+### Interpreting v3 score
 
-### How to check and interpret v3 score
-
-1. Open the site key in [reCAPTCHA Admin Console](https://www.google.com/recaptcha/admin).
-2. Go to Analytics/traffic view for that key.
-3. Look for score distribution and action activity (for this flow, action is `newsletter_subscribe`).
-4. Compare observed scores against your threshold logic.
-
-General interpretation:
-
-- Closer to `1.0` = more likely human.
-- Closer to `0.0` = more likely bot/risk.
-- Common starting threshold is `0.5`, then tune based on real traffic quality.
-
-### How to identify if the integration works
-
-Expected newsletter success path:
-
-- Form submits and redirects with `newsletter_success=1`.
-- Backend accepted nonce, captcha verification, and email validation.
-
-Expected newsletter failure path:
-
-- Redirect includes `newsletter_error=captcha_failed`.
-- Indicates captcha token was missing/invalid or verification failed.
-
-What to verify during testing:
-
-- Request payload includes `g-recaptcha-response`.
-- The submit action is `noyona_newsletter_subscribe`.
-- For v3, no checkbox UI is expected (invisible flow is normal).
-
-Expected login success path:
-
-- User can complete v2 challenge and log in successfully.
-- After verification, login captcha container is hidden.
-
-Expected login failure path:
-
-- Login blocked with captcha error when token is missing/invalid.
+- Closer to `1.0` = more likely human; closer to `0.0` = more likely bot.
+- Common starting threshold is `0.5`; tune against real traffic (Analytics view per action: `contact`, `login`, `register`, `newsletter_subscribe`).
 
 ---
 
-## Reusability and version support
+## Testing checklist
 
-Yes, this module is reusable.
+For each form, with reCAPTCHA configured:
 
-- Reusable across forms:
-  - Any form can use the same helpers by adding nonce + token field + submit handler call to `noyona_verify_recaptcha_from_post()`.
+- **v2:** the checkbox renders; solving it then submitting succeeds; submitting without solving is blocked server-side.
+- **v3:** no checkbox; the request payload includes a non-empty `g-recaptcha-response`; submission succeeds for normal users.
+- **Tampering:** a direct POST with a missing/garbage token is rejected (captcha error / safe redirect).
+- **Switch test:** flip a form in the map (`v2` ↔ `v3`), reload, and confirm the UI and verification both follow.
 
-- Reusable across reCAPTCHA versions:
-  - Supports both `v2` and `v3` through `NOYONA_RECAPTCHA_VERSION`.
-  - v2 uses checkbox widget markup.
-  - v3 uses hidden token flow + JS execute flow.
+Expected failure markers:
 
----
-
-## Considerations
-
-- v3 is intentionally invisible (no checkbox UI).
-- v2 is visible (checkbox widget UI).
-- Server-side verification is the source of truth.
-- Receiver email is not from form action; it is `get_option('admin_email')`.
-- `formAction` controls request destination only (routing), not recipient.
-
+- Newsletter: `newsletter_error=captcha_failed`
+- Register: `register_error=captcha_failed`
+- Contact: `cf_error=captcha_failed`
+- Login: WooCommerce login error "Captcha verification failed. Please try again."

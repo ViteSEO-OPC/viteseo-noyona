@@ -149,10 +149,10 @@ function noyona_enqueue_recaptcha_script( $version = '' ) {
     wp_enqueue_script( $script_handle );
 
     if ( 'v3' === $version ) {
-        $script_path = get_stylesheet_directory() . '/assets/js/recaptcha-v3.js';
+        $script_path = get_stylesheet_directory() . '/assets/js/recaptcha/recaptcha-v3.js';
         wp_enqueue_script(
             'noyona-recaptcha-v3',
-            get_stylesheet_directory_uri() . '/assets/js/recaptcha-v3.js',
+            get_stylesheet_directory_uri() . '/assets/js/recaptcha/recaptcha-v3.js',
             array( $script_handle ),
             file_exists( $script_path ) ? (string) filemtime( $script_path ) : wp_get_theme()->get( 'Version' ),
             true

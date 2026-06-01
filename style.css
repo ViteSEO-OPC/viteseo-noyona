@@ -505,6 +505,12 @@ body.woocommerce-account .entry-title {
   margin-top: 0.85rem;
 }
 
+.noyona-register-recaptcha {
+  margin-top: 0.85rem;
+  display: flex;
+  justify-content: center;
+}
+
 .noyona-register-google i {
   font-size: 1.1rem;
   background: conic-gradient(

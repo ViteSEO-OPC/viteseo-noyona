@@ -24,8 +24,8 @@ function noyona_handle_newsletter_subscribe() {
         exit;
     }
 
-    if ( noyona_is_recaptcha_enabled( 'v3' ) ) {
-        $captcha_result = noyona_verify_recaptcha_from_post( 'g-recaptcha-response', 'newsletter_subscribe', 'v3' );
+    if ( function_exists( 'noyona_recaptcha_form_verify_post' ) ) {
+        $captcha_result = noyona_recaptcha_form_verify_post( 'newsletter' );
         if ( is_wp_error( $captcha_result ) ) {
             wp_safe_redirect( add_query_arg( 'newsletter_error', 'captcha_failed', $redirect_url ) );
             exit;

@@ -327,6 +327,9 @@ function woocom_ct_register_form_shortcode() {
             case 'invalid_request':
                 $message = 'Invalid registration request. Please try again.';
                 break;
+            case 'captcha_failed':
+                $message = 'Captcha verification failed. Please try again.';
+                break;
             default:
                 $message = 'Registration failed. Please try again.';
                 break;
@@ -389,6 +392,10 @@ function woocom_ct_register_form_shortcode() {
                     <input type="checkbox" name="terms" value="1" <?php checked( $old_terms ); ?> required>
                     <span><?php esc_html_e( 'I agree to the', 'noyona-childtheme' ); ?> <a href="/terms-of-service/"><?php esc_html_e( 'Terms and Conditions', 'noyona-childtheme' ); ?></a> <span aria-hidden="true">*</span></span>
                 </label>
+
+                <?php if ( function_exists( 'noyona_recaptcha_register_token_field' ) ) : ?>
+                    <?php noyona_recaptcha_register_token_field(); ?>
+                <?php endif; ?>
 
                 <button class="noyona-register-submit" type="submit"><?php esc_html_e( 'Sign Up', 'noyona-childtheme' ); ?></button>
             </form>
@@ -484,6 +491,10 @@ function woocom_ct_register_form_shortcode() {
                     <span><?php esc_html_e( 'Sign Up with Google', 'noyona-childtheme' ); ?></span>
                 </a>
             </div>
+
+            <?php if ( function_exists( 'noyona_recaptcha_register_external_widget' ) ) : ?>
+                <?php noyona_recaptcha_register_external_widget( 'noyona-register-recaptcha' ); ?>
+            <?php endif; ?>
 
             <p class="noyona-register-login">
                 <?php esc_html_e( 'Already have an account?', 'noyona-childtheme' ); ?> <a href="<?php echo esc_url( $account_url ); ?>"><?php esc_html_e( 'Log In', 'noyona-childtheme' ); ?></a>
@@ -610,6 +621,14 @@ function woocom_ct_handle_register_form() {
     if ( is_user_logged_in() ) {
         wp_safe_redirect( $redirect );
         exit;
+    }
+
+    if ( function_exists( 'noyona_recaptcha_form_verify_post' ) ) {
+        $captcha_result = noyona_recaptcha_form_verify_post( 'register' );
+        if ( is_wp_error( $captcha_result ) ) {
+            wp_safe_redirect( $build_error_redirect( 'captcha_failed', $redirect ) );
+            exit;
+        }
     }
 
     $full_name = isset( $_POST['full_name'] ) ? sanitize_text_field( wp_unslash( $_POST['full_name'] ) ) : '';
