@@ -127,6 +127,857 @@ function noyona_pdp_append_reviews_link_after_rating( $block_content, $block ) {
 }
 
 /**
+ * Product IDs that count as "this product" for review eligibility (parent + variations).
+ *
+ * @param int $product_id Product or variation ID.
+ * @return int[]
+ */
+function noyona_get_review_product_match_ids( $product_id ) {
+	$product_id = absint( $product_id );
+	if ( $product_id < 1 || ! function_exists( 'wc_get_product' ) ) {
+		return array();
+	}
+
+	$product = wc_get_product( $product_id );
+	if ( ! $product ) {
+		return array();
+	}
+
+	$ids = array( $product_id );
+
+	if ( $product->is_type( 'variable' ) ) {
+		$ids = array_merge( $ids, $product->get_children() );
+	} elseif ( $product->is_type( 'variation' ) ) {
+		$parent_id = (int) $product->get_parent_id();
+		if ( $parent_id > 0 ) {
+			$ids[] = $parent_id;
+			$parent = wc_get_product( $parent_id );
+			if ( $parent && $parent->is_type( 'variable' ) ) {
+				$ids = array_merge( $ids, $parent->get_children() );
+			}
+		}
+	}
+
+	return array_values( array_unique( array_filter( array_map( 'absint', $ids ) ) ) );
+}
+
+/**
+ * Whether the user may bypass the completed-order requirement (shop staff).
+ *
+ * @param int $user_id User ID.
+ * @return bool
+ */
+function noyona_user_can_bypass_review_purchase_check( $user_id = 0 ) {
+	$user_id = $user_id > 0 ? $user_id : get_current_user_id();
+	if ( $user_id < 1 ) {
+		return false;
+	}
+
+	return user_can( $user_id, 'manage_woocommerce' ) || user_can( $user_id, 'manage_options' );
+}
+
+/**
+ * Days after order completion that a customer may leave a product review.
+ *
+ * @return int
+ */
+function noyona_get_review_window_days() {
+	$days = (int) apply_filters( 'noyona_review_window_days', 14 );
+
+	return max( 1, $days );
+}
+
+/**
+ * Unix timestamp when the order was marked completed (received).
+ *
+ * @param WC_Order $order Order object.
+ * @return int
+ */
+function noyona_get_order_received_timestamp( $order ) {
+	if ( ! $order instanceof WC_Order ) {
+		return 0;
+	}
+
+	$completed = $order->get_date_completed();
+	if ( $completed ) {
+		return (int) $completed->getTimestamp();
+	}
+
+	if ( $order->has_status( 'completed' ) ) {
+		$modified = $order->get_date_modified();
+		if ( $modified ) {
+			return (int) $modified->getTimestamp();
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Whether the review window is still open for a completed order.
+ *
+ * @param WC_Order $order Order object.
+ * @return bool
+ */
+function noyona_order_is_within_review_window( $order ) {
+	$received_at = noyona_get_order_received_timestamp( $order );
+	if ( $received_at <= 0 ) {
+		return false;
+	}
+
+	$deadline = $received_at + ( DAY_IN_SECONDS * noyona_get_review_window_days() );
+
+	return (int) current_time( 'timestamp', true ) <= $deadline;
+}
+
+/**
+ * Completed order linked to a product review comment.
+ *
+ * @param int $comment_id Comment ID.
+ * @return WC_Order|null
+ */
+function noyona_get_review_order_for_comment( $comment_id ) {
+	$comment_id = absint( $comment_id );
+	if ( $comment_id < 1 ) {
+		return null;
+	}
+
+	$order_id = (int) get_comment_meta( $comment_id, 'noyona_review_order_id', true );
+	if ( $order_id > 0 ) {
+		$order = wc_get_order( $order_id );
+		return $order instanceof WC_Order ? $order : null;
+	}
+
+	$comment = get_comment( $comment_id );
+	if ( ! $comment instanceof WP_Comment || (int) $comment->user_id < 1 ) {
+		return null;
+	}
+
+	$orders = noyona_get_completed_order_ids_with_product( (int) $comment->user_id, (int) $comment->comment_post_ID );
+	foreach ( $orders as $candidate_id ) {
+		$order = wc_get_order( $candidate_id );
+		if ( $order instanceof WC_Order ) {
+			return $order;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Whether a user may edit their own product review (within the review window).
+ *
+ * @param int $comment_id Comment ID.
+ * @param int $user_id    User ID.
+ * @return bool
+ */
+function noyona_user_can_edit_product_review( $comment_id, $user_id = 0 ) {
+	$comment_id = absint( $comment_id );
+	$user_id    = $user_id > 0 ? absint( $user_id ) : get_current_user_id();
+
+	if ( $comment_id < 1 || $user_id < 1 ) {
+		return false;
+	}
+
+	$comment = get_comment( $comment_id );
+	if ( ! $comment instanceof WP_Comment ) {
+		return false;
+	}
+
+	if ( (int) $comment->user_id !== $user_id ) {
+		return false;
+	}
+
+	if ( 'review' !== (string) $comment->comment_type || '1' !== (string) $comment->comment_approved ) {
+		return false;
+	}
+
+	if ( 'product' !== get_post_type( (int) $comment->comment_post_ID ) ) {
+		return false;
+	}
+
+	if ( noyona_user_can_bypass_review_purchase_check( $user_id ) ) {
+		return true;
+	}
+
+	$order = noyona_get_review_order_for_comment( $comment_id );
+
+	return $order instanceof WC_Order && noyona_order_is_within_review_window( $order );
+}
+
+/**
+ * Whether the user has at least one editable review on this product.
+ *
+ * @param int $product_id Product ID.
+ * @param int $user_id    User ID.
+ * @return bool
+ */
+function noyona_user_has_editable_review_on_product( $product_id, $user_id = 0 ) {
+	$product_id = absint( $product_id );
+	$user_id    = $user_id > 0 ? absint( $user_id ) : get_current_user_id();
+
+	if ( $product_id < 1 || $user_id < 1 ) {
+		return false;
+	}
+
+	foreach ( noyona_get_user_product_review_comments( $user_id, $product_id ) as $comment ) {
+		if ( $comment instanceof WP_Comment && noyona_user_can_edit_product_review( (int) $comment->comment_ID, $user_id ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Completed order IDs (newest first) that include this product for the user.
+ *
+ * @param int $user_id    User ID.
+ * @param int $product_id Product ID.
+ * @return int[]
+ */
+function noyona_get_completed_order_ids_with_product( $user_id, $product_id ) {
+	$user_id    = absint( $user_id );
+	$product_id = absint( $product_id );
+
+	if ( $user_id < 1 || $product_id < 1 || ! function_exists( 'wc_get_orders' ) ) {
+		return array();
+	}
+
+	$match_ids = noyona_get_review_product_match_ids( $product_id );
+	if ( empty( $match_ids ) ) {
+		return array();
+	}
+
+	$user  = get_user_by( 'id', $user_id );
+	$email = ( $user && ! empty( $user->user_email ) ) ? (string) $user->user_email : '';
+
+	$base_query = array(
+		'status' => array( 'completed' ),
+		'limit'  => -1,
+		'return' => 'ids',
+	);
+
+	$order_ids = wc_get_orders( array_merge( $base_query, array( 'customer_id' => $user_id ) ) );
+
+	if ( is_email( $email ) ) {
+		$email_order_ids = wc_get_orders( array_merge( $base_query, array( 'billing_email' => $email ) ) );
+		$order_ids       = array_values( array_unique( array_merge( (array) $order_ids, (array) $email_order_ids ) ) );
+	}
+
+	$matching_orders = array();
+
+	foreach ( $order_ids as $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			continue;
+		}
+
+		$contains_product = false;
+		foreach ( $order->get_items( 'line_item' ) as $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				continue;
+			}
+
+			$item_product_id = (int) $item->get_product_id();
+			if ( in_array( $item_product_id, $match_ids, true ) ) {
+				$contains_product = true;
+				break;
+			}
+		}
+
+		if ( $contains_product ) {
+			$matching_orders[] = $order;
+		}
+	}
+
+	if ( empty( $matching_orders ) ) {
+		return array();
+	}
+
+	usort(
+		$matching_orders,
+		static function ( $a, $b ) {
+			$a_date = $a instanceof WC_Order ? $a->get_date_completed() : null;
+			$b_date = $b instanceof WC_Order ? $b->get_date_completed() : null;
+			$a_time = $a_date ? $a_date->getTimestamp() : 0;
+			$b_time = $b_date ? $b_date->getTimestamp() : 0;
+			return $b_time <=> $a_time;
+		}
+	);
+
+	return array_values(
+		array_map(
+			static function ( $order ) {
+				return $order instanceof WC_Order ? (int) $order->get_id() : 0;
+			},
+			$matching_orders
+		)
+	);
+}
+
+/**
+ * Product reviews left by a user on a product (approved only).
+ *
+ * @param int $user_id    User ID.
+ * @param int $product_id Product ID.
+ * @return WP_Comment[]
+ */
+function noyona_get_user_product_review_comments( $user_id, $product_id ) {
+	$user_id    = absint( $user_id );
+	$product_id = absint( $product_id );
+
+	if ( $user_id < 1 || $product_id < 1 ) {
+		return array();
+	}
+
+	$comments = get_comments(
+		array(
+			'user_id' => $user_id,
+			'post_id' => $product_id,
+			'type'    => 'review',
+			'status'  => 'approve',
+			'number'  => 0,
+			'orderby' => 'comment_date_gmt',
+			'order'   => 'DESC',
+		)
+	);
+
+	return is_array( $comments ) ? $comments : array();
+}
+
+/**
+ * Completed order IDs this user already reviewed for this product.
+ *
+ * @param int $user_id    User ID.
+ * @param int $product_id Product ID.
+ * @return int[]
+ */
+function noyona_get_reviewed_order_ids_for_product( $user_id, $product_id ) {
+	$reviewed = array();
+
+	foreach ( noyona_get_user_product_review_comments( $user_id, $product_id ) as $comment ) {
+		if ( ! $comment instanceof WP_Comment ) {
+			continue;
+		}
+
+		$order_id = (int) get_comment_meta( $comment->comment_ID, 'noyona_review_order_id', true );
+		if ( $order_id > 0 ) {
+			$reviewed[] = $order_id;
+		}
+	}
+
+	return array_values( array_unique( $reviewed ) );
+}
+
+/**
+ * Completed orders for this product that do not yet have a review from this user.
+ *
+ * @param int $user_id    User ID.
+ * @param int $product_id Product ID.
+ * @return int[]
+ */
+function noyona_get_reviewable_order_ids( $user_id, $product_id ) {
+	$user_id    = absint( $user_id );
+	$product_id = absint( $product_id );
+
+	if ( $user_id < 1 || $product_id < 1 ) {
+		return array();
+	}
+
+	$orders   = noyona_get_completed_order_ids_with_product( $user_id, $product_id );
+	$reviewed = noyona_get_reviewed_order_ids_for_product( $user_id, $product_id );
+
+	if ( empty( $orders ) ) {
+		return array();
+	}
+
+	$unlinked_reviews = 0;
+	foreach ( noyona_get_user_product_review_comments( $user_id, $product_id ) as $comment ) {
+		if ( ! $comment instanceof WP_Comment ) {
+			continue;
+		}
+		if ( (int) get_comment_meta( $comment->comment_ID, 'noyona_review_order_id', true ) <= 0 ) {
+			$unlinked_reviews++;
+		}
+	}
+
+	$available = array();
+	foreach ( $orders as $order_id ) {
+		if ( in_array( (int) $order_id, $reviewed, true ) ) {
+			continue;
+		}
+		if ( $unlinked_reviews > 0 ) {
+			$unlinked_reviews--;
+			continue;
+		}
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order || ! noyona_order_is_within_review_window( $order ) ) {
+			continue;
+		}
+
+		$available[] = (int) $order_id;
+	}
+
+	return $available;
+}
+
+/**
+ * Whether the user has an unreviewed completed order past the review deadline.
+ *
+ * @param int $user_id    User ID.
+ * @param int $product_id Product ID.
+ * @return bool
+ */
+function noyona_user_has_expired_review_opportunity( $user_id, $product_id ) {
+	$user_id    = absint( $user_id );
+	$product_id = absint( $product_id );
+
+	if ( $user_id < 1 || $product_id < 1 ) {
+		return false;
+	}
+
+	$orders   = noyona_get_completed_order_ids_with_product( $user_id, $product_id );
+	$reviewed = noyona_get_reviewed_order_ids_for_product( $user_id, $product_id );
+
+	foreach ( $orders as $order_id ) {
+		if ( in_array( (int) $order_id, $reviewed, true ) ) {
+			continue;
+		}
+
+		$order = wc_get_order( $order_id );
+		if ( $order && ! noyona_order_is_within_review_window( $order ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Pick the completed order this new review should be linked to.
+ *
+ * @param int $user_id    User ID.
+ * @param int $product_id Product ID.
+ * @return int Order ID, or 0 when not applicable (e.g. staff bypass).
+ */
+function noyona_pick_review_order_id( $user_id, $product_id ) {
+	if ( noyona_user_can_bypass_review_purchase_check( $user_id ) ) {
+		return 0;
+	}
+
+	$available = noyona_get_reviewable_order_ids( $user_id, $product_id );
+
+	return ! empty( $available ) ? (int) $available[0] : 0;
+}
+
+/**
+ * Whether the user has a completed order that includes this product (received).
+ *
+ * @param int $user_id    User ID.
+ * @param int $product_id Product ID.
+ * @return bool
+ */
+function noyona_user_has_received_product( $user_id, $product_id ) {
+	return ! empty( noyona_get_completed_order_ids_with_product( $user_id, $product_id ) );
+}
+
+/**
+ * Whether the current (or given) user may submit a review for this product.
+ *
+ * @param int $product_id Product ID.
+ * @param int $user_id    User ID (defaults to current user).
+ * @return bool
+ */
+function noyona_user_can_review_product( $product_id = 0, $user_id = 0 ) {
+	$product_id = $product_id > 0 ? absint( $product_id ) : (int) get_the_ID();
+	$user_id    = $user_id > 0 ? absint( $user_id ) : get_current_user_id();
+
+	if ( $product_id < 1 || $user_id < 1 ) {
+		return false;
+	}
+
+	/**
+	 * Filter whether a user may submit a product review.
+	 *
+	 * @param bool $can_review   Default eligibility from completed orders.
+	 * @param int  $product_id   Product ID.
+	 * @param int  $user_id      User ID.
+	 */
+	$can_review = ! empty( noyona_get_reviewable_order_ids( $user_id, $product_id ) );
+	if ( noyona_user_can_bypass_review_purchase_check( $user_id ) ) {
+		$can_review = true;
+	}
+
+	return (bool) apply_filters(
+		'noyona_user_can_review_product',
+		$can_review,
+		$product_id,
+		$user_id
+	);
+}
+
+add_action( 'pre_comment_on_post', 'noyona_pdp_validate_review_purchase', 5 );
+/**
+ * Block product reviews from users who have not received the product.
+ *
+ * @param int $comment_post_id Post ID.
+ */
+function noyona_pdp_validate_review_purchase( $comment_post_id ) {
+	$comment_post_id = absint( $comment_post_id );
+	if ( $comment_post_id < 1 || 'product' !== get_post_type( $comment_post_id ) ) {
+		return;
+	}
+
+	if ( ! is_user_logged_in() ) {
+		wp_die(
+			esc_html__( 'You must be logged in to submit a review.', 'noyona-childtheme' ),
+			esc_html__( 'Review not allowed', 'noyona-childtheme' ),
+			array( 'response' => 403 )
+		);
+	}
+
+	if ( noyona_user_can_review_product( $comment_post_id ) ) {
+		$order_id = noyona_pick_review_order_id( get_current_user_id(), $comment_post_id );
+		if ( $order_id > 0 ) {
+			$GLOBALS['noyona_current_review_order_id'] = $order_id;
+		}
+		return;
+	}
+
+	$user_id = get_current_user_id();
+
+	if ( ! noyona_user_has_received_product( $user_id, $comment_post_id ) ) {
+		$message = esc_html__( 'Only customers who have purchased and received this product can leave a review.', 'noyona-childtheme' );
+	} elseif ( noyona_user_has_expired_review_opportunity( $user_id, $comment_post_id ) ) {
+		$message = sprintf(
+			/* translators: %d: number of days to leave a review after delivery */
+			esc_html__( 'The review period for this product has ended. Reviews must be submitted within %d days of receiving your order.', 'noyona-childtheme' ),
+			noyona_get_review_window_days()
+		);
+	} else {
+		$message = esc_html__( 'You have already reviewed this product for each of your completed orders.', 'noyona-childtheme' );
+	}
+
+	wp_die(
+		$message,
+		esc_html__( 'Review not allowed', 'noyona-childtheme' ),
+		array( 'response' => 403 )
+	);
+}
+
+add_filter( 'duplicate_comment_id', 'noyona_pdp_allow_review_per_order', 11, 2 );
+/**
+ * Allow another review on the same product when a different completed order is eligible.
+ *
+ * @param int|null            $dupe_id     Duplicate comment ID from core.
+ * @param array<string,mixed> $commentdata Comment data.
+ * @return int|null|false
+ */
+function noyona_pdp_allow_review_per_order( $dupe_id, $commentdata ) {
+	if ( empty( $dupe_id ) || ! is_user_logged_in() ) {
+		return $dupe_id;
+	}
+
+	$post_id = isset( $commentdata['comment_post_ID'] ) ? (int) $commentdata['comment_post_ID'] : 0;
+	if ( $post_id < 1 || 'product' !== get_post_type( $post_id ) ) {
+		return $dupe_id;
+	}
+
+	$user_id = get_current_user_id();
+	if ( noyona_user_can_bypass_review_purchase_check( $user_id ) ) {
+		return $dupe_id;
+	}
+
+	if ( ! empty( noyona_get_reviewable_order_ids( $user_id, $post_id ) ) ) {
+		return null;
+	}
+
+	return $dupe_id;
+}
+
+add_filter( 'comments_open', 'noyona_pdp_comments_open_for_eligible_reviewers', 10, 2 );
+/**
+ * Gate product comments for logged-in users: allow new reviews or editing within the window.
+ *
+ * @param bool $open    Whether comments are open.
+ * @param int  $post_id Post ID.
+ * @return bool
+ */
+function noyona_pdp_comments_open_for_eligible_reviewers( $open, $post_id ) {
+	if ( 'product' !== get_post_type( $post_id ) ) {
+		return $open;
+	}
+
+	if ( ! is_user_logged_in() ) {
+		return $open;
+	}
+
+	if ( noyona_user_can_review_product( $post_id ) || noyona_user_has_editable_review_on_product( $post_id ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+add_filter( 'pre_comment_approved', 'noyona_pdp_auto_approve_product_review', 20, 2 );
+/**
+ * Publish product reviews immediately for eligible verified buyers (and staff bypass).
+ *
+ * @param int|string|bool $approved     Approval status (0/1/'spam'/etc.).
+ * @param array           $commentdata  Comment data.
+ * @return int|string|bool
+ */
+function noyona_pdp_auto_approve_product_review( $approved, $commentdata ) {
+	$post_id = isset( $commentdata['comment_post_ID'] ) ? (int) $commentdata['comment_post_ID'] : 0;
+	if ( $post_id < 1 || 'product' !== get_post_type( $post_id ) ) {
+		return $approved;
+	}
+
+	if ( ! is_user_logged_in() ) {
+		return $approved;
+	}
+
+	if ( noyona_user_can_review_product( $post_id ) ) {
+		return 1;
+	}
+
+	return $approved;
+}
+
+add_filter( 'comment_post_redirect', 'noyona_pdp_review_redirect_to_reviews', 10, 3 );
+/**
+ * Send reviewers back to the PDP reviews section after submit.
+ *
+ * @param string     $location Redirect URL.
+ * @param WP_Comment $comment  New comment.
+ * @return string
+ */
+function noyona_pdp_review_redirect_to_reviews( $location, $comment ) {
+	if ( ! $comment instanceof WP_Comment || 'product' !== get_post_type( (int) $comment->comment_post_ID ) ) {
+		return $location;
+	}
+
+	$permalink = get_permalink( (int) $comment->comment_post_ID );
+	if ( ! $permalink ) {
+		return $location;
+	}
+
+	return add_query_arg( 'review_submitted', '1', $permalink ) . '#reviews';
+}
+
+/**
+ * Approved product reviews for a PDP.
+ *
+ * @param int $product_id Product ID.
+ * @return WP_Comment[]
+ */
+function noyona_pdp_get_product_review_comments( $product_id ) {
+	$product_id = absint( $product_id );
+	if ( $product_id < 1 ) {
+		return array();
+	}
+
+	$comments = get_comments(
+		array(
+			'post_id' => $product_id,
+			'status'  => 'approve',
+			'type'    => 'review',
+			'number'  => 0,
+			'orderby' => 'comment_date_gmt',
+			'order'   => 'DESC',
+		)
+	);
+
+	return is_array( $comments ) ? $comments : array();
+}
+
+add_action( 'comment_post', 'noyona_pdp_attach_review_order_id', 15, 3 );
+/**
+ * Link a product review to the completed order it is for (one review per order).
+ *
+ * @param int        $comment_id       Comment ID.
+ * @param int|string $comment_approved Approval status.
+ * @param array      $commentdata      Comment data.
+ */
+function noyona_pdp_attach_review_order_id( $comment_id, $comment_approved, $commentdata ) {
+	unset( $comment_approved );
+
+	if ( empty( $commentdata['comment_post_ID'] ) || 'product' !== get_post_type( (int) $commentdata['comment_post_ID'] ) ) {
+		return;
+	}
+
+	if ( ! is_user_logged_in() ) {
+		return;
+	}
+
+	$order_id = isset( $GLOBALS['noyona_current_review_order_id'] )
+		? (int) $GLOBALS['noyona_current_review_order_id']
+		: noyona_pick_review_order_id( get_current_user_id(), (int) $commentdata['comment_post_ID'] );
+
+	unset( $GLOBALS['noyona_current_review_order_id'] );
+
+	if ( $order_id > 0 ) {
+		update_comment_meta( $comment_id, 'noyona_review_order_id', $order_id );
+	}
+}
+
+add_action( 'wp_ajax_noyona_update_product_review', 'noyona_pdp_ajax_update_product_review' );
+/**
+ * Update the current user's product review (within the edit window).
+ */
+function noyona_pdp_ajax_update_product_review() {
+	check_ajax_referer( 'noyona-review-edit', 'nonce' );
+
+	if ( ! is_user_logged_in() ) {
+		wp_send_json_error( array( 'message' => __( 'You must be logged in to edit a review.', 'noyona-childtheme' ) ), 403 );
+	}
+
+	$comment_id = isset( $_POST['comment_id'] ) ? absint( $_POST['comment_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	if ( $comment_id < 1 || ! noyona_user_can_edit_product_review( $comment_id ) ) {
+		wp_send_json_error(
+			array(
+				'message' => sprintf(
+					/* translators: %d: number of days reviews can be edited after delivery */
+					__( 'This review can no longer be edited. Reviews can only be changed within %d days of receiving your order.', 'noyona-childtheme' ),
+					noyona_get_review_window_days()
+				),
+			),
+			403
+		);
+	}
+
+	$comment = get_comment( $comment_id );
+	if ( ! $comment instanceof WP_Comment ) {
+		wp_send_json_error( array( 'message' => __( 'Review not found.', 'noyona-childtheme' ) ), 404 );
+	}
+
+	$product_id = (int) $comment->comment_post_ID;
+	$rating     = isset( $_POST['rating'] ) ? absint( $_POST['rating'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	$title      = isset( $_POST['noyona_review_title'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['noyona_review_title'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	$body       = isset( $_POST['comment'] ) ? sanitize_textarea_field( wp_unslash( (string) $_POST['comment'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+	if ( function_exists( 'wc_review_ratings_enabled' ) && wc_review_ratings_enabled() ) {
+		if ( function_exists( 'wc_review_ratings_required' ) && wc_review_ratings_required() && ( $rating < 1 || $rating > 5 ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please select a rating.', 'noyona-childtheme' ) ), 400 );
+		}
+	} else {
+		$rating = 0;
+	}
+
+	if ( '' === trim( $body ) && $rating > 0 ) {
+		$body = '[noyona-rating-only]';
+	}
+
+	$updated = wp_update_comment(
+		array(
+			'comment_ID'      => $comment_id,
+			'comment_content' => $body,
+		),
+		true
+	);
+
+	if ( is_wp_error( $updated ) ) {
+		wp_send_json_error( array( 'message' => __( 'Could not save your review. Please try again.', 'noyona-childtheme' ) ), 500 );
+	}
+
+	if ( $rating > 0 && $rating <= 5 ) {
+		update_comment_meta( $comment_id, 'rating', $rating );
+	}
+
+	if ( '' !== $title ) {
+		update_comment_meta( $comment_id, 'review_title', $title );
+	} else {
+		delete_comment_meta( $comment_id, 'review_title' );
+	}
+
+	$new_image_ids = noyona_pdp_handle_review_image_uploads();
+	if ( ! empty( $new_image_ids ) ) {
+		$existing_raw = get_comment_meta( $comment_id, 'noyona_review_image_ids', true );
+		$existing_ids = array();
+		if ( is_array( $existing_raw ) ) {
+			$existing_ids = array_map( 'absint', $existing_raw );
+		} elseif ( is_string( $existing_raw ) && '' !== trim( $existing_raw ) ) {
+			$existing_ids = array_map( 'absint', explode( ',', $existing_raw ) );
+		}
+
+		$merged_ids = array_values( array_unique( array_merge( $existing_ids, $new_image_ids ) ) );
+		$merged_ids = array_slice( $merged_ids, 0, 4 );
+
+		update_comment_meta( $comment_id, 'review_image_ids', implode( ',', $merged_ids ) );
+		update_comment_meta( $comment_id, 'noyona_review_image_ids', $merged_ids );
+	}
+
+	if ( class_exists( 'WC_Comments' ) && $product_id > 0 ) {
+		WC_Comments::clear_transients( $product_id );
+	}
+
+	$display_content = trim( wp_strip_all_tags( $body ) );
+	if ( '[noyona-rating-only]' === $display_content ) {
+		$display_content = '';
+	}
+
+	$media_urls = noyona_pdp_get_review_media_urls( $comment_id );
+
+	wp_send_json_success(
+		array(
+			'commentId'  => $comment_id,
+			'title'      => $title,
+			'content'    => $display_content,
+			'rating'     => $rating,
+			'mediaUrls'  => $media_urls,
+			'mediaCount' => count( $media_urls ),
+		)
+	);
+}
+
+/**
+ * Resolve image URLs attached to a product review.
+ *
+ * @param int $comment_id Comment ID.
+ * @return string[]
+ */
+function noyona_pdp_get_review_media_urls( $comment_id ) {
+	$comment_id = absint( $comment_id );
+	if ( $comment_id < 1 ) {
+		return array();
+	}
+
+	if ( function_exists( 'noyona_cr_extract_media_urls' ) ) {
+		return noyona_cr_extract_media_urls( $comment_id );
+	}
+
+	$urls = array();
+	$raw  = get_comment_meta( $comment_id, 'noyona_review_image_ids', true );
+	$ids  = array();
+
+	if ( is_array( $raw ) ) {
+		$ids = array_map( 'absint', $raw );
+	} else {
+		$string_ids = get_comment_meta( $comment_id, 'review_image_ids', true );
+		if ( is_string( $string_ids ) && '' !== trim( $string_ids ) ) {
+			$ids = array_map( 'absint', explode( ',', $string_ids ) );
+		}
+	}
+
+	foreach ( $ids as $attachment_id ) {
+		if ( $attachment_id < 1 ) {
+			continue;
+		}
+		$url = wp_get_attachment_image_url( $attachment_id, 'full' );
+		if ( ! $url ) {
+			$url = wp_get_attachment_url( $attachment_id );
+		}
+		if ( $url ) {
+			$urls[] = $url;
+		}
+	}
+
+	return array_values( array_unique( $urls ) );
+}
+
+/**
  * Handle optional review image uploads from the custom review form.
  *
  * @return int[] Attachment IDs.
