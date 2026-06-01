@@ -171,6 +171,13 @@ function woocom_ct_enqueue_assets() {
         $shop_price_ceiling = $shop_price_step;
     }
 
+    $wishlist_saved_keys = array();
+    if ( is_user_logged_in() && function_exists( 'noyona_get_product_wishlist_items' ) && function_exists( 'noyona_get_product_wishlist_item_key' ) ) {
+        foreach ( noyona_get_product_wishlist_items( get_current_user_id() ) as $wishlist_item ) {
+            $wishlist_saved_keys[] = noyona_get_product_wishlist_item_key( $wishlist_item['product_id'], $wishlist_item['variation_id'] );
+        }
+    }
+
     wp_localize_script(
         'woocom-ct-header',
         'noyonaHeader',
@@ -185,6 +192,18 @@ function woocom_ct_enqueue_assets() {
             'shopPriceFilter' => array(
                 'step'     => $shop_price_step,
                 'maxPrice' => $shop_price_ceiling,
+            ),
+            'wishlist'        => array(
+                'nonce'     => wp_create_nonce( 'noyona_product_wishlist' ),
+                'loginUrl'  => function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' ),
+                'savedKeys' => array_values( array_unique( $wishlist_saved_keys ) ),
+            ),
+            'i18n'            => array(
+                'wishlistAdd'        => __( 'Add to wishlist', 'noyona-childtheme' ),
+                'wishlistRemove'     => __( 'Remove from wishlist', 'noyona-childtheme' ),
+                'wishlistLoginTitle' => __( 'Log in to save your wishlist', 'noyona-childtheme' ),
+                'wishlistLoginCopy'  => __( 'Please log in to save products and view them from My Account.', 'noyona-childtheme' ),
+                'wishlistError'      => __( 'Wishlist could not be updated. Please try again.', 'noyona-childtheme' ),
             ),
         )
     );
