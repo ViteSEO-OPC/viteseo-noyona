@@ -30,12 +30,13 @@ $background_image= isset( $atts['backgroundImage'] ) ? trim( (string) $atts['bac
 $cards           = is_array( $atts['cards'] ?? null ) ? $atts['cards'] : array();
 
 $style = '';
+$has_background_image = '' !== $background_image;
 if ( '' !== $background_image ) {
     $style = '--discover-face-bg-image: url(' . esc_url_raw( $background_image ) . ');';
 }
 ?>
 
-<section <?php echo get_block_wrapper_attributes( array( 'class' => 'noyona-discover-face-banner', 'style' => $style ) ); ?>>
+<section <?php echo get_block_wrapper_attributes( array( 'class' => 'noyona-discover-face-banner' . ( $has_background_image ? ' has-background-image' : '' ), 'style' => $style ) ); ?>>
     <div class="noyona-discover-face-banner__inner">
         <div class="noyona-discover-face-banner__content">
             <?php if ( '' !== $heading ) : ?>

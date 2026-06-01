@@ -19,8 +19,19 @@
     linear-gradient(180deg, rgba(160, 24, 101, 0.72) 0%, rgba(160, 24, 101, 0.72) 100%),
     var(--discover-face-bg-image, none),
     linear-gradient(115deg, #9d0f65 0%, #8c185f 45%, #b03c7f 100%);
-  background-size: cover;
-  background-position: center;
+  background-size: cover, cover, cover;
+  background-position: center center, center center, center center;
+  background-repeat: no-repeat;
+}
+
+.noyona-discover-face-banner.has-background-image .noyona-discover-face-banner__inner {
+  background-image:
+    linear-gradient(90deg, rgba(28, 16, 26, 0.48) 0%, rgba(28, 16, 26, 0.22) 48%, rgba(28, 16, 26, 0.08) 100%),
+    var(--discover-face-bg-image);
+  background-color: transparent;
+  background-size: 100% 100%, 100% auto;
+  background-position: center center, center center;
+  background-repeat: no-repeat;
 }
 
 .noyona-discover-face-banner__inner::after {
@@ -31,6 +42,10 @@
   background:
     linear-gradient(120deg, rgba(255, 255, 255, 0.1) 8%, rgba(255, 255, 255, 0) 40%),
     radial-gradient(circle at 18% 80%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 48%);
+}
+
+.noyona-discover-face-banner.has-background-image .noyona-discover-face-banner__inner::after {
+  background: none;
 }
 
 .noyona-discover-face-banner__content,
