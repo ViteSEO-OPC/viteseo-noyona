@@ -23,6 +23,14 @@
     display: block;
     width: 100%;
     height: auto;
+    /* The <img> markup hard-codes width="1920" height="1080" (a 16:9 ratio), but
+       the real hero artwork is wider/shorter. That mismatched attribute ratio made
+       the box taller than the image, so object-fit:contain letterboxed the extra
+       height to the bottom (object-position: center top) → a white gap below the
+       image on wide screens. aspect-ratio:auto makes the box follow the loaded
+       image's actual ratio, so the wrapper collapses exactly to the image height:
+       full width, no crop, no letterbox, no gap. */
+    aspect-ratio: auto;
     object-fit: contain;
     object-position: var(--hero-banner-bg-position, center top);
     pointer-events: none;

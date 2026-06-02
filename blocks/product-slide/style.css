@@ -19,7 +19,14 @@
   --ps-cta-h: clamp(44px, 5vw, 56px);
   --ps-nav-w: clamp(44px, 6vw, 60px);
   --ps-nav-h: clamp(72px, 10vw, 120px);
-  --ps-card-w: clamp(280px, 30vw, 466px);
+  /* Cap lowered 466 -> 400 so the card stops growing past ~1333px instead of
+     staying on the vw slope to ~1553px. This stabilizes card width across
+     laptop/desktop widths (MacBook ~1470 and Windows 1600-1920 now render the
+     same) without changing the <=1440px responsive fill or the mobile floor. */
+  --ps-card-w: clamp(280px, 30vw, 400px);
+  /* NOTE: --ps-card-h and --ps-media-w are currently unused (no var() consumer):
+     card height is `height: 100%` (content-driven) and the media uses
+     `aspect-ratio: 423/318`. Left as-is; flagged for a future cleanup. */
   --ps-card-h: clamp(460px, 56vw, 665px);
   --ps-media-w: clamp(240px, 26vw, 423px);
   padding-block: clamp(2rem, 4vw, 3.5rem);
@@ -107,6 +114,12 @@
   flex-direction: column;
   flex: 1;
   width: min(100%, var(--ps-card-w));
+  /* Cap rendered width at --ps-card-w. `flex: 1` sets flex-basis:0% which
+     overrides `width`, so without this max-width the card filled its whole
+     slot (oversized on tablet). max-width lets the card fill smaller slots
+     but never exceed --ps-card-w; the parent's justify-content:center
+     centers it when the slot is wider. (Mirrors phone-video's cap.) */
+  max-width: var(--ps-card-w);
   height: 100%;
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
@@ -471,6 +484,29 @@
 .ps-nav-btn:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+/* Tablet/mobile (<=1023px): hide the prev/next arrows AND the dots, and reclaim
+   the side space the arrows reserved. Navigation is via swipe (see view.js) and
+   a partial next/prev card peek (view.js sizes the slide pitch). Cards fill their
+   peek-slot here (max-width cap relaxed) so they aren't centered with empty space;
+   the --ps-card-w cap still governs desktop (>=1024px), which is unchanged. */
+@media (max-width: 1023px) {
+  .ps-nav-btn {
+    display: none;
+  }
+
+  .product-slide__dots {
+    display: none;
+  }
+
+  .product-slide__carousel--has-nav-space {
+    padding-inline: 0;
+  }
+
+  .ps-card {
+    max-width: none;
+  }
 }
 
 .product-slide__dots {

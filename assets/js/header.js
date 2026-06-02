@@ -1746,7 +1746,7 @@
     const placeholder = document.createComment('noyona-shop-categories-placeholder');
     categories.parentNode.insertBefore(placeholder, categories.nextSibling);
 
-    const media = window.matchMedia('(max-width: 1201px)');
+    const media = window.matchMedia('(max-width: 1023px)');
 
     const moveCategories = () => {
       if (media.matches) {
@@ -2709,7 +2709,7 @@
     const filterPanel = document.querySelector('.noyona-shop-filters');
     if (!filterToggle || !filterPanel) return;
 
-    const MOBILE_BREAKPOINT = 1201;
+    const MOBILE_BREAKPOINT = 1023;
 
     const openFilter = () => {
       if (window.innerWidth > MOBILE_BREAKPOINT) return;

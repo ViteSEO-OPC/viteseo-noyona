@@ -1,6 +1,6 @@
 /* =========================================================
    FAQ LIST BLOCK — style.css (FULL)
-   - Arrow "›" stays until 1360px
+   - Arrow "›" stays until 1023px
    - Plus/Minus starts only at 960px
 ========================================================= */
 
@@ -135,7 +135,7 @@
 }
 
 /* Desktop: keep the left panel sticky while the FAQ list scrolls */
-@media (min-width: 1361px) {
+@media (min-width: 1024px) {
   .faq-list__sidebar {
     position: sticky;
     top: calc(var(--noyona-header-total-offset, 72px) + 16px);
@@ -543,12 +543,12 @@
 }
 
 /* =========================================================
-   <= 1360px
+   <= 1023px
    - START accordion format here
    - Hide right-side content
    - Plus/Minus icon for categories (CSS bars, not text glyphs)
 ========================================================= */
-@media (max-width: 1360px) {
+@media (max-width: 1023px) {
   .faq-list__grid {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -560,7 +560,7 @@
     grid-row: auto;
   }
 
-  /* START accordion mode at 1360px */
+  /* START accordion mode at 1023px */
   .faq-list__content {
     display: none;
   }

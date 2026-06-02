@@ -13,10 +13,14 @@
     --pr-max: 1400px;
     --pr-gap: clamp(1rem, 2.5vw, 3rem);
   
-    /* Card sizing (fluid, replaces multiple breakpoints) */
-    /* Increase max sizes so cards don't look "short" on large screens */
-    --pr-card-w: clamp(260px, 22vw, 440px);
-    --pr-card-w-land: clamp(360px, 38vw, 760px);
+    /* Card sizing (fluid, replaces multiple breakpoints). Caps lowered to the
+       value the slope reaches around MacBook width (~1470px) so the grid-mode
+       card (>=1241px) stops growing across laptop/desktop widths and MacBook,
+       iPad and Windows/Linux render near-identically (was 440/760, on the vw
+       slope all the way to 2000px). Carousel mode (<=1240px) is unaffected —
+       it sizes the phone via .phone-card__shell width, not these vars. */
+    --pr-card-w: clamp(260px, 22vw, 330px);
+    --pr-card-w-land: clamp(360px, 38vw, 570px);
   
     /* Shell details */
     --pr-shell-radius: clamp(1.6rem, 2.2vw, 2.1rem);
@@ -511,17 +515,20 @@
   .phone-reviews__overlay-shell[data-aspect="portrait"]{
     /* Scale with viewport HEIGHT so it doesn't look tiny on large screens */
     height: min(86vh, 900px);
+    height: min(86dvh, 900px);
     width: auto;
     max-width: min(62vw, 520px);
     /* Match the in-grid phone ratio (11/19.5) to avoid player letterboxing */
     aspect-ratio: 11 / 19.5;
     max-height: 86vh;
+    max-height: 86dvh;
   }
   
   .phone-reviews__overlay-shell[data-aspect="landscape"]{
     width: min(92vw, 1100px);
     aspect-ratio: 19.5 / 9;
     max-height: 86vh;
+    max-height: 86dvh;
   }
   
   .phone-reviews__overlay.is-open .phone-reviews__overlay-shell{

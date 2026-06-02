@@ -219,6 +219,7 @@
         width: min(88vw, 560px);
         min-width: 0;
         max-width: calc(100vw - 24px);
+        max-height: min(70vh, 520px);
         max-height: min(70dvh, 520px);
         overflow: auto;
         overscroll-behavior: contain;
