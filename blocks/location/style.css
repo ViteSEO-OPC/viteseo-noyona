@@ -954,8 +954,8 @@ body.nsl-v2-review-modal-open {
 
 .nsl-v2-store-pagination__btn:not([disabled]):hover {
     border-color: var(--noyona-color-pink-muted-rose);
-    color: var(--noyona-color-pink-muted-rose);
-    background: var(--noyona-color-pink-light-blush);
+    color: var(--noyona-color-white);
+    background: var(--noyona-color-pink-accent);
 }
 
 .nsl-v2-store-pagination__btn:focus-visible {
@@ -965,16 +965,29 @@ body.nsl-v2-review-modal-open {
 }
 
 .nsl-v2-store-pagination__btn.is-active {
-    border-color: var(--noyona-color-pink-muted-rose);
+    border-color: var(--noyona-color-pink-accent);
     background: var(--noyona-color-pink-light-blush);
-    color: var(--noyona-color-pink-accent);
+    color: var(--noyona-color-text-main);
 }
 
 .nsl-v2-store-pagination__btn[disabled] {
     cursor: not-allowed;
     opacity: 0.55;
     border-color: #ececec;
-    color: #999;
+    color: var(--noyona-color-text-main);
+    background-color: var(--noyona-color-pink-soft);
+}
+
+.nsl-v2-store-pagination__btn[data-page-nav="next"] {
+    color: var(--noyona-color-pink-accent);
+    background-color: var(--noyona-color-white);
+    border-color: var(--noyona-color-pink-accent);
+}
+
+.nsl-v2-store-pagination__btn[data-page-nav="prev"] {
+    color: var(--noyona-color-pink-accent);
+    background-color: var(--noyona-color-white);
+    border-color: var(--noyona-color-pink-accent);
 }
 
 .nsl-v2-store-card {
