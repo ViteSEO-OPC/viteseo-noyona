@@ -171,6 +171,11 @@ function woocom_ct_enqueue_assets() {
         $shop_price_ceiling = $shop_price_step;
     }
 
+    $shop_product_tags = array();
+    if ( $is_shop_archive && function_exists( 'noyona_get_shop_filter_product_tags' ) ) {
+        $shop_product_tags = noyona_get_shop_filter_product_tags();
+    }
+
     $wishlist_saved_keys = array();
     if ( is_user_logged_in() && function_exists( 'noyona_get_product_wishlist_items' ) && function_exists( 'noyona_get_product_wishlist_item_key' ) ) {
         foreach ( noyona_get_product_wishlist_items( get_current_user_id() ) as $wishlist_item ) {
@@ -193,6 +198,7 @@ function woocom_ct_enqueue_assets() {
                 'step'     => $shop_price_step,
                 'maxPrice' => $shop_price_ceiling,
             ),
+            'shopProductTags'  => $shop_product_tags,
             'wishlist'        => array(
                 'nonce'     => wp_create_nonce( 'noyona_product_wishlist' ),
                 'loginUrl'  => function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' ),

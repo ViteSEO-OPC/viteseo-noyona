@@ -1707,20 +1707,54 @@
   function initShopToolbarControlsPlacement() {
     const placeToggle = () => {
       const toolbar = document.querySelector('.noyona-shop-toolbar-right');
+      const sortSelect = document.querySelector('.noyona-shop-sort-select');
+      const priceDropdown = document.querySelector('.noyona-shop-price-dropdown');
       const wrapper = document.querySelector('.noyona-shop-view-wrapper');
       const filterToggle = document.querySelector('.noyona-shop-filter-toggle');
-      if (!toolbar || !wrapper) return false;
+      if (!toolbar || !sortSelect || !wrapper) return false;
 
-      if (filterToggle && !toolbar.contains(filterToggle)) {
-        toolbar.appendChild(filterToggle);
+      let dropdownsGroup = toolbar.querySelector('.noyona-shop-toolbar-dropdowns');
+      let iconsGroup = toolbar.querySelector('.noyona-shop-toolbar-icons');
+
+      if (!dropdownsGroup) {
+        dropdownsGroup = document.createElement('div');
+        dropdownsGroup.className = 'noyona-shop-toolbar-dropdowns';
+        toolbar.appendChild(dropdownsGroup);
       }
-      if (filterToggle && toolbar.contains(filterToggle) && filterToggle.nextElementSibling !== wrapper) {
+
+      if (!iconsGroup) {
+        iconsGroup = document.createElement('div');
+        iconsGroup.className = 'noyona-shop-toolbar-icons';
+        toolbar.appendChild(iconsGroup);
+      }
+
+      if (priceDropdown && priceDropdown.parentElement !== dropdownsGroup) {
+        dropdownsGroup.appendChild(priceDropdown);
+      }
+      if (sortSelect && sortSelect.parentElement !== dropdownsGroup) {
+        dropdownsGroup.appendChild(sortSelect);
+      }
+      if (priceDropdown && sortSelect && priceDropdown.nextElementSibling !== sortSelect) {
+        priceDropdown.after(sortSelect);
+      }
+
+      if (filterToggle && filterToggle.parentElement !== iconsGroup) {
+        iconsGroup.appendChild(filterToggle);
+      }
+      if (wrapper.parentElement !== iconsGroup) {
+        iconsGroup.appendChild(wrapper);
+      }
+      if (filterToggle && filterToggle.nextElementSibling !== wrapper) {
         filterToggle.after(wrapper);
-        return true;
       }
-      if (toolbar.contains(wrapper)) return true;
 
-      toolbar.appendChild(wrapper);
+      if (toolbar.firstElementChild !== dropdownsGroup) {
+        toolbar.prepend(dropdownsGroup);
+      }
+      if (dropdownsGroup.nextElementSibling !== iconsGroup) {
+        dropdownsGroup.after(iconsGroup);
+      }
+
       return true;
     };
 
@@ -1743,32 +1777,102 @@
     const panel = document.querySelector('#noyona-shop-filter-panel');
     if (!categories || !panel || !categories.parentNode) return;
 
-    const placeholder = document.createComment('noyona-shop-categories-placeholder');
-    categories.parentNode.insertBefore(placeholder, categories.nextSibling);
+    // Keep categories inside the filter panel across all breakpoints.
+    if (categories.parentNode !== panel) {
+      panel.prepend(categories);
+    }
 
-    const media = window.matchMedia('(max-width: 1201px)');
+    if (!categories.querySelector('.noyona-shop-filter-section-title')) {
+      const title = document.createElement('h5');
+      title.className = 'noyona-shop-filter-section-title';
+      title.textContent = 'Categories';
+      categories.prepend(title);
+    }
+  }
 
-    const moveCategories = () => {
-      if (media.matches) {
-        const sortSection = panel.querySelector('.noyona-shop-filter-section-sort');
-        if (categories.parentNode !== panel) {
-          if (sortSection) {
-            panel.insertBefore(categories, sortSection);
-          } else {
-            panel.appendChild(categories);
-          }
+  function initShopTagFilters() {
+    const panel = document.querySelector('#noyona-shop-filter-panel');
+    if (!panel || !window.noyonaHeader || !Array.isArray(window.noyonaHeader.shopProductTags)) return;
+
+    const tags = window.noyonaHeader.shopProductTags;
+    if (!tags.length || panel.querySelector('.noyona-shop-filter-section-tags')) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const selectedTag = String(params.get('product_tag') || '').toLowerCase();
+    const section = document.createElement('section');
+    section.className = 'noyona-shop-filter-section noyona-shop-filter-section-tags';
+
+    const title = document.createElement('h5');
+    title.textContent = 'Tags';
+    section.appendChild(title);
+
+    const list = document.createElement('div');
+    list.className = 'noyona-shop-tag-radio-list';
+
+    const isPaginationKey = (key) =>
+      key === 'paged' || key === 'product-page' || key === 'search_page' || /^query-\d+-page$/.test(key);
+
+    const sortedTags = tags
+      .filter((tag) => tag && tag.slug && tag.name)
+      .sort((a, b) => {
+        const aAvailable = Boolean(a.hasProducts);
+        const bAvailable = Boolean(b.hasProducts);
+        if (aAvailable !== bAvailable) {
+          return aAvailable ? -1 : 1;
         }
-      } else if (categories.parentNode !== placeholder.parentNode) {
-        placeholder.parentNode.insertBefore(categories, placeholder);
+        return String(a.name).localeCompare(String(b.name), undefined, { sensitivity: 'base' });
+      });
+
+    sortedTags.forEach((tag) => {
+      const slug = String(tag.slug).toLowerCase();
+      const isAvailable = Boolean(tag.hasProducts);
+      const label = document.createElement('label');
+      label.className = 'noyona-shop-tag-radio' + (isAvailable ? '' : ' is-disabled');
+
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'noyona-product-tag';
+      input.value = slug;
+      input.checked = isAvailable && selectedTag === slug;
+      input.disabled = !isAvailable;
+      if (!isAvailable) {
+        input.setAttribute('aria-disabled', 'true');
       }
-    };
 
-    moveCategories();
+      const text = document.createElement('span');
+      text.textContent = String(tag.name);
 
-    if (typeof media.addEventListener === 'function') {
-      media.addEventListener('change', moveCategories);
-    } else if (typeof media.addListener === 'function') {
-      media.addListener(moveCategories);
+      if (isAvailable) {
+        input.addEventListener('change', () => {
+          if (!input.checked) return;
+
+          const nextParams = new URLSearchParams(window.location.search);
+          nextParams.set('product_tag', slug);
+          Array.from(nextParams.keys()).forEach((key) => {
+            if (isPaginationKey(key)) {
+              nextParams.delete(key);
+            }
+          });
+
+          const query = nextParams.toString();
+          window.location.assign(window.location.pathname + (query ? '?' + query : ''));
+        });
+      }
+
+      label.appendChild(input);
+      label.appendChild(text);
+      list.appendChild(label);
+    });
+
+    section.appendChild(list);
+
+    const categories = panel.querySelector('.noyona-shop-categories');
+    if (categories && categories.nextSibling) {
+      panel.insertBefore(section, categories.nextSibling);
+    } else if (categories) {
+      panel.appendChild(section);
+    } else {
+      panel.prepend(section);
     }
   }
 
@@ -2333,9 +2437,6 @@
       const nativeAdd = card.querySelector('.wp-block-button .wp-block-button__link, .add_to_cart_button');
       const nativeButtonWrap = card.querySelector('.wp-block-button');
       const hasPrimaryFooterCta = !!card.querySelector('.noyona-product-card-footer .noyona-buy-now-btn');
-      const titleLink = card.querySelector('.wp-block-post-title a');
-      const imageLink = card.querySelector('.wc-block-components-product-image a');
-      const productUrl = (titleLink && titleLink.href) || (imageLink && imageLink.href) || '#';
 
       if (nativeButtonWrap) {
         nativeButtonWrap.classList.add('noyona-shop-native-add-to-cart');
@@ -2354,8 +2455,7 @@
       actions.appendChild(wishlistButton);
       bindShopWishlistButton(wishlistButton, card);
 
-      // Cards rendered with the Noyona footer already include the primary Buy Now CTA.
-      // Keep only wishlist on those cards to avoid duplicate actions in list view.
+      // Keep only wishlist/cart quick actions in product cards.
       if (!hasPrimaryFooterCta) {
         const footerActions = document.createElement('div');
         footerActions.className = 'noyona-shop-card-footer-actions';
@@ -2373,17 +2473,20 @@
           footerActions.appendChild(cartButton);
         }
 
-        const buyNowLink = document.createElement('a');
-        buyNowLink.className = 'noyona-shop-buy-now';
-        buyNowLink.href = productUrl;
-        buyNowLink.textContent = 'Buy Now';
-        buyNowLink.setAttribute('aria-label', 'Go to product details');
-        footerActions.appendChild(buyNowLink);
-
         actions.appendChild(footerActions);
       }
 
       card.appendChild(actions);
+
+      const cardLink = card.querySelector('.wp-block-post-title a, .wc-block-components-product-image a');
+      if (cardLink && card.dataset.noyonaCardClickBound !== '1') {
+        card.addEventListener('click', (event) => {
+          const interactiveTarget = event.target.closest('a, button, input, select, textarea, label, summary, details');
+          if (interactiveTarget) return;
+          window.location.assign(cardLink.href);
+        });
+        card.dataset.noyonaCardClickBound = '1';
+      }
 
       card.dataset.noyonaActionsReady = '1';
     });
@@ -2397,8 +2500,12 @@
     const grid = container.querySelector('.wc-block-product-template');
     if (!grid) return;
 
-    // Skip when there are no real product cards (e.g. "no products in this
-    // price range" fallback). Avoids rendering an awkward "end" message.
+    // Skip when the grid is showing the empty-state message.
+    if (grid.querySelector('.noyona-shop-no-products')) {
+      return;
+    }
+
+    // Skip when there are no real product cards.
     if (!grid.querySelector('.wc-block-product .wp-block-post-title, .wc-block-product .wc-block-components-product-image')) {
       return;
     }
@@ -2709,7 +2816,7 @@
     const filterPanel = document.querySelector('.noyona-shop-filters');
     if (!filterToggle || !filterPanel) return;
 
-    const MOBILE_BREAKPOINT = 1201;
+    const MOBILE_BREAKPOINT = 1399;
 
     const openFilter = () => {
       if (window.innerWidth > MOBILE_BREAKPOINT) return;
@@ -2757,44 +2864,78 @@
   }
 
   function initShopSort() {
-    const lists = Array.from(document.querySelectorAll('.noyona-shop-sort-list'));
-    if (!lists.length) return;
+    const selects = Array.from(document.querySelectorAll('.noyona-shop-sort-select'));
+    if (!selects.length) return;
 
     const params = new URLSearchParams(window.location.search);
-    const current = String(params.get('orderby') || 'menu_order').toLowerCase();
+    const allowedValues = new Set(['menu_order', 'popularity', 'rating', 'date', 'price', 'price-desc']);
+    const requested = String(params.get('orderby') || 'menu_order').toLowerCase();
+    const current = allowedValues.has(requested) ? requested : 'menu_order';
 
     const isPaginationKey = (key) =>
       key === 'paged' || key === 'product-page' || key === 'search_page' || /^query-\d+-page$/.test(key);
 
-    lists.forEach((list) => {
-      const options = Array.from(list.querySelectorAll('.noyona-shop-sort-option'));
+    const applySort = (value) => {
+      const nextParams = new URLSearchParams(window.location.search);
 
-      options.forEach((option) => {
-        const value = String(option.dataset.orderby || 'menu_order').toLowerCase();
-        const isActive = value === current;
-        option.classList.toggle('is-active', isActive);
-        option.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      if (value && value !== 'menu_order') {
+        nextParams.set('orderby', value);
+      } else {
+        nextParams.delete('orderby');
+      }
 
-        option.addEventListener('click', () => {
-          const nextParams = new URLSearchParams(window.location.search);
-
-          if (value && value !== 'menu_order') {
-            nextParams.set('orderby', value);
-          } else {
-            nextParams.delete('orderby');
-          }
-
-          // Reset pagination so a new sort always starts on the first page.
-          Array.from(nextParams.keys()).forEach((key) => {
-            if (isPaginationKey(key)) {
-              nextParams.delete(key);
-            }
-          });
-
-          const query = nextParams.toString();
-          window.location.assign(window.location.pathname + (query ? '?' + query : ''));
-        });
+      // Reset pagination so a new sort always starts on the first page.
+      Array.from(nextParams.keys()).forEach((key) => {
+        if (isPaginationKey(key)) {
+          nextParams.delete(key);
+        }
       });
+
+      const query = nextParams.toString();
+      window.location.assign(window.location.pathname + (query ? '?' + query : ''));
+    };
+
+    selects.forEach((select) => {
+      select.value = current;
+      select.addEventListener('change', () => {
+        const value = String(select.value || 'menu_order').toLowerCase();
+        applySort(value);
+      });
+    });
+  }
+
+  function initShopPriceDropdown() {
+    const dropdowns = Array.from(document.querySelectorAll('.noyona-shop-price-dropdown'));
+    if (!dropdowns.length) return;
+
+    const closeAll = (except) => {
+      dropdowns.forEach((dropdown) => {
+        if (dropdown !== except) {
+          dropdown.removeAttribute('open');
+        }
+      });
+    };
+
+    dropdowns.forEach((dropdown) => {
+      dropdown.addEventListener('toggle', () => {
+        if (dropdown.open) {
+          closeAll(dropdown);
+        }
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      const clickedInside = dropdowns.some((dropdown) => dropdown.contains(target));
+      if (!clickedInside) {
+        closeAll(null);
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeAll(null);
+      }
     });
   }
 
@@ -2821,6 +2962,7 @@
     initShopToolbarControlsPlacement();
     initShopArchiveViewToggle();
     initShopMobileCategoriesPlacement();
+    initShopTagFilters();
     initShopCategoryActiveByPath();
     initShopPriceFilter();
     initShopProductActions();
@@ -2828,5 +2970,6 @@
     initScrollTopButton();
     initShopFilterModal();
     initShopSort();
+    initShopPriceDropdown();
   });
 })();
