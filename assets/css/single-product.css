@@ -599,11 +599,21 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   display: none !important;
 }
 
+.single-product form.cart .single_variation .woocommerce-variation-availability {
+  display: none !important;
+}
+
+.single-product .wp-block-add-to-cart-form .stock,
+.single-product form.cart > p.stock {
+  display: none !important;
+}
+
 .single-product form.cart .reset_variations {
   display: none !important;
 }
 
-.single-product form.cart .quantity.noyona-pdp-qty {
+.single-product form.cart .quantity.noyona-pdp-qty,
+.single-product .wp-block-add-to-cart-form .quantity.noyona-pdp-qty {
   width: 100%;
   display: grid;
   grid-template-columns: 1fr auto auto auto;
@@ -616,7 +626,8 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   max-width: 360px;
 }
 
-.single-product form.cart .quantity.noyona-pdp-qty::before {
+.single-product form.cart .quantity.noyona-pdp-qty::before,
+.single-product .wp-block-add-to-cart-form .quantity.noyona-pdp-qty::before {
   content: "Quantity";
   font-size: 1.75rem;
   font-weight: 700;
@@ -626,11 +637,13 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   margin-right: 0.35rem;
 }
 
-.single-product form.cart .quantity.noyona-pdp-qty .qty {
+.single-product form.cart .quantity.noyona-pdp-qty .qty,
+.single-product .wp-block-add-to-cart-form .quantity.noyona-pdp-qty .qty {
   width: 2.25rem;
   min-width: 2.25rem;
   border: 0;
   padding: 0;
+  margin-right: 0;
   text-align: center;
   font-size: 1.75rem;
   font-weight: 700;
@@ -642,12 +655,15 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 }
 
 .single-product form.cart .quantity.noyona-pdp-qty .qty::-webkit-outer-spin-button,
-.single-product form.cart .quantity.noyona-pdp-qty .qty::-webkit-inner-spin-button {
+.single-product form.cart .quantity.noyona-pdp-qty .qty::-webkit-inner-spin-button,
+.single-product .wp-block-add-to-cart-form .quantity.noyona-pdp-qty .qty::-webkit-outer-spin-button,
+.single-product .wp-block-add-to-cart-form .quantity.noyona-pdp-qty .qty::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.single-product form.cart .noyona-pdp-qty__btn {
+.single-product form.cart .noyona-pdp-qty__btn,
+.single-product .wp-block-add-to-cart-form .noyona-pdp-qty__btn {
   width: 44px;
   height: 44px;
   border: 0;
@@ -663,31 +679,38 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   padding: 0;
 }
 
-.single-product form.cart .noyona-pdp-qty__btn--plus {
+.single-product form.cart .noyona-pdp-qty__btn--plus,
+.single-product .wp-block-add-to-cart-form .noyona-pdp-qty__btn--plus {
   background: #e3a0ae;
   color: #fff;
 }
 
-.single-product form.cart .noyona-pdp-qty__btn:hover {
+.single-product form.cart .noyona-pdp-qty__btn:hover,
+.single-product .wp-block-add-to-cart-form .noyona-pdp-qty__btn:hover {
   filter: brightness(0.98);
 }
 
 @media (max-width: 600px) {
-  .single-product form.cart .quantity.noyona-pdp-qty {
+  .single-product form.cart .quantity.noyona-pdp-qty,
+  .single-product .wp-block-add-to-cart-form .quantity.noyona-pdp-qty {
     max-width: 100%;
   }
 
-  .single-product form.cart .quantity.noyona-pdp-qty::before {
+  .single-product form.cart .quantity.noyona-pdp-qty::before,
+  .single-product .wp-block-add-to-cart-form .quantity.noyona-pdp-qty::before {
     font-size: 1.25rem;
   }
 
-  .single-product form.cart .quantity.noyona-pdp-qty .qty {
+  .single-product form.cart .quantity.noyona-pdp-qty .qty,
+  .single-product .wp-block-add-to-cart-form .quantity.noyona-pdp-qty .qty {
     font-size: 1.35rem;
     width: 1.8rem;
     min-width: 1.8rem;
+    margin-right: 0;
   }
 
-  .single-product form.cart .noyona-pdp-qty__btn {
+  .single-product form.cart .noyona-pdp-qty__btn,
+  .single-product .wp-block-add-to-cart-form .noyona-pdp-qty__btn {
     width: 40px;
     height: 40px;
     font-size: 1.6rem;
@@ -713,7 +736,8 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   width: 100%;
 }
 
-.single-product form.cart .single_add_to_cart_button {
+.single-product form.cart .single_add_to_cart_button,
+.single-product .noyona-pdp-cart-actions--unavailable .single_add_to_cart_button {
   flex: 1 1 calc(50% - 0.35rem);
   min-width: min(100%, 8.5rem);
   width: auto;
@@ -729,12 +753,15 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 }
 
 .single-product form.cart .single_add_to_cart_button:hover,
-.single-product form.cart .single_add_to_cart_button:focus-visible {
+.single-product form.cart .single_add_to_cart_button:focus-visible,
+.single-product .noyona-pdp-cart-actions--unavailable .single_add_to_cart_button:hover,
+.single-product .noyona-pdp-cart-actions--unavailable .single_add_to_cart_button:focus-visible {
   background: #D81B60 !important;
   color: #FFFFFF !important;
 }
 
-.single-product .noyona-pdp-cart-actions .noyona-pdp-buy-now {
+.single-product .noyona-pdp-cart-actions .noyona-pdp-buy-now,
+.single-product .noyona-pdp-cart-actions--unavailable .noyona-pdp-buy-now {
   flex: 1 1 calc(50% - 0.35rem);
   min-width: min(100%, 8.5rem);
   width: auto;
@@ -752,6 +779,24 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 
 .single-product .noyona-pdp-buy-now:hover,
 .single-product .noyona-pdp-buy-now:focus-visible {
+  background: #EFB5BE !important;
+  border: 3px solid #D81B60 !important;
+  color: #D81B60 !important;
+}
+
+.single-product .noyona-pdp-cart-actions--unavailable button {
+  cursor: pointer;
+  opacity: 1 !important;
+}
+
+.single-product .noyona-pdp-cart-actions--unavailable .noyona-pdp-buy-now {
+  background: #FFFFFF !important;
+  border: 3px solid #D81B60 !important;
+  color: #D81B60 !important;
+}
+
+.single-product .noyona-pdp-cart-actions--unavailable .noyona-pdp-buy-now:hover,
+.single-product .noyona-pdp-cart-actions--unavailable .noyona-pdp-buy-now:focus-visible {
   background: #EFB5BE !important;
   border: 3px solid #D81B60 !important;
   color: #D81B60 !important;
@@ -806,6 +851,7 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   background: #fdf7f8;
   border-radius: clamp(14px, 2.5vw, 22px);
   overflow: hidden;
+  position: relative;
 }
 .single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-main-img {
   display: block;
@@ -813,6 +859,7 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   height: auto;
   object-fit: contain;
   object-position: center;
+  transition: filter 0.2s ease;
 }
 @media (min-width: 782px) {
   .single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-main-img {
@@ -924,6 +971,43 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 .single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-magnify:focus-visible {
   outline: 2px solid #D81B60;
   outline-offset: 2px;
+}
+
+.single-product .woocommerce-product-gallery .noyona-pdp-variation-out-of-stock {
+  position: relative;
+}
+
+.single-product .woocommerce-product-gallery .noyona-pdp-variation-out-of-stock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.36);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.single-product .woocommerce-product-gallery .noyona-pdp-variation-out-of-stock::after {
+  content: "OUT OF STOCK";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(20, 20, 20, 0.9);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  z-index: 4;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.single-product .woocommerce-product-gallery .woocommerce-product-gallery__image.noyona-pdp-variation-out-of-stock img,
+.single-product .woocommerce-product-gallery .noyona-pdp-gallery-main.noyona-pdp-variation-out-of-stock .noyona-pdp-gallery-main-img {
+  filter: brightness(0.52);
 }
 
 /* Lightbox modal (opened by the magnifier). Self-contained — no plugin deps. */

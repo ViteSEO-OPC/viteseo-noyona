@@ -254,6 +254,55 @@
     return document.querySelector('.single-product .woocommerce-product-gallery');
   }
 
+  function clearPdpOutOfStockImageState() {
+    var gallery = getPdpGallery();
+    if (!gallery) {
+      return;
+    }
+
+    gallery
+      .querySelectorAll(
+        '.noyona-pdp-gallery-main.noyona-pdp-variation-out-of-stock,' +
+          '.woocommerce-product-gallery__image.noyona-pdp-variation-out-of-stock'
+      )
+      .forEach(function (node) {
+        node.classList.remove('noyona-pdp-variation-out-of-stock');
+      });
+  }
+
+  function getActivePdpGalleryImageWrap(gallery) {
+    if (!gallery) {
+      return null;
+    }
+    return (
+      gallery.querySelector('.woocommerce-product-gallery__image.flex-active-slide') ||
+      gallery.querySelector('.woocommerce-product-gallery__image')
+    );
+  }
+
+  function applyPdpOutOfStockImageState(isOutOfStock) {
+    clearPdpOutOfStockImageState();
+    if (!isOutOfStock) {
+      return;
+    }
+
+    var gallery = getPdpGallery();
+    if (!gallery) {
+      return;
+    }
+
+    var fallbackMain = gallery.querySelector('.noyona-pdp-gallery-main');
+    if (fallbackMain) {
+      fallbackMain.classList.add('noyona-pdp-variation-out-of-stock');
+      return;
+    }
+
+    var activeWrap = getActivePdpGalleryImageWrap(gallery);
+    if (activeWrap) {
+      activeWrap.classList.add('noyona-pdp-variation-out-of-stock');
+    }
+  }
+
   function getCurrentGalleryImageSrc(gallery) {
     if (!gallery) return '';
     var fallbackImg = gallery.querySelector('.noyona-pdp-gallery-main-img');
@@ -1675,6 +1724,90 @@
     });
   }
 
+  function bindVariationStockSync(form) {
+    if (!form || !form.classList.contains('variations_form')) {
+      return;
+    }
+    if (typeof window.jQuery === 'undefined') {
+      return;
+    }
+
+    var stockBadge = document.querySelector('.single-product .noyona-pdp-stock-shipping__stock');
+    if (!stockBadge) {
+      return;
+    }
+
+    if (!stockBadge.getAttribute('data-original-stock-label')) {
+      stockBadge.setAttribute('data-original-stock-label', (stockBadge.textContent || '').trim());
+      stockBadge.setAttribute('data-original-stock-class', stockBadge.className);
+    }
+
+    var $form = window.jQuery(form);
+    if ($form.data('noyonaStockSyncBound')) {
+      return;
+    }
+    $form.data('noyonaStockSyncBound', true);
+
+    function getVariationStockCount(variation) {
+      if (!variation) {
+        return null;
+      }
+      var raw = variation.noyona_stock_quantity;
+      if (raw === null || typeof raw === 'undefined' || raw === '') {
+        raw = variation.max_qty;
+      }
+      if (raw === '' || raw === null || typeof raw === 'undefined') {
+        return null;
+      }
+      var parsed = parseInt(raw, 10);
+      return isFinite(parsed) && parsed > 0 ? parsed : null;
+    }
+
+    function formatInStockLabel(variation) {
+      var stockCount = getVariationStockCount(variation);
+      if (stockCount === null) {
+        return getPdpText('inStock', 'In stock');
+      }
+      return getPdpText('inStockLeft', 'In stock (%d left)').replace('%d', String(stockCount));
+    }
+
+    function setStockBadgeFromVariation(variation) {
+      if (!variation || typeof variation.is_in_stock === 'undefined') {
+        return;
+      }
+      var inStock = !!variation.is_in_stock;
+      stockBadge.textContent = inStock
+        ? formatInStockLabel(variation)
+        : getPdpText('outOfStockLeft', 'Out of stock (%d left)').replace('%d', '0');
+      stockBadge.classList.toggle('noyona-pdp-stock-shipping__stock--in', inStock);
+      stockBadge.classList.toggle('noyona-pdp-stock-shipping__stock--out', !inStock);
+      applyPdpOutOfStockImageState(!inStock);
+    }
+
+    function resetStockBadgeLabel() {
+      stockBadge.textContent = getPdpText(
+        'selectOptionsAvailability',
+        'Select options to see availability'
+      );
+      stockBadge.classList.remove('noyona-pdp-stock-shipping__stock--in');
+      stockBadge.classList.remove('noyona-pdp-stock-shipping__stock--out');
+      clearPdpOutOfStockImageState();
+    }
+
+    $form.on('found_variation show_variation', function (_event, variation) {
+      setStockBadgeFromVariation(variation);
+      window.setTimeout(function () {
+        if (variation && typeof variation.is_in_stock !== 'undefined') {
+          applyPdpOutOfStockImageState(!variation.is_in_stock);
+        }
+      }, 120);
+    });
+
+    $form.on('reset_data hide_variation', function () {
+      resetStockBadgeLabel();
+    });
+  }
+
   function getAddToCartEndpoint() {
     if (
       typeof window.wc_add_to_cart_params !== 'undefined' &&
@@ -1691,6 +1824,48 @@
       return window.noyonaPdp.i18n[key];
     }
     return fallback;
+  }
+
+  function showPdpToast(message, type) {
+    var text = String(message || '').trim();
+    if (!text) {
+      return;
+    }
+
+    document.body.dispatchEvent(
+      new CustomEvent('noyona_pdp_toast', {
+        bubbles: true,
+        detail: {
+          message: text,
+          type: type || 'error',
+        },
+      })
+    );
+  }
+
+  function bindPdpAlertToasts() {
+    if (window._noyonaPdpAlertToastBound) {
+      return;
+    }
+    window._noyonaPdpAlertToastBound = true;
+    window._noyonaNativeAlert = window.alert;
+    window.alert = function (message) {
+      showPdpToast(message, 'error');
+    };
+  }
+
+  function getPdpOutOfStockMessage() {
+    return getPdpText('outOfStockCartError', 'This product is out of stock.');
+  }
+
+  function getAjaxCartErrorMessage(data) {
+    if (data && data.message) {
+      return String(data.message);
+    }
+    if (data && data.data && data.data.message) {
+      return String(data.data.message);
+    }
+    return getPdpText('cartError', 'This product cannot be added to cart right now.');
   }
 
   function getPdpWishlistAjaxUrl() {
@@ -2197,7 +2372,16 @@
 
     function runAjaxAddToCart() {
       addBtn = form.querySelector('.single_add_to_cart_button');
+      if (form.classList.contains('variations_form')) {
+        var currentVariationId = form.querySelector('input[name="variation_id"]');
+        if (!currentVariationId || !currentVariationId.value || currentVariationId.value === '0') {
+          showPdpToast(getPdpText('selectOptions', 'Please select all options.'), 'error');
+          return;
+        }
+      }
+
       if (!addBtn || addBtn.disabled || addBtn.classList.contains('disabled')) {
+        showPdpToast(getPdpOutOfStockMessage(), 'error');
         return;
       }
       if (inFlight || addBtn.classList.contains('loading')) {
@@ -2222,7 +2406,7 @@
             window.noyonaPdp.i18n.selectOptions
               ? window.noyonaPdp.i18n.selectOptions
               : 'Please select all options.';
-          window.alert(msg);
+          showPdpToast(msg, 'error');
           return;
         }
         selectedVariationId = parseInt(variationId.value, 10) || 0;
@@ -2298,6 +2482,7 @@
 
           if (data && data.error) {
             addBtn.classList.add('is-error');
+            showPdpToast(getAjaxCartErrorMessage(data), 'error');
             return;
           }
 
@@ -2455,9 +2640,14 @@
       if (form.classList.contains('variations_form')) {
         var variationId = form.querySelector('input[name="variation_id"]');
         if (!variationId || !variationId.value || variationId.value === '0') {
-          window.alert(msg);
+          showPdpToast(msg, 'error');
           return;
         }
+      }
+
+      if (buy.disabled || buy.classList.contains('disabled') || addBtn.disabled || addBtn.classList.contains('disabled')) {
+        showPdpToast(getPdpOutOfStockMessage(), 'error');
+        return;
       }
 
       var existing = form.querySelector('input[name="noyona_buy_now"]');
@@ -2478,14 +2668,63 @@
     });
   }
 
-  function enhanceQuantity(form) {
-    if (!form) {
+  function getSimplePdpCartRoot() {
+    return (
+      document.querySelector('.single-product form.cart') ||
+      document.querySelector('.single-product .wp-block-add-to-cart-form')
+    );
+  }
+
+  function createPdpQuantityField() {
+    var wrap = document.createElement('div');
+    wrap.className = 'quantity';
+
+    var input = document.createElement('input');
+    input.type = 'number';
+    input.className = 'input-text qty text';
+    input.name = 'quantity';
+    input.value = '1';
+    input.min = '1';
+    input.step = '1';
+    input.setAttribute('inputmode', 'numeric');
+    wrap.appendChild(input);
+
+    return wrap;
+  }
+
+  function setPdpQuantityDisabled(qtyWrap, disabled) {
+    if (!qtyWrap) {
       return;
     }
-    var qtyWrap = form.querySelector('.quantity');
+
+    var qtyInput = qtyWrap.querySelector('.qty');
+    if (qtyInput) {
+      qtyInput.disabled = !!disabled;
+      if (disabled) {
+        qtyInput.setAttribute('aria-disabled', 'true');
+      } else {
+        qtyInput.removeAttribute('aria-disabled');
+      }
+    }
+
+    qtyWrap.querySelectorAll('.noyona-pdp-qty__btn').forEach(function (button) {
+      button.disabled = !!disabled;
+      if (disabled) {
+        button.setAttribute('aria-disabled', 'true');
+      } else {
+        button.removeAttribute('aria-disabled');
+      }
+    });
+  }
+
+  function enhanceQuantity(root) {
+    if (!root) {
+      return null;
+    }
+    var qtyWrap = root.querySelector('.quantity');
     var qtyInput = qtyWrap ? qtyWrap.querySelector('.qty') : null;
     if (!qtyWrap || !qtyInput || qtyWrap.classList.contains('noyona-pdp-qty')) {
-      return;
+      return qtyWrap || null;
     }
 
     qtyWrap.classList.add('noyona-pdp-qty');
@@ -2536,6 +2775,41 @@
       qtyInput.value = String(clamp(current + asNumber(qtyInput.step, 1)));
       qtyInput.dispatchEvent(new Event('change', { bubbles: true }));
     });
+
+    return qtyWrap;
+  }
+
+  function ensureSimplePdpQuantity() {
+    var stockBadge = getPdpStockBadge();
+    if (!stockBadge || stockBadge.getAttribute('data-noyona-product-type') !== 'simple') {
+      return;
+    }
+
+    var root = getSimplePdpCartRoot();
+    if (!root) {
+      return;
+    }
+
+    var qtyWrap = root.querySelector('.quantity');
+    if (!qtyWrap && isSimpleProductOutOfStock()) {
+      return;
+    }
+
+    if (!qtyWrap) {
+      qtyWrap = createPdpQuantityField();
+      var actions = root.querySelector('.noyona-pdp-cart-actions, .noyona-pdp-cart-actions--unavailable');
+      if (actions) {
+        root.insertBefore(qtyWrap, actions);
+      } else {
+        root.appendChild(qtyWrap);
+      }
+    }
+
+    enhanceQuantity(root);
+
+    if (isSimpleProductOutOfStock()) {
+      setPdpQuantityDisabled(root.querySelector('.quantity.noyona-pdp-qty'), true);
+    }
   }
 
   /* ===================================================================
@@ -2928,8 +3202,87 @@
     }
   }
 
+  function getPdpStockBadge() {
+    return document.querySelector('.single-product .noyona-pdp-stock-shipping__stock');
+  }
+
+  function isSimpleProductOutOfStock() {
+    var stockBadge = getPdpStockBadge();
+    return !!(
+      stockBadge &&
+      stockBadge.getAttribute('data-noyona-product-type') === 'simple' &&
+      stockBadge.getAttribute('data-noyona-in-stock') === '0'
+    );
+  }
+
+  function ensureSimpleOutOfStockActions() {
+    if (!isSimpleProductOutOfStock()) {
+      return;
+    }
+    if (document.querySelector('.single-product .noyona-pdp-cart-actions--unavailable')) {
+      return;
+    }
+    if (document.querySelector('.single-product form.cart .single_add_to_cart_button')) {
+      return;
+    }
+
+    var addToCartBlock = getSimplePdpCartRoot();
+    if (!addToCartBlock) {
+      return;
+    }
+
+    var qtyWrap = addToCartBlock.querySelector('.quantity');
+    if (!qtyWrap) {
+      qtyWrap = createPdpQuantityField();
+      addToCartBlock.appendChild(qtyWrap);
+    }
+    enhanceQuantity(addToCartBlock);
+    setPdpQuantityDisabled(addToCartBlock.querySelector('.quantity.noyona-pdp-qty'), true);
+
+    var actions = document.createElement('div');
+    actions.className = 'noyona-pdp-cart-actions noyona-pdp-cart-actions--unavailable';
+
+    var addButton = document.createElement('button');
+    addButton.type = 'button';
+    addButton.className = 'single_add_to_cart_button button alt wp-element-button wc-block-components-button';
+    addButton.textContent = getPdpText('addToCart', 'Add to cart');
+
+    var buyButton = document.createElement('button');
+    buyButton.type = 'button';
+    buyButton.className = 'noyona-pdp-buy-now button alt wp-element-button wc-block-components-button';
+    buyButton.textContent = getPdpText('buyNow', 'Buy now');
+
+    [addButton, buyButton].forEach(function (button) {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        showPdpToast(getPdpOutOfStockMessage(), 'error');
+      });
+    });
+
+    actions.appendChild(addButton);
+    actions.appendChild(buyButton);
+    addToCartBlock.appendChild(actions);
+  }
+
+  function initSimpleProductStockState() {
+    var stockBadge = getPdpStockBadge();
+    if (!stockBadge || stockBadge.getAttribute('data-noyona-product-type') !== 'simple') {
+      return;
+    }
+
+    var isOutOfStock = stockBadge.getAttribute('data-noyona-in-stock') === '0';
+    applyPdpOutOfStockImageState(isOutOfStock);
+    ensureSimplePdpQuantity();
+
+    if (isOutOfStock) {
+      ensureSimpleOutOfStockActions();
+    }
+  }
+
   function initPdp() {
     clearLegacyAddToCartState();
+    bindPdpAlertToasts();
     initTabs(document);
     initPdpWishlist();
 
@@ -2937,12 +3290,14 @@
       initSwatches(form);
       enhanceQuantity(form);
       bindVariationPriceSync(form);
+      bindVariationStockSync(form);
       bindAjaxAddToCart(form);
       addBuyNow(form);
       bindNoyonaVariationInteraction(form);
     });
 
     initNoyonaBuySheet();
+    initSimpleProductStockState();
   }
 
   /**
@@ -3198,7 +3553,10 @@
     // Wait long enough for wc-single-product.js / FlexSlider to win on hosts
     // where they actually do initialize. On hosts where they don't, this
     // delay is invisible — the pre-init CSS layout is already in place.
-    setTimeout(initGalleryFallback, 400);
+    setTimeout(function () {
+      initGalleryFallback();
+      initSimpleProductStockState();
+    }, 400);
   }
 
   bindWooCommercePdpHooks();
