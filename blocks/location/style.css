@@ -165,6 +165,7 @@
 
 .nsl-v2-map .leaflet-bottom.leaflet-right {
     margin: 0 14px 14px 0;
+    z-index: 998;
 }
 
 .nsl-v2-overlay-panel {
