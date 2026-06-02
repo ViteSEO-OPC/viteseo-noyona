@@ -502,6 +502,37 @@
     line-height: normal;
 }
 
+/* Presentational scroll container: shows ~3 review cards, the rest reachable
+   by scrolling. Heading and Add Review button stay outside this wrapper. */
+.nsl-v2-reviews-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    /* Reserve clear space below the last card so that, when fully scrolled,
+       the bottom fade lands on empty space and never obscures review text. */
+    padding-bottom: 14px;
+    /* Subtle bottom fade hinting that more reviews exist below. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent 100%);
+    /* Subtle, non-intrusive scrollbar; scrolling stays available. */
+    scrollbar-width: thin;
+    scrollbar-color: #d9d9d9 transparent;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.nsl-v2-reviews-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nsl-v2-reviews-scroll::-webkit-scrollbar-thumb {
+    background: #d9d9d9;
+    border-radius: 3px;
+}
+
+.nsl-v2-reviews-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 .nsl-v2-review-item {
     border: 1px solid #f0f0f0;
     border-radius: 10px;

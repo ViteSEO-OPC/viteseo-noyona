@@ -324,7 +324,7 @@
             var reviewDate = escHtml(review.date || "");
             var reviewText = escHtml(review.text || "");
             var reviewStars = escHtml(renderStars(review.rating));
-            var sourceLabel = review.source === "manual" ? "Admin" : "Customer";
+            var sourceLabel = "Customer";
             return (
               '<article class="nsl-v2-review-item">' +
               '<div class="nsl-v2-review-item__head">' +
@@ -405,7 +405,9 @@
       "</div>" +
       "</div>" +
       '<div class="nsl-v2-detail__reviews"><h4>All Reviews</h4>' +
+      '<div class="nsl-v2-reviews-scroll">' +
       reviewsHtml +
+      "</div>" +
       (store.allow_public_reviews
         ? '<button type="button" class="nsl-v2-open-review-modal" data-store-id="' +
           escHtml(store.id) +
