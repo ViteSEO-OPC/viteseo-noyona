@@ -1173,16 +1173,25 @@
       };
     };
 
-    const showSuccessToast = () => {
+    const showSuccessToast = (message, type) => {
       let toast = document.querySelector('.noyona-add-cart-toast');
       if (!toast) {
         toast = document.createElement('div');
         toast.className = 'noyona-add-cart-toast';
         toast.setAttribute('role', 'status');
         toast.setAttribute('aria-live', 'polite');
-        toast.innerHTML = '<span class="noyona-add-cart-toast__icon" aria-hidden="true">✓</span><span>Added to cart</span>';
         document.body.appendChild(toast);
       }
+
+      const toastType = type === 'error' ? 'error' : 'success';
+      const icon = toastType === 'error' ? '!' : '✓';
+      const text = message || 'Added to cart';
+
+      toast.classList.toggle('is-error', toastType === 'error');
+      toast.classList.toggle('is-success', toastType !== 'error');
+      toast.setAttribute('role', toastType === 'error' ? 'alert' : 'status');
+      toast.innerHTML = '<span class="noyona-add-cart-toast__icon" aria-hidden="true">' + icon + '</span><span></span>';
+      toast.querySelector('span:last-child').textContent = text;
 
       toast.classList.remove('is-visible');
       window.requestAnimationFrame(() => {
@@ -1192,7 +1201,7 @@
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => {
         toast.classList.remove('is-visible');
-      }, 1800);
+      }, toastType === 'error' ? 2400 : 1800);
     };
 
     const pulseCartIcon = () => {
@@ -1306,6 +1315,11 @@
       const button = event.detail && event.detail.button ? event.detail.button : null;
       if (!canAnimateFromEvent(button)) return;
       animateSuccess(event.detail && event.detail.button ? event.detail.button : null);
+    });
+
+    document.body.addEventListener('noyona_pdp_toast', (event) => {
+      const detail = event.detail || {};
+      showSuccessToast(detail.message || '', detail.type || 'error');
     });
   }
 

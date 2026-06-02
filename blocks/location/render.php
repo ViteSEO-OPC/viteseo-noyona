@@ -12,29 +12,20 @@ if (function_exists('wp_enqueue_style') && function_exists('wp_enqueue_script'))
     wp_enqueue_script('leaflet-js');
 }
 
-if (!function_exists('nsl_v2_save_comment_rating')) {
-    /**
-     * Persist optional star rating from frontend store review form.
-     *
-     * @param int $comment_id Comment ID.
-     * @return void
-     */
-    function nsl_v2_save_comment_rating($comment_id)
-    {
-        if (!isset($_POST['nsl_comment_rating'])) {
-            return;
-        }
-        $rating = (int) wp_unslash($_POST['nsl_comment_rating']);
-        $rating = max(1, min(5, $rating));
-        update_comment_meta($comment_id, 'rating', $rating);
-    }
-}
-add_action('comment_post', 'nsl_v2_save_comment_rating');
+// Rating persistence moved to inc/store-locator-reviews.php so the hook is
+// registered on every request (this render template does not run during the
+// /wp-comments-post.php submission).
 
 $wrapper_attributes = get_block_wrapper_attributes(array(
     'class' => 'noyona-store-locator-wrapper',
 ));
 $default_store_image = trailingslashit(get_stylesheet_directory_uri()) . 'assets/images/logo_contact.webp';
+
+// Map mouse-wheel zoom is opt-in (default false) so the page scrolls normally
+// while the cursor hovers the map. The block attribute is the single source of
+// truth; the frontend script reads the rendered data attribute during Leaflet
+// init. Touch/pinch gestures and the +/- zoom controls are unaffected.
+$nsl_enable_scroll_wheel_zoom = !empty($attributes['enableScrollWheelZoom']);
 
 if (!function_exists('nsl_v2_time_to_minutes')) {
     function nsl_v2_time_to_minutes($time_value)
@@ -352,6 +343,41 @@ $uid = wp_unique_id('nsl_v2_');
 $map_id = 'nsl-map-' . $uid;
 $json_id = 'nsl-data-' . $uid;
 
+// Store IDs the current logged-in user has already reviewed (approved or
+// pending only; spam/trash excluded so a removed review frees the slot).
+// One query for all of the user's store reviews, mapped by store ID.
+// Administrators are exempt from the one-review-per-store rule, so the map
+// stays empty for them and the Add Review button remains visible everywhere.
+$nsl_user_reviewed_store_ids = array();
+if (is_user_logged_in() && !current_user_can('manage_options')) {
+    $nsl_user_review_comments = get_comments(array(
+        'user_id' => get_current_user_id(),
+        'type'    => 'comment',
+        'status'  => 'all',
+        'fields'  => 'all',
+    ));
+    foreach ($nsl_user_review_comments as $nsl_user_review_comment) {
+        $nsl_comment_approved = (string) $nsl_user_review_comment->comment_approved;
+        // '1' = approved, '0' = pending. Skip 'spam' and 'trash'.
+        if ($nsl_comment_approved !== '1' && $nsl_comment_approved !== '0') {
+            continue;
+        }
+        $nsl_user_reviewed_store_ids[(int) $nsl_user_review_comment->comment_post_ID] = true;
+    }
+}
+
+/**
+ * Review sort mode.
+ *
+ * Supported:
+ *  - rating_desc : Rating DESC, then Date DESC.
+ *  - rating_asc  : Rating ASC, then Date DESC.
+ *  - newest      : Date DESC only.
+ *  - default     : Original order (manual reviews in admin order, then customer
+ *                  reviews newest-first); no combined sort applied.
+ */
+$nsl_review_sort_mode = 'rating_desc';
+
 if ($store_query->have_posts()) {
     while ($store_query->have_posts()) {
         $store_query->the_post();
@@ -468,17 +494,19 @@ if ($store_query->have_posts()) {
                 $manual_name = isset($manual_review['name']) ? sanitize_text_field((string) $manual_review['name']) : '';
                 $manual_text = isset($manual_review['text']) ? sanitize_textarea_field((string) $manual_review['text']) : '';
                 $manual_date = isset($manual_review['date']) ? sanitize_text_field((string) $manual_review['date']) : '';
-                $manual_rating = isset($manual_review['rating']) ? (int) $manual_review['rating'] : 5;
+                $manual_rating = isset($manual_review['rating']) ? (int) $manual_review['rating'] : 3;
                 $manual_rating = max(1, min(5, $manual_rating));
                 if ($manual_name === '' && $manual_text === '') {
                     continue;
                 }
+                $manual_ts = $manual_date !== '' ? strtotime($manual_date) : false;
                 $review_items[] = array(
                     'name' => $manual_name !== '' ? $manual_name : __('Anonymous', 'noyona'),
                     'text' => $manual_text,
                     'date' => $manual_date,
                     'rating' => $manual_rating,
                     'source' => 'manual',
+                    '_ts' => $manual_ts ? (int) $manual_ts : 0,
                 );
             }
         }
@@ -496,18 +524,40 @@ if ($store_query->have_posts()) {
             if ($comment_rating < 1 || $comment_rating > 5) {
                 $comment_rating = 5;
             }
-            $comment_text = wp_strip_all_tags((string) $comment->comment_content);
-            if ($comment_text === '__NSL_EMPTY_REVIEW__') {
-                $comment_text = '';
-            }
+            $comment_ts = strtotime((string) $comment->comment_date_gmt);
             $review_items[] = array(
                 'name' => (string) $comment->comment_author,
-                'text' => $comment_text,
+                'text' => wp_strip_all_tags((string) $comment->comment_content),
                 'date' => get_comment_date('M j, Y', $comment),
                 'rating' => $comment_rating,
                 'source' => 'public',
+                '_ts' => $comment_ts ? (int) $comment_ts : 0,
             );
         }
+
+        // Order reviews based on $nsl_review_sort_mode (see config above). A
+        // stable original-index tiebreaker keeps manual reviews with unparseable
+        // dates in their existing admin order rather than reordering randomly.
+        foreach ($review_items as $review_index => $review_item) {
+            $review_items[$review_index]['_idx'] = $review_index;
+        }
+        if ('default' !== $nsl_review_sort_mode) {
+            usort($review_items, function ($a, $b) use ($nsl_review_sort_mode) {
+                if ('newest' !== $nsl_review_sort_mode && $a['rating'] !== $b['rating']) {
+                    return 'rating_asc' === $nsl_review_sort_mode
+                        ? ($a['rating'] <=> $b['rating'])
+                        : ($b['rating'] <=> $a['rating']);
+                }
+                if ($a['_ts'] !== $b['_ts']) {
+                    return $b['_ts'] <=> $a['_ts'];
+                }
+                return $a['_idx'] <=> $b['_idx'];
+            });
+        }
+        foreach ($review_items as $review_index => $review_item) {
+            unset($review_items[$review_index]['_ts'], $review_items[$review_index]['_idx']);
+        }
+        $review_items = array_values($review_items);
 
         $stores_data[] = array(
             'id' => (string) $post_id,
@@ -531,6 +581,7 @@ if ($store_query->have_posts()) {
             'island_group' => $island_group,
             'region' => (string) $region,
             'allow_public_reviews' => (bool) $allow_public_reviews,
+            'user_has_reviewed' => isset($nsl_user_reviewed_store_ids[$post_id]),
             'reviews' => $review_items,
         );
     }
@@ -538,7 +589,7 @@ if ($store_query->have_posts()) {
 }
 ?>
 
-<div <?php echo $wrapper_attributes; ?>>
+<div <?php echo $wrapper_attributes; ?> data-nsl-logged-in="<?php echo is_user_logged_in() ? '1' : '0'; ?>">
     <nav class="nsl-v2-breadcrumbs" aria-label="<?php esc_attr_e('Breadcrumb', 'noyona'); ?>">
         <a class="nsl-v2-breadcrumbs__home" href="<?php echo esc_url(home_url('/')); ?>">
             <?php esc_html_e('Home', 'noyona'); ?>
@@ -556,7 +607,7 @@ if ($store_query->have_posts()) {
 
     <section class="nsl-v2-top">
         <div class="nsl-v2-map-shell">
-            <div class="nsl-v2-map" id="<?php echo esc_attr($map_id); ?>"></div>
+            <div class="nsl-v2-map" id="<?php echo esc_attr($map_id); ?>" data-scroll-wheel-zoom="<?php echo $nsl_enable_scroll_wheel_zoom ? 'true' : 'false'; ?>"></div>
             <aside class="nsl-v2-overlay-panel">
                 <div class="nsl-v2-overlay-top">
                     <div class="nsl-v2-search-wrap">
@@ -609,6 +660,7 @@ if ($store_query->have_posts()) {
 
     <script type="application/json" id="<?php echo esc_attr($json_id); ?>"><?php echo wp_json_encode($stores_data); ?></script>
 
+    <?php if (is_user_logged_in()) : ?>
     <div class="nsl-v2-review-modal" id="nsl-v2-review-modal" hidden>
         <div class="nsl-v2-review-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="nsl-v2-review-modal-title">
             <button type="button" class="nsl-v2-review-modal__close" aria-label="<?php esc_attr_e('Close', 'noyona'); ?>">×</button>
@@ -694,5 +746,6 @@ if ($store_query->have_posts()) {
             });
         })();
     </script>
+    <?php endif; ?>
 </div>
 
