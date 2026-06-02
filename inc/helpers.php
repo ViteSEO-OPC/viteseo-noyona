@@ -200,11 +200,278 @@ function noyona_get_google_login_url( $redirect_to = '' ) {
 
 /* ----- Shop category landing page slugs ----- */
 /**
- * Category page slugs (WooCommerce product_cat slugs) for Eyes, Face, Lips, Hair, Body.
- * Used to force Store API product queries to filter by this category when on the corresponding page.
+ * Canonical category order for shop/search navigation (Face, Lips, Eyes, Hair, Body).
+ * WooCommerce product_cat slugs; also used for Store API filtering on category landing pages.
  */
 function noyona_get_shop_category_page_slugs() {
     return array( 'face', 'lips', 'eyes', 'hair', 'body' );
+}
+
+/**
+ * Active product_cat slug for the current shop/search filter context.
+ */
+function noyona_get_current_shop_filter_category_slug() {
+    if ( is_tax( 'product_cat' ) ) {
+        $term = get_queried_object();
+        if ( $term instanceof WP_Term ) {
+            return (string) $term->slug;
+        }
+    }
+
+    if ( isset( $_GET['product_cat'] ) ) {
+        $slug = sanitize_key( wp_unslash( $_GET['product_cat'] ) );
+        if ( '' !== $slug && term_exists( $slug, 'product_cat' ) ) {
+            return $slug;
+        }
+    }
+
+    if ( is_page() ) {
+        $post = get_queried_object();
+        if ( $post instanceof WP_Post ) {
+            $slug = strtolower( (string) $post->post_name );
+            if ( in_array( $slug, noyona_get_shop_category_page_slugs(), true ) ) {
+                return $slug;
+            }
+        }
+    }
+
+    return '';
+}
+
+/**
+ * Whether any published products match a tag in the current shop filter context.
+ *
+ * @param string $tag_slug       Product tag slug.
+ * @param string $category_slug  Optional product_cat slug.
+ * @param string $search_query   Optional product search string.
+ * @param float|null $min_price  Optional minimum price.
+ * @param float|null $max_price  Optional maximum price.
+ */
+function noyona_shop_tag_has_products_in_context( $tag_slug, $category_slug = '', $search_query = '', $min_price = null, $max_price = null ) {
+    $tag_slug = sanitize_key( (string) $tag_slug );
+    if ( '' === $tag_slug || ! term_exists( $tag_slug, 'product_tag' ) ) {
+        return false;
+    }
+
+    static $availability_cache = array();
+
+    $cache_key = md5(
+        wp_json_encode(
+            array(
+                'tag'      => $tag_slug,
+                'category' => sanitize_key( (string) $category_slug ),
+                'search'   => trim( (string) $search_query ),
+                'min'      => null === $min_price ? null : (float) $min_price,
+                'max'      => null === $max_price ? null : (float) $max_price,
+            )
+        )
+    );
+
+    if ( isset( $availability_cache[ $cache_key ] ) ) {
+        return $availability_cache[ $cache_key ];
+    }
+
+    $tax_query = array(
+        array(
+            'taxonomy' => 'product_tag',
+            'field'    => 'slug',
+            'terms'    => array( $tag_slug ),
+        ),
+    );
+
+    $category_slug = sanitize_key( (string) $category_slug );
+    if ( '' !== $category_slug && term_exists( $category_slug, 'product_cat' ) ) {
+        $tax_query[] = array(
+            'taxonomy' => 'product_cat',
+            'field'    => 'slug',
+            'terms'    => array( $category_slug ),
+        );
+    }
+
+    if ( count( $tax_query ) > 1 ) {
+        $tax_query['relation'] = 'AND';
+    }
+
+    $query_args = array(
+        'post_type'              => 'product',
+        'post_status'            => 'publish',
+        'posts_per_page'         => 1,
+        'fields'                 => 'ids',
+        'ignore_sticky_posts'    => true,
+        'no_found_rows'          => false,
+        'update_post_meta_cache' => false,
+        'update_post_term_cache' => false,
+        'tax_query'              => $tax_query,
+    );
+
+    $search_query = trim( (string) $search_query );
+    if ( '' !== $search_query ) {
+        $query_args['s'] = $search_query;
+    }
+
+    $query_args = noyona_apply_price_range_to_product_query_args( $query_args, $min_price, $max_price );
+
+    $query = new WP_Query( $query_args );
+
+    $availability_cache[ $cache_key ] = (int) $query->found_posts > 0;
+
+    return $availability_cache[ $cache_key ];
+}
+
+/**
+ * Product tags for the filter panel: available tags first, then unavailable (alphabetical within each group).
+ *
+ * @return array<int, array{slug:string, name:string, hasProducts:bool}>
+ */
+function noyona_get_shop_filter_product_tags() {
+    if ( ! taxonomy_exists( 'product_tag' ) ) {
+        return array();
+    }
+
+    $category_slug = noyona_get_current_shop_filter_category_slug();
+    $search_query  = '';
+
+    $request_post_type = get_query_var( 'post_type' );
+    $request_post_type = is_array( $request_post_type ) ? reset( $request_post_type ) : $request_post_type;
+    $is_product_search = is_search()
+        && (
+            'product' === (string) $request_post_type
+            || ( isset( $_GET['post_type'] ) && 'product' === sanitize_key( wp_unslash( $_GET['post_type'] ) ) )
+        );
+
+    if ( $is_product_search ) {
+        $search_query = get_search_query();
+    }
+
+    $min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : null;
+    $max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : null;
+
+    $product_tag_terms = get_terms(
+        array(
+            'taxonomy'   => 'product_tag',
+            'hide_empty' => true,
+            'orderby'    => 'name',
+            'order'      => 'ASC',
+        )
+    );
+
+    if ( is_wp_error( $product_tag_terms ) || empty( $product_tag_terms ) ) {
+        return array();
+    }
+
+    $available = array();
+    $disabled  = array();
+
+    foreach ( $product_tag_terms as $product_tag_term ) {
+        if ( ! $product_tag_term instanceof WP_Term ) {
+            continue;
+        }
+
+        $has_products = noyona_shop_tag_has_products_in_context(
+            $product_tag_term->slug,
+            $category_slug,
+            $search_query,
+            $min_price,
+            $max_price
+        );
+
+        $item = array(
+            'slug'        => $product_tag_term->slug,
+            'name'        => $product_tag_term->name,
+            'hasProducts' => $has_products,
+        );
+
+        if ( $has_products ) {
+            $available[] = $item;
+        } else {
+            $disabled[] = $item;
+        }
+    }
+
+    return array_merge( $available, $disabled );
+}
+
+/**
+ * Empty-state message for shop/search product grids (not a product card).
+ */
+function noyona_get_shop_no_products_markup() {
+    return '<div class="noyona-shop-no-products" role="status">'
+        . '<p>' . esc_html__( 'No Products found', 'noyona-childtheme' ) . '</p>'
+        . '</div>';
+}
+
+/**
+ * Product collection wrapper when the current filters return zero products.
+ *
+ * @param array $options {
+ *     @type bool   $infinite Use infinite-scroll collection class.
+ *     @type string $columns  CSS grid-template-columns value.
+ * }
+ */
+function noyona_render_shop_empty_product_collection( $options = array() ) {
+    $options = wp_parse_args(
+        $options,
+        array(
+            'infinite' => false,
+            'columns'  => 'repeat(4,minmax(0,1fr))',
+        )
+    );
+
+    $classes = array( 'wp-block-woocommerce-product-collection', 'noyona-shop-products' );
+    if ( ! empty( $options['infinite'] ) ) {
+        $classes[] = 'noyona-shop-products-infinite';
+    }
+
+    $grid_style = sprintf(
+        'display:grid;grid-template-columns:%s;gap:18px;',
+        (string) $options['columns']
+    );
+
+    return '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">'
+        . '<div class="wc-block-product-template" style="' . esc_attr( $grid_style ) . '">'
+        . noyona_get_shop_no_products_markup()
+        . '</div></div>';
+}
+
+/**
+ * Ordered category list markup shared by shop archive and product search.
+ *
+ * @param string   $selected_slug Active product_cat slug, or '' when none is selected.
+ * @param callable $url_builder   Receives sanitized slug and WP_Term|null; returns category URL.
+ */
+function noyona_render_ordered_shop_category_list( $selected_slug, $url_builder ) {
+    $slugs         = noyona_get_shop_category_page_slugs();
+    $selected_slug = sanitize_key( (string) $selected_slug );
+
+    $html = '<ul class="wc-block-product-categories-list wc-block-product-categories-list--depth-0">';
+
+    foreach ( $slugs as $slug ) {
+        $slug = sanitize_key( (string) $slug );
+        $term = get_term_by( 'slug', $slug, 'product_cat' );
+        $name = $term instanceof WP_Term ? $term->name : ucfirst( $slug );
+
+        $url = call_user_func( $url_builder, $slug, $term instanceof WP_Term ? $term : null );
+        if ( ! is_string( $url ) || '' === $url ) {
+            continue;
+        }
+
+        $is_active    = ( $selected_slug === $slug );
+        $li_classes   = 'wc-block-product-categories-list-item';
+        $aria_current = '';
+
+        if ( $is_active ) {
+            $li_classes  .= ' current-cat current-product_cat';
+            $aria_current = ' aria-current="page"';
+        }
+
+        $html .= '<li class="' . esc_attr( $li_classes ) . '">';
+        $html .= '<a' . $aria_current . ' href="' . esc_url( $url ) . '">' . esc_html( $name ) . '</a>';
+        $html .= '</li>';
+    }
+
+    $html .= '</ul>';
+
+    return $html;
 }
 
 /* ----- Maximum product price (optionally per category) ----- */
@@ -578,7 +845,7 @@ function noyona_get_product_card_price_html( $product ) {
 /* ----- Render a single product card ----- */
 /**
  * Render a single product card with the unified layout:
- * image → title → meta → excerpt → footer (price left, buy-now right).
+ * image → title → meta → excerpt → footer (price only).
  */
 function noyona_render_product_card( $product ) {
     if ( ! $product instanceof WC_Product ) {
@@ -594,9 +861,6 @@ function noyona_render_product_card( $product ) {
     $excerpt       = has_excerpt( $product->get_id() ) ? get_the_excerpt( $product->get_id() ) : '';
     $meta_html     = noyona_get_product_card_meta_html( $product );
     $price_html    = noyona_get_product_card_price_html( $product );
-    $buy_now_url   = $link;
-    $buy_now_label = esc_html__( 'Buy Now!', 'noyona' );
-
     if ( $excerpt ) {
         $excerpt = wp_trim_words( $excerpt, 22 );
     }
@@ -614,7 +878,6 @@ function noyona_render_product_card( $product ) {
         <?php endif; ?>
         <div class="noyona-product-card-footer">
             <?php echo $price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-            <a href="<?php echo esc_url( $buy_now_url ); ?>" class="noyona-buy-now-btn"><?php echo $buy_now_label; ?></a>
         </div>
     </div>
     <?php
@@ -717,6 +980,9 @@ function noyona_keep_product_search_route_when_filtering_by_category( $query_var
     if ( isset( $query_vars['product_cat'] ) ) {
         unset( $query_vars['product_cat'] );
     }
+    if ( isset( $query_vars['product_tag'] ) ) {
+        unset( $query_vars['product_tag'] );
+    }
     return $query_vars;
 }
 
@@ -730,6 +996,7 @@ function noyona_render_product_search_page_shortcode() {
     $query_text     = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : get_search_query( false );
     $query_text     = trim( (string) $query_text );
     $selected_cat   = isset( $_GET['product_cat'] ) ? sanitize_key( wp_unslash( $_GET['product_cat'] ) ) : '';
+    $selected_tag   = isset( $_GET['product_tag'] ) ? sanitize_key( wp_unslash( $_GET['product_tag'] ) ) : '';
     $selected_order = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
     $min_price      = isset( $_GET['min_price'] ) && '' !== (string) $_GET['min_price'] ? floatval( wp_unslash( $_GET['min_price'] ) ) : null;
     $max_price      = isset( $_GET['max_price'] ) && '' !== (string) $_GET['max_price'] ? floatval( wp_unslash( $_GET['max_price'] ) ) : null;
@@ -750,6 +1017,9 @@ function noyona_render_product_search_page_shortcode() {
         : array( 'face', 'lips', 'eyes', 'hair', 'body' );
     if ( '' !== $selected_cat && ! in_array( $selected_cat, $allowed_cat_slugs, true ) ) {
         $selected_cat = '';
+    }
+    if ( '' !== $selected_tag && ! term_exists( $selected_tag, 'product_tag' ) ) {
+        $selected_tag = '';
     }
 
     $per_page = 12;
@@ -851,16 +1121,28 @@ function noyona_render_product_search_page_shortcode() {
             break;
     }
 
-    // Final displayed products query (adds category filter if a category pill is selected).
+    // Final displayed products query (adds category/tag filters if selected).
     $query_args = $base_query_args;
+    $tax_query  = array();
     if ( '' !== $selected_cat ) {
-        $query_args['tax_query'] = array(
-            array(
-                'taxonomy' => 'product_cat',
-                'field'    => 'slug',
-                'terms'    => array( $selected_cat ),
-            ),
+        $tax_query[] = array(
+            'taxonomy' => 'product_cat',
+            'field'    => 'slug',
+            'terms'    => array( $selected_cat ),
         );
+    }
+    if ( '' !== $selected_tag ) {
+        $tax_query[] = array(
+            'taxonomy' => 'product_tag',
+            'field'    => 'slug',
+            'terms'    => array( $selected_tag ),
+        );
+    }
+    if ( ! empty( $tax_query ) ) {
+        if ( count( $tax_query ) > 1 ) {
+            $tax_query['relation'] = 'AND';
+        }
+        $query_args['tax_query'] = $tax_query;
     }
 
     $products_query = new WP_Query( $query_args );
@@ -872,6 +1154,9 @@ function noyona_render_product_search_page_shortcode() {
     );
     if ( '' !== $selected_cat ) {
         $base_params['product_cat'] = $selected_cat;
+    }
+    if ( '' !== $selected_tag ) {
+        $base_params['product_tag'] = $selected_tag;
     }
     if ( 'menu_order' !== $selected_order ) {
         $base_params['orderby'] = $selected_order;
@@ -916,6 +1201,49 @@ function noyona_render_product_search_page_shortcode() {
                 </p>
 
                 <div class="wp-block-group noyona-shop-toolbar-right">
+                    <details class="noyona-shop-price-dropdown">
+                        <summary class="noyona-shop-price-dropdown__summary"><?php esc_html_e( 'Price range', 'noyona-childtheme' ); ?></summary>
+                        <div class="noyona-shop-price-dropdown__panel">
+                            <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
+                            <div class="noyona-shop-filter-price" data-min="0" data-step="50">
+                                <div class="noyona-shop-filter-price-slider" role="group" aria-label="<?php esc_attr_e( 'Price range', 'noyona-childtheme' ); ?>">
+                                    <div class="noyona-shop-filter-price-track"></div>
+                                    <div class="noyona-shop-filter-price-track-fill"></div>
+                                    <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="<?php esc_attr_e( 'Minimum price handle', 'noyona-childtheme' ); ?>"></button>
+                                    <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="<?php esc_attr_e( 'Maximum price handle', 'noyona-childtheme' ); ?>"></button>
+                                </div>
+                                <div class="noyona-shop-filter-price-inputs">
+                                    <label class="noyona-shop-filter-price-input">
+                                        <span aria-hidden="true">₱</span>
+                                        <input type="number" inputmode="numeric" min="0" step="1" value="<?php echo esc_attr( null !== $min_price ? (string) $min_price : '0' ); ?>" name="min_price" aria-label="<?php esc_attr_e( 'Minimum price', 'noyona-childtheme' ); ?>" />
+                                    </label>
+                                    <span class="noyona-shop-filter-price-separator" aria-hidden="true">-</span>
+                                    <label class="noyona-shop-filter-price-input">
+                                        <span aria-hidden="true">₱</span>
+                                        <input type="number" inputmode="numeric" min="0" step="1" value="<?php echo esc_attr( null !== $max_price ? (string) $max_price : '0' ); ?>" name="max_price" aria-label="<?php esc_attr_e( 'Maximum price', 'noyona-childtheme' ); ?>" />
+                                    </label>
+                                </div>
+                                <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
+                            </div>
+                            </section>
+                        </div>
+                    </details>
+
+                    <label class="screen-reader-text" for="noyona-shop-sort-select"><?php esc_html_e( 'Sort products', 'noyona-childtheme' ); ?></label>
+                    <select id="noyona-shop-sort-select" class="noyona-shop-sort-select" aria-label="<?php esc_attr_e( 'Sort products', 'noyona-childtheme' ); ?>">
+                        <option value="menu_order"><?php esc_html_e( 'Default sorting', 'woocommerce' ); ?></option>
+                        <option value="popularity"><?php esc_html_e( 'Popularity', 'noyona-childtheme' ); ?></option>
+                        <option value="rating"><?php esc_html_e( 'Average rating', 'noyona-childtheme' ); ?></option>
+                        <option value="date"><?php esc_html_e( 'Latest', 'noyona-childtheme' ); ?></option>
+                        <option value="price"><?php esc_html_e( 'Price: low to high', 'noyona-childtheme' ); ?></option>
+                        <option value="price-desc"><?php esc_html_e( 'Price: high to low', 'noyona-childtheme' ); ?></option>
+                    </select>
+
+                    <button type="button" class="noyona-shop-filter-toggle" aria-expanded="false" aria-controls="noyona-shop-filter-panel" aria-label="<?php esc_attr_e( 'Open filters', 'noyona-childtheme' ); ?>">
+                        <svg class="icon-filter" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5h18l-7 8v5.5l-4 2V13L3 5z"/></svg>
+                        <span class="screen-reader-text"><?php esc_html_e( 'Filter', 'noyona-childtheme' ); ?></span>
+                    </button>
+
                     <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
                         <div class="noyona-shop-view-toggle" aria-label="<?php esc_attr_e( 'Toggle view mode', 'noyona-childtheme' ); ?>">
                             <button type="button" class="is-active" data-shop-view-toggle="1" aria-label="<?php esc_attr_e( 'Switch to list view', 'noyona-childtheme' ); ?>" aria-pressed="false">
@@ -924,11 +1252,6 @@ function noyona_render_product_search_page_shortcode() {
                             </button>
                         </div>
                     </div>
-
-                    <button type="button" class="noyona-shop-filter-toggle" aria-expanded="false" aria-controls="noyona-shop-filter-panel" aria-label="<?php esc_attr_e( 'Open filters', 'noyona-childtheme' ); ?>">
-                        <svg class="icon-filter" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5h18l-7 8v5.5l-4 2V13L3 5z"/></svg>
-                        <span class="screen-reader-text"><?php esc_html_e( 'Filter', 'noyona-childtheme' ); ?></span>
-                    </button>
                 </div>
             </div>
 
@@ -937,7 +1260,7 @@ function noyona_render_product_search_page_shortcode() {
                 data-current-page="<?php echo esc_attr( (string) $current_page ); ?>"
                 data-max-pages="<?php echo esc_attr( (string) max( 1, (int) $products_query->max_num_pages ) ); ?>"
                 data-total="<?php echo esc_attr( (string) $result_count ); ?>">
-                <div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;">
+                <div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;">
                     <?php if ( $products_query->have_posts() ) : ?>
                         <?php
                         while ( $products_query->have_posts() ) :
@@ -950,9 +1273,7 @@ function noyona_render_product_search_page_shortcode() {
                         wp_reset_postdata();
                         ?>
                     <?php else : ?>
-                        <div class="wc-block-product noyona-search-no-products">
-                            <p><?php esc_html_e( 'No products found. Try another search or adjust your filters.', 'noyona-childtheme' ); ?></p>
-                        </div>
+                        <?php echo noyona_get_shop_no_products_markup(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <?php endif; ?>
                 </div>
                 <?php
@@ -1016,43 +1337,7 @@ function noyona_render_product_search_page_shortcode() {
             <div id="noyona-shop-filter-panel" class="wp-block-group noyona-shop-filters">
                 <button type="button" class="noyona-shop-filter-close" aria-label="<?php esc_attr_e( 'Close filters', 'noyona-childtheme' ); ?>">✕</button>
 
-                <section class="noyona-shop-filter-section noyona-shop-filter-section-sort">
-                    <h5><?php esc_html_e( 'Sort By', 'noyona-childtheme' ); ?></h5>
-                    <ul class="noyona-shop-sort-list">
-                        <li><button type="button" class="noyona-shop-sort-option" data-orderby="menu_order"><?php esc_html_e( 'Default sorting', 'woocommerce' ); ?></button></li>
-                        <li><button type="button" class="noyona-shop-sort-option" data-orderby="popularity"><?php esc_html_e( 'Popularity', 'noyona-childtheme' ); ?></button></li>
-                        <li><button type="button" class="noyona-shop-sort-option" data-orderby="rating"><?php esc_html_e( 'Average rating', 'noyona-childtheme' ); ?></button></li>
-                        <li><button type="button" class="noyona-shop-sort-option" data-orderby="date"><?php esc_html_e( 'Latest', 'noyona-childtheme' ); ?></button></li>
-                        <li><button type="button" class="noyona-shop-sort-option" data-orderby="price"><?php esc_html_e( 'Price: low to high', 'noyona-childtheme' ); ?></button></li>
-                        <li><button type="button" class="noyona-shop-sort-option" data-orderby="price-desc"><?php esc_html_e( 'Price: high to low', 'noyona-childtheme' ); ?></button></li>
-                    </ul>
-                </section>
-
-                <div class="noyona-shop-filter-sections" aria-hidden="true">
-                    <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
-                        <h5 class="noyona-shop-filter-price-title"><?php esc_html_e( 'Price', 'noyona-childtheme' ); ?></h5>
-                        <div class="noyona-shop-filter-price" data-min="0" data-step="50">
-                            <div class="noyona-shop-filter-price-slider" role="group" aria-label="<?php esc_attr_e( 'Price range', 'noyona-childtheme' ); ?>">
-                                <div class="noyona-shop-filter-price-track"></div>
-                                <div class="noyona-shop-filter-price-track-fill"></div>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="<?php esc_attr_e( 'Minimum price handle', 'noyona-childtheme' ); ?>"></button>
-                                <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="<?php esc_attr_e( 'Maximum price handle', 'noyona-childtheme' ); ?>"></button>
-                            </div>
-                            <div class="noyona-shop-filter-price-inputs">
-                                <label class="noyona-shop-filter-price-input">
-                                    <span aria-hidden="true">₱</span>
-                                    <input type="number" inputmode="numeric" min="0" step="1" value="<?php echo esc_attr( null !== $min_price ? (string) $min_price : '0' ); ?>" name="min_price" aria-label="<?php esc_attr_e( 'Minimum price', 'noyona-childtheme' ); ?>" />
-                                </label>
-                                <span class="noyona-shop-filter-price-separator" aria-hidden="true">-</span>
-                                <label class="noyona-shop-filter-price-input">
-                                    <span aria-hidden="true">₱</span>
-                                    <input type="number" inputmode="numeric" min="0" step="1" value="<?php echo esc_attr( null !== $max_price ? (string) $max_price : '0' ); ?>" name="max_price" aria-label="<?php esc_attr_e( 'Maximum price', 'noyona-childtheme' ); ?>" />
-                                </label>
-                            </div>
-                            <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
-                        </div>
-                    </section>
-                </div>
+                <div class="noyona-shop-filter-sections" aria-hidden="true"></div>
 
                 <div class="wp-block-group noyona-shop-filter-blocks">
                     <div class="wp-block-woocommerce-product-filter-active"></div>
@@ -1098,10 +1383,6 @@ function noyona_get_product_search_result_count_text( $total, $current_page, $pe
 }
 
 function noyona_render_product_search_shop_categories( $query_text, $selected_cat, $current_params = array() ) {
-    $slugs = function_exists( 'noyona_get_shop_category_page_slugs' )
-        ? noyona_get_shop_category_page_slugs()
-        : array( 'face', 'lips', 'eyes', 'hair', 'body' );
-
     $base_args = wp_parse_args(
         (array) $current_params,
         array(
@@ -1113,37 +1394,22 @@ function noyona_render_product_search_shop_categories( $query_text, $selected_ca
     $base_args['post_type'] = 'product';
     unset( $base_args['product_cat'], $base_args['paged'], $base_args['search_page'] );
 
-    $html             = '<a class="noyona-shop-category-all' . ( '' === $selected_cat ? ' is-active' : '' ) . '" href="' . esc_url( add_query_arg( $base_args, home_url( '/' ) ) ) . '">';
-    $html            .= esc_html__( 'All Products', 'noyona-childtheme' );
-    $html            .= '</a>';
-    $html            .= '<ul class="wc-block-product-categories-list wc-block-product-categories-list--depth-0">';
+    $html  = '<a class="noyona-shop-category-all' . ( '' === $selected_cat ? ' is-active' : '' ) . '" href="' . esc_url( add_query_arg( $base_args, home_url( '/' ) ) ) . '">';
+    $html .= esc_html__( 'All Products', 'noyona-childtheme' );
+    $html .= '</a>';
 
-    foreach ( $slugs as $slug ) {
-        $slug         = sanitize_key( (string) $slug );
-        $term         = get_term_by( 'slug', $slug, 'product_cat' );
-        $name         = $term instanceof WP_Term ? $term->name : ucfirst( $slug );
-        $is_active    = ( $selected_cat === $slug );
-
-        $url        = add_query_arg( array_merge( $base_args, array( 'product_cat' => $slug ) ), home_url( '/' ) );
-        $li_classes = 'wc-block-product-categories-list-item';
-        if ( $is_active ) {
-            $li_classes .= ' current-cat current-product_cat';
+    $html .= noyona_render_ordered_shop_category_list(
+        $selected_cat,
+        static function ( $slug ) use ( $base_args ) {
+            return add_query_arg( array_merge( $base_args, array( 'product_cat' => $slug ) ), home_url( '/' ) );
         }
-        $aria_current = $is_active ? ' aria-current="page"' : '';
-        $html        .= '<li class="' . esc_attr( $li_classes ) . '">';
-        $html        .= '<a' . $aria_current . ' href="' . esc_url( $url ) . '">' . esc_html( $name ) . '</a>';
-        $html       .= '</li>';
-    }
-
-    $html .= '</ul>';
+    );
 
     return $html;
 }
 
 function noyona_render_product_search_category_pills( $query_text, $selected_cat, $current_params = array(), $available_cat_slugs = array() ) {
-    $slugs = function_exists( 'noyona_get_shop_category_page_slugs' )
-        ? noyona_get_shop_category_page_slugs()
-        : array( 'face', 'lips', 'eyes', 'hair', 'body' );
+    $slugs = noyona_get_shop_category_page_slugs();
 
     $base_args = wp_parse_args(
         (array) $current_params,
