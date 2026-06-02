@@ -1071,6 +1071,9 @@
   }
 
   function initAddToCartSuccessAnimation() {
+    const isPdpPage = document.body.classList.contains('single-product');
+    if (!isPdpPage) return;
+
     const ADD_TO_CART_SELECTOR = [
       '.add_to_cart_button',
       '.ajax_add_to_cart',
@@ -1106,6 +1109,28 @@
       if (source.jquery && source[0] && source[0].nodeType === 1) return source[0];
       if (Array.isArray(source) && source[0] && source[0].nodeType === 1) return source[0];
       return null;
+    };
+
+    const isMiniCartContext = (el) => {
+      if (!el || typeof el.closest !== 'function') return false;
+      return !!el.closest('.wc-block-mini-cart__drawer, .wp-block-woocommerce-mini-cart');
+    };
+
+    const isPdpAddToCartSource = (source) => {
+      const el = normalizeEventSource(source);
+      if (!el) return false;
+      if (isMiniCartContext(el)) return false;
+      return !!el.closest('.single-product form.cart');
+    };
+
+    const canAnimateFromEvent = (source) => {
+      if (isPdpAddToCartSource(source)) {
+        return true;
+      }
+      // Some add-to-cart flows emit events without a button reference.
+      return !!lastClickedAddToCart
+        && Date.now() - lastClickedAt < 1200
+        && isPdpAddToCartSource(lastClickedAddToCart);
     };
 
     const isVisible = (el) => {
@@ -1256,6 +1281,7 @@
       (event) => {
         const button = event.target.closest(ADD_TO_CART_SELECTOR);
         if (!button) return;
+        if (!isPdpAddToCartSource(button)) return;
         lastClickedAddToCart = button;
         lastClickedAt = Date.now();
       },
@@ -1264,16 +1290,21 @@
 
     if (window.jQuery) {
       window.jQuery(document.body).on('added_to_cart', (event, fragments, cartHash, button) => {
+        if (!canAnimateFromEvent(button)) return;
         animateSuccess(button);
       });
     }
 
     document.body.addEventListener('wc-blocks_added_to_cart', (event) => {
       if (event.detail && event.detail.source === 'header-mini-cart-retry') return;
+      const button = event.detail && event.detail.button ? event.detail.button : null;
+      if (!canAnimateFromEvent(button)) return;
       animateSuccess(event.detail && event.detail.button ? event.detail.button : null);
     });
 
     document.body.addEventListener('noyona_cart_added', (event) => {
+      const button = event.detail && event.detail.button ? event.detail.button : null;
+      if (!canAnimateFromEvent(button)) return;
       animateSuccess(event.detail && event.detail.button ? event.detail.button : null);
     });
   }
