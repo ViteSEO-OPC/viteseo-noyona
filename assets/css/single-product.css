@@ -1621,7 +1621,7 @@ html.noyona-pdp-buysheet-open body {
     bottom: 0;
     z-index: 9000;
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
-    background: #ffffff;
+    background: #E199A4;
     box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.12);
   }
 
