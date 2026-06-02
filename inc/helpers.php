@@ -1194,6 +1194,23 @@ function noyona_render_product_search_page_shortcode() {
     </div>
 
     <div class="wp-block-columns alignwide noyona-shop-layout">
+        <div class="wp-block-column noyona-shop-sidebar" style="flex-basis:28%">
+            <button type="button" class="noyona-shop-filter-overlay" aria-label="<?php esc_attr_e( 'Close filter panel', 'noyona-childtheme' ); ?>"></button>
+
+            <div id="noyona-shop-filter-panel" class="wp-block-group noyona-shop-filters">
+                <button type="button" class="noyona-shop-filter-close" aria-label="<?php esc_attr_e( 'Close filters', 'noyona-childtheme' ); ?>">✕</button>
+
+                <div class="noyona-shop-filter-sections" aria-hidden="true"></div>
+
+                <div class="wp-block-group noyona-shop-filter-blocks">
+                    <div class="wp-block-woocommerce-product-filter-active"></div>
+                    <div class="wp-block-woocommerce-product-filter-stock-status"></div>
+                    <div class="wp-block-woocommerce-product-filter-price"></div>
+                    <div class="wp-block-woocommerce-product-filter-rating"></div>
+                </div>
+            </div>
+        </div>
+
         <div class="wp-block-column noyona-shop-products-column" style="flex-basis:72%">
             <div class="wp-block-group noyona-shop-toolbar">
                 <p class="woocommerce-result-count noyona-shop-count">
@@ -1328,23 +1345,6 @@ function noyona_render_product_search_page_shortcode() {
                         <?php endif; ?>
                     </nav>
                 <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="wp-block-column noyona-shop-sidebar" style="flex-basis:28%">
-            <button type="button" class="noyona-shop-filter-overlay" aria-label="<?php esc_attr_e( 'Close filter panel', 'noyona-childtheme' ); ?>"></button>
-
-            <div id="noyona-shop-filter-panel" class="wp-block-group noyona-shop-filters">
-                <button type="button" class="noyona-shop-filter-close" aria-label="<?php esc_attr_e( 'Close filters', 'noyona-childtheme' ); ?>">✕</button>
-
-                <div class="noyona-shop-filter-sections" aria-hidden="true"></div>
-
-                <div class="wp-block-group noyona-shop-filter-blocks">
-                    <div class="wp-block-woocommerce-product-filter-active"></div>
-                    <div class="wp-block-woocommerce-product-filter-stock-status"></div>
-                    <div class="wp-block-woocommerce-product-filter-price"></div>
-                    <div class="wp-block-woocommerce-product-filter-rating"></div>
-                </div>
             </div>
         </div>
     </div>
