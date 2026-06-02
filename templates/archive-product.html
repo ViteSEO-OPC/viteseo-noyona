@@ -30,6 +30,71 @@
                 <!-- wp:group {"className":"noyona-shop-toolbar-right","layout":{"type":"flex","verticalAlignment":"center","justifyContent":"right","flexWrap":"nowrap"}} -->
                 <div class="wp-block-group noyona-shop-toolbar-right">
                 <!-- wp:html -->
+                    <details class="noyona-shop-price-dropdown">
+                        <summary class="noyona-shop-price-dropdown__summary">Price range</summary>
+                        <div class="noyona-shop-price-dropdown__panel">
+                            <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
+                            <div class="noyona-shop-filter-price" data-min="0" data-step="50">
+                                <div class="noyona-shop-filter-price-slider" role="group" aria-label="Price range">
+                                    <div class="noyona-shop-filter-price-track"></div>
+                                    <div class="noyona-shop-filter-price-track-fill"></div>
+                                    <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="Minimum price handle"></button>
+                                    <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="Maximum price handle"></button>
+                                </div>
+                                <div class="noyona-shop-filter-price-inputs">
+                                    <label class="noyona-shop-filter-price-input">
+                                        <span aria-hidden="true">₱</span>
+                                        <input
+                                            type="number"
+                                            inputmode="numeric"
+                                            min="0"
+                                            step="1"
+                                            value="0"
+                                            name="noyona-price-min"
+                                            aria-label="Minimum price"
+                                        >
+                                    </label>
+                                    <span class="noyona-shop-filter-price-separator" aria-hidden="true">-</span>
+                                    <label class="noyona-shop-filter-price-input">
+                                        <span aria-hidden="true">₱</span>
+                                        <input
+                                            type="number"
+                                            inputmode="numeric"
+                                            min="0"
+                                            step="1"
+                                            value="0"
+                                            name="noyona-price-max"
+                                            aria-label="Maximum price"
+                                        >
+                                    </label>
+                                </div>
+                                <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
+                            </div>
+                            </section>
+                        </div>
+                    </details>
+                    <!-- /wp:html -->
+
+                    <!-- wp:html -->
+                    <label class="screen-reader-text" for="noyona-shop-sort-select">Sort products</label>
+                    <select id="noyona-shop-sort-select" class="noyona-shop-sort-select" aria-label="Sort products">
+                        <option value="menu_order">Default sorting</option>
+                        <option value="popularity">Popularity</option>
+                        <option value="rating">Average rating</option>
+                        <option value="date">Latest</option>
+                        <option value="price">Price: low to high</option>
+                        <option value="price-desc">Price: high to low</option>
+                    </select>
+                    <!-- /wp:html -->
+
+                    <!-- wp:html -->
+                    <button type="button" class="noyona-shop-filter-toggle" aria-expanded="false" aria-controls="noyona-shop-filter-panel" aria-label="Open filters">
+                        <svg class="icon-filter" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5h18l-7 8v5.5l-4 2V13L3 5z"/></svg>
+                        <span class="screen-reader-text">Filter</span>
+                    </button>
+                    <!-- /wp:html -->
+
+                    <!-- wp:html -->
                 <div class="noyona-shop-view-wrapper" style="display:flex; align-items:center; gap:8px;">
                     <div class="noyona-shop-view-toggle" aria-label="Toggle view mode">
                         <button type="button" class="is-active" data-shop-view-toggle="1" aria-label="Switch to list view" aria-pressed="false">
@@ -39,13 +104,6 @@
                     </div>
                 </div>
                 <!-- /wp:html -->
-
-                    <!-- wp:html -->
-                    <button type="button" class="noyona-shop-filter-toggle" aria-expanded="false" aria-controls="noyona-shop-filter-panel" aria-label="Open filters">
-                        <svg class="icon-filter" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5h18l-7 8v5.5l-4 2V13L3 5z"/></svg>
-                        <span class="screen-reader-text">Filter</span>
-                    </button>
-                    <!-- /wp:html -->
                 </div>
                 <!-- /wp:group -->
             </div>
@@ -92,60 +150,7 @@
             <button type="button" class="noyona-shop-filter-close" aria-label="Close filters">✕</button>
             <!-- /wp:html -->
             <!-- wp:html -->
-            <section class="noyona-shop-filter-section noyona-shop-filter-section-sort">
-                <h5>Sort By</h5>
-                <ul class="noyona-shop-sort-list">
-                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="menu_order">Default sorting</button></li>
-                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="popularity">Popularity</button></li>
-                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="rating">Average rating</button></li>
-                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="date">Latest</button></li>
-                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="price">Price: low to high</button></li>
-                    <li><button type="button" class="noyona-shop-sort-option" data-orderby="price-desc">Price: high to low</button></li>
-                </ul>
-            </section>
-            <!-- /wp:html -->
-            <!-- wp:html -->
             <div class="noyona-shop-filter-sections" aria-hidden="true">
-                <section class="noyona-shop-filter-section noyona-shop-filter-section-price">
-                    <h5 class="noyona-shop-filter-price-title">Price</h5>
-                    <div class="noyona-shop-filter-price" data-min="0" data-step="50">
-                        <div class="noyona-shop-filter-price-slider" role="group" aria-label="Price range">
-                            <div class="noyona-shop-filter-price-track"></div>
-                            <div class="noyona-shop-filter-price-track-fill"></div>
-                            <button type="button" class="noyona-shop-filter-price-thumb is-min" aria-label="Minimum price handle"></button>
-                            <button type="button" class="noyona-shop-filter-price-thumb is-max" aria-label="Maximum price handle"></button>
-                        </div>
-                        <div class="noyona-shop-filter-price-inputs">
-                            <label class="noyona-shop-filter-price-input">
-                                <span aria-hidden="true">₱</span>
-                                <input
-                                    type="number"
-                                    inputmode="numeric"
-                                    min="0"
-                                    step="1"
-                                    value="0"
-                                    name="noyona-price-min"
-                                    aria-label="Minimum price"
-                                >
-                            </label>
-                            <span class="noyona-shop-filter-price-separator" aria-hidden="true">-</span>
-                            <label class="noyona-shop-filter-price-input">
-                                <span aria-hidden="true">₱</span>
-                                <input
-                                    type="number"
-                                    inputmode="numeric"
-                                    min="0"
-                                    step="1"
-                                    value="0"
-                                    name="noyona-price-max"
-                                    aria-label="Maximum price"
-                                >
-                            </label>
-                        </div>
-                        <div class="noyona-shop-filter-price-labels" aria-hidden="true"></div>
-                    </div>
-                </section>
-
                 <!-- <section class="noyona-shop-filter-section">
                     <h5>Star Rating</h5>
                     <label><input type="radio" name="noyona-star-rating"> Bestsellers</label>
