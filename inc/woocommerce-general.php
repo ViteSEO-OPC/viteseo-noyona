@@ -96,11 +96,15 @@ function noyona_render_landing_page_products_block( $block_content, $block ) {
 
     $min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : null;
     $max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : null;
+    $selected_tag = isset( $_GET['product_tag'] ) ? sanitize_key( wp_unslash( $_GET['product_tag'] ) ) : '';
+    if ( '' !== $selected_tag && ! term_exists( $selected_tag, 'product_tag' ) ) {
+        $selected_tag = '';
+    }
 
     $has_price_range = null !== $min_price || null !== $max_price;
 
-    $selected_orderby = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '';
-    $orderby          = 'title';
+    $selected_orderby = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
+    $orderby          = 'menu_order';
     $order            = 'ASC';
 
     // Keep dedicated category pages aligned with the shop archive sorter.
@@ -125,9 +129,13 @@ function noyona_render_landing_page_products_block( $block_content, $block ) {
             $orderby = 'price';
             $order   = 'DESC';
             break;
-        case 'menu_order':
         case 'title':
             $orderby = $selected_orderby;
+            break;
+        case 'menu_order':
+        default:
+            $selected_orderby = 'menu_order';
+            $orderby          = 'menu_order';
             break;
     }
 
@@ -139,6 +147,9 @@ function noyona_render_landing_page_products_block( $block_content, $block ) {
         'category' => array( $slug_lower ),
         'return'   => 'objects',
     );
+    if ( '' !== $selected_tag ) {
+        $query_args['tag'] = array( $selected_tag );
+    }
 
     $query_args = noyona_apply_price_range_to_product_query_args( $query_args, $min_price, $max_price );
 
@@ -173,26 +184,31 @@ function noyona_render_landing_page_products_block( $block_content, $block ) {
     }
 
     if ( $has_price_range ) {
-        $all_for_more = wc_get_products(
-            array(
-                'status'   => 'publish',
-                'limit'    => -1,
-                'orderby'  => 'title',
-                'order'    => 'ASC',
-                'category' => array( $slug_lower ),
-                'return'   => 'objects',
-            )
+        $all_for_more_args = array(
+            'status'   => 'publish',
+            'limit'    => -1,
+            'orderby'  => 'title',
+            'order'    => 'ASC',
+            'category' => array( $slug_lower ),
+            'return'   => 'objects',
         );
+        if ( '' !== $selected_tag ) {
+            $all_for_more_args['tag'] = array( $selected_tag );
+        }
+        $all_for_more = wc_get_products( $all_for_more_args );
         $all_for_more = noyona_filter_products_by_price_range( $all_for_more, $min_price, $max_price );
         $has_more     = count( $all_for_more ) > 4;
     } else {
         $has_more = count(
             wc_get_products(
-                array(
-                    'status'   => 'publish',
-                    'limit'    => 5,
-                    'category' => array( $slug_lower ),
-                    'return'   => 'ids',
+                array_filter(
+                    array(
+                        'status'   => 'publish',
+                        'limit'    => 5,
+                        'category' => array( $slug_lower ),
+                        'tag'      => '' !== $selected_tag ? array( $selected_tag ) : null,
+                        'return'   => 'ids',
+                    )
                 )
             )
         ) > 4;
@@ -200,7 +216,11 @@ function noyona_render_landing_page_products_block( $block_content, $block ) {
 
     if ( empty( $products ) ) {
         if ( null !== $min_price || null !== $max_price ) {
-            return '<div class="wp-block-woocommerce-product-collection noyona-shop-products"><div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px;"><div class="wc-block-product" style="grid-column:1/-1;padding:32px;text-align:center;border-radius:16px;background:#f9f9f9;"><p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">No products found in this price range</p></div></div></div>';
+            return noyona_render_shop_empty_product_collection(
+                array(
+                    'columns' => 'repeat(2,minmax(0,1fr))',
+                )
+            );
         }
         return '<div class="wp-block-woocommerce-product-collection noyona-shop-products"><div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px;"><div class="wc-block-product" style="grid-column:1/-1;padding:32px;text-align:center;border-radius:16px;background:#f9f9f9;"><p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">Coming Soon</p></div></div></div>';
     }
@@ -337,6 +357,50 @@ function noyona_render_landing_page_toolbar_blocks( $block_content, $block ) {
     return $html;
 }
 
+/* ----- Shop archive category order (Face → Lips → Eyes → Hair → Body) ----- */
+/**
+ * WooCommerce's product-categories block sorts terms by name/id. Replace it on
+ * shop and product_cat archives so pills match the canonical Noyona sequence.
+ */
+add_filter( 'render_block', 'noyona_render_ordered_shop_product_categories_block', 9, 2 );
+function noyona_render_ordered_shop_product_categories_block( $block_content, $block ) {
+    if ( ! isset( $block['blockName'] ) || 'woocommerce/product-categories' !== $block['blockName'] ) {
+        return $block_content;
+    }
+
+    if ( ! function_exists( 'noyona_render_ordered_shop_category_list' ) ) {
+        return $block_content;
+    }
+
+    if ( ! is_shop() && ! is_product_category() ) {
+        return $block_content;
+    }
+
+    $selected_slug = '';
+    if ( is_product_category() ) {
+        $term = get_queried_object();
+        if ( $term instanceof WP_Term && in_array( $term->slug, noyona_get_shop_category_page_slugs(), true ) ) {
+            $selected_slug = $term->slug;
+        }
+    }
+
+    $list = noyona_render_ordered_shop_category_list(
+        $selected_slug,
+        static function ( $slug, $term ) {
+            if ( $term instanceof WP_Term ) {
+                $link = get_term_link( $term );
+                if ( ! is_wp_error( $link ) ) {
+                    return $link;
+                }
+            }
+
+            return home_url( user_trailingslashit( 'shop/' . $slug ) );
+        }
+    );
+
+    return '<div class="wp-block-woocommerce-product-categories wc-block-product-categories">' . $list . '</div>';
+}
+
 /* ----- Replace shop archive product cards ----- */
 /**
  * On the shop archive, replace native product-collection card markup with
@@ -376,10 +440,10 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
     }
     $per_page = $main_per_page > 0 ? $main_per_page : 12;
     $order    = isset( $query['order'] ) ? $query['order'] : 'ASC';
-    $orderby  = isset( $query['orderBy'] ) ? $query['orderBy'] : 'title';
+    $orderby  = 'menu_order';
 
     // Honor the Woo catalog sorter (e.g. ?orderby=price, popularity, rating, date, price-desc).
-    $selected_orderby = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '';
+    $selected_orderby = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
     switch ( $selected_orderby ) {
         case 'popularity':
             $orderby = 'popularity';
@@ -402,12 +466,12 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
             $order   = 'DESC';
             break;
         case 'title':
-        case 'menu_order':
             $orderby = $selected_orderby;
-            // keep block default order
             break;
+        case 'menu_order':
         default:
-            // Keep block-defined defaults when no valid catalog sorter is selected.
+            $selected_orderby = 'menu_order';
+            $orderby          = 'menu_order';
             break;
     }
 
@@ -453,8 +517,15 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
 
     $min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : null;
     $max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : null;
+    $selected_tag = isset( $_GET['product_tag'] ) ? sanitize_key( wp_unslash( $_GET['product_tag'] ) ) : '';
+    if ( '' !== $selected_tag && ! term_exists( $selected_tag, 'product_tag' ) ) {
+        $selected_tag = '';
+    }
 
     $has_price_range = null !== $min_price || null !== $max_price;
+    if ( '' !== $selected_tag ) {
+        $args['tag'] = array( $selected_tag );
+    }
     $args            = noyona_apply_price_range_to_product_query_args( $args, $min_price, $max_price );
     if ( $has_price_range ) {
         $args['limit'] = -1;
@@ -526,7 +597,11 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
     }
 
     if ( empty( $products ) ) {
-        return '<div class="wp-block-woocommerce-product-collection noyona-shop-products noyona-shop-products-infinite"><div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;"><div class="wc-block-product" style="grid-column:1/-1;padding:32px;text-align:center;border-radius:16px;background:#f9f9f9;"><p class="has-text-align-center has-vivid-pink-cyan-color has-text-color" style="font-size:30px;font-weight:700">No products found in this price range</p></div></div></div>';
+        return noyona_render_shop_empty_product_collection(
+            array(
+                'infinite' => true,
+            )
+        );
     }
 
     ob_start();
@@ -535,7 +610,7 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
         . ' data-current-page="' . esc_attr( (string) $paged ) . '"'
         . ' data-max-pages="' . esc_attr( (string) $max_pages ) . '"'
         . ' data-total="' . esc_attr( (string) $total_results ) . '">'
-        . '<div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;">';
+        . '<div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;">';
     foreach ( $products as $product ) {
         echo noyona_render_product_card( $product );
     }
@@ -561,6 +636,30 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
 
     echo '</div>';
     return ob_get_clean();
+}
+
+/**
+ * Replace Woo's default no-results pattern on shop/search with the theme empty state.
+ */
+add_filter( 'render_block', 'noyona_render_shop_product_collection_no_results', 10, 2 );
+function noyona_render_shop_product_collection_no_results( $block_content, $block ) {
+    if ( ! isset( $block['blockName'] ) || 'woocommerce/product-collection-no-results' !== $block['blockName'] ) {
+        return $block_content;
+    }
+
+    if ( ! function_exists( 'noyona_get_shop_no_products_markup' ) ) {
+        return $block_content;
+    }
+
+    $is_shop_context = ( function_exists( 'is_shop' ) && is_shop() )
+        || ( function_exists( 'is_product_taxonomy' ) && is_product_taxonomy() )
+        || ( function_exists( 'noyona_is_product_search_request' ) && noyona_is_product_search_request() );
+
+    if ( ! $is_shop_context ) {
+        return $block_content;
+    }
+
+    return noyona_get_shop_no_products_markup();
 }
 
 /* ----- Force product category on Store API queries ----- */
