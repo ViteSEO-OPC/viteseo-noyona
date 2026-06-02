@@ -308,12 +308,12 @@ if ( class_exists( 'WooCommerce' ) && 'static' !== $data_source ) {
 
     if ( 'product' === $resolved_source && $is_product_page ) {
         $pdp_product_id = (int) get_the_ID();
+        $query_args['post_id'] = $pdp_product_id;
+        $query_args['number']  = 0;
+
         if ( function_exists( 'noyona_pdp_get_product_review_comments' ) ) {
             $dynamic_comments = noyona_pdp_get_product_review_comments( $pdp_product_id );
             $reviews          = noyona_cr_build_dynamic_reviews( $dynamic_comments );
-        } else {
-            $query_args['post_id'] = $pdp_product_id;
-            $query_args['number']  = 0;
         }
     } elseif ( 'category' === $resolved_source ) {
         if ( empty( $source_categories ) && is_tax( 'product_cat' ) ) {

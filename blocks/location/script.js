@@ -541,7 +541,13 @@
       popupAnchor: [0, -36],
     });
 
-    var map = L.map(mapEl, { zoomControl: false }).setView([14.5547, 121.0244], 11);
+    // Mouse-wheel zoom is opt-in so the page scrolls normally while the cursor
+    // hovers the map. Defaults to false; set the map element's
+    // data-scroll-wheel-zoom="true" to enable wheel zoom. Touch/pinch gestures
+    // and the +/- zoom controls are unaffected by this flag.
+    var enable_scroll_wheel_zoom = mapEl.getAttribute("data-scroll-wheel-zoom") === "true";
+
+    var map = L.map(mapEl, { zoomControl: false, scrollWheelZoom: enable_scroll_wheel_zoom }).setView([14.5547, 121.0244], 11);
     L.control.zoom({ position: "bottomright" }).addTo(map);
     // tile.openstreetmap.org is OSM's dev/operations server and is rate-limited /
     // 403'd for production embeds under their tile usage policy. CARTO's Voyager
