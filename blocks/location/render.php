@@ -360,6 +360,18 @@ if (is_user_logged_in() && !current_user_can('manage_options')) {
     }
 }
 
+/**
+ * Review sort mode.
+ *
+ * Supported:
+ *  - rating_desc : Rating DESC, then Date DESC.
+ *  - rating_asc  : Rating ASC, then Date DESC.
+ *  - newest      : Date DESC only.
+ *  - default     : Original order (manual reviews in admin order, then customer
+ *                  reviews newest-first); no combined sort applied.
+ */
+$nsl_review_sort_mode = 'rating_desc';
+
 if ($store_query->have_posts()) {
     while ($store_query->have_posts()) {
         $store_query->the_post();
@@ -481,12 +493,14 @@ if ($store_query->have_posts()) {
                 if ($manual_name === '' && $manual_text === '') {
                     continue;
                 }
+                $manual_ts = $manual_date !== '' ? strtotime($manual_date) : false;
                 $review_items[] = array(
                     'name' => $manual_name !== '' ? $manual_name : __('Anonymous', 'noyona'),
                     'text' => $manual_text,
                     'date' => $manual_date,
                     'rating' => $manual_rating,
                     'source' => 'manual',
+                    '_ts' => $manual_ts ? (int) $manual_ts : 0,
                 );
             }
         }
@@ -504,14 +518,40 @@ if ($store_query->have_posts()) {
             if ($comment_rating < 1 || $comment_rating > 5) {
                 $comment_rating = 5;
             }
+            $comment_ts = strtotime((string) $comment->comment_date_gmt);
             $review_items[] = array(
                 'name' => (string) $comment->comment_author,
                 'text' => wp_strip_all_tags((string) $comment->comment_content),
                 'date' => get_comment_date('M j, Y', $comment),
                 'rating' => $comment_rating,
                 'source' => 'public',
+                '_ts' => $comment_ts ? (int) $comment_ts : 0,
             );
         }
+
+        // Order reviews based on $nsl_review_sort_mode (see config above). A
+        // stable original-index tiebreaker keeps manual reviews with unparseable
+        // dates in their existing admin order rather than reordering randomly.
+        foreach ($review_items as $review_index => $review_item) {
+            $review_items[$review_index]['_idx'] = $review_index;
+        }
+        if ('default' !== $nsl_review_sort_mode) {
+            usort($review_items, function ($a, $b) use ($nsl_review_sort_mode) {
+                if ('newest' !== $nsl_review_sort_mode && $a['rating'] !== $b['rating']) {
+                    return 'rating_asc' === $nsl_review_sort_mode
+                        ? ($a['rating'] <=> $b['rating'])
+                        : ($b['rating'] <=> $a['rating']);
+                }
+                if ($a['_ts'] !== $b['_ts']) {
+                    return $b['_ts'] <=> $a['_ts'];
+                }
+                return $a['_idx'] <=> $b['_idx'];
+            });
+        }
+        foreach ($review_items as $review_index => $review_item) {
+            unset($review_items[$review_index]['_ts'], $review_items[$review_index]['_idx']);
+        }
+        $review_items = array_values($review_items);
 
         $stores_data[] = array(
             'id' => (string) $post_id,
