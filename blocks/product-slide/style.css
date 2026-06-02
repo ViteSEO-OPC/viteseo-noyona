@@ -385,7 +385,7 @@
   box-sizing: border-box;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: 16px;
-  border: 1px solid #D81B60;
+  border: 1px solid var(--ps-swatch-selected-color);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   transition:
@@ -398,7 +398,7 @@
 .ps-btn-primary:hover {
   background: var(--ps-cta-hover-bg) !important;
   color: var(--ps-cta-hover-color) !important;
-  border: 1px solid #D81B60;
+  border: 1px solid var(--ps-swatch-selected-color);
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
@@ -422,13 +422,13 @@
     transform 0.2s,
     box-shadow 0.2s;
   outline: none;
-  border: 1px solid #D81B60;
+  border: 1px solid var(--ps-swatch-selected-color);
 }
 
 .ps-btn-cart:hover {
   background: var(--ps-cta-hover-bg) !important;
   color: var(--ps-cta-hover-color) !important;
-  border: 1px solid #D81B60;
+  border: 1px solid var(--ps-swatch-selected-color);
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
