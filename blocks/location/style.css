@@ -88,6 +88,10 @@
     height: 100%;
     min-height: 0;
 }
+/* Hide Leaflet attribution */
+.nsl-v2-map .leaflet-control-attribution {
+    display: none;
+}
 
 .nsl-v2-marker-wrap {
     background: transparent;
@@ -963,7 +967,7 @@ body.nsl-v2-review-modal-open {
 .nsl-v2-store-pagination__btn.is-active {
     border-color: var(--noyona-color-pink-muted-rose);
     background: var(--noyona-color-pink-light-blush);
-    color: var(--noyona-color-pink-muted-rose);
+    color: var(--noyona-color-pink-accent);
 }
 
 .nsl-v2-store-pagination__btn[disabled] {

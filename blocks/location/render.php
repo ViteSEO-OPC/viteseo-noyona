@@ -21,6 +21,12 @@ $wrapper_attributes = get_block_wrapper_attributes(array(
 ));
 $default_store_image = trailingslashit(get_stylesheet_directory_uri()) . 'assets/images/logo_contact.webp';
 
+// Map mouse-wheel zoom is opt-in (default false) so the page scrolls normally
+// while the cursor hovers the map. The block attribute is the single source of
+// truth; the frontend script reads the rendered data attribute during Leaflet
+// init. Touch/pinch gestures and the +/- zoom controls are unaffected.
+$nsl_enable_scroll_wheel_zoom = !empty($attributes['enableScrollWheelZoom']);
+
 if (!function_exists('nsl_v2_time_to_minutes')) {
     function nsl_v2_time_to_minutes($time_value)
     {
@@ -601,7 +607,7 @@ if ($store_query->have_posts()) {
 
     <section class="nsl-v2-top">
         <div class="nsl-v2-map-shell">
-            <div class="nsl-v2-map" id="<?php echo esc_attr($map_id); ?>"></div>
+            <div class="nsl-v2-map" id="<?php echo esc_attr($map_id); ?>" data-scroll-wheel-zoom="<?php echo $nsl_enable_scroll_wheel_zoom ? 'true' : 'false'; ?>"></div>
             <aside class="nsl-v2-overlay-panel">
                 <div class="nsl-v2-overlay-top">
                     <div class="nsl-v2-search-wrap">
