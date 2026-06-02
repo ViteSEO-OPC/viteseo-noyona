@@ -71,11 +71,11 @@
     },
     "ctaBackgroundColor": {
       "type": "string",
-      "default": "#E199A4"
+      "default": "#EFB5BE"
     },
     "ctaTextColor": {
       "type": "string",
-      "default": "#D81B60"
+      "default": "#000000"
     },
     "ctaHoverBackgroundColor": {
       "type": "string",

@@ -501,9 +501,9 @@ body.woocommerce-cart .noyona-cart-page-title {
   width: 100%;
   min-height: 58px;
   border-radius: 16px;
-  background: #EFB5BE;
-  border: none;
-  color: #D81B60;
+  background: var(--noyona-color-pink-soft, #EFB5BE);
+  border: 1px solid #D81B60;
+  color: #000000;
   font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
   font-weight: 700;

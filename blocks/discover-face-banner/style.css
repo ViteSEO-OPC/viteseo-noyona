@@ -71,7 +71,7 @@
   font-style: italic;
   font-weight: 400;
   line-height: normal;
-  color: #f7bfd0;
+  color: var(--noyona-color-pink-muted-rose, #E199A4);
 }
 
 .noyona-discover-face-banner__paragraph {
@@ -94,7 +94,7 @@
   padding: 12px 1.5rem;
   border-radius: 16px;
   text-decoration: none;
-  border: 3px solid #D81B60;
+  border: 1px solid #D81B60;
   background: #FFFFFF;
   color: #D81B60;
   font-family: var(--wp--preset--font-family--poppins);
@@ -109,7 +109,7 @@
 .noyona-discover-face-banner__cta:focus-visible {
   background: #EFB5BE;
   color: #D81B60;
-  border: 3px solid #D81B60;
+  border: 1px solid #D81B60;
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }

@@ -79,7 +79,7 @@
     white-space: pre-line;
     font-family: var(--wp--preset--font-family--poppins);
     letter-spacing: var(--noyona-letter-spacing-bugfix);
-    /* color: #ce798a; */
+    color: #fff;
     max-width: 700px;
 }
 
@@ -251,7 +251,7 @@
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
     color: #D81B60;
     background: #EFB5BE;
-    border: 3px solid #D81B60;
+    border: 1px solid #D81B60;
 }
 
 @media (max-width: 980px) {

@@ -8,8 +8,8 @@
     8px 41px 25px 0 rgba(0, 0, 0, 0.03), 4px 18px 19px 0 rgba(0, 0, 0, 0.04),
     1px 5px 10px 0 rgba(0, 0, 0, 0.05);
   --ps-media-bg: #f2a0a7;
-  --ps-cta-bg: #EFB5BE;
-  --ps-cta-color: #D81B60;
+  --ps-cta-bg: var(--noyona-color-pink-soft, #EFB5BE);
+  --ps-cta-color: #000000;
   --ps-cta-hover-bg: #D81B60;
   --ps-cta-hover-color: #FFFFFF;
   --ps-swatch-selected-color: #D91B61;
@@ -45,7 +45,7 @@
 }
 .product-slide__heading_extend,
 .product-slide__heading-accent {
-  color: #D91B61;
+  color: var(--noyona-color-pink-muted-rose, #E199A4);
 }
 
 .product-slide__subheading {
@@ -117,7 +117,7 @@
 }
 
 .ps-card__media {
-  background: var(--noyona-color-pink-muted-rose);
+  background: var(--ps-media-bg);
   border-radius: var(--ps-radius-media);
   position: relative;
   display: flex;
@@ -134,8 +134,8 @@
   position: absolute;
   top: 12px;
   left: 12px;
-  background: #D91B61;
-  border: 1px solid #D91B61;
+  background: var(--ps-card-border-color);
+  border: 1px solid var(--ps-card-border-color);
   color: #fff;
   padding: 5px 12px;
   border-radius: 50px;
@@ -182,7 +182,7 @@
   height: 30px;
   border-radius: 50%;
   border: 2px solid #fff;
-  box-shadow: 0 0 0 1px #d9d9d9;
+  box-shadow: 0 0 0 1px var(--ps-swatch-selected-color);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -249,7 +249,7 @@
 .ps-choice {
   min-height: 30px;
   padding: 5px 10px;
-  border: 1px solid rgba(216, 27, 96, 0.28);
+  border: 1px solid var(--ps-swatch-selected-color);
   border-radius: 999px;
   background: #fff;
   color: #333;
@@ -385,7 +385,7 @@
   box-sizing: border-box;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: 16px;
-  border: none;
+  border: 1px solid #D81B60;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   transition:
@@ -398,7 +398,7 @@
 .ps-btn-primary:hover {
   background: var(--ps-cta-hover-bg) !important;
   color: var(--ps-cta-hover-color) !important;
-  border: none;
+  border: 1px solid #D81B60;
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
@@ -422,13 +422,13 @@
     transform 0.2s,
     box-shadow 0.2s;
   outline: none;
-  border: none;
+  border: 1px solid #D81B60;
 }
 
 .ps-btn-cart:hover {
   background: var(--ps-cta-hover-bg) !important;
   color: var(--ps-cta-hover-color) !important;
-  border: none;
+  border: 1px solid #D81B60;
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }

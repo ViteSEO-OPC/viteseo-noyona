@@ -89,15 +89,26 @@
 }
 
 .faq-list__search-button {
-  border: none;
-  background: var(--noyona-color-pink-muted-rose);
-  color: #fff;
-  border-radius: var(--noyona-radius-cta);
-  padding: 0.45rem 1.2rem;
-  font-size: var(--wp--preset--font-size--body);
+  border: 1px solid #D81B60;
+  background: var(--noyona-color-pink-soft, #EFB5BE);
+  color: #000000;
+  border-radius: 16px;
+  padding: 12px 16px;
+  min-height: 44px;
+  box-sizing: border-box;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 8px 16px rgba(227, 11, 93, 0.25);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.faq-list__search-button:hover,
+.faq-list__search-button:focus-visible {
+  background: #D81B60;
+  color: #FFFFFF;
+  border: 1px solid #D81B60;
 }
 
 /* Safety: ensure JS filtering via [hidden] always hides items inside this block */
@@ -457,15 +468,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 14px;
-  background: var(--noyona-color-pink-muted-rose);
-  color: #fff;
+  padding: 12px 16px;
+  min-height: 44px;
+  box-sizing: border-box;
+  background: var(--noyona-color-pink-soft, #EFB5BE);
+  color: #000000;
   text-decoration: none;
   font-weight: 700;
-  font-size: clamp(16px, 2vw, 24px);
+  font-size: 16px;
   line-height: 1;
-  border: 0;
+  border: 1px solid #D81B60;
+  border-radius: 16px;
   cursor: pointer;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.faq-community__submit:hover,
+.faq-community__submit:focus-visible {
+  background: #D81B60;
+  color: #FFFFFF;
+  border: 1px solid #D81B60;
 }
 
 .faq-community__fineprint {
@@ -501,9 +525,9 @@
   justify-content: center;
   padding: 0.9rem 3.2rem;
   border-radius: var(--noyona-radius-cta);
-  background: #EFB5BE;
-  color: #D81B60;
-  border: none;
+  background: var(--noyona-color-pink-soft, #EFB5BE);
+  color: #000000;
+  border: 1px solid #D81B60;
   text-decoration: none;
   font-weight: 700;
   font-size: 16px;

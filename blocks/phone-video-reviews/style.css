@@ -48,7 +48,7 @@
   }
   
   .phone-reviews__title-accent{
-    color: #D91B61;
+    color: var(--noyona-color-pink-muted-rose, #E199A4);
   }
   
   .phone-reviews__sub{
@@ -81,9 +81,9 @@
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    background: #EFB5BE;
-    color: #D81B60;
-    border: none;
+    background: var(--noyona-color-pink-soft, #EFB5BE);
+    color: #000000;
+    border: 1px solid #D81B60;
     border-radius: 16px;
     padding: 12px 16px;
     font-size: 16px;

@@ -24,7 +24,7 @@
 }
 
 .ni-highlight {
-    color: #EFA6A6;
+    color: var(--noyona-color-pink-muted-rose, #E199A4);
     /* Soft pinkish text color from image */
 }
 

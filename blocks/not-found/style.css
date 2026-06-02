@@ -77,9 +77,9 @@
     justify-content: center;
     padding: 12px 32px;
     border-radius: var(--noyona-radius-cta);
-    background: #EFB5BE;
-    color: #D81B60;
-    border: none;
+    background: var(--noyona-color-pink-soft, #EFB5BE);
+    color: #000000;
+    border: 1px solid #D81B60;
     font-weight: 700;
     font-size: var(--wp--preset--font-size--nav-button);
     text-decoration: none;

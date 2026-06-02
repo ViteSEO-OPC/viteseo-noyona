@@ -80,7 +80,9 @@
 }
 
 .noyona-landing-feature-banner__subheading-accent {
-  color: #ff1f78;
+  /* color: var(--noyona-color-pink-muted-rose, #E199A4); */
+  /* outline: 1px solid #fff; */
+  color: #fff;
 }
 
 .noyona-landing-feature-banner__paragraph {
