@@ -337,6 +337,27 @@ $uid = wp_unique_id('nsl_v2_');
 $map_id = 'nsl-map-' . $uid;
 $json_id = 'nsl-data-' . $uid;
 
+// Store IDs the current logged-in user has already reviewed (approved or
+// pending only; spam/trash excluded so a removed review frees the slot).
+// One query for all of the user's store reviews, mapped by store ID.
+$nsl_user_reviewed_store_ids = array();
+if (is_user_logged_in()) {
+    $nsl_user_review_comments = get_comments(array(
+        'user_id' => get_current_user_id(),
+        'type'    => 'comment',
+        'status'  => 'all',
+        'fields'  => 'all',
+    ));
+    foreach ($nsl_user_review_comments as $nsl_user_review_comment) {
+        $nsl_comment_approved = (string) $nsl_user_review_comment->comment_approved;
+        // '1' = approved, '0' = pending. Skip 'spam' and 'trash'.
+        if ($nsl_comment_approved !== '1' && $nsl_comment_approved !== '0') {
+            continue;
+        }
+        $nsl_user_reviewed_store_ids[(int) $nsl_user_review_comment->comment_post_ID] = true;
+    }
+}
+
 if ($store_query->have_posts()) {
     while ($store_query->have_posts()) {
         $store_query->the_post();
@@ -512,6 +533,7 @@ if ($store_query->have_posts()) {
             'island_group' => $island_group,
             'region' => (string) $region,
             'allow_public_reviews' => (bool) $allow_public_reviews,
+            'user_has_reviewed' => isset($nsl_user_reviewed_store_ids[$post_id]),
             'reviews' => $review_items,
         );
     }
@@ -519,7 +541,7 @@ if ($store_query->have_posts()) {
 }
 ?>
 
-<div <?php echo $wrapper_attributes; ?>>
+<div <?php echo $wrapper_attributes; ?> data-nsl-logged-in="<?php echo is_user_logged_in() ? '1' : '0'; ?>">
     <nav class="nsl-v2-breadcrumbs" aria-label="<?php esc_attr_e('Breadcrumb', 'noyona'); ?>">
         <a class="nsl-v2-breadcrumbs__home" href="<?php echo esc_url(home_url('/')); ?>">
             <?php esc_html_e('Home', 'noyona'); ?>
@@ -590,6 +612,7 @@ if ($store_query->have_posts()) {
 
     <script type="application/json" id="<?php echo esc_attr($json_id); ?>"><?php echo wp_json_encode($stores_data); ?></script>
 
+    <?php if (is_user_logged_in()) : ?>
     <div class="nsl-v2-review-modal" id="nsl-v2-review-modal" hidden>
         <div class="nsl-v2-review-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="nsl-v2-review-modal-title">
             <button type="button" class="nsl-v2-review-modal__close" aria-label="<?php esc_attr_e('Close', 'noyona'); ?>">×</button>
@@ -675,5 +698,6 @@ if ($store_query->have_posts()) {
             });
         })();
     </script>
+    <?php endif; ?>
 </div>
 

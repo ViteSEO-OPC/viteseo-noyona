@@ -16,6 +16,15 @@
     return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(store.lat + "," + store.lng);
   }
 
+  // Login state is published by render.php on the block wrapper. Only logged-in
+  // users may submit reviews; guests see no review CTA (read-only reviews).
+  function nslReviewLoginState() {
+    var wrapper = document.querySelector(".noyona-store-locator-wrapper");
+    return {
+      loggedIn: !!(wrapper && wrapper.getAttribute("data-nsl-logged-in") === "1"),
+    };
+  }
+
   function renderStars(rating) {
     var r = Math.max(1, Math.min(5, parseInt(rating || 0, 10) || 0));
     var out = "";
@@ -408,7 +417,7 @@
       '<div class="nsl-v2-reviews-scroll">' +
       reviewsHtml +
       "</div>" +
-      (store.allow_public_reviews
+      (store.allow_public_reviews && nslReviewLoginState().loggedIn && !store.user_has_reviewed
         ? '<button type="button" class="nsl-v2-open-review-modal" data-store-id="' +
           escHtml(store.id) +
           '">Add Review</button>'
