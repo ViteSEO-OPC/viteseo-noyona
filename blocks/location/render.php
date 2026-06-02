@@ -12,24 +12,9 @@ if (function_exists('wp_enqueue_style') && function_exists('wp_enqueue_script'))
     wp_enqueue_script('leaflet-js');
 }
 
-if (!function_exists('nsl_v2_save_comment_rating')) {
-    /**
-     * Persist optional star rating from frontend store review form.
-     *
-     * @param int $comment_id Comment ID.
-     * @return void
-     */
-    function nsl_v2_save_comment_rating($comment_id)
-    {
-        if (!isset($_POST['nsl_comment_rating'])) {
-            return;
-        }
-        $rating = (int) wp_unslash($_POST['nsl_comment_rating']);
-        $rating = max(1, min(5, $rating));
-        update_comment_meta($comment_id, 'rating', $rating);
-    }
-}
-add_action('comment_post', 'nsl_v2_save_comment_rating');
+// Rating persistence moved to inc/store-locator-reviews.php so the hook is
+// registered on every request (this render template does not run during the
+// /wp-comments-post.php submission).
 
 $wrapper_attributes = get_block_wrapper_attributes(array(
     'class' => 'noyona-store-locator-wrapper',
@@ -468,7 +453,7 @@ if ($store_query->have_posts()) {
                 $manual_name = isset($manual_review['name']) ? sanitize_text_field((string) $manual_review['name']) : '';
                 $manual_text = isset($manual_review['text']) ? sanitize_textarea_field((string) $manual_review['text']) : '';
                 $manual_date = isset($manual_review['date']) ? sanitize_text_field((string) $manual_review['date']) : '';
-                $manual_rating = isset($manual_review['rating']) ? (int) $manual_review['rating'] : 5;
+                $manual_rating = isset($manual_review['rating']) ? (int) $manual_review['rating'] : 3;
                 $manual_rating = max(1, min(5, $manual_rating));
                 if ($manual_name === '' && $manual_text === '') {
                     continue;
@@ -496,13 +481,9 @@ if ($store_query->have_posts()) {
             if ($comment_rating < 1 || $comment_rating > 5) {
                 $comment_rating = 5;
             }
-            $comment_text = wp_strip_all_tags((string) $comment->comment_content);
-            if ($comment_text === '__NSL_EMPTY_REVIEW__') {
-                $comment_text = '';
-            }
             $review_items[] = array(
                 'name' => (string) $comment->comment_author,
-                'text' => $comment_text,
+                'text' => wp_strip_all_tags((string) $comment->comment_content),
                 'date' => get_comment_date('M j, Y', $comment),
                 'rating' => $comment_rating,
                 'source' => 'public',
