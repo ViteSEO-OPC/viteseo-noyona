@@ -1284,6 +1284,14 @@ function noyona_pdp_enqueue_assets() {
 			'i18n'        => array(
 				'selectOptions'         => __( 'Please select all product options before continuing.', 'viteseo-noyona-childtheme' ),
 				'buyNow'                => __( 'Buy now', 'viteseo-noyona-childtheme' ),
+				'addToCart'             => __( 'Add to cart', 'viteseo-noyona-childtheme' ),
+				'inStock'               => __( 'In stock', 'viteseo-noyona-childtheme' ),
+				'inStockLeft'           => __( 'In stock (%d left)', 'viteseo-noyona-childtheme' ),
+				'outOfStock'            => __( 'Out of stock', 'viteseo-noyona-childtheme' ),
+				'outOfStockLeft'        => __( 'Out of stock (%d left)', 'viteseo-noyona-childtheme' ),
+				'outOfStockCartError'   => __( 'This product is out of stock.', 'viteseo-noyona-childtheme' ),
+				'cartError'             => __( 'This product cannot be added to cart right now.', 'viteseo-noyona-childtheme' ),
+				'selectOptionsAvailability' => __( 'Select options to see availability', 'viteseo-noyona-childtheme' ),
 				'selectShade'           => __( 'Select shade', 'viteseo-noyona-childtheme' ),
 				'wishlistAdd'           => __( 'Add to wishlist', 'viteseo-noyona-childtheme' ),
 				'wishlistRemove'        => __( 'Remove from wishlist', 'viteseo-noyona-childtheme' ),
@@ -1296,6 +1304,31 @@ function noyona_pdp_enqueue_assets() {
 			),
 		)
 	);
+}
+
+add_filter( 'woocommerce_available_variation', 'noyona_pdp_add_variation_stock_data', 10, 3 );
+/**
+ * Expose the actual managed stock quantity to the PDP variation UI.
+ *
+ * @param array                $variation_data Variation payload.
+ * @param WC_Product_Variable  $product        Parent product.
+ * @param WC_Product_Variation $variation      Variation product.
+ * @return array
+ */
+function noyona_pdp_add_variation_stock_data( $variation_data, $product, $variation ) {
+	unset( $product );
+
+	if ( ! $variation instanceof WC_Product_Variation ) {
+		return $variation_data;
+	}
+
+	$stock_quantity = $variation->get_stock_quantity();
+
+	$variation_data['noyona_stock_quantity'] = null !== $stock_quantity
+		? max( 0, (int) $stock_quantity )
+		: null;
+
+	return $variation_data;
 }
 
 function noyona_pdp_get_wishlist_button_html( $product ) {
