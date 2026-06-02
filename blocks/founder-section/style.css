@@ -155,9 +155,9 @@
   text-decoration: none;
   font-size: 16px;
   font-weight: 700;
-  background: #EFB5BE;
-  color: #D81B60;
-  border: none;
+  background: var(--noyona-color-pink-soft, #EFB5BE);
+  color: #000000;
+  border: 1px solid #D81B60;
   transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
 }
 
@@ -266,5 +266,5 @@
 }
 
 .noyona-founder-section__title .founder-accent {
-  color: #D91B61;
+  color: var(--noyona-color-pink-muted-rose, #E199A4);
 }

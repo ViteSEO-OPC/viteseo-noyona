@@ -18,7 +18,7 @@ $defaults = array(
 	'subheading' => __( 'Complete your look with these favorites', 'viteseo-noyona-childtheme' ),
 	'viewAllText'=> __( 'View All', 'viteseo-noyona-childtheme' ),
 	'viewAllUrl' => '/shop/',
-	'limit'      => 3,
+	'limit'      => 4,
 );
 
 $atts      = wp_parse_args( is_array( $attributes ) ? $attributes : array(), $defaults );
@@ -35,17 +35,25 @@ if ( ! $product ) {
 }
 
 $related_ids = wc_get_related_products( $product->get_id(), $limit );
-if ( empty( $related_ids ) ) {
-	$related_ids = wc_get_products(
+$related_ids = array_values( array_unique( array_map( 'absint', (array) $related_ids ) ) );
+
+if ( count( $related_ids ) < $limit ) {
+	$exclude_ids  = array_merge( array( $product->get_id() ), $related_ids );
+	$backfill_ids = wc_get_products(
 		array(
 			'status'  => 'publish',
-			'limit'   => $limit,
-			'exclude' => array( $product->get_id() ),
+			'limit'   => $limit - count( $related_ids ),
+			'exclude' => array_values( array_unique( array_map( 'absint', $exclude_ids ) ) ),
 			'return'  => 'ids',
 			'orderby' => 'date',
 			'order'   => 'DESC',
 		)
 	);
+
+	if ( ! empty( $backfill_ids ) ) {
+		$related_ids = array_merge( $related_ids, array_map( 'absint', (array) $backfill_ids ) );
+		$related_ids = array_slice( array_values( array_unique( $related_ids ) ), 0, $limit );
+	}
 }
 
 if ( empty( $related_ids ) ) {

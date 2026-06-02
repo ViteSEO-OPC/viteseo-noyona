@@ -292,9 +292,9 @@
     font-size: 16px;
     font-weight: 700;
     line-height: 1;
-    border: none;
-    background: #EFB5BE;
-    color: #D81B60;
+    border: 1px solid #D81B60;
+    background: var(--noyona-color-pink-soft, #EFB5BE);
+    color: #000000;
     text-decoration: none;
     cursor: pointer;
     white-space: nowrap;

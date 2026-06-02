@@ -51,10 +51,10 @@
   min-height: 46px;
   margin-top: 1.25rem;
   padding: 12px 20px;
-  border: none;
+  border: 1px solid #D81B60;
   border-radius: var(--noyona-radius-cta);
-  background: #EFB5BE;
-  color: #D81B60;
+  background: var(--noyona-color-pink-soft, #EFB5BE);
+  color: #000000;
   font-size: var(--wp--preset--font-size--nav-button);
   font-weight: 700;
   line-height: normal;

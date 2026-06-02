@@ -123,6 +123,13 @@ body,
   padding: 0;
 }
 
+/* Global Safari/iOS text scaling hardening: prevent iOS/iPadOS automatic text
+   inflation ("text autosizing") so font sizes render exactly as authored. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 /* Global: prevent horizontal page scroll (common cause: carousels/dropdowns overflowing) */
 html,
 body {
@@ -273,6 +280,7 @@ body.woocommerce-account .entry-title {
   width: 100%;
   height: auto;
   max-height: 100vh;
+  max-height: 100dvh;
   object-fit: contain;
 }
 
@@ -967,11 +975,13 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
 /* Lost-password page (guest): custom card layout */
 body.woocommerce-account.woocommerce-lost-password {
   min-height: 100vh;
+  min-height: 100dvh;
   background: #fff;
 }
 
 body.woocommerce-account.woocommerce-lost-password .wp-site-blocks {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -1245,7 +1255,8 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   order: -1;
 }
 
-@media (min-width: 1400px) {
+
+@media (min-width: 1024px) {
   .noyona-shop-layout {
     display: grid !important;
     grid-template-columns: minmax(160px, 13%) minmax(0, 1fr);
@@ -1289,9 +1300,11 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
     align-self: start;
     height: fit-content;
     max-height: calc(100vh - var(--noyona-header-total-offset, 72px) - 32px);
+    max-height: calc(100dvh - var(--noyona-header-total-offset, 72px) - 32px);
     overflow-y: auto;
     position: sticky;
     top: calc(var(--noyona-header-total-offset, 72px) + 16px);
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   }
 }
 
@@ -1697,7 +1710,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 
 .noyona-shop-filter-section-price .noyona-shop-filter-price-input {
   min-height: 54px;
-  border-width: 2px;
+  border-width: 1px;
   border-color: #e9a3af;
   padding: 0 16px;
 }
@@ -1873,7 +1886,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   border: 2px solid transparent;
   border-radius: var(--noyona-radius-cta);
   background: #fff;
-  padding: 14px;
+  /* padding: 16px; */
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
   position: relative;
   display: flex;
@@ -1961,19 +1974,19 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   font-weight: 700;
 }
 
-.noyona-shop-products .wc-block-components-product-image {
+.noyona-shop-products :is(a, figure, div).wc-block-components-product-image {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   aspect-ratio: 1 / 1;
   margin-bottom: 16px;
-  border-radius: 8px;
+  border-radius: 22px 22px 0px 0px;
   overflow: hidden;
-  background: #fff;
+  background: var(--noyona-color-pink-muted-rose);
 }
 
-.noyona-shop-products .wc-block-components-product-image a {
+.noyona-shop-products :is(a, figure, div).wc-block-components-product-image > picture {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1982,7 +1995,8 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   overflow: hidden;
 }
 
-.noyona-shop-products .wc-block-components-product-image img {
+.noyona-shop-products :is(a, figure, div).wc-block-components-product-image > img,
+.noyona-shop-products :is(a, figure, div).wc-block-components-product-image > picture > img {
   display: block;
   width: 100%;
   height: 100%;
@@ -1999,6 +2013,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   color: #000000;
   margin: 0 0 4px;
   line-height: normal;
+  padding: 0 16px;
 }
 
 .noyona-shop-products .wc-block-product .wp-block-post-title a,
@@ -2022,6 +2037,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   color: #666;
   line-height: normal;
   margin: 0 0 12px;
+  padding: 0 16px;
 }
 
 .noyona-shop-products .wc-block-product .wp-block-post-excerpt p {
@@ -2035,6 +2051,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   align-items: center;
   gap: 8px 12px;
   margin: 0 0 10px;
+  padding: 0 16px;
 }
 
 .noyona-shop-products .noyona-product-card-meta__category {
@@ -2085,6 +2102,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   align-items: baseline;
   gap: 4px 8px;
   margin: 0;
+  /* padding: 0 16px; */
 }
 
 .noyona-shop-products .noyona-product-card-price__badge {
@@ -2148,6 +2166,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   gap: 10px;
   margin-top: auto;
   padding-top: 8px;
+  padding: 0 16px;
 }
 
 .noyona-product-card-footer .wc-block-components-product-price,
@@ -2165,14 +2184,14 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   justify-content: center;
   padding: 12px 18px;
   border-radius: 16px;
-  background: #EFB5BE;
-  color: #D81B60;
+  background: var(--noyona-color-pink-soft, #EFB5BE);
+  color: #000000;
   font-size: 16px;
   font-weight: 700;
   text-decoration: none;
   text-transform: uppercase;
   white-space: nowrap;
-  border: none;
+  border: 1px solid #D81B60;
   transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
@@ -2180,7 +2199,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 .noyona-product-card-footer .noyona-buy-now-btn:focus-visible {
   background: #D81B60 !important;
   color: #FFFFFF !important;
-  border: none;
+  border: 1px solid #D81B60;
   transform: translateY(-1px);
 }
 
@@ -2208,9 +2227,9 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   padding: 14px 28px;
   font-size: 16px;
   font-weight: 700;
-  color: #D81B60;
-  background: #EFB5BE;
-  border: none;
+  color: #000000;
+  background: var(--noyona-color-pink-soft, #EFB5BE);
+  border: 1px solid #D81B60;
   border-radius: 16px;
   text-decoration: none;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
@@ -2219,7 +2238,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 .noyona-landing-show-more-btn:hover {
   color: #FFFFFF;
   background: #D81B60;
-  border: none;
+  border: 1px solid #D81B60;
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product-template {
@@ -2259,7 +2278,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product > .wc-block-c
   margin: 0;
   border-radius: var(--noyona-radius-cta);
   overflow: hidden;
-  background: var(--ps-media-bg);
+  background: #fff;
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-components-product-image img {
@@ -2436,8 +2455,9 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   height: 42px;
   padding: 0 22px;
   border-radius: var(--noyona-radius-cta);
-  background: #EFB5BE;
-  color: #D81B60;
+  background: var(--noyona-color-pink-soft, #EFB5BE);
+  color: #000000;
+  border: 1px solid #D81B60;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -2455,7 +2475,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 /* List view: hide the thumbnail when the row is too narrow (laptop funnel layout and below). */
-@media (max-width: 1201px) {
+@media (max-width: 1023px) {
   body.noyona-shop-view-list .noyona-shop-products .wc-block-product {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto;
@@ -3248,9 +3268,9 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
  *     </details>
  *   </aside>
  *
- * Desktop (≥1202px): the <summary> button is hidden and the form is
+ * Desktop (≥1024px): the <summary> button is hidden and the form is
  * forced visible, so the filter card always shows.
- * Laptop/tablet/mobile (≤1201px): the <summary> button shows; the form is
+ * Tablet/mobile (≤1023px): the <summary> button shows; the form is
  * shown only when the user opens the <details>.
  * ============================================================= */
 .noyona-product-search-page .noyona-search-filters-panel {
@@ -3306,7 +3326,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 /* Desktop: always-on filter card, summary button hidden, form visible */
-@media (min-width: 1202px) {
+@media (min-width: 1024px) {
   .noyona-product-search-page .noyona-search-filters-panel > summary.noyona-search-filter-toggle {
     display: none;
   }
@@ -3317,8 +3337,8 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   }
 }
 
-/* Laptop and below (≤1201px) — stack layout, show filter toggle, hide card chrome */
-@media (max-width: 1201px) {
+/* Tablet and below (≤1023px) — stack layout, show filter toggle, hide card chrome */
+@media (max-width: 1023px) {
   .noyona-product-search-page .noyona-search-layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 14px;
@@ -3354,7 +3374,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 /* Laptop and below: page chrome tightens; product grid stays 2 cols */
-@media (max-width: 1201px) {
+@media (max-width: 1023px) {
   .noyona-product-search-page .noyona-search-hero {
     margin: 36px 0 28px;
   }
@@ -3724,14 +3744,14 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	min-height: 44px;
 	padding: 0 18px;
 	border-radius: 16px;
-	background: #EFB5BE;
-	color: #D81B60 !important;
+	background: var(--noyona-color-pink-soft, #EFB5BE);
+	color: #000000 !important;
 	text-decoration: none;
 	font-size: 16px;
 	font-weight: 700;
 	line-height: 1;
 	text-transform: uppercase;
-	border: none;
+	border: 1px solid #D81B60;
 	box-shadow: none;
 	transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
@@ -3740,7 +3760,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 .noyona-buy-now-btn:focus-visible {
 	background: #D81B60 !important;
 	color: #FFFFFF !important;
-	border: none;
+	border: 1px solid #D81B60;
 	transform: translateY(-1px);
 }
 
@@ -4263,29 +4283,29 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 .noyona-account-btn--primary {
-	background: #EFB5BE;
-	color: #D81B60 !important;
-	border: none;
+	background: var(--noyona-color-pink-soft, #EFB5BE);
+	color: #000000 !important;
+	border: 1px solid #D81B60;
 }
 
 .noyona-account-btn--primary:hover {
 	background: #D81B60;
 	color: #FFFFFF !important;
-	border: none;
+	border: 1px solid #D81B60;
 	transform: translateY(-1px);
 }
 
 .noyona-account-btn--ghost {
 	background: #FFFFFF;
 	color: #D81B60 !important;
-	border: 3px solid #D81B60;
+	border: 1px solid #D81B60;
 }
 
 .noyona-account-btn--ghost:hover,
 .noyona-account-btn--ghost:focus-visible {
 	background: #EFB5BE;
 	color: #D81B60 !important;
-	border: 3px solid #D81B60;
+	border: 1px solid #D81B60;
 }
 
 .noyona-account-profile-card {
@@ -4543,6 +4563,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	width: min(980px, calc(100vw - 32px));
 	max-width: 100%;
 	max-height: calc(100vh - 56px);
+	max-height: calc(100dvh - 56px);
 	overflow-x: hidden;
 	overflow-y: auto;
 	padding: 24px 26px 26px;

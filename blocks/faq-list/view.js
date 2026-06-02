@@ -18,7 +18,7 @@
         var prefersReducedMotion = window.matchMedia &&
             window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var motionDuration = prefersReducedMotion ? 0 : 320;
-        var mobileMq = window.matchMedia('(max-width: 1360px)');
+        var mobileMq = window.matchMedia('(max-width: 1023px)');
         var panelsByCategory = {};
         var originalOrder = Array.prototype.slice.call(items);
 

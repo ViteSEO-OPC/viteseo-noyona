@@ -601,7 +601,7 @@ if ($store_query->have_posts()) {
     </nav>
 
     <div class="nsl-v2-header">
-        <h2 class="nsl-v2-title">Find a <span class="nsl-v2-title__accent">Store</span></h2>
+        <h1 class="nsl-v2-title">Find a <span class="nsl-v2-title__accent">Store</span></h1>
         <p class="nsl-v2-subtitle">Search by store name or address and explore branches by region.</p>
     </div>
 

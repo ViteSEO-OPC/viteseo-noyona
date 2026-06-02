@@ -28,7 +28,7 @@ body.single-product .noyona-pdp-columns {
   align-items: flex-start !important;
 }
 
-@media (min-width: 782px) {
+@media (min-width: 768px) {
   body.single-product .noyona-pdp-main .noyona-pdp-columns {
     display: grid !important;
     grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
@@ -56,7 +56,7 @@ body.single-product .noyona-pdp-columns {
   }
 }
 
-@media (max-width: 781px) {
+@media (max-width: 767px) {
   body.single-product .noyona-pdp-column--media .wp-block-woocommerce-product-image-gallery {
     width: 100%;
   }
@@ -269,7 +269,7 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 .single-product .woocommerce ins {
   order: 1;
   text-decoration: none;
-  color: var(--noyona-color-pink-muted-rose);
+  color: #000;
 }
 
 /* Short description */
@@ -307,7 +307,7 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   white-space: nowrap;
 }
 
-@media (max-width: 781px) {
+@media (max-width: 767px) {
   body.single-product .noyona-pdp-column--summary .noyona-pdp-social-proof {
     box-sizing: border-box;
     min-height: 42px;
@@ -746,9 +746,9 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   padding: 0.85rem 1.5rem !important;
   font-weight: 700 !important;
   font-size: 16px !important;
-  background: #EFB5BE !important;
+  background: #FFFFFF !important;
   color: #D81B60 !important;
-  border: none !important;
+  border: 1px solid #D81B60 !important;
   box-shadow: 0 4px 14px rgba(216, 27, 96, 0.2);
 }
 
@@ -770,18 +770,18 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   padding: 0.85rem 1.5rem !important;
   font-weight: 700 !important;
   font-size: 16px !important;
-  background: #FFFFFF !important;
-  color: #D81B60 !important;
-  border: 3px solid #D81B60 !important;
+  background: var(--noyona-color-pink-soft, #EFB5BE) !important;
+  color: #000000 !important;
+  border: 1px solid #D81B60 !important;
   box-shadow: none !important;
   margin-top: 0;
 }
 
 .single-product .noyona-pdp-buy-now:hover,
 .single-product .noyona-pdp-buy-now:focus-visible {
-  background: #EFB5BE !important;
-  border: 3px solid #D81B60 !important;
-  color: #D81B60 !important;
+  background: #D81B60 !important;
+  border: 1px solid #D81B60 !important;
+  color: #FFFFFF !important;
 }
 
 .single-product .noyona-pdp-cart-actions--unavailable button {
@@ -861,7 +861,7 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   object-position: center;
   transition: filter 0.2s ease;
 }
-@media (min-width: 782px) {
+@media (min-width: 768px) {
   .single-product .noyona-pdp-gallery-fallback .noyona-pdp-gallery-main-img {
     max-height: min(75vh, 720px);
   }
@@ -1037,6 +1037,7 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 .noyona-pdp-lightbox__img {
   max-width: 100%;
   max-height: calc(100vh - 4rem);
+  max-height: calc(100dvh - 4rem);
   width: auto;
   height: auto;
   display: block;
@@ -1126,7 +1127,7 @@ html.noyona-pdp-lightbox-open body {
    object-position: center;
  }
  
- @media (min-width: 782px) {
+ @media (min-width: 768px) {
    .single-product .noyona-pdp-column--media .woocommerce-product-gallery .woocommerce-product-gallery__image img {
      max-height: min(75vh, 720px);
    }
@@ -1177,7 +1178,7 @@ html.noyona-pdp-lightbox-open body {
   width: 100% !important;
   border-radius: clamp(14px, 2.5vw, 22px);
   overflow: hidden;
-  background: #fdf7f8;
+  background: #fff !important;
 }
 
 /* FlexSlider track: no overflow/isolation — would clip translate3d strip or hide slides */
@@ -1251,7 +1252,7 @@ html.noyona-pdp-lightbox-open body {
   flex-shrink: 0;
 }
 
-@media (min-width: 782px) {
+@media (min-width: 768px) {
   .single-product .noyona-pdp-column--media .flex-control-thumbs {
     padding-top: clamp(0.15rem, 0.5vw, 0.35rem) !important;
     align-content: flex-start;
@@ -1653,7 +1654,7 @@ body.single-product .related.products ul.products li.product .onsale {
   white-space: nowrap;
 }
 
-@media (max-width: 781px) {
+@media (max-width: 767px) {
   .single-product .noyona-pdp-best-seller-badge {
     top: 0.65rem;
     left: 0.65rem;
@@ -1663,8 +1664,8 @@ body.single-product .related.products ul.products li.product .onsale {
 }
 
 /* ====================================================================
- * Mobile/tablet sticky buy bar + slide-up buy sheet (<= 781px only).
- * Desktop (>= 782px) never displays these — the shell stays hidden and
+ * Mobile/tablet sticky buy bar + slide-up buy sheet (<= 767px only).
+ * Desktop (>= 768px) never displays these — the shell stays hidden and
  * the relocated form is restored to its original PDP position by JS.
  * ================================================================== */
 
@@ -1683,7 +1684,7 @@ html.noyona-pdp-buysheet-open body {
   overflow: hidden;
 }
 
-@media (max-width: 781px) {
+@media (max-width: 767px) {
   /* Spacer so the fixed bar never covers the last bit of page content. */
   body.single-product .noyona-pdp-main {
     padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
@@ -1705,7 +1706,7 @@ html.noyona-pdp-buysheet-open body {
     bottom: 0;
     z-index: 9000;
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
-    background: #ffffff;
+    background: #E199A4;
     box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.12);
   }
 
@@ -1737,28 +1738,28 @@ html.noyona-pdp-buysheet-open body {
   .noyona-pdp-buybar__btn--cart {
     background: #ffffff;
     color: #d81b60;
-    border: 3px solid #d81b60;
+    border: 1px solid #d81b60;
   }
 
   .noyona-pdp-buybar__btn--cart:hover,
   .noyona-pdp-buybar__btn--cart:active {
     background: #efb5be;
     color: #d81b60;
-    border: 3px solid #d81b60;
+    border: 1px solid #d81b60;
   }
 
   /* Frame 83 — Buy now (filled) */
   .noyona-pdp-buybar__btn--buy {
-    background: #efb5be;
-    color: #d81b60;
-    border: none;
+    background: var(--noyona-color-pink-soft, #efb5be);
+    color: #000000;
+    border: 1px solid #d81b60;
   }
 
   .noyona-pdp-buybar__btn--buy:hover,
   .noyona-pdp-buybar__btn--buy:active {
     background: #d81b60;
     color: #ffffff;
-    border: none;
+    border: 1px solid #d81b60;
   }
 
   /* ---------- Slide-up buy sheet ---------- */
@@ -1782,6 +1783,7 @@ html.noyona-pdp-buysheet-open body {
     right: 0;
     bottom: 0;
     max-height: 90vh;
+    max-height: 90dvh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     background: #ffffff;
@@ -1931,16 +1933,16 @@ html.noyona-pdp-buysheet-open body {
     flex: 1 1 100%;
     width: 100%;
     min-height: 48px;
-    background: #efb5be !important;
+    background: #ffffff !important;
     color: #d81b60 !important;
-    border: none !important;
+    border: 1px solid #d81b60 !important;
     box-shadow: none !important;
   }
 
   body.single-product .noyona-pdp-buysheet__body form.cart .single_add_to_cart_button:hover,
   body.single-product .noyona-pdp-buysheet__body form.cart .single_add_to_cart_button:active {
-    background: #d81b60 !important;
-    color: #ffffff !important;
+    background: #efb5be !important;
+    color: #d81b60 !important;
   }
 
   /* Inside the sheet the shopper can choose either CTA: keep both the

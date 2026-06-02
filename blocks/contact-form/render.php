@@ -77,7 +77,7 @@ if ($brand_image_id) {
 $theme_uri = get_stylesheet_directory_uri();
 $social_asset_map = array(
     'facebook'  => $theme_uri . '/assets/images/fb_icon.webp',
-    'tiktok'    => $theme_uri . '/assets/images/titktok_icon.webp',
+    'tiktok'    => $theme_uri . '/assets/images/tiktok_icon.webp',
     'instagram' => $theme_uri . '/assets/images/instagram_icon.webp',
     'lazada'    => $theme_uri . '/assets/images/lazada_icon.webp',
     'shopee'    => $theme_uri . '/assets/images/shopee_icon.webp',

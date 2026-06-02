@@ -16,21 +16,20 @@
   gap: clamp(20px, 3vw, 50px);
   color: #fff;
   background:
-    linear-gradient(180deg, rgba(160, 24, 101, 0.72) 0%, rgba(160, 24, 101, 0.72) 100%),
-    var(--discover-face-bg-image, none),
-    linear-gradient(115deg, #9d0f65 0%, #8c185f 45%, #b03c7f 100%);
-  background-size: cover, cover, cover;
-  background-position: center center, center center, center center;
+    /* var(--discover-face-bg-image, none), */
+    linear-gradient(90deg, #901E58 0%, #4C1E3E 100%);
+  background-size: cover;
+  background-position: center center;
   background-repeat: no-repeat;
 }
 
 .noyona-discover-face-banner.has-background-image .noyona-discover-face-banner__inner {
   background-image:
-    linear-gradient(90deg, rgba(28, 16, 26, 0.48) 0%, rgba(28, 16, 26, 0.22) 48%, rgba(28, 16, 26, 0.08) 100%),
-    var(--discover-face-bg-image);
-  background-color: transparent;
-  background-size: 100% 100%, 100% auto;
-  background-position: center center, center center;
+    /* var(--discover-face-bg-image), */
+    linear-gradient(90deg, #901E58 0%, #4C1E3E 100%);
+  background-color: #901E58;
+  background-size: cover;
+  background-position: center center;
   background-repeat: no-repeat;
 }
 
@@ -71,7 +70,7 @@
   font-style: italic;
   font-weight: 400;
   line-height: normal;
-  color: #f7bfd0;
+  color: var(--noyona-color-pink-muted-rose, #E199A4);
 }
 
 .noyona-discover-face-banner__paragraph {
@@ -94,7 +93,7 @@
   padding: 12px 1.5rem;
   border-radius: 16px;
   text-decoration: none;
-  border: 3px solid #D81B60;
+  border: 1px solid #D81B60;
   background: #FFFFFF;
   color: #D81B60;
   font-family: var(--wp--preset--font-family--poppins);
@@ -109,7 +108,7 @@
 .noyona-discover-face-banner__cta:focus-visible {
   background: #EFB5BE;
   color: #D81B60;
-  border: 3px solid #D81B60;
+  border: 1px solid #D81B60;
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }

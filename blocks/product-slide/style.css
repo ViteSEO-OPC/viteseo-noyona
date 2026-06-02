@@ -8,8 +8,8 @@
     8px 41px 25px 0 rgba(0, 0, 0, 0.03), 4px 18px 19px 0 rgba(0, 0, 0, 0.04),
     1px 5px 10px 0 rgba(0, 0, 0, 0.05);
   --ps-media-bg: #f2a0a7;
-  --ps-cta-bg: #EFB5BE;
-  --ps-cta-color: #D81B60;
+  --ps-cta-bg: var(--noyona-color-pink-soft, #EFB5BE);
+  --ps-cta-color: #000000;
   --ps-cta-hover-bg: #D81B60;
   --ps-cta-hover-color: #FFFFFF;
   --ps-swatch-selected-color: #D91B61;
@@ -19,7 +19,14 @@
   --ps-cta-h: clamp(44px, 5vw, 56px);
   --ps-nav-w: clamp(44px, 6vw, 60px);
   --ps-nav-h: clamp(72px, 10vw, 120px);
-  --ps-card-w: clamp(280px, 30vw, 466px);
+  /* Cap lowered 466 -> 400 so the card stops growing past ~1333px instead of
+     staying on the vw slope to ~1553px. This stabilizes card width across
+     laptop/desktop widths (MacBook ~1470 and Windows 1600-1920 now render the
+     same) without changing the <=1440px responsive fill or the mobile floor. */
+  --ps-card-w: clamp(280px, 30vw, 400px);
+  /* NOTE: --ps-card-h and --ps-media-w are currently unused (no var() consumer):
+     card height is `height: 100%` (content-driven) and the media uses
+     `aspect-ratio: 423/318`. Left as-is; flagged for a future cleanup. */
   --ps-card-h: clamp(460px, 56vw, 665px);
   --ps-media-w: clamp(240px, 26vw, 423px);
   padding-block: clamp(2rem, 4vw, 3.5rem);
@@ -45,7 +52,7 @@
 }
 .product-slide__heading_extend,
 .product-slide__heading-accent {
-  color: #D91B61;
+  color: var(--noyona-color-pink-muted-rose, #E199A4);
 }
 
 .product-slide__subheading {
@@ -107,6 +114,12 @@
   flex-direction: column;
   flex: 1;
   width: min(100%, var(--ps-card-w));
+  /* Cap rendered width at --ps-card-w. `flex: 1` sets flex-basis:0% which
+     overrides `width`, so without this max-width the card filled its whole
+     slot (oversized on tablet). max-width lets the card fill smaller slots
+     but never exceed --ps-card-w; the parent's justify-content:center
+     centers it when the slot is wider. (Mirrors phone-video's cap.) */
+  max-width: var(--ps-card-w);
   height: 100%;
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
@@ -134,8 +147,8 @@
   position: absolute;
   top: 12px;
   left: 12px;
-  background: #D91B61;
-  border: 1px solid #D91B61;
+  background: var(--ps-card-border-color);
+  border: 1px solid var(--ps-card-border-color);
   color: #fff;
   padding: 5px 12px;
   border-radius: 50px;
@@ -182,7 +195,7 @@
   height: 30px;
   border-radius: 50%;
   border: 2px solid #fff;
-  box-shadow: 0 0 0 1px #d9d9d9;
+  box-shadow: 0 0 0 1px var(--ps-swatch-selected-color);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -249,7 +262,7 @@
 .ps-choice {
   min-height: 30px;
   padding: 5px 10px;
-  border: 1px solid rgba(216, 27, 96, 0.28);
+  border: 1px solid var(--ps-swatch-selected-color);
   border-radius: 999px;
   background: #fff;
   color: #333;
@@ -385,7 +398,7 @@
   box-sizing: border-box;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: 16px;
-  border: none;
+  border: 1px solid var(--ps-swatch-selected-color);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   transition:
@@ -398,7 +411,7 @@
 .ps-btn-primary:hover {
   background: var(--ps-cta-hover-bg) !important;
   color: var(--ps-cta-hover-color) !important;
-  border: none;
+  border: 1px solid var(--ps-swatch-selected-color);
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
@@ -422,13 +435,13 @@
     transform 0.2s,
     box-shadow 0.2s;
   outline: none;
-  border: none;
+  border: 1px solid var(--ps-swatch-selected-color);
 }
 
 .ps-btn-cart:hover {
   background: var(--ps-cta-hover-bg) !important;
   color: var(--ps-cta-hover-color) !important;
-  border: none;
+  border: 1px solid var(--ps-swatch-selected-color);
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
@@ -471,6 +484,29 @@
 .ps-nav-btn:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+/* Tablet/mobile (<=1023px): hide the prev/next arrows AND the dots, and reclaim
+   the side space the arrows reserved. Navigation is via swipe (see view.js) and
+   a partial next/prev card peek (view.js sizes the slide pitch). Cards fill their
+   peek-slot here (max-width cap relaxed) so they aren't centered with empty space;
+   the --ps-card-w cap still governs desktop (>=1024px), which is unchanged. */
+@media (max-width: 1023px) {
+  .ps-nav-btn {
+    display: none;
+  }
+
+  .product-slide__dots {
+    display: none;
+  }
+
+  .product-slide__carousel--has-nav-space {
+    padding-inline: 0;
+  }
+
+  .ps-card {
+    max-width: none;
+  }
 }
 
 .product-slide__dots {

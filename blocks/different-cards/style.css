@@ -28,7 +28,7 @@
 }
 
 .different-cards__accent {
-  color: var(--noyona-color-pink-accent);
+  color: var(--noyona-color-pink-muted-rose, #E199A4);
 }
 
 .different-cards__subtitle {
