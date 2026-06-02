@@ -340,8 +340,10 @@ $json_id = 'nsl-data-' . $uid;
 // Store IDs the current logged-in user has already reviewed (approved or
 // pending only; spam/trash excluded so a removed review frees the slot).
 // One query for all of the user's store reviews, mapped by store ID.
+// Administrators are exempt from the one-review-per-store rule, so the map
+// stays empty for them and the Add Review button remains visible everywhere.
 $nsl_user_reviewed_store_ids = array();
-if (is_user_logged_in()) {
+if (is_user_logged_in() && !current_user_can('manage_options')) {
     $nsl_user_review_comments = get_comments(array(
         'user_id' => get_current_user_id(),
         'type'    => 'comment',

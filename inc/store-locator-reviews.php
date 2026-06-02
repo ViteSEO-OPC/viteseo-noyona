@@ -53,6 +53,12 @@ function noyona_location_review_require_login( $commentdata ) {
         );
     }
 
+    // Administrators are exempt from the one-review-per-store rule and may
+    // submit multiple reviews to the same store. Login is still required above.
+    if ( current_user_can( 'manage_options' ) ) {
+        return $commentdata;
+    }
+
     // One review per user per store. Approved or pending reviews count;
     // spam/trash are excluded so a removed review frees the slot.
     if ( noyona_location_user_has_store_review( get_current_user_id(), $post_id ) ) {
