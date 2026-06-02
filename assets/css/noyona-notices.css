@@ -1,0 +1,291 @@
+/**
+ * Noyona — global notice / banner styling.
+ *
+ * Targets WooCommerce classic notices, block store-notice banners, and
+ * theme-specific notice markup. Colors vary by type; layout matches the
+ * bordered pill + circular icon pattern.
+ */
+
+:root {
+  --noyona-notice-radius: 12px;
+  --noyona-notice-padding: 14px 16px;
+  --noyona-notice-gap: 12px;
+  --noyona-notice-icon-size: 20px;
+  --noyona-notice-border-width: 1px;
+  --noyona-notice-accent-width: 5px;
+
+  --noyona-notice-error-bg: #fff0f0;
+  --noyona-notice-error-border: #a81d1d;
+  --noyona-notice-error-text: #a81d1d;
+  --noyona-notice-error-icon-bg: #a81d1d;
+  --noyona-notice-error-icon-fg: #fff;
+
+  --noyona-notice-success-bg: #f0faf3;
+  --noyona-notice-success-border: #2e7d32;
+  --noyona-notice-success-text: #2e7d32;
+  --noyona-notice-success-icon-bg: #2e7d32;
+  --noyona-notice-success-icon-fg: #fff;
+
+  --noyona-notice-info-bg: #f4f8fc;
+  --noyona-notice-info-border: #1565c0;
+  --noyona-notice-info-text: #1565c0;
+  --noyona-notice-info-icon-bg: #1565c0;
+  --noyona-notice-info-icon-fg: #fff;
+
+  --noyona-notice-warning-bg: #fff8e8;
+  --noyona-notice-warning-border: #b45309;
+  --noyona-notice-warning-text: #b45309;
+  --noyona-notice-warning-icon-bg: #b45309;
+  --noyona-notice-warning-icon-fg: #fff;
+}
+
+/* ── Shared notice shell ── */
+.woocommerce-notices-wrapper,
+.wp-block-woocommerce-store-notices,
+.woocommerce-NoticeGroup {
+  margin-bottom: 1rem;
+}
+
+.woocommerce-message,
+.woocommerce-error,
+.woocommerce-info,
+.wc-block-components-notice-banner,
+.noyona-notice,
+.noyona-account-wishlist-notice,
+.noyona-account-addresses-notice,
+.noyona-account-modal-notice,
+.noyona-mini-cart-stock-notice {
+  box-sizing: border-box;
+  border-radius: var(--noyona-notice-radius);
+  padding: var(--noyona-notice-padding) !important;
+  margin: 0 0 1rem;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--body);
+  font-weight: 600;
+  line-height: 1.4;
+  list-style: none;
+  box-shadow: none;
+}
+
+/* Classic lists: icon column + message column */
+.woocommerce-message,
+.woocommerce-error,
+.woocommerce-info,
+.noyona-mini-cart-stock-notice {
+  display: grid;
+  grid-template-columns: var(--noyona-notice-icon-size) minmax(0, 1fr);
+  column-gap: var(--noyona-notice-gap);
+  row-gap: 0.35rem;
+  align-items: start;
+}
+
+/* Block banners: flex row, hide default WC SVG + dismiss */
+.wc-block-components-notice-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--noyona-notice-gap);
+}
+
+.wc-block-components-notice-banner > svg,
+.wc-block-components-notice-banner__dismiss {
+  display: none !important;
+}
+
+.wc-block-components-notice-banner__content {
+  padding: 0 !important;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.woocommerce-message a,
+.woocommerce-error a,
+.woocommerce-info a,
+.wc-block-components-notice-banner a {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* ── Type: error ── */
+.woocommerce-error,
+.wc-block-components-notice-banner.is-error,
+.noyona-notice.is-error,
+.noyona-account-wishlist-notice.is-error,
+.noyona-account-addresses-notice.is-error,
+.noyona-account-modal-notice.is-error,
+.noyona-mini-cart-stock-notice {
+  background: var(--noyona-notice-error-bg);
+  border: var(--noyona-notice-border-width) solid var(--noyona-notice-error-border);
+  border-left-width: var(--noyona-notice-accent-width);
+  color: var(--noyona-notice-error-text);
+}
+
+.woocommerce-error::before,
+.wc-block-components-notice-banner.is-error::before,
+.noyona-notice.is-error::before,
+.noyona-account-wishlist-notice.is-error::before,
+.noyona-account-addresses-notice.is-error::before,
+.noyona-account-modal-notice.is-error::before,
+.noyona-mini-cart-stock-notice::before {
+  content: "!" !important;
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  flex: 0 0 var(--noyona-notice-icon-size);
+  width: var(--noyona-notice-icon-size);
+  height: var(--noyona-notice-icon-size);
+  margin: 0.05rem 0 0;
+  border-radius: 999px;
+  background: var(--noyona-notice-error-icon-bg);
+  color: var(--noyona-notice-error-icon-fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ── Type: success ── */
+.woocommerce-message,
+.wc-block-components-notice-banner.is-success,
+.noyona-notice.is-success,
+.noyona-account-wishlist-notice.is-success,
+.noyona-account-addresses-notice.is-success,
+.noyona-account-modal-notice.is-success {
+  background: var(--noyona-notice-success-bg);
+  border: var(--noyona-notice-border-width) solid var(--noyona-notice-success-border);
+  border-left-width: var(--noyona-notice-accent-width);
+  color: var(--noyona-notice-success-text);
+}
+
+.woocommerce-message::before,
+.wc-block-components-notice-banner.is-success::before,
+.noyona-notice.is-success::before,
+.noyona-account-wishlist-notice.is-success::before,
+.noyona-account-addresses-notice.is-success::before,
+.noyona-account-modal-notice.is-success::before {
+  content: "✓" !important;
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  flex: 0 0 var(--noyona-notice-icon-size);
+  width: var(--noyona-notice-icon-size);
+  height: var(--noyona-notice-icon-size);
+  margin: 0.05rem 0 0;
+  border-radius: 999px;
+  background: var(--noyona-notice-success-icon-bg);
+  color: var(--noyona-notice-success-icon-fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ── Type: info ── */
+.woocommerce-info,
+.wc-block-components-notice-banner.is-info,
+.noyona-notice.is-info {
+  background: var(--noyona-notice-info-bg);
+  border: var(--noyona-notice-border-width) solid var(--noyona-notice-info-border);
+  border-left-width: var(--noyona-notice-accent-width);
+  color: var(--noyona-notice-info-text);
+}
+
+.woocommerce-info::before,
+.wc-block-components-notice-banner.is-info::before,
+.noyona-notice.is-info::before {
+  content: "i" !important;
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  flex: 0 0 var(--noyona-notice-icon-size);
+  width: var(--noyona-notice-icon-size);
+  height: var(--noyona-notice-icon-size);
+  margin: 0.05rem 0 0;
+  border-radius: 999px;
+  background: var(--noyona-notice-info-icon-bg);
+  color: var(--noyona-notice-info-icon-fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1;
+}
+
+/* ── Type: warning ── */
+.wc-block-components-notice-banner.is-warning,
+.noyona-notice.is-warning {
+  background: var(--noyona-notice-warning-bg);
+  border: var(--noyona-notice-border-width) solid var(--noyona-notice-warning-border);
+  border-left-width: var(--noyona-notice-accent-width);
+  color: var(--noyona-notice-warning-text);
+}
+
+.wc-block-components-notice-banner.is-warning::before,
+.noyona-notice.is-warning::before {
+  content: "!" !important;
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  flex: 0 0 var(--noyona-notice-icon-size);
+  width: var(--noyona-notice-icon-size);
+  height: var(--noyona-notice-icon-size);
+  margin: 0.05rem 0 0;
+  border-radius: 999px;
+  background: var(--noyona-notice-warning-icon-bg);
+  color: var(--noyona-notice-warning-icon-fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* List items inside classic notices */
+.woocommerce-message li,
+.woocommerce-error li,
+.woocommerce-info li,
+.noyona-mini-cart-stock-notice li {
+  grid-column: 2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.woocommerce-message li:not(:first-child),
+.woocommerce-error li:not(:first-child),
+.woocommerce-info li:not(:first-child),
+.noyona-mini-cart-stock-notice li:not(:first-child) {
+  margin-top: 0.35rem;
+}
+
+/* Theme <p> notices (account areas) */
+.noyona-notice,
+.noyona-account-wishlist-notice,
+.noyona-account-addresses-notice,
+.noyona-account-modal-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--noyona-notice-gap);
+}
+
+.noyona-notice::before,
+.noyona-account-wishlist-notice::before,
+.noyona-account-addresses-notice::before,
+.noyona-account-modal-notice::before {
+  flex-shrink: 0;
+}
+
+/* Mini-cart drawer: spacing only (colors from global tokens) */
+.wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice {
+  margin: 10px 16px 14px;
+}

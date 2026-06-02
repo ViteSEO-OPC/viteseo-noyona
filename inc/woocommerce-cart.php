@@ -28,7 +28,7 @@ function noyona_cart_enqueue_assets() {
 	wp_enqueue_style(
 		'noyona-cart',
 		get_stylesheet_directory_uri() . '/assets/css/noyona-cart.css',
-		array( 'woocom-ct-style', 'woocom-ct-header' ),
+		array( 'woocom-ct-style', 'noyona-notices', 'woocom-ct-header' ),
 		file_exists( $cart_css_path ) ? (string) filemtime( $cart_css_path ) : wp_get_theme()->get( 'Version' )
 	);
 }
