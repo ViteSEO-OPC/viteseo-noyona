@@ -310,7 +310,7 @@ function woocom_ct_register_form_shortcode() {
                 $message = 'Please enter a valid email address.';
                 break;
             case 'email_exists':
-                $message = 'This email is already registered.';
+                $message = 'This email is already registered. Please log in or continue with Google Sign In.';
                 break;
             case 'password_mismatch':
                 $message = 'Passwords do not match.';

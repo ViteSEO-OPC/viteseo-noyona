@@ -203,7 +203,7 @@ function woocom_ct_add_register_link_to_login() {
     $register_url = home_url( '/register/' );
 
     echo '<div class="noyona-login-form-footer">';
-    echo '<a class="noyona-login-google-btn" href="' . esc_url( $google_login_url ) . '"><i class="fa-brands fa-google" aria-hidden="true"></i><span>' . esc_html__( 'Sign In with Google', 'noyona-childtheme' ) . '</span></a>';
+    echo '<a class="noyona-login-google-btn" href="' . esc_url( $google_login_url ) . '"><i class="fa-brands fa-google" aria-hidden="true"></i><span>' . esc_html__( 'Log In with Google', 'noyona-childtheme' ) . '</span></a>';
 
     if ( function_exists( 'noyona_recaptcha_form_enabled' ) && noyona_recaptcha_form_enabled( 'login' ) ) {
         $captcha_markup = function_exists( 'noyona_recaptcha_form_widget_html' )
