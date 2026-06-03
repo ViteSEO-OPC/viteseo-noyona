@@ -17,10 +17,10 @@ $defaults = array(
     'wooColorAttribute' => 'pa_color',
     'mediaBackgroundColor' => '#F2A0A7',
     'cardBorderColor' => '#D91B61',
-    'ctaBackgroundColor' => '#EFB5BE',
-    'ctaTextColor' => '#000000',
-    'ctaHoverBackgroundColor' => '#D81B60',
-    'ctaHoverTextColor' => '#FFFFFF',
+    'ctaBackgroundColor' => '#D91B61',
+    'ctaTextColor' => '#FFFFFF',
+    'ctaHoverBackgroundColor' => '#FBDDE2',
+    'ctaHoverTextColor' => '#D91B61',
     'swatchSelectedColor' => '#D91B61',
     'items' => array(),
 );
@@ -799,10 +799,10 @@ if (!function_exists('noyona_ps_get_variation_combinations')) {
 
 $media_background_color = noyona_ps_normalize_hex_color($atts['mediaBackgroundColor'] ?? '') ?: '#F2A0A7';
 $card_border_color = noyona_ps_normalize_hex_color($atts['cardBorderColor'] ?? '') ?: '#D91B61';
-$cta_background_color = noyona_ps_normalize_hex_color($atts['ctaBackgroundColor'] ?? '') ?: '#EFB5BE';
-$cta_text_color = noyona_ps_normalize_hex_color($atts['ctaTextColor'] ?? '') ?: '#000000';
-$cta_hover_background_color = noyona_ps_normalize_hex_color($atts['ctaHoverBackgroundColor'] ?? '') ?: '#D81B60';
-$cta_hover_text_color = noyona_ps_normalize_hex_color($atts['ctaHoverTextColor'] ?? '') ?: '#FFFFFF';
+$cta_background_color = noyona_ps_normalize_hex_color($atts['ctaBackgroundColor'] ?? '') ?: '#D91B61';
+$cta_text_color = noyona_ps_normalize_hex_color($atts['ctaTextColor'] ?? '') ?: '#FFFFFF';
+$cta_hover_background_color = noyona_ps_normalize_hex_color($atts['ctaHoverBackgroundColor'] ?? '') ?: '#FBDDE2';
+$cta_hover_text_color = noyona_ps_normalize_hex_color($atts['ctaHoverTextColor'] ?? '') ?: '#D91B61';
 $swatch_selected_color = noyona_ps_normalize_hex_color($atts['swatchSelectedColor'] ?? '') ?: '#D91B61';
 
 if ($use_woo_products && class_exists('WooCommerce')) {
@@ -1366,7 +1366,6 @@ $block_style = sprintf(
                                                 <?php if (!empty($variation_combinations_safe)): ?>
                                                     data-variation-combinations="<?php echo esc_attr(wp_json_encode($variation_combinations_safe)); ?>"
                                                 <?php endif; ?>
-                                                style="background-color: <?php echo esc_attr($cart_bg); ?>;"
                                                 aria-label="<?php echo esc_attr('Add ' . ($title ? $title : 'product') . ' to cart'); ?>"
                                                 rel="nofollow">
                                                 <i class="fa-solid fa-cart-shopping"></i>
@@ -1378,7 +1377,6 @@ $block_style = sprintf(
                                                 <?php if (!empty($selected_attributes)): ?>
                                                     data-selected-attributes="<?php echo esc_attr(wp_json_encode($selected_attributes)); ?>"
                                                 <?php endif; ?>
-                                                style="background-color: <?php echo esc_attr($cart_bg); ?>;"
                                                 aria-label="<?php echo esc_attr('Add ' . ($title ? $title : 'product') . ' to cart'); ?>"
                                                 rel="nofollow">
                                                 <i class="fa-solid fa-cart-shopping"></i>

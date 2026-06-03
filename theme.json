@@ -41,7 +41,7 @@
         { "slug": "brand-pink-soft", "name": "Brand Pink Soft / Primary", "color": "#EFB5BE" },
         { "slug": "brand-pink-muted-rose", "name": "Brand Pink Muted Rose / Secondary", "color": "#E199A4" },
         { "slug": "brand-pink-light-blush", "name": "Brand Pink Light Blush / Secondary", "color": "#FBDDE2" },
-        { "slug": "brand-pink-accent", "name": "Brand Pink Accent / Badge", "color": "#D81B60" },
+        { "slug": "brand-pink-accent", "name": "Brand Pink Accent / Badge", "color": "#D91B61" },
         { "slug": "text-main", "name": "Text Main", "color": "#000000" },
         { "slug": "text-muted", "name": "Text Muted", "color": "#525252" },
         { "slug": "white", "name": "White", "color": "#FFFFFF" },

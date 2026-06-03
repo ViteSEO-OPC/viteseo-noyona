@@ -84,13 +84,34 @@ Tags:
   --noyona-color-pink-soft: var(--wp--preset--color--brand-pink-soft, #EFB5BE);
   --noyona-color-pink-muted-rose: var(--wp--preset--color--brand-pink-muted-rose, #E199A4);
   --noyona-color-pink-light-blush: var(--wp--preset--color--brand-pink-light-blush, #FBDDE2);
-  --noyona-color-pink-accent: var(--wp--preset--color--brand-pink-accent, #D81B60);
+  --noyona-color-pink-accent: var(--wp--preset--color--brand-pink-accent, #D91B61);
   --noyona-color-text-main: var(--wp--preset--color--text-main, #000000);
   --noyona-color-text-muted: var(--wp--preset--color--text-muted, #525252);
   --noyona-color-white: var(--wp--preset--color--white, #FFFFFF);
   --noyona-color-input-bg: var(--wp--preset--color--input-bg, #FFFFFF);
   --noyona-color-placeholder: var(--wp--preset--color--placeholder, #525252);
   --noyona-color-border-strong: var(--wp--preset--color--border-strong, #000000);
+
+  /* === Semantic CTA token layer (CTA Migration Batch 1) ===
+     Built on the brand tokens above so hue stays single-sourced.
+     Primary = white-on-accent (filled); Secondary = accent-on-white (outline).
+     Per approved spec the Primary and Secondary hover states are identical (blush bg).
+     NOTE: Primary tokens are defined here but NOT yet consumed — Frame 83 → Primary
+     migration is a later batch. Secondary tokens are consumed in Batch 3. */
+  /* Primary */
+  --noyona-cta-primary-bg: var(--noyona-color-pink-accent);            /* #D91B61 */
+  --noyona-cta-primary-text: var(--noyona-color-white);               /* #FFFFFF */
+  --noyona-cta-primary-border: var(--noyona-color-pink-accent);       /* #D91B61 */
+  --noyona-cta-primary-hover-bg: var(--noyona-color-pink-light-blush);   /* #FBDDE2 */
+  --noyona-cta-primary-hover-text: var(--noyona-color-pink-accent);      /* #D91B61 */
+  --noyona-cta-primary-hover-border: var(--noyona-color-pink-accent);    /* #D91B61 */
+  /* Secondary */
+  --noyona-cta-secondary-bg: var(--noyona-color-white);               /* #FFFFFF */
+  --noyona-cta-secondary-text: var(--noyona-color-pink-accent);       /* #D91B61 */
+  --noyona-cta-secondary-border: var(--noyona-color-pink-accent);     /* #D91B61 */
+  --noyona-cta-secondary-hover-bg: var(--noyona-color-pink-light-blush); /* #FBDDE2 */
+  --noyona-cta-secondary-hover-text: var(--noyona-color-pink-accent);    /* #D91B61 */
+  --noyona-cta-secondary-hover-border: var(--noyona-color-pink-accent);  /* #D91B61 */
 
   /* === Provisional status color shorthands ===
      Not designer-final. Do not consume globally in Phase 1. */
@@ -2307,22 +2328,22 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   justify-content: center;
   padding: 12px 18px;
   border-radius: 16px;
-  background: var(--noyona-color-pink-soft, #EFB5BE);
-  color: #000000;
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
   font-size: 16px;
   font-weight: 700;
   text-decoration: none;
   text-transform: uppercase;
   white-space: nowrap;
-  border: 1px solid #D81B60;
+  border: 1px solid var(--noyona-cta-primary-border);
   transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
 .noyona-product-card-footer .noyona-buy-now-btn:hover,
 .noyona-product-card-footer .noyona-buy-now-btn:focus-visible {
-  background: #D81B60 !important;
-  color: #FFFFFF !important;
-  border: 1px solid #D81B60;
+  background: var(--noyona-cta-primary-hover-bg) !important;
+  color: var(--noyona-cta-primary-hover-text) !important;
+  border: 1px solid var(--noyona-cta-primary-hover-border);
   transform: translateY(-1px);
 }
 
@@ -2350,18 +2371,18 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   padding: 14px 28px;
   font-size: 16px;
   font-weight: 700;
-  color: #000000;
-  background: var(--noyona-color-pink-soft, #EFB5BE);
-  border: 1px solid #D81B60;
+  color: var(--noyona-cta-primary-text);
+  background: var(--noyona-cta-primary-bg);
+  border: 1px solid var(--noyona-cta-primary-border);
   border-radius: 16px;
   text-decoration: none;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .noyona-landing-show-more-btn:hover {
-  color: #FFFFFF;
-  background: #D81B60;
-  border: 1px solid #D81B60;
+  color: var(--noyona-cta-primary-hover-text);
+  background: var(--noyona-cta-primary-hover-bg);
+  border: 1px solid var(--noyona-cta-primary-hover-border);
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product-template {
@@ -3872,23 +3893,23 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	min-height: 44px;
 	padding: 0 18px;
 	border-radius: 16px;
-	background: var(--noyona-color-pink-soft, #EFB5BE);
-	color: #000000 !important;
+	background: var(--noyona-cta-primary-bg);
+	color: var(--noyona-cta-primary-text) !important;
 	text-decoration: none;
 	font-size: 16px;
 	font-weight: 700;
 	line-height: 1;
 	text-transform: uppercase;
-	border: 1px solid #D81B60;
+	border: 1px solid var(--noyona-cta-primary-border);
 	box-shadow: none;
 	transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .noyona-buy-now-btn:hover,
 .noyona-buy-now-btn:focus-visible {
-	background: #D81B60 !important;
-	color: #FFFFFF !important;
-	border: 1px solid #D81B60;
+	background: var(--noyona-cta-primary-hover-bg) !important;
+	color: var(--noyona-cta-primary-hover-text) !important;
+	border: 1px solid var(--noyona-cta-primary-hover-border);
 	transform: translateY(-1px);
 }
 
@@ -4431,29 +4452,29 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 }
 
 .noyona-account-btn--primary {
-	background: var(--noyona-color-pink-soft, #EFB5BE);
-	color: #000000 !important;
-	border: 1px solid #D81B60;
+	background: var(--noyona-cta-primary-bg);
+	color: var(--noyona-cta-primary-text) !important;
+	border: 1px solid var(--noyona-cta-primary-border);
 }
 
 .noyona-account-btn--primary:hover {
-	background: #D81B60;
-	color: #FFFFFF !important;
-	border: 1px solid #D81B60;
+	background: var(--noyona-cta-primary-hover-bg);
+	color: var(--noyona-cta-primary-hover-text) !important;
+	border: 1px solid var(--noyona-cta-primary-hover-border);
 	transform: translateY(-1px);
 }
 
 .noyona-account-btn--ghost {
-	background: #FFFFFF;
-	color: #D81B60 !important;
-	border: 1px solid #D81B60;
+	background: var(--noyona-cta-secondary-bg);
+	color: var(--noyona-cta-secondary-text) !important;
+	border: 1px solid var(--noyona-cta-secondary-border);
 }
 
 .noyona-account-btn--ghost:hover,
 .noyona-account-btn--ghost:focus-visible {
-	background: #EFB5BE;
-	color: #D81B60 !important;
-	border: 1px solid #D81B60;
+	background: var(--noyona-cta-secondary-hover-bg);
+	color: var(--noyona-cta-secondary-hover-text) !important;
+	border: 1px solid var(--noyona-cta-secondary-hover-border);
 }
 
 .noyona-account-profile-card {
