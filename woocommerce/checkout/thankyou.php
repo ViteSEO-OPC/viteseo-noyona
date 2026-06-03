@@ -79,9 +79,32 @@ defined( 'ABSPATH' ) || exit;
 			}
 
 			$shop_url  = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
-			$track_url = ( is_user_logged_in() && (int) $order->get_user_id() === (int) get_current_user_id() )
-				? $order->get_view_order_url()
-				: wc_get_page_permalink( 'myaccount' );
+
+			// Track Order should open the custom order-details modal on the
+			// My Account "Orders" panel rather than Woo's default view-order page.
+			// The orders panel renders one modal per line item, with the id
+			// "noyona-account-order-modal-{order_id}-{item_id}" (see
+			// inc/shortcodes.php), opened via the matching URL hash. Target the
+			// order's first product line item; fall back to the orders/account
+			// page when we can't build the anchor or the visitor isn't the owner.
+			$track_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' );
+			if ( is_user_logged_in() && (int) $order->get_user_id() === (int) get_current_user_id() ) {
+				$orders_url = function_exists( 'wc_get_account_endpoint_url' )
+					? wc_get_account_endpoint_url( 'orders' )
+					: $track_url;
+
+				$first_item_id = 0;
+				foreach ( $order->get_items( 'line_item' ) as $line_item ) {
+					if ( $line_item instanceof WC_Order_Item_Product ) {
+						$first_item_id = (int) $line_item->get_id();
+						break;
+					}
+				}
+
+				$track_url = $first_item_id
+					? $orders_url . '#noyona-account-order-modal-' . (int) $order->get_id() . '-' . $first_item_id
+					: $orders_url;
+			}
 			?>
 
 			<?php if ( $is_awaiting_payment ) : ?>
