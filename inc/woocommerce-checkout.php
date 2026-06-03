@@ -70,8 +70,7 @@ if ( ! function_exists( 'noyona_get_checkout_attempt_id' ) ) {
 			$attempt_id = function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : wp_hash( uniqid( 'noyona_checkout_', true ) );
 			WC()->session->set( 'noyona_checkout_attempt_id', $attempt_id );
 			WC()->session->set( 'noyona_checkout_attempt_cart_hash', $cart_hash );
-			WC()->session->set( 'noyona_checkout_completed_attempt_id', '' );
-			WC()->session->set( 'noyona_checkout_completed_order_id', 0 );
+			WC()->session->set( 'noyona_checkout_attempt_order_id', 0 );
 		}
 
 		return $attempt_id;
@@ -919,11 +918,20 @@ function noyona_validate_paymongo_frontend_token_before_order( $data, $errors ) 
 }
 
 /**
- * Prevent duplicate Place Order submissions for the same checkout attempt.
+ * Guard Place Order submissions for the same checkout attempt.
  *
- * Woo already validates the checkout nonce. This adds a short-lived idempotency
- * lock so double-clicks, browser retries, or connection drops do not create
- * multiple orders from the same cart attempt.
+ * Woo already validates the checkout nonce. This adds two protections:
+ *
+ *   1. A short-lived idempotency lock that absorbs rapid double-clicks before
+ *      WooCommerce sets up its own order-resume guard.
+ *   2. A block that fires ONLY when the order produced by this attempt is
+ *      already PAID.
+ *
+ * Crucially, an *unpaid* order does NOT block a retry. Every PayMongo method
+ * (QR Ph, card, GCash, Maya) creates the order in `pending` BEFORE payment
+ * resolves, so a failed/abandoned payment must remain retryable. WooCommerce
+ * resumes the same pending order via its `order_awaiting_payment` session key,
+ * so retrying never produces a duplicate order.
  *
  * @param array    $data   Posted checkout data.
  * @param WP_Error $errors Checkout validation errors.
@@ -949,20 +957,32 @@ function noyona_lock_checkout_attempt_after_validation( $data, $errors ) {
 		return;
 	}
 
-	$completed_attempt_id = (string) WC()->session->get( 'noyona_checkout_completed_attempt_id', '' );
-	$completed_order_id   = absint( WC()->session->get( 'noyona_checkout_completed_order_id', 0 ) );
-	if ( '' !== $completed_attempt_id && hash_equals( $completed_attempt_id, $attempt_id ) && $completed_order_id > 0 ) {
-		$errors->add(
-			'noyona_checkout_attempt_completed',
-			sprintf(
-				/* translators: %s: order number */
-				__( 'This checkout attempt already created order #%s. Please check your order history before placing another order.', 'noyona' ),
-				esc_html( (string) $completed_order_id )
-			)
-		);
-		return;
+	// Block only if the order created by THIS attempt has already been paid.
+	// Unpaid orders are intentionally allowed through so the customer can retry
+	// payment; WooCommerce resumes the same pending order rather than duplicating.
+	$attempt_order_id = absint( WC()->session->get( 'noyona_checkout_attempt_order_id', 0 ) );
+	if ( $attempt_order_id > 0 && function_exists( 'wc_get_order' ) ) {
+		$attempt_order = wc_get_order( $attempt_order_id );
+		if (
+			$attempt_order instanceof WC_Order
+			&& hash_equals( (string) $attempt_order->get_meta( '_noyona_checkout_attempt_id' ), $attempt_id )
+			&& $attempt_order->is_paid()
+		) {
+			$errors->add(
+				'noyona_checkout_attempt_paid',
+				sprintf(
+					/* translators: %s: order number */
+					__( 'Order #%s has already been paid. Please check your order history before placing another order.', 'noyona' ),
+					esc_html( (string) $attempt_order->get_order_number() )
+				)
+			);
+			return;
+		}
 	}
 
+	// Short, self-healing double-submit lock. Released on
+	// woocommerce_checkout_order_processed (priority 5) regardless of the payment
+	// outcome, so a failed payment-intent creation can never strand the customer.
 	$lock_key = noyona_checkout_attempt_lock_key( $attempt_id );
 	if ( get_transient( $lock_key ) ) {
 		$errors->add(
@@ -978,7 +998,7 @@ function noyona_lock_checkout_attempt_after_validation( $data, $errors ) {
 			'time'    => time(),
 			'user_id' => get_current_user_id(),
 		),
-		5 * MINUTE_IN_SECONDS
+		30
 	);
 
 	WC()->session->set( 'noyona_checkout_attempt_lock_key', $lock_key );
@@ -986,23 +1006,24 @@ function noyona_lock_checkout_attempt_after_validation( $data, $errors ) {
 }
 
 /**
- * Remember the order produced by a checkout attempt.
+ * Record the order produced by a checkout attempt and release the lock.
  *
- * If the browser retries after the order exists, the duplicate request is
- * stopped before creating another order.
+ * Runs at priority 5 — ahead of the PayMongo plugin's payment-intent creation
+ * (also on woocommerce_checkout_order_processed) — so the double-submit lock is
+ * always released even if intent creation later throws.
+ *
+ * Order creation is NOT treated as "completed". Only a *paid* order blocks a
+ * retry (see the paid check above), because every PayMongo method creates the
+ * order before payment resolves. The attempt id is stamped on the order so that
+ * paid status can be tied back to the originating attempt.
  *
  * @param int      $order_id Order ID.
  * @param array    $data     Posted checkout data.
  * @param WC_Order $order    Created order.
  */
-add_action( 'woocommerce_checkout_order_processed', 'noyona_mark_checkout_attempt_processed', 10, 3 );
+add_action( 'woocommerce_checkout_order_processed', 'noyona_mark_checkout_attempt_processed', 5, 3 );
 function noyona_mark_checkout_attempt_processed( $order_id, $data, $order ) {
 	if ( ! function_exists( 'WC' ) || ! WC()->session ) {
-		return;
-	}
-
-	$attempt_id = (string) WC()->session->get( 'noyona_checkout_attempt_id', '' );
-	if ( '' === $attempt_id ) {
 		return;
 	}
 
@@ -1012,8 +1033,17 @@ function noyona_mark_checkout_attempt_processed( $order_id, $data, $order ) {
 		WC()->session->set( 'noyona_checkout_attempt_lock_key', '' );
 	}
 
-	WC()->session->set( 'noyona_checkout_completed_attempt_id', $attempt_id );
-	WC()->session->set( 'noyona_checkout_completed_order_id', absint( $order_id ) );
+	$attempt_id = (string) WC()->session->get( 'noyona_checkout_attempt_id', '' );
+	if ( '' === $attempt_id ) {
+		return;
+	}
+
+	WC()->session->set( 'noyona_checkout_attempt_order_id', absint( $order_id ) );
+
+	if ( $order instanceof WC_Order && '' === (string) $order->get_meta( '_noyona_checkout_attempt_id' ) ) {
+		$order->update_meta_data( '_noyona_checkout_attempt_id', $attempt_id );
+		$order->save();
+	}
 }
 
 /**
