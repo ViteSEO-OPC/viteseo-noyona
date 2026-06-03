@@ -216,9 +216,9 @@
     align-items: center;
     justify-content: center;
     padding: clamp(12px, 1.1vw, 0.85rem) clamp(1rem, 1.8vw, 1.4rem);
-    background: #FFFFFF;
-    color: #D81B60;
-    border: 1px solid #D81B60;
+    background: var(--noyona-cta-primary-bg);
+    color: var(--noyona-cta-primary-text);
+    border: 1px solid var(--noyona-cta-primary-border);
     border-radius: 16px !important;
     font-weight: 700;
     font-size: 16px;
@@ -257,9 +257,9 @@
 .hero-banner__cta:hover {
     transform: translateY(-1px);
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
-    color: #D81B60;
-    background: #EFB5BE;
-    border: 1px solid #D81B60;
+    color: var(--noyona-cta-primary-hover-text);
+    background: var(--noyona-cta-primary-hover-bg);
+    border: 1px solid var(--noyona-cta-primary-hover-border);
 }
 
 @media (max-width: 980px) {

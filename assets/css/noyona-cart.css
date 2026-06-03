@@ -503,9 +503,9 @@ body.woocommerce-cart .noyona-cart-page-title {
   width: 100%;
   min-height: 58px;
   border-radius: 16px;
-  background: #EFB5BE;
-  border: none;
-  color: var(--noyona-color-text-main);
+  background: var(--noyona-cta-primary-bg);
+  border: 1px solid var(--noyona-cta-primary-border);
+  color: var(--noyona-cta-primary-text);
   font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
   font-weight: 700;
@@ -519,8 +519,9 @@ body.woocommerce-cart .noyona-cart-page-title {
 
 .noyona-checkout-btn:hover,
 .noyona-checkout-btn:focus-visible {
-  background: #D81B60;
-  color: #FFFFFF;
+  background: var(--noyona-cta-primary-hover-bg);
+  color: var(--noyona-cta-primary-hover-text);
+  border-color: var(--noyona-cta-primary-hover-border);
   box-shadow: 0 12px 30px rgba(216, 27, 96, 0.6);
   transform: translateY(-1px);
 }
@@ -548,20 +549,21 @@ body.woocommerce-cart .noyona-cart-page-title {
   min-height: 48px;
   padding: 0 2rem;
   border-radius: var(--noyona-radius-cta);
-  background: var(--noyona-cart-pink);
-  color: #333333;
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
   font-weight: 700;
   font-size: var(--wp--preset--font-size--nav-button);
   text-decoration: none;
-  border: none;
+  border: 1px solid var(--noyona-cta-primary-border);
   box-shadow: 0 8px 20px rgba(216, 27, 96, 0.4);
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .noyona-cart-summary-card .return-to-shop .button:hover,
 .noyona-cart-summary-card .return-to-shop .button:focus-visible {
-  background: var(--noyona-cart-pink-dark);
-  color: #ffffff;
+  background: var(--noyona-cta-primary-hover-bg);
+  color: var(--noyona-cta-primary-hover-text);
+  border-color: var(--noyona-cta-primary-hover-border);
 }
 
 /* Notices: global styles in assets/css/noyona-notices.css */

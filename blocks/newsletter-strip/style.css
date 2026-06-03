@@ -71,10 +71,10 @@
 }
 
 .newsletter-strip__button {
-  border: 1px solid var(--newsletter-strip-cta-border-color, #D81B60);
+  border: 1px solid var(--newsletter-strip-cta-border-color, var(--noyona-cta-primary-border));
   border-radius: 16px;
-  color: var(--newsletter-strip-cta-color, #000000);
-  background: var(--newsletter-strip-cta-bg, var(--noyona-color-pink-soft, #EFB5BE));
+  color: var(--newsletter-strip-cta-color, var(--noyona-cta-primary-text));
+  background: var(--newsletter-strip-cta-bg, var(--noyona-cta-primary-bg));
   padding: 12px 20px;
   font-size: 16px;
   font-weight: 700;
@@ -98,8 +98,8 @@
 
 .newsletter-strip__button:hover,
 .newsletter-strip__button:focus-visible {
-  background: var(--newsletter-strip-cta-hover-bg, var(--noyona-color-pink-accent));
-  color: var(--newsletter-strip-cta-hover-color, #ffffff);
+  background: var(--newsletter-strip-cta-hover-bg, var(--noyona-cta-primary-hover-bg));
+  color: var(--newsletter-strip-cta-hover-color, var(--noyona-cta-primary-hover-text));
 }
 
 @media (max-width: 900px) {

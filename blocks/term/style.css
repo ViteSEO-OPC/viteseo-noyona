@@ -91,9 +91,9 @@
 
 .term-overview__card-link:hover .term-overview__card-button,
 .term-overview__card-link:focus-visible .term-overview__card-button {
-    background: #D81B60;
-    color: #FFFFFF;
-    border: 1px solid #D81B60;
+    background: var(--noyona-cta-primary-hover-bg);
+    color: var(--noyona-cta-primary-hover-text);
+    border: 1px solid var(--noyona-cta-primary-hover-border);
     transform: translateY(-1px);
     box-shadow: 0 10px 22px rgba(216, 27, 96, 0.28);
 }
@@ -152,9 +152,9 @@
     min-height: 44px;
     padding: 12px 16px;
     border-radius: 16px;
-    background: var(--noyona-color-pink-soft, #EFB5BE);
-    color: #000000;
-    border: 1px solid #D81B60;
+    background: var(--noyona-cta-primary-bg);
+    color: var(--noyona-cta-primary-text);
+    border: 1px solid var(--noyona-cta-primary-border);
     font-size: 16px;
     text-transform: uppercase;
     letter-spacing: 0.07em;

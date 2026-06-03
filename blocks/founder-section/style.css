@@ -155,16 +155,16 @@
   text-decoration: none;
   font-size: 16px;
   font-weight: 700;
-  background: var(--noyona-color-pink-soft, #EFB5BE);
-  color: #000000;
-  border: 1px solid #D81B60;
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
+  border: 1px solid var(--noyona-cta-primary-border);
   transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
 }
 
 .noyona-founder-section__button:hover,
 .noyona-founder-section__button:focus-visible {
-  background-color: #D81B60;
-  color: #FFFFFF;
+  background-color: var(--noyona-cta-primary-hover-bg);
+  color: var(--noyona-cta-primary-hover-text);
   filter: brightness(1.04);
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
