@@ -37,7 +37,7 @@
 
 .noyona-pdp-related__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: clamp(0.9rem, 1.7vw, 1.25rem);
 }
 
@@ -119,7 +119,7 @@
 }
 
 .noyona-pdp-related__price {
-  margin: 0;
+  margin: auto 0 0;
   font-size: clamp(1.05rem, 1.3vw, 1.45rem);
   font-weight: 700;
   color: #111;
@@ -130,7 +130,7 @@
 }
 
 .noyona-pdp-related__rating {
-  margin-top: auto;
+  margin-top: 0;
   padding-top: 0.45rem;
   display: flex;
   align-items: center;

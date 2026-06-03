@@ -18,8 +18,9 @@ $defaults = array(
     'innerBorderWidth' => '0',
     'innerBorderStyle' => 'all',
     'innerHeight' => '',
-    'ctaTextColor' => '#D81B60',
+    'ctaTextColor' => '#000000',
     'ctaBackgroundColor' => '#EFB5BE',
+    'ctaBorderColor' => '#D81B60',
     'ctaHoverTextColor' => '#ffffff',
     'ctaHoverBackgroundColor' => '#D81B60',
 );
@@ -42,6 +43,7 @@ $border_style   = isset( $atts['innerBorderStyle'] ) ? sanitize_key( (string) $a
 $inner_height   = isset( $atts['innerHeight'] ) ? trim( (string) $atts['innerHeight'] ) : '';
 $cta_text       = sanitize_hex_color( $atts['ctaTextColor'] );
 $cta_bg         = sanitize_hex_color( $atts['ctaBackgroundColor'] );
+$cta_border     = sanitize_hex_color( $atts['ctaBorderColor'] );
 $cta_hover_text = sanitize_hex_color( $atts['ctaHoverTextColor'] );
 $cta_hover_bg   = sanitize_hex_color( $atts['ctaHoverBackgroundColor'] );
 $captcha_markup = '';
@@ -62,10 +64,13 @@ if ( '' !== $inner_height && ! preg_match( '/^(auto|\d+(\.\d+)?(px|rem|em|vh|svh
     $inner_height = '';
 }
 if ( ! $cta_text ) {
-    $cta_text = '#D81B60';
+    $cta_text = '#000000';
 }
 if ( ! $cta_bg ) {
     $cta_bg = '#EFB5BE';
+}
+if ( ! $cta_border ) {
+    $cta_border = '#D81B60';
 }
 if ( ! $cta_hover_text ) {
     $cta_hover_text = '#ffffff';
@@ -81,6 +86,7 @@ $style_vars = array(
     '--newsletter-strip-border-bottom-width: ' . ( 'top-sides' === $border_style ? '0' : $border_width ),
     '--newsletter-strip-cta-color: ' . $cta_text,
     '--newsletter-strip-cta-bg: ' . $cta_bg,
+    '--newsletter-strip-cta-border-color: ' . $cta_border,
     '--newsletter-strip-cta-hover-color: ' . $cta_hover_text,
     '--newsletter-strip-cta-hover-bg: ' . $cta_hover_bg,
 );

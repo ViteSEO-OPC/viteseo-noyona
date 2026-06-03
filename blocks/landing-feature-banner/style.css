@@ -2,6 +2,7 @@
   margin: 0 !important;
   position: relative;
   width: 100%;
+  min-height: 80vh;
   min-height: 80svh;
   overflow: hidden;
   color: #ffffff;
@@ -22,6 +23,7 @@
 .noyona-landing-feature-banner__inner {
   position: relative;
   z-index: 1;
+  min-height: 80vh;
   min-height: 80svh;
   width: min(1400px, calc(100vw - 80px));
   margin: 0 var(--page-gutter-left);
@@ -80,7 +82,9 @@
 }
 
 .noyona-landing-feature-banner__subheading-accent {
-  color: #ff1f78;
+  /* color: var(--noyona-color-pink-muted-rose, #E199A4); */
+  /* outline: 1px solid #fff; */
+  color: #fff;
 }
 
 .noyona-landing-feature-banner__paragraph {
@@ -98,6 +102,7 @@
 
   .noyona-landing-feature-banner,
   .noyona-landing-feature-banner__inner {
+    min-height: min(780px, 100vh);
     min-height: min(780px, 100svh);
   }
 }
@@ -111,6 +116,7 @@
 
   .noyona-landing-feature-banner,
   .noyona-landing-feature-banner__inner {
+    min-height: min(780px, 100vh);
     min-height: min(780px, 100svh);
   }
 
@@ -150,6 +156,7 @@
 
   .noyona-landing-feature-banner,
   .noyona-landing-feature-banner__inner {
+    min-height: min(610px, 100vh);
     min-height: min(610px, 100svh);
   }
 }

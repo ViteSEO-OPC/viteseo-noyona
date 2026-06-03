@@ -15,9 +15,11 @@
   function perView(maxCards) {
     const w = window.innerWidth;
     // Prefer 4 cards on desktop/large laptops, fallback to 3 on standard laptops.
+    // Tablets / iPad portrait (down to ~600px) show 2 cards instead of one
+    // oversized card; phones (<600px) keep a single card.
     if (w >= 1600) return Math.min(4, maxCards);
     if (w >= 1260) return Math.min(3, maxCards);
-    if (w >= 770) return Math.min(2, maxCards);
+    if (w >= 600) return Math.min(2, maxCards);
     return 1;
   }
 
@@ -629,6 +631,9 @@
     let view = perView(maxCards);
     let maxIndex = Math.max(0, cards.length - view);
     let totalPositions = Math.max(1, maxIndex + 1);
+    // Slide pitch as a % of the track. On touch layouts (<=1023px) this is set
+    // smaller than 100/view so a partial next/prev card peeks (swipe affordance).
+    let slidePct = 100 / view;
 
     function buildDots() {
       dotsContainer.innerHTML = "";
@@ -645,14 +650,23 @@
       view = perView(maxCards);
       maxIndex = Math.max(0, cards.length - view);
       totalPositions = Math.max(1, maxIndex + 1);
+      // Touch layouts (<=1023px) with more cards than fit reveal a partial card
+      // peek so it reads as a swipe carousel; desktop keeps full-width slides.
+      const peek =
+        maxIndex > 0 &&
+        window.matchMedia &&
+        window.matchMedia("(max-width: 1023px)").matches
+          ? 0.2
+          : 0;
+      slidePct = 100 / (view + peek);
       root
         .querySelector(".product-slide__carousel")
         ?.classList.toggle("product-slide__carousel--has-nav-space", maxIndex > 0);
       track.style.setProperty("--cards-visible", view);
       track.style.justifyContent = maxIndex > 0 ? "flex-start" : "";
       cards.forEach((card) => {
-        card.style.flexBasis = 100 / view + "%";
-        card.style.maxWidth = 100 / view + "%";
+        card.style.flexBasis = slidePct + "%";
+        card.style.maxWidth = slidePct + "%";
       });
       if (currentIndex > maxIndex) currentIndex = maxIndex;
       if (currentIndex < 0) currentIndex = 0;
@@ -661,7 +675,14 @@
     }
 
     function update() {
-      const offset = -(currentIndex * (100 / view));
+      // Center the active slide group in the viewport. On touch layouts the
+      // slide is narrower than the viewport (peek), so this inset reveals a
+      // partial PREVIOUS card on the left and a partial NEXT card on the right
+      // for middle slides, and cleanly centers the first/last card (the outer
+      // side simply has no neighbor to peek). On desktop peek = 0, so
+      // view * slidePct = 100 and inset = 0 — i.e. this is a no-op there.
+      const inset = (100 - view * slidePct) / 2;
+      const offset = -(currentIndex * slidePct) + inset;
       track.style.transform = `translateX(${offset}%)`;
       prevBtn.disabled = currentIndex === 0;
       nextBtn.disabled = currentIndex >= maxIndex;
@@ -684,6 +705,40 @@
 
     prevBtn.addEventListener("click", () => goTo(currentIndex - 1));
     nextBtn.addEventListener("click", () => goTo(currentIndex + 1));
+
+    // Touch swipe: on tablet/mobile the arrows are hidden (CSS <=1023px), so let
+    // users swipe the track between slides. Threshold-based and passive, so a tap
+    // still fires card/CTA clicks and vertical page scroll is never blocked.
+    let swipeStartX = 0;
+    let swipeStartY = 0;
+    let swipeActive = false;
+    track.addEventListener(
+      "touchstart",
+      function (event) {
+        if (!event.touches || event.touches.length !== 1) return;
+        swipeActive = true;
+        swipeStartX = event.touches[0].clientX;
+        swipeStartY = event.touches[0].clientY;
+      },
+      { passive: true }
+    );
+    track.addEventListener(
+      "touchend",
+      function (event) {
+        if (!swipeActive) return;
+        swipeActive = false;
+        const touch = event.changedTouches && event.changedTouches[0];
+        if (!touch) return;
+        const dx = touch.clientX - swipeStartX;
+        const dy = touch.clientY - swipeStartY;
+        // Only react to a deliberate, mostly-horizontal swipe.
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+          goTo(currentIndex + (dx < 0 ? 1 : -1));
+        }
+      },
+      { passive: true }
+    );
+
     initShadeSwatches(root);
     initChoicePills(root);
 

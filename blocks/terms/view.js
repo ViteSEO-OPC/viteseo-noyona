@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var tocOpenButton = block.querySelector('[data-terms-toc-open]');
         var tocCloseControls = block.querySelectorAll('[data-terms-toc-close]');
         var tocBackdrop = block.querySelector('.terms__toc-backdrop');
-        var tocMobileQuery = window.matchMedia ? window.matchMedia('(max-width: 980px)') : null;
+        var tocMobileQuery = window.matchMedia ? window.matchMedia('(max-width: 1023px)') : null;
 
         var closeTocPanel = function () {
             if (!tocPanel) return;

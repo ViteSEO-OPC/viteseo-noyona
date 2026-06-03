@@ -75,6 +75,7 @@
     top: calc(100% + 0.55rem);
     left: 0;
     width: min(360px, calc(100vw - 24px));
+    max-height: min(460px, calc(100vh - var(--noyona-header-total-offset, 96px) - 24px));
     max-height: min(460px, calc(100dvh - var(--noyona-header-total-offset, 96px) - 24px));
     overflow: auto;
     z-index: 2200;
@@ -272,6 +273,7 @@
         left: 12px;
         right: 12px;
         width: auto;
+        max-height: min(420px, calc(100vh - var(--noyona-header-total-offset, 72px) - 76px));
         max-height: min(420px, calc(100dvh - var(--noyona-header-total-offset, 72px) - 76px));
         z-index: 2100;
     }
@@ -334,6 +336,7 @@
 .search-expand-overlay {
     position: fixed;
     inset: 0;
+    height: 100vh;
     height: 100dvh;
   
     /* Optional: add a soft backdrop to avoid “floating white box” look */
@@ -357,6 +360,7 @@
 
   body.search-expand-open .search-expand-overlay {
     top: var(--noyona-header-total-offset, 96px);
+    height: calc(100vh - var(--noyona-header-total-offset, 96px));
     height: calc(100dvh - var(--noyona-header-total-offset, 96px));
   }
   

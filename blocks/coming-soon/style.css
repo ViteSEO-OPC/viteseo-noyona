@@ -56,7 +56,7 @@
 }
 
 .noyona-coming-soon__title-highlight {
-    color: var(--noyona-color-pink-accent);
+    color: var(--noyona-color-pink-muted-rose, #E199A4);
 }
 
 .noyona-coming-soon__copy {
@@ -97,11 +97,11 @@
 }
 
 .noyona-coming-soon__button {
-    border: none;
+    border: 1px solid #D81B60;
     border-radius: 16px;
     padding: 12px 24px;
-    background: #EFB5BE;
-    color: #D81B60;
+    background: var(--noyona-color-pink-soft, #EFB5BE);
+    color: #000000;
     font-size: var(--wp--preset--font-size--nav-button);
     font-weight: 700;
     cursor: pointer;

@@ -164,8 +164,8 @@
 
 .ph-btn-primary {
     flex: 1;
-    background: #EFB5BE;
-    color: #D81B60;
+    background: var(--noyona-color-pink-soft, #EFB5BE);
+    color: #000000;
     text-decoration: none;
     padding: 12px 16px;
     border-radius: 16px;
@@ -173,14 +173,14 @@
     text-align: center;
     font-size: 16px;
     text-transform: uppercase;
-    border: none;
+    border: 1px solid #D81B60;
     transition: background 0.2s, color 0.2s;
 }
 
 .ph-btn-primary:hover {
     background: #D81B60;
     color: #FFFFFF;
-    border: none;
+    border: 1px solid #D81B60;
 }
 
 .ph-btn-cart {
@@ -188,18 +188,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #EFB5BE;
-    color: #D81B60;
+    background: var(--noyona-color-pink-soft, #EFB5BE);
+    color: #000000;
     border-radius: 16px;
     text-decoration: none;
-    border: none;
+    border: 1px solid #D81B60;
     transition: background 0.2s, color 0.2s;
 }
 
 .ph-btn-cart:hover {
     background: #D81B60;
     color: #FFFFFF;
-    border: none;
+    border: 1px solid #D81B60;
 }
 
 /* Navigation Buttons */

@@ -213,7 +213,10 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
 
 .site-logo-text {
   font-family: var(--wp--preset--font-family--poppins);
-  font-size: clamp(20px, 2.25vw, 44px);
+  /* Cap at 34px (matches the 1401–1600px override) so the wordmark is a
+     stable size across all laptop/desktop widths instead of growing to 44px
+     on wide screens — removes the Apple-vs-Windows size divergence. */
+  font-size: clamp(20px, 2.25vw, 34px);
   font-weight: 700;
   line-height: 1;
   color: var(--noyona-color-pink-muted-rose);
@@ -920,9 +923,9 @@ body:not(.logged-in) .header-account--logged-out {
 }
 
 .wc-block-mini-cart__drawer .wc-block-components-button--primary {
-  background: #EFB5BE !important;
-  border-color: #EFB5BE !important;
-  color: #D81B60 !important;
+  background: var(--noyona-color-pink-soft, #EFB5BE) !important;
+  border: 1px solid #D81B60 !important;
+  color: #000000 !important;
 }
 
 .wc-block-mini-cart__drawer .wc-block-components-button--primary:hover,
@@ -1155,6 +1158,46 @@ body:not(.logged-in) .header-account--logged-out {
   opacity: 0.65;
 }
 
+<<<<<<< HEAD
+=======
+.wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice {
+  margin: 10px 16px 14px;
+  padding: 10px 14px 10px 36px;
+  border-left: 4px solid #c62828;
+  border-radius: 12px;
+  background: #fdecea;
+  color: #c62828;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  list-style: none;
+  position: relative;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice::before {
+  content: "!";
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #c62828;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice li {
+  margin: 0;
+  padding: 0;
+}
+
+>>>>>>> origin/main
 /* Hide the WooCommerce store-notices toast inside the mini-cart drawer
    entirely. Stock issues are surfaced via our own <ul class="noyona-mini-cart-stock-notice">
    so we never want the duplicate native banner to render alongside it. */
@@ -1339,9 +1382,9 @@ body:not(.logged-in) .header-account--logged-out {
   justify-content: center;
   gap: 10px;
   border-radius: var(--noyona-radius-cta) !important;
-  background: #EFB5BE !important;
-  border-color: #EFB5BE !important;
-  color: #D81B60 !important;
+  background: var(--noyona-color-pink-soft, #EFB5BE) !important;
+  border: 1px solid #D81B60 !important;
+  color: #000000 !important;
   margin-inline: auto !important;
 }
 
@@ -1352,9 +1395,9 @@ body:not(.logged-in) .header-account--logged-out {
   padding: 12px 20px !important;
   margin-inline: auto !important;
   border-radius: var(--noyona-radius-cta) !important;
-  background: #EFB5BE !important;
-  border-color: #EFB5BE !important;
-  color: #D81B60 !important;
+  background: var(--noyona-color-pink-soft, #EFB5BE) !important;
+  border: 1px solid #D81B60 !important;
+  color: #000000 !important;
 }
 
 .wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:hover,
@@ -1413,6 +1456,7 @@ body:not(.logged-in) .header-account--logged-out {
   z-index: 1;
   width: min(92vw, 440px);
   max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
   border-radius: var(--noyona-radius-card);
   background: #fff;
@@ -1821,8 +1865,10 @@ body:not(.logged-in) .header-account--logged-out {
     left: auto;
     width: min(360px, calc(100vw - 32px));
     max-width: calc(100vw - 32px);
+    height: 100vh;
     height: 100dvh;
     min-height: 100vh;
+    min-height: 100dvh;
     background: #fff;
     flex-direction: column;
     align-items: flex-start;

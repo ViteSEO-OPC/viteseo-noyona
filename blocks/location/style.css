@@ -46,7 +46,7 @@
     font-family: inherit;
     font-size: inherit;
     font-style: normal;
-    font-weight: 600;
+    font-weight: 400;
     line-height: normal;
     letter-spacing: -0.8px;
 }
@@ -381,8 +381,8 @@
 }
 
 .nsl-v2-detail-tab.is-active {
-    color: #0f7d91;
-    border-bottom-color: #0f7d91;
+    color: var(--noyona-color-pink-muted-rose);
+    border-bottom-color: var(--noyona-color-pink-muted-rose);
 }
 
 .nsl-v2-detail-pane {
@@ -866,6 +866,7 @@ body.nsl-v2-review-modal-open {
     border-color: var(--noyona-color-pink-muted-rose);
     color: var(--noyona-color-pink-muted-rose);
     background: var(--noyona-color-pink-light-blush);
+    font-weight: 600;
 }
 
 .nsl-v2-parent-filter-list .nsl-v2-filter-parent.is-active {
@@ -879,6 +880,7 @@ body.nsl-v2-review-modal-open {
     color: var(--noyona-color-pink-muted-rose);
     background: var(--noyona-color-pink-light-blush);
     transform: translateY(-1px);
+    font-weight: 600;
 }
 
 .nsl-v2-parent-filter-list .nsl-v2-filter-parent:hover {

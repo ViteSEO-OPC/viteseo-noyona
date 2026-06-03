@@ -2815,14 +2815,14 @@
   /* ===================================================================
    * Mobile/tablet sticky buy bar + slide-up buy sheet (Strategy A).
    *
-   * The real `form.cart` is RELOCATED into the sheet on viewports <= 781px
+   * The real `form.cart` is RELOCATED into the sheet on viewports <= 767px
    * and RESTORED to its original DOM position on wider viewports. No form is
    * cloned and no variation/add-to-cart logic is duplicated: every existing
    * binding (swatches, quantity stepper, variation price sync, AJAX add to
    * cart, buy-now) lives on the form node itself and survives the move.
    * ================================================================= */
 
-  var NOYONA_BUYSHEET_MQ = '(max-width: 781px)';
+  var NOYONA_BUYSHEET_MQ = '(max-width: 767px)';
   var noyonaBuySheetLastFocus = null;
   var noyonaBuySheetKeyHandler = null;
 
@@ -3020,7 +3020,7 @@
    *
    * Also installs a mobile-only capture guard on the in-sheet buy-now button so
    * it cannot submit a default shade. Desktop is never affected (the guard
-   * no-ops when the viewport is not <=781px and the bar/sheet are absent).
+   * no-ops when the viewport is not <=767px and the bar/sheet are absent).
    */
   function bindNoyonaVariationInteraction(form) {
     if (!form || !form.classList.contains('variations_form')) {
