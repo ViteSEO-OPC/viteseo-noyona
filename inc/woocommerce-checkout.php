@@ -601,6 +601,71 @@ function noyona_checkout_enqueue_paymongo_preview_assets() {
 	}
 }
 
+/**
+ * Force the PayMongo checkout scripts to defer so they run after deferred jQuery.
+ *
+ * This site loads jQuery with `strategy=defer` (jQuery executes after the
+ * document is parsed). The PayMongo gateway plugin, however, registers its
+ * card/token scripts (paymongo-checkout.js, paymongo-client.js, paymongo-cc.js,
+ * paymongo-installment.js) as BLOCKING head scripts. Blocking scripts execute
+ * the moment the parser reaches them — before deferred jQuery has run — so each
+ * one throws `Uncaught ReferenceError: jQuery is not defined`, `new CCForm()`
+ * never runs, the `checkout_place_order_paymongo` tokenizer is never bound, and
+ * card submits post an empty `cynder_paymongo_method_id` -> "Your payment method
+ * could not be prepared".
+ *
+ * WooCommerce's own `wc-checkout` already defers (which is why its submit/change
+ * handlers bind correctly), so we mirror that: add `jquery` to each handle's
+ * deps (guarantees jQuery's tag prints first) and set `strategy=defer` so WP
+ * emits a real `defer` attribute and the script executes alongside/after jQuery.
+ * We hook at print time (like the Wordfence fix) because the gateway registers
+ * these handles from its own `wp_enqueue_scripts` callback; the mutation is
+ * idempotent. We do not touch any other handle.
+ */
+add_action( 'wp_print_scripts', 'noyona_defer_paymongo_checkout_scripts', 0 );
+add_action( 'wp_print_footer_scripts', 'noyona_defer_paymongo_checkout_scripts', 0 );
+function noyona_defer_paymongo_checkout_scripts() {
+	if ( is_admin() ) {
+		return;
+	}
+
+	if ( ! function_exists( 'noyona_is_checkout_ui_context' ) || ! noyona_is_checkout_ui_context() ) {
+		return;
+	}
+
+	$scripts = wp_scripts();
+	if ( ! $scripts instanceof WP_Scripts ) {
+		return;
+	}
+
+	$handles = array(
+		'woocommerce_paymongo_checkout',
+		'woocommerce_paymongo_client',
+		'woocommerce_paymongo_cc',
+		'woocommerce_paymongo_card_installment',
+	);
+
+	foreach ( $handles as $handle ) {
+		if ( ! isset( $scripts->registered[ $handle ] ) ) {
+			continue;
+		}
+
+		$script = $scripts->registered[ $handle ];
+
+		if ( ! is_array( $script->deps ) ) {
+			$script->deps = array();
+		}
+		if ( ! in_array( 'jquery', $script->deps, true ) ) {
+			$script->deps[] = 'jquery';
+		}
+
+		if ( ! is_array( $script->extra ) ) {
+			$script->extra = array();
+		}
+		$script->extra['strategy'] = 'defer';
+	}
+}
+
 // Safety net for environments/plugins that alter checkout detection or dequeue styles later.
 add_action( 'wp_enqueue_scripts', 'noyona_checkout_force_styles_late', 999 );
 function noyona_checkout_force_styles_late() {
