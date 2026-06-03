@@ -586,13 +586,7 @@
     max-width: 420px;
 }
 
-.contact-form__form--cf7 .wpcf7-response-output {
-    margin: 0 !important;
-    padding: 0.7rem 0.9rem !important;
-    border-radius: 10px;
-    font-size: 14px;
-    color: #E199A4;
-}
+/* Form-level CF7 responses: assets/css/noyona-notices.css */
 
 .contact-form__form--cf7 .wpcf7-spinner {
     display: none;

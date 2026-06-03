@@ -2348,6 +2348,35 @@
     });
   }
 
+  function showShopWishlistNotice(message) {
+    const text = String(message || '').trim();
+    if (!text) return;
+
+    const root =
+      document.querySelector('.noyona-product-gatherer') ||
+      document.querySelector('main') ||
+      document.body;
+
+    if (typeof window.noyonaShowNotice === 'function') {
+      window.noyonaShowNotice(text, {
+        root,
+        key: 'shop-wishlist',
+        type: 'error',
+      });
+      return;
+    }
+
+    const existing = root.querySelector('[data-noyona-notice-key="shop-wishlist"]');
+    if (existing) existing.remove();
+
+    const notice = document.createElement('p');
+    notice.className = 'noyona-notice is-error';
+    notice.setAttribute('data-noyona-notice-key', 'shop-wishlist');
+    notice.setAttribute('role', 'alert');
+    notice.textContent = text;
+    root.insertBefore(notice, root.firstChild);
+  }
+
   function openShopWishlistLoginModal() {
     const cfg = getShopWishlistConfig();
     const modal = document.querySelector('[data-mini-cart-login-modal-global]');
@@ -2405,7 +2434,9 @@
             openShopWishlistLoginModal();
             return null;
           }
-          window.alert(getShopWishlistText('wishlistError', 'Wishlist could not be updated. Please try again.'));
+          showShopWishlistNotice(
+            getShopWishlistText('wishlistError', 'Wishlist could not be updated. Please try again.')
+          );
           return null;
         }
 
@@ -2426,7 +2457,9 @@
         return saved;
       })
       .catch(() => {
-        window.alert(getShopWishlistText('wishlistError', 'Wishlist could not be updated. Please try again.'));
+        showShopWishlistNotice(
+          getShopWishlistText('wishlistError', 'Wishlist could not be updated. Please try again.')
+        );
         return null;
       })
       .finally(() => {

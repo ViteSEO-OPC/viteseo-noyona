@@ -43,11 +43,25 @@ function woocom_ct_enqueue_assets() {
 
     // Global WooCommerce / theme notice banners (classic + block + account).
     $notices_css_path = get_stylesheet_directory() . '/assets/css/noyona-notices.css';
+    $notices_deps     = array( 'woocom-ct-style' );
+    // Block themes use wc-block-components-notice-banner (4px radius in wc-blocks-style).
+    if ( wp_style_is( 'wc-blocks-style', 'registered' ) ) {
+        $notices_deps[] = 'wc-blocks-style';
+    }
     wp_enqueue_style(
         'noyona-notices',
         get_stylesheet_directory_uri() . '/assets/css/noyona-notices.css',
-        array( 'woocom-ct-style' ),
+        $notices_deps,
         file_exists( $notices_css_path ) ? (string) filemtime( $notices_css_path ) : wp_get_theme()->get( 'Version' )
+    );
+
+    $notices_js_path = get_stylesheet_directory() . '/assets/js/noyona-notices.js';
+    wp_enqueue_script(
+        'noyona-notices',
+        get_stylesheet_directory_uri() . '/assets/js/noyona-notices.js',
+        array(),
+        file_exists( $notices_js_path ) ? (string) filemtime( $notices_js_path ) : wp_get_theme()->get( 'Version' ),
+        true
     );
 
     // Header CSS (assets/css/header.css) — filemtime-versioned so edits bust browser cache.
@@ -55,7 +69,7 @@ function woocom_ct_enqueue_assets() {
     wp_enqueue_style(
         'woocom-ct-header',
         get_stylesheet_directory_uri() . '/assets/css/header.css',
-        array( 'woocom-ct-style' ),
+        array( 'woocom-ct-style', 'noyona-notices' ),
         file_exists( $header_css_path ) ? (string) filemtime( $header_css_path ) : wp_get_theme()->get( 'Version' )
     );
 
@@ -104,7 +118,7 @@ function woocom_ct_enqueue_assets() {
     wp_enqueue_script(
         'woocom-ct-header',
         get_stylesheet_directory_uri() . '/assets/js/header.js',
-        array(),
+        array( 'noyona-notices' ),
         file_exists( $header_js_path ) ? (string) filemtime( $header_js_path ) : wp_get_theme()->get( 'Version' ),
         true
     );

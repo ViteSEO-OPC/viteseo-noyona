@@ -348,26 +348,9 @@ body.woocommerce-account .entry-title {
   line-height: normal;
 }
 
-.noyona-register-message {
-  margin: 0 0 0.8rem 0;
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: var(--wp--preset--font-size--helper);
-  text-align: left;
-  background: #f0f4ff;
-  color: #2d3b5f;
-}
-
-.noyona-register-message.is-error {
-  background: #fff1f0;
-  color: #a32a2a;
-  border: 1px solid #f4c7c3;
-}
-
-.noyona-register-message.is-success {
-  background: #eef9f1;
-  color: #245e3c;
-  border: 1px solid #ccead7;
+/* Register notices: global styles in assets/css/noyona-notices.css */
+.noyona-register-card > .noyona-notice {
+  margin: 0 0 0.8rem;
 }
 
 .noyona-register-form {
@@ -5030,7 +5013,8 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	font-weight: 600;
 }
 
-.noyona-account-wishlist-notice {
+.noyona-account-wishlist-card > .noyona-notice,
+.noyona-account-profile-card > .noyona-notice {
 	margin: 14px 0 0;
 }
 
@@ -5314,9 +5298,6 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	margin-top: 6px;
 }
 
-.noyona-account-addresses-notice {
-	margin: 14px 0 0;
-}
 
 .noyona-account-address-form {
 	margin-top: 14px;
@@ -5845,7 +5826,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	color: #000000;
 }
 
-.noyona-account-modal-notice {
+.noyona-account-modal-dialog > .noyona-notice {
 	margin: 0 0 12px;
 }
 

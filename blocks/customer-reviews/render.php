@@ -422,7 +422,7 @@ if ( $is_product_page && isset( $_GET['review_submitted'] ) ) { // phpcs:ignore 
 
 <section <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
     <?php if ( '' !== $review_notice ) : ?>
-        <p class="customer-reviews-grid__notice" role="status"><?php echo esc_html( $review_notice ); ?></p>
+        <p class="noyona-notice is-success" role="status" data-noyona-notice-key="customer-reviews" data-noyona-notice-autohide="6000"><?php echo esc_html( $review_notice ); ?></p>
     <?php endif; ?>
     <?php if ( ( $has_reviews && '' !== $heading ) || ( $show_write_cta && '' !== $write_review_text ) ) : ?>
         <div class="customer-reviews-grid__header">

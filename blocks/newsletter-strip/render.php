@@ -102,6 +102,14 @@ if ( '' === trim( $form_action ) || '#' === trim( $form_action ) ) {
 if ( function_exists( 'noyona_recaptcha_form_widget_html' ) ) {
     $captcha_markup = noyona_recaptcha_form_widget_html( 'newsletter', 'newsletter-strip__captcha' );
 }
+
+$newsletter_notice = function_exists( 'noyona_newsletter_notice_from_query' )
+    ? noyona_newsletter_notice_from_query()
+    : null;
+
+$newsletter_redirect_back = function_exists( 'noyona_newsletter_redirect_back_url' )
+    ? noyona_newsletter_redirect_back_url()
+    : home_url( '/' );
 ?>
 
 <section class="wp-block-noyona-newsletter-strip newsletter-strip alignfull" style="<?php echo esc_attr( implode( '; ', $style_vars ) ); ?>">
@@ -126,18 +134,39 @@ if ( function_exists( 'noyona_recaptcha_form_widget_html' ) ) {
             <p class="newsletter-strip__subtitle"><?php echo esc_html( $subtitle ); ?></p>
         <?php endif; ?>
 
+        <?php if ( is_array( $newsletter_notice ) && '' !== trim( (string) $newsletter_notice['message'] ) ) : ?>
+            <?php
+            $nl_notice_type = in_array( $newsletter_notice['type'], array( 'success', 'info', 'warning' ), true )
+                ? (string) $newsletter_notice['type']
+                : 'error';
+            $nl_notice_role = 'error' === $nl_notice_type ? 'alert' : 'status';
+            ?>
+            <p
+                class="noyona-notice is-<?php echo esc_attr( $nl_notice_type ); ?>"
+                role="<?php echo esc_attr( $nl_notice_role ); ?>"
+                data-noyona-notice-key="newsletter-strip"
+                <?php if ( ! empty( $newsletter_notice['autohide'] ) ) : ?>
+                    data-noyona-notice-autohide="<?php echo esc_attr( (string) (int) $newsletter_notice['autohide'] ); ?>"
+                <?php endif; ?>
+            ><?php echo esc_html( (string) $newsletter_notice['message'] ); ?></p>
+        <?php endif; ?>
+
         <?php if ( '' !== trim( $button_text ) ) : ?>
             <?php if ( $show_email ) : ?>
-                <form class="newsletter-strip__form" method="post" action="<?php echo esc_url( $form_action ); ?>">
+                <form class="newsletter-strip__form" method="post" action="<?php echo esc_url( $form_action ); ?>" novalidate>
                     <input type="hidden" name="action" value="noyona_newsletter_subscribe" />
+                    <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url( $newsletter_redirect_back ); ?>" />
                     <?php wp_nonce_field( 'noyona_newsletter_subscribe', 'noyona_newsletter_nonce' ); ?>
                     <input
                         type="email"
                         class="newsletter-strip__input"
                         name="newsletter_email"
                         placeholder="<?php echo esc_attr( $placeholder ); ?>"
-                        required
+                        autocomplete="email"
+                        inputmode="email"
+                        aria-describedby="newsletter-strip-email-hint"
                     />
+                    <span id="newsletter-strip-email-hint" class="screen-reader-text"><?php esc_html_e( 'Enter your email address to subscribe.', 'noyona-childtheme' ); ?></span>
                     <?php if ( '' !== $captcha_markup ) : ?>
                         <?php echo $captcha_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     <?php endif; ?>

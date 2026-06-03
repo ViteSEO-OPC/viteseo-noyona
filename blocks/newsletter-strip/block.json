@@ -1,7 +1,7 @@
 {
   "apiVersion": 3,
   "name": "noyona/newsletter-strip",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "title": "Newsletter Strip",
   "category": "design",
   "icon": "email-alt",
@@ -89,6 +89,7 @@
     }
   },
   "style": "file:./style.css",
+  "viewScript": "file:./view.js",
   "render": "file:./render.php",
   "textdomain": "noyona-childtheme"
 }

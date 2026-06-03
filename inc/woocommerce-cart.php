@@ -45,6 +45,35 @@ function noyona_remove_cart_cross_sells() {
 }
 
 /**
+ * When checkout/preview guards redirect an empty cart back here, keep the
+ * guard's specific notice and suppress WooCommerce's generic empty-cart copy.
+ */
+add_action( 'wp', 'noyona_suppress_duplicate_guard_empty_cart_notice' );
+function noyona_suppress_duplicate_guard_empty_cart_notice() {
+	if ( ! function_exists( 'is_cart' ) || ! is_cart() ) {
+		return;
+	}
+
+	if ( ! function_exists( 'wc_get_notices' ) || ! function_exists( 'wc_empty_cart_message' ) ) {
+		return;
+	}
+
+	$notices      = wc_get_notices( 'notice' );
+	$guard_notice = __( 'Your cart is empty. Add items before continuing to checkout.', 'noyona' );
+
+	foreach ( (array) $notices as $notice ) {
+		$message = is_array( $notice ) && isset( $notice['notice'] )
+			? wp_strip_all_tags( (string) $notice['notice'] )
+			: wp_strip_all_tags( (string) $notice );
+
+		if ( $message === $guard_notice ) {
+			remove_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
+			return;
+		}
+	}
+}
+
+/**
  * Change the "Proceed to checkout" button text.
  */
 add_filter( 'woocommerce_order_button_text', 'noyona_checkout_button_text' );
