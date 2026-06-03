@@ -1155,43 +1155,6 @@ body:not(.logged-in) .header-account--logged-out {
   opacity: 0.65;
 }
 
-.wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice {
-  margin: 10px 16px 14px;
-  padding: 10px 14px 10px 36px;
-  border-left: 4px solid #c62828;
-  border-radius: 12px;
-  background: #fdecea;
-  color: #c62828;
-  font-family: var(--wp--preset--font-family--proxima-nova), system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  list-style: none;
-  position: relative;
-}
-
-.wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice::before {
-  content: "!";
-  position: absolute;
-  top: 50%;
-  left: 14px;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: #c62828;
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  line-height: 1;
-}
-
-.wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice li {
-  margin: 0;
-  padding: 0;
-}
-
 /* Hide the WooCommerce store-notices toast inside the mini-cart drawer
    entirely. Stock issues are surfaced via our own <ul class="noyona-mini-cart-stock-notice">
    so we never want the duplicate native banner to render alongside it. */

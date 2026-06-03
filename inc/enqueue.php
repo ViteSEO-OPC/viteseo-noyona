@@ -41,6 +41,15 @@ function woocom_ct_enqueue_assets() {
         wp_get_theme()->get( 'Version' )
     );
 
+    // Global WooCommerce / theme notice banners (classic + block + account).
+    $notices_css_path = get_stylesheet_directory() . '/assets/css/noyona-notices.css';
+    wp_enqueue_style(
+        'noyona-notices',
+        get_stylesheet_directory_uri() . '/assets/css/noyona-notices.css',
+        array( 'woocom-ct-style' ),
+        file_exists( $notices_css_path ) ? (string) filemtime( $notices_css_path ) : wp_get_theme()->get( 'Version' )
+    );
+
     // Header CSS (assets/css/header.css) — filemtime-versioned so edits bust browser cache.
     $header_css_path = get_stylesheet_directory() . '/assets/css/header.css';
     wp_enqueue_style(

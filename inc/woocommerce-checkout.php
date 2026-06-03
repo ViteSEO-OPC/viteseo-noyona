@@ -269,6 +269,48 @@ function noyona_is_checkout_ui_context() {
 }
 
 /**
+ * Detect the custom preview step specifically.
+ *
+ * PayMongo's plugin scripts only treat Woo's native checkout/order-pay URLs as
+ * checkout contexts. The custom /preview/ step still submits Woo checkout, so
+ * it needs a small bridge for gateway frontend assets.
+ *
+ * @return bool
+ */
+function noyona_is_checkout_preview_step() {
+	if ( is_page( 'preview' ) ) {
+		return true;
+	}
+
+	$request_path = (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH );
+	$request_lc   = trim( strtolower( untrailingslashit( $request_path ) ), '/' );
+	$preview_path = (string) wp_parse_url( home_url( '/preview/' ), PHP_URL_PATH );
+	$preview_lc   = trim( strtolower( untrailingslashit( $preview_path ) ), '/' );
+
+	return ( '' !== $preview_lc && ( $request_lc === $preview_lc || 0 === strpos( $request_lc, $preview_lc . '/' ) ) );
+}
+
+/**
+ * PayMongo methods whose frontend JS must create cynder_paymongo_method_id
+ * before Woo creates an order.
+ *
+ * @param string $payment_method Payment method ID.
+ * @return bool
+ */
+function noyona_paymongo_method_requires_frontend_token( $payment_method ) {
+	$payment_method = sanitize_key( (string) $payment_method );
+
+	return in_array(
+		$payment_method,
+		array(
+			defined( 'PAYMONGO_CARD' ) ? PAYMONGO_CARD : 'paymongo',
+			defined( 'PAYMONGO_CARD_INSTALLMENT' ) ? PAYMONGO_CARD_INSTALLMENT : 'paymongo_card_installment',
+		),
+		true
+	);
+}
+
+/**
  * Force WooCommerce to use child-theme checkout template overrides.
  *
  * Some environments/plugins can short-circuit template resolution and fall back
@@ -433,6 +475,103 @@ function noyona_checkout_enqueue_runtime_scripts() {
 		if ( wp_script_is( $handle, 'registered' ) ) {
 			wp_enqueue_script( $handle );
 		}
+	}
+}
+
+/**
+ * Bridge PayMongo checkout scripts onto the custom /preview/ step.
+ *
+ * The gateway plugin localizes `cynder_paymongo_cc_params` only when its own
+ * `is_checkout()` check passes. /preview/ is outside that native check, but it
+ * still submits the same Woo checkout form, so card/card-installment token
+ * creation must be available here too.
+ */
+add_action( 'wp_enqueue_scripts', 'noyona_checkout_enqueue_paymongo_preview_assets', 35 );
+function noyona_checkout_enqueue_paymongo_preview_assets() {
+	if ( ! function_exists( 'noyona_is_checkout_preview_step' ) || ! noyona_is_checkout_preview_step() ) {
+		return;
+	}
+
+	if ( ! defined( 'CYNDER_PAYMONGO_MAIN_FILE' ) ) {
+		return;
+	}
+
+	$test_mode  = 'yes' === (string) get_option( 'woocommerce_cynder_paymongo_test_mode', 'no' );
+	$public_key = (string) get_option( $test_mode ? 'woocommerce_cynder_paymongo_test_public_key' : 'woocommerce_cynder_paymongo_public_key', '' );
+	$secret_key = (string) get_option( $test_mode ? 'woocommerce_cynder_paymongo_test_secret_key' : 'woocommerce_cynder_paymongo_secret_key', '' );
+
+	if ( ! $test_mode && ( '' === $public_key || '' === $secret_key ) ) {
+		return;
+	}
+
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		return;
+	}
+
+	$plugin_version = defined( 'CYNDER_PAYMONGO_VERSION' ) ? CYNDER_PAYMONGO_VERSION : null;
+	$plugin_url     = static function( $asset ) {
+		return plugins_url( ltrim( (string) $asset, '/' ), CYNDER_PAYMONGO_MAIN_FILE );
+	};
+
+	if ( ! wp_style_is( 'paymongo', 'registered' ) ) {
+		wp_register_style( 'paymongo', $plugin_url( 'assets/css/paymongo-styles.css' ), array(), $plugin_version );
+	}
+
+	if ( ! wp_script_is( 'cleave', 'registered' ) ) {
+		wp_register_script( 'cleave', $plugin_url( 'assets/js/cleave.min.js' ), array(), $plugin_version, true );
+	}
+
+	if ( ! wp_script_is( 'woocommerce_paymongo_checkout', 'registered' ) ) {
+		wp_register_script( 'woocommerce_paymongo_checkout', $plugin_url( 'assets/js/paymongo-checkout.js' ), array( 'jquery' ), $plugin_version, true );
+	}
+
+	if ( ! wp_script_is( 'woocommerce_paymongo_client', 'registered' ) ) {
+		wp_register_script( 'woocommerce_paymongo_client', $plugin_url( 'assets/js/paymongo-client.js' ), array( 'jquery' ), $plugin_version, true );
+	}
+
+	if ( ! wp_script_is( 'woocommerce_paymongo_cc', 'registered' ) ) {
+		wp_register_script( 'woocommerce_paymongo_cc', $plugin_url( 'assets/js/paymongo-cc.js' ), array( 'jquery', 'cleave' ), $plugin_version, true );
+	}
+
+	if ( ! wp_script_is( 'woocommerce_paymongo_card_installment', 'registered' ) ) {
+		wp_register_script( 'woocommerce_paymongo_card_installment', $plugin_url( 'assets/js/paymongo-installment.js' ), array( 'jquery', 'cleave' ), $plugin_version, true );
+	}
+
+	$paymongo_client = array(
+		'home_url'   => get_home_url(),
+		'public_key' => $public_key,
+	);
+
+	$customer = WC()->customer;
+	$paymongo_cc = array(
+		'isCheckout'   => true,
+		'isOrderPay'   => false,
+		'total_amount' => WC()->cart ? WC()->cart->get_totals()['total'] : 0,
+		'billing_first_name' => $customer ? $customer->get_billing_first_name() : '',
+		'billing_last_name'  => $customer ? $customer->get_billing_last_name() : '',
+		'billing_address_1'  => $customer ? ( $customer->get_billing_address_1() ?: $customer->get_shipping_address_1() ) : '',
+		'billing_address_2'  => $customer ? ( $customer->get_billing_address_2() ?: $customer->get_shipping_address_2() ) : '',
+		'billing_state'      => $customer ? ( $customer->get_billing_state() ?: $customer->get_shipping_state() ) : '',
+		'billing_city'       => $customer ? ( $customer->get_billing_city() ?: $customer->get_shipping_city() ) : '',
+		'billing_postcode'   => $customer ? ( $customer->get_billing_postcode() ?: $customer->get_shipping_postcode() ) : '',
+		'billing_country'    => $customer ? ( $customer->get_billing_country() ?: $customer->get_shipping_country() ?: 'PH' ) : 'PH',
+		'billing_email'      => $customer ? $customer->get_billing_email() : '',
+		'billing_phone'      => $customer ? $customer->get_billing_phone() : '',
+	);
+
+	wp_localize_script( 'woocommerce_paymongo_client', 'cynder_paymongo_client_params', $paymongo_client );
+	wp_localize_script( 'woocommerce_paymongo_cc', 'cynder_paymongo_cc_params', $paymongo_cc );
+	wp_localize_script( 'woocommerce_paymongo_card_installment', 'cynder_paymongo_cc_params', $paymongo_cc );
+
+	wp_enqueue_style( 'paymongo' );
+	wp_enqueue_script( 'cleave' );
+	wp_enqueue_script( 'woocommerce_paymongo_checkout' );
+	wp_enqueue_script( 'woocommerce_paymongo_client' );
+	wp_enqueue_script( 'woocommerce_paymongo_cc' );
+
+	$installment_settings = (array) get_option( 'woocommerce_paymongo_card_installment_settings', array() );
+	if ( isset( $installment_settings['enabled'] ) && 'yes' === $installment_settings['enabled'] ) {
+		wp_enqueue_script( 'woocommerce_paymongo_card_installment' );
 	}
 }
 
@@ -736,6 +875,47 @@ function noyona_save_custom_checkout_fields( $order_id ) {
 	if ( ! empty( $_POST['noyona_gift_order'] ) ) {
 		update_post_meta( $order_id, '_noyona_gift_order', 'yes' );
 	}
+}
+
+/**
+ * Fail fast when PayMongo card token creation did not happen.
+ *
+ * This prevents Woo from creating a pending "To Pay" order when the custom
+ * preview step submits before PayMongo's frontend has attached
+ * cynder_paymongo_method_id.
+ *
+ * @param array    $data   Posted checkout data.
+ * @param WP_Error $errors Checkout validation errors.
+ */
+add_action( 'woocommerce_after_checkout_validation', 'noyona_validate_paymongo_frontend_token_before_order', 40, 2 );
+function noyona_validate_paymongo_frontend_token_before_order( $data, $errors ) {
+	if ( ! $errors instanceof WP_Error || $errors->has_errors() ) {
+		return;
+	}
+
+	$payment_method = '';
+	if ( is_array( $data ) && isset( $data['payment_method'] ) ) {
+		$payment_method = sanitize_key( (string) $data['payment_method'] );
+	} elseif ( isset( $_POST['payment_method'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$payment_method = sanitize_key( wp_unslash( $_POST['payment_method'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	}
+
+	if ( '' === $payment_method || ! noyona_paymongo_method_requires_frontend_token( $payment_method ) ) {
+		return;
+	}
+
+	$method_id = isset( $_POST['cynder_paymongo_method_id'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		? trim( sanitize_text_field( wp_unslash( $_POST['cynder_paymongo_method_id'] ) ) ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		: '';
+
+	if ( '' !== $method_id ) {
+		return;
+	}
+
+	$errors->add(
+		'noyona_paymongo_method_token_missing',
+		__( 'Your payment method could not be prepared. Please refresh the checkout page and try again before placing your order.', 'noyona' )
+	);
 }
 
 /**
