@@ -272,46 +272,10 @@ function noyona_enforce_checkout_step_flow() {
         exit;
     }
 
-    // Rule: /preview/ additionally requires that the details step (/checkout/)
-    // has actually been completed. Both contact and shipping must be in the
-    // customer session; any missing piece means the user is skipping ahead.
-    if ( $on_preview_page ) {
-        $customer = ( function_exists( 'WC' ) && WC()->customer ) ? WC()->customer : null;
-        if ( ! $customer ) {
-            wp_safe_redirect( $checkout_url );
-            exit;
-        }
-
-        $required_values = array(
-            trim( (string) $customer->get_billing_first_name() ),
-            trim( (string) $customer->get_billing_last_name() ),
-            trim( (string) $customer->get_billing_email() ),
-            trim( (string) $customer->get_billing_phone() ),
-            trim( (string) $customer->get_shipping_address_1() ),
-            trim( (string) $customer->get_shipping_city() ),
-            trim( (string) $customer->get_shipping_state() ),
-            trim( (string) $customer->get_shipping_postcode() ),
-        );
-
-        $billing_email = trim( (string) $customer->get_billing_email() );
-        $email_valid   = ( '' !== $billing_email && function_exists( 'is_email' ) && is_email( $billing_email ) );
-
-        $has_blank_required = false;
-        foreach ( $required_values as $value ) {
-            if ( '' === $value ) {
-                $has_blank_required = true;
-                break;
-            }
-        }
-
-        if ( $has_blank_required || ! $email_valid ) {
-            // No wc_add_notice here — the client-side validation on /checkout/
-            // already renders a woocommerce-error toast listing exactly which
-            // field is missing, so a second generic banner would be redundant.
-            wp_safe_redirect( $checkout_url );
-            exit;
-        }
-    }
+    // The standalone /preview/ page is retired — the review step is now an
+    // in-page panel on /checkout/, and /preview/ is redirected to /checkout/
+    // before this runs (see noyona_redirect_preview_to_checkout). No separate
+    // preview-step session check is required here anymore.
 }
 
 /* ----- Block guest access to cart/checkout flow routes ----- */

@@ -129,6 +129,27 @@ function noyona_route_generic_thankyou_to_wc_order_received() {
 }
 
 /**
+ * Retire the standalone /preview/ page.
+ *
+ * The review step is now an in-page panel on /checkout/, so any direct hit on
+ * /preview/ (old links, bookmarks, stepper back-links) is sent to /checkout/.
+ */
+add_action( 'template_redirect', 'noyona_redirect_preview_to_checkout', 2 );
+function noyona_redirect_preview_to_checkout() {
+	if ( is_admin() || wp_doing_ajax() ) {
+		return;
+	}
+
+	if ( ! is_page( 'preview' ) ) {
+		return;
+	}
+
+	$checkout_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' );
+	wp_safe_redirect( $checkout_url );
+	exit;
+}
+
+/**
  * AJAX: lightweight order payment status probe for order-received polling.
  *
  * Uses order ID + order key validation so guests can safely query their own
@@ -1164,7 +1185,10 @@ function noyona_checkout_inline_js() {
 			return null;
 		}
 
-		var isReviewStep = currentPath === reviewPath;
+		// Review is now an in-page panel on /checkout/ (no separate /preview/ page),
+		// so the checkout always loads in details mode and toggles client-side.
+		// This keeps entered card details in the DOM through Place Order.
+		var isReviewStep = false;
 		var isAwaitingPayment = !!document.querySelector('[data-noyona-awaiting-payment="1"]');
 
 		if (!isAwaitingPayment && isOrderReceivedPath) {
@@ -1830,17 +1854,23 @@ function noyona_checkout_inline_js() {
 				}
 			}
 		} else if (isReviewStep) {
+			applyReviewStepUI();
+		} else {
+			applyDetailsStepUI();
+		}
+
+		var reviewUiWired = false;
+
+		function applyReviewStepUI() {
 			body.classList.add('noyona-review-step');
 			body.classList.remove('noyona-pay-step');
 			body.classList.remove('noyona-details-step');
 			body.classList.remove('noyona-done-step');
 			ensureCheckoutStepper();
-			restoreCheckoutDraft(form);
 			syncReviewSnapshot(form);
-			wireReviewTerms(form);
-			var backBtn = document.querySelector('.noyona-checkout-actions__back');
-			if (backBtn) {
-				backBtn.setAttribute('href', detailsUrl);
+			if (!reviewUiWired) {
+				wireReviewTerms(form);
+				reviewUiWired = true;
 			}
 
 			var stepItems = document.querySelectorAll('.noyona-checkout-steps li');
@@ -1856,7 +1886,9 @@ function noyona_checkout_inline_js() {
 				stepItems[1].classList.add('is-complete');
 				stepItems[2].classList.add('is-active');
 			}
-		} else {
+		}
+
+		function applyDetailsStepUI() {
 			body.classList.add('noyona-details-step');
 			body.classList.remove('noyona-pay-step');
 			body.classList.remove('noyona-review-step');
@@ -1876,46 +1908,45 @@ function noyona_checkout_inline_js() {
 			}
 		}
 
-		/* 3. Review Order button → go to reviews step, then place order */
+		function updateReviewButtonLabel() {
+			var btn = document.getElementById('noyona-review-order');
+			if (!btn) return;
+			if (isReviewStep) {
+				btn.innerHTML = '<i class="fa-solid fa-lock" aria-hidden="true"></i> PLACE ORDER';
+			} else {
+				btn.innerHTML = 'PREVIEW ORDER <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>';
+			}
+		}
+
+		function goToReviewStep() {
+			isReviewStep = true;
+			applyReviewStepUI();
+			updateReviewButtonLabel();
+			if (window.scrollTo) {
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			}
+		}
+
+		function goToDetailsStep() {
+			isReviewStep = false;
+			applyDetailsStepUI();
+			updateReviewButtonLabel();
+			if (window.scrollTo) {
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			}
+		}
+
+		/* 3. Review Order button → switch to in-page review, then place order */
 		var reviewBtn = document.getElementById('noyona-review-order');
 		var placeOrder = document.getElementById('place_order');
 		if (reviewBtn) {
 			var qrPaymentConfirmed = false;
-			if (isReviewStep) {
-				reviewBtn.innerHTML = '<i class="fa-solid fa-lock" aria-hidden="true"></i> PLACE ORDER';
-				reviewBtn.addEventListener('click', function() {
-					var customTerms = document.getElementById('noyona-review-terms');
-					if (customTerms && !customTerms.checked) {
-						customTerms.focus();
-						return;
-					}
-					if (form) {
-						var nativeTerms = form.querySelector('#terms');
-						if (nativeTerms) {
-							nativeTerms.checked = true;
-							nativeTerms.dispatchEvent(new Event('change', { bubbles: true }));
-						}
-					}
+			updateReviewButtonLabel();
 
-					if (isQrPayMongoSelected(form) && !qrPaymentConfirmed) {
-						if (openPayConfirmModal(function () {
-							qrPaymentConfirmed = true;
-							reviewBtn.click();
-						})) {
-							return;
-						}
-					}
-					qrPaymentConfirmed = false;
-
-					// Local/dev temporary bypass to preview the "Done" page without payment gateway validation.
-					if (allowDonePreviewBypass && donePreviewUrl) {
-						window.location.assign(donePreviewUrl);
-						return;
-					}
-					submitCheckoutForm(form, placeOrder);
-				});
-			} else {
-				reviewBtn.addEventListener('click', function() {
+			reviewBtn.addEventListener('click', function() {
+				// Details → review: validate, then reveal the review panel in-page.
+				// No navigation, so card fields (and their values) are preserved.
+				if (!isReviewStep) {
 					var validation = validateNoyonaCheckoutDetails(form);
 					if (!validation.ok) {
 						renderNoyonaCheckoutValidationNotice(form, validation);
@@ -1926,17 +1957,52 @@ function noyona_checkout_inline_js() {
 						return;
 					}
 					clearNoyonaCheckoutValidationNotice(form);
-					persistCheckoutDraft(form);
+					goToReviewStep();
+					return;
+				}
 
-					// Sync the form data to the WC server session via the
-					// update_order_review AJAX endpoint before navigating.
-					// Without this the server-side guard on /preview/ sees
-					// empty customer fields and redirects back to /checkout/.
-					syncCheckoutToServer(form, function() {
-						window.location.assign(reviewUrl);
-					});
-				});
-			}
+				// Review → place order.
+				var customTerms = document.getElementById('noyona-review-terms');
+				if (customTerms && !customTerms.checked) {
+					customTerms.focus();
+					return;
+				}
+				if (form) {
+					var nativeTerms = form.querySelector('#terms');
+					if (nativeTerms) {
+						nativeTerms.checked = true;
+						nativeTerms.dispatchEvent(new Event('change', { bubbles: true }));
+					}
+				}
+
+				if (isQrPayMongoSelected(form) && !qrPaymentConfirmed) {
+					if (openPayConfirmModal(function () {
+						qrPaymentConfirmed = true;
+						reviewBtn.click();
+					})) {
+						return;
+					}
+				}
+				qrPaymentConfirmed = false;
+
+				// Local/dev temporary bypass to preview the "Done" page without payment gateway validation.
+				if (allowDonePreviewBypass && donePreviewUrl) {
+					window.location.assign(donePreviewUrl);
+					return;
+				}
+				submitCheckoutForm(form, placeOrder);
+			});
+		}
+
+		/* Back button: in review → return to details in-page; in details → cart. */
+		var checkoutBackBtn = document.querySelector('.noyona-checkout-actions__back');
+		if (checkoutBackBtn) {
+			checkoutBackBtn.addEventListener('click', function (e) {
+				if (isReviewStep) {
+					e.preventDefault();
+					goToDetailsStep();
+				}
+			});
 		}
 
 		function validateNoyonaCheckoutDetails(checkoutForm) {
@@ -2091,7 +2157,9 @@ function noyona_checkout_inline_js() {
 			}
 		}
 
-		if (isReviewStep && form) {
+		// Always attach the live snapshot listeners; syncReviewSnapshot() no-ops
+		// while in details mode and updates the panel once review mode is active.
+		if (form) {
 			form.addEventListener('input', function () {
 				syncReviewSnapshot(form);
 			});

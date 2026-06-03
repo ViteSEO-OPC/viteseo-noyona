@@ -167,6 +167,40 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   box-shadow: none;
 }
 
+/* In-page review toggle: review-only blocks live in the DOM at all times and are
+   revealed only when the checkout switches to review mode. Because there is no
+   page navigation, entered card details keep their values into Place Order. */
+.noyona-summary-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.noyona-summary-title--review {
+  display: none;
+}
+.noyona-checkout-card--review-meta,
+.noyona-checkout-card--review-totals,
+.noyona-review-terms {
+  display: none;
+}
+
+body.noyona-review-step .noyona-summary-title--details {
+  display: none;
+}
+body.noyona-review-step .noyona-summary-title--review {
+  display: inline-flex;
+}
+body.noyona-review-step .noyona-checkout-card--review-meta,
+body.noyona-review-step .noyona-checkout-card--review-totals {
+  display: block;
+}
+body.noyona-review-step .noyona-review-terms {
+  display: block;
+}
+body.noyona-review-step .noyona-order-totals--summary {
+  display: none;
+}
+
 /* ═══════════════════════════════════════
    CARDS
    ═══════════════════════════════════════ */

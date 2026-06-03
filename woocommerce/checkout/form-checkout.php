@@ -299,12 +299,15 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 			</div>
 			<?php endif; ?>
 
-			<div class="noyona-checkout-card noyona-checkout-card--summary noyona-checkout-card--sidebar <?php echo $is_review_step ? 'noyona-checkout-card--review-items' : ''; ?>">
-				<h2 class="noyona-checkout-card__title <?php echo $is_review_step ? 'noyona-review-heading' : ''; ?>">
-					<?php if ( ! $is_review_step ) : ?>
+			<div class="noyona-checkout-card noyona-checkout-card--summary noyona-checkout-card--sidebar noyona-checkout-card--review-items">
+				<h2 class="noyona-checkout-card__title noyona-review-heading">
+					<span class="noyona-summary-title noyona-summary-title--details">
 						<i class="fa-solid fa-receipt" aria-hidden="true"></i>
-					<?php endif; ?>
-					<?php echo $is_review_step ? esc_html__( 'Preview Your Order', 'noyona' ) : esc_html__( 'Order Summary', 'noyona' ); ?>
+						<?php esc_html_e( 'Order Summary', 'noyona' ); ?>
+					</span>
+					<span class="noyona-summary-title noyona-summary-title--review">
+						<?php esc_html_e( 'Preview Your Order', 'noyona' ); ?>
+					</span>
 				</h2>
 				<div class="noyona-order-items">
 					<?php
@@ -342,8 +345,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 					}
 					?>
 				</div>
-				<?php if ( ! $is_review_step ) : ?>
-					<div class="noyona-order-totals">
+					<div class="noyona-order-totals noyona-order-totals--summary">
 						<div class="noyona-order-totals__row">
 							<span class="noyona-order-totals__label"><?php esc_html_e( 'Subtotal', 'noyona' ); ?></span>
 							<span class="noyona-order-totals__value"><?php wc_cart_totals_subtotal_html(); ?></span>
@@ -389,10 +391,8 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 							<span class="noyona-order-totals__value"><?php wc_cart_totals_order_total_html(); ?></span>
 						</div>
 					</div>
-				<?php endif; ?>
 			</div>
-			<?php if ( $is_review_step ) : ?>
-				<?php
+			<?php
 				$ship_name  = trim( $checkout->get_value( 'billing_first_name' ) . ' ' . $checkout->get_value( 'billing_last_name' ) );
 				$ship_lines = array_filter(
 					array(
@@ -488,7 +488,6 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 						</div>
 					</div>
 				</div>
-			<?php endif; ?>
 
 			<div class="noyona-checkout-actions">
 				<a href="/cart" class="noyona-checkout-actions__back">
@@ -534,10 +533,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 				</div>
 			</div>
 
-			<?php if ( $is_review_step ) : ?>
-				<?php
-				$terms_url = home_url( '/terms-and-policies/' );
-				?>
+			<?php $terms_url = home_url( '/terms-and-policies/' ); ?>
 				<div class="noyona-review-terms">
 					<label class="noyona-review-terms__label" for="noyona-review-terms">
 						<input type="checkbox" id="noyona-review-terms" class="noyona-review-terms__checkbox">
@@ -552,7 +548,6 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 						</span>
 					</label>
 				</div>
-			<?php endif; ?>
 
 			<div class="noyona-trust-badges">
 				<div class="noyona-trust-badge">

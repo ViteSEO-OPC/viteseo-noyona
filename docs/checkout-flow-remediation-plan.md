@@ -172,6 +172,24 @@ and duplicate orders cannot be created.
 
 ## Phase 2 — Collapse `/preview/` into an in-page panel
 
+> **STATUS: IMPLEMENTED (2026-06-03).** Review is now a client-side panel on
+> `/checkout/`; there is no second page load, so entered card details survive to
+> Place Order (fixes the card "could not be prepared" failure).
+> Files changed:
+> - `woocommerce/checkout/form-checkout.php` — review-meta, review-totals, terms
+>   and both summary headings now always render; visibility is toggled by the
+>   `body.noyona-review-step` class instead of the URL.
+> - `assets/css/noyona-checkout.css` — added show/hide rules for the in-page toggle.
+> - `inc/woocommerce-checkout.php` — `isReviewStep` is now in-page state;
+>   `applyReviewStepUI()`/`applyDetailsStepUI()`/`goToReviewStep()`/`goToDetailsStep()`
+>   added; PREVIEW button toggles in-page (no navigation, no session sync); Back
+>   button returns to details in-page; `/preview/` now 301s to `/checkout/`.
+> - `inc/security.php` — removed the defunct `/preview/` step-flow session check.
+> Note: the old `noyona_sync_checkout_fields` AJAX, the `/preview/` PayMongo script
+> bridge, and the draft save/restore helpers are now unused (left in place, inert;
+> safe to delete in a later cleanup).
+> Remaining: run the §2.4 tests below.
+
 This removes the fragile cross-page machinery. UI work; ship after Phase 1.
 
 ### 2.1 Turn Preview into a panel, not a page
