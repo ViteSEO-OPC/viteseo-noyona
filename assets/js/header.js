@@ -1871,14 +1871,17 @@
     sortedTags.forEach((tag) => {
       const slug = String(tag.slug).toLowerCase();
       const isAvailable = Boolean(tag.hasProducts);
+      const isSelected = isAvailable && selectedTag === slug;
       const label = document.createElement('label');
-      label.className = 'noyona-shop-tag-radio' + (isAvailable ? '' : ' is-disabled');
+      label.className = 'noyona-shop-tag-radio'
+        + (isAvailable ? '' : ' is-disabled')
+        + (isSelected ? ' is-active' : '');
 
       const input = document.createElement('input');
       input.type = 'radio';
       input.name = 'noyona-product-tag';
       input.value = slug;
-      input.checked = isAvailable && selectedTag === slug;
+      input.checked = isSelected;
       input.disabled = !isAvailable;
       if (!isAvailable) {
         input.setAttribute('aria-disabled', 'true');
@@ -2973,12 +2976,93 @@
       window.location.assign(window.location.pathname + (query ? '?' + query : ''));
     };
 
+    const closeSortDropdowns = (except) => {
+      document.querySelectorAll('.noyona-shop-sort-dropdown[open]').forEach((dropdown) => {
+        if (dropdown !== except) {
+          dropdown.removeAttribute('open');
+        }
+      });
+    };
+
+    const closePriceDropdowns = () => {
+      document.querySelectorAll('.noyona-shop-price-dropdown[open]').forEach((dropdown) => {
+        dropdown.removeAttribute('open');
+      });
+    };
+
+    const buildSortDropdown = (select) => {
+      const dropdown = document.createElement('details');
+      const summary = document.createElement('summary');
+      const panel = document.createElement('div');
+      const currentOption = select.options[select.selectedIndex] || select.options[0];
+
+      dropdown.className = 'noyona-shop-sort-dropdown';
+      summary.className = 'noyona-shop-sort-dropdown__summary';
+      summary.textContent = currentOption ? currentOption.textContent : 'Default sorting';
+      panel.className = 'noyona-shop-sort-dropdown__panel';
+
+      Array.from(select.options).forEach((option) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'noyona-shop-sort-dropdown__option';
+        item.textContent = option.textContent;
+        item.dataset.sortValue = String(option.value || 'menu_order');
+        item.setAttribute('role', 'menuitemradio');
+        item.setAttribute('aria-checked', option.value === select.value ? 'true' : 'false');
+
+        if (option.value === select.value) {
+          item.classList.add('is-active');
+        }
+
+        item.addEventListener('click', () => {
+          const value = String(item.dataset.sortValue || 'menu_order').toLowerCase();
+          dropdown.removeAttribute('open');
+          if (value === select.value) {
+            return;
+          }
+          select.value = value;
+          applySort(value);
+        });
+
+        panel.appendChild(item);
+      });
+
+      dropdown.append(summary, panel);
+      dropdown.addEventListener('toggle', () => {
+        if (dropdown.open) {
+          closeSortDropdowns(dropdown);
+          closePriceDropdowns();
+        }
+      });
+
+      select.classList.add('noyona-shop-sort-select--native');
+      select.setAttribute('aria-hidden', 'true');
+      select.tabIndex = -1;
+      select.insertAdjacentElement('afterend', dropdown);
+    };
+
     selects.forEach((select) => {
       select.value = current;
+      if (!select.dataset.noyonaSortEnhanced) {
+        select.dataset.noyonaSortEnhanced = '1';
+        buildSortDropdown(select);
+      }
       select.addEventListener('change', () => {
         const value = String(select.value || 'menu_order').toLowerCase();
         applySort(value);
       });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.noyona-shop-sort-dropdown')) {
+        closeSortDropdowns(null);
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeSortDropdowns(null);
+      }
     });
   }
 
@@ -2992,6 +3076,10 @@
           dropdown.removeAttribute('open');
         }
       });
+
+      document.querySelectorAll('.noyona-shop-sort-dropdown[open]').forEach((dropdown) => {
+        dropdown.removeAttribute('open');
+      });
     };
 
     dropdowns.forEach((dropdown) => {
@@ -3004,7 +3092,8 @@
 
     document.addEventListener('click', (event) => {
       const target = event.target;
-      const clickedInside = dropdowns.some((dropdown) => dropdown.contains(target));
+      const clickedInside = dropdowns.some((dropdown) => dropdown.contains(target))
+        || !!target.closest('.noyona-shop-sort-dropdown');
       if (!clickedInside) {
         closeAll(null);
       }
