@@ -800,8 +800,16 @@ body.noyona-review-step .noyona-order-totals--summary {
   margin-left: 2px;
 }
 
-.noyona-checkout-form .payment_box {
+/* Hide every payment box by default, but reveal the box of the currently
+   selected method so card number/expiry/CVC fields can be entered. Hiding all
+   boxes unconditionally previously made card payments impossible (no fields ->
+   no token -> "payment method could not be prepared"). */
+.noyona-checkout-form .wc_payment_method .payment_box {
   display: none !important;
+}
+
+.noyona-checkout-form .wc_payment_method:has(input.input-radio:checked) .payment_box {
+  display: block !important;
 }
 
 .noyona-checkout-form .payment_box p {
