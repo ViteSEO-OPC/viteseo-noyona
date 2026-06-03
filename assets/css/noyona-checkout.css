@@ -600,15 +600,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   color: #d4636f;
 }
 
-/* Inline validation message (WooCommerce adds these as <span> or via JS) */
-.noyona-checkout-form .form-row .woocommerce-error,
-.noyona-checkout-form .form-row .error {
-  display: block;
-  margin-top: 4px;
-  font-size: var(--wp--preset--font-size--helper);
-  font-weight: 500;
-  color: #d4636f;
-}
+/* Inline field errors: assets/css/noyona-notices.css */
 
 /* Validated — subtle green border */
 .noyona-checkout-form .form-row.woocommerce-validated input.input-text,
@@ -795,21 +787,7 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   box-shadow: 0 1px 6px rgba(16, 24, 40, 0.04);
 }
 
-/* No-payment-methods empty state */
-.noyona-checkout-form .woocommerce-checkout-payment .woocommerce-notice,
-.noyona-checkout-form .woocommerce-checkout-payment .woocommerce-info,
-.noyona-checkout-form .woocommerce-checkout-payment > .woocommerce-notices-wrapper + .wc-no-payment-methods-notice,
-.noyona-checkout-form #order_review .woocommerce-info {
-  background: #f9f5f0;
-  border: 1px dashed #e0d5c8;
-  border-left: 3px solid #d4952a;
-  border-radius: 10px;
-  padding: 16px 20px;
-  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
-  font-size: var(--wp--preset--font-size--helper);
-  color: #8a7050;
-  line-height: normal;
-}
+/* Payment / login / coupon notices: assets/css/noyona-notices.css */
 
 /* Payment box inner fields (Stripe, etc.) */
 .noyona-checkout-form .payment_box fieldset {
@@ -1361,26 +1339,9 @@ body.noyona-pay-confirm-open {
   display: none;
 }
 
-/* Login toggle notices */
+/* Login toggle spacing (notice colors: global) */
 .noyona-checkout-shell .woocommerce-form-login-toggle {
   margin-bottom: 0.75rem;
-}
-
-.noyona-checkout-shell .woocommerce-form-login-toggle .woocommerce-info,
-.noyona-checkout-shell .woocommerce-form-coupon-toggle .woocommerce-info {
-  background: var(--noyona-cart-pink-soft, #fef0f2);
-  border-left: 3px solid var(--noyona-cart-pink, #e199a4);
-  color: #1a1a1a;
-}
-
-.noyona-checkout-shell .woocommerce-info a {
-  color: var(--noyona-cart-pink, #e199a4);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.noyona-checkout-shell .woocommerce-info a:hover {
-  text-decoration: underline;
 }
 
 /* Login & coupon forms */

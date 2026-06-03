@@ -1871,14 +1871,17 @@
     sortedTags.forEach((tag) => {
       const slug = String(tag.slug).toLowerCase();
       const isAvailable = Boolean(tag.hasProducts);
+      const isSelected = isAvailable && selectedTag === slug;
       const label = document.createElement('label');
-      label.className = 'noyona-shop-tag-radio' + (isAvailable ? '' : ' is-disabled');
+      label.className = 'noyona-shop-tag-radio'
+        + (isAvailable ? '' : ' is-disabled')
+        + (isSelected ? ' is-active' : '');
 
       const input = document.createElement('input');
       input.type = 'radio';
       input.name = 'noyona-product-tag';
       input.value = slug;
-      input.checked = isAvailable && selectedTag === slug;
+      input.checked = isSelected;
       input.disabled = !isAvailable;
       if (!isAvailable) {
         input.setAttribute('aria-disabled', 'true');
@@ -2348,6 +2351,35 @@
     });
   }
 
+  function showShopWishlistNotice(message) {
+    const text = String(message || '').trim();
+    if (!text) return;
+
+    const root =
+      document.querySelector('.noyona-product-gatherer') ||
+      document.querySelector('main') ||
+      document.body;
+
+    if (typeof window.noyonaShowNotice === 'function') {
+      window.noyonaShowNotice(text, {
+        root,
+        key: 'shop-wishlist',
+        type: 'error',
+      });
+      return;
+    }
+
+    const existing = root.querySelector('[data-noyona-notice-key="shop-wishlist"]');
+    if (existing) existing.remove();
+
+    const notice = document.createElement('p');
+    notice.className = 'noyona-notice is-error';
+    notice.setAttribute('data-noyona-notice-key', 'shop-wishlist');
+    notice.setAttribute('role', 'alert');
+    notice.textContent = text;
+    root.insertBefore(notice, root.firstChild);
+  }
+
   function openShopWishlistLoginModal() {
     const cfg = getShopWishlistConfig();
     const modal = document.querySelector('[data-mini-cart-login-modal-global]');
@@ -2405,7 +2437,9 @@
             openShopWishlistLoginModal();
             return null;
           }
-          window.alert(getShopWishlistText('wishlistError', 'Wishlist could not be updated. Please try again.'));
+          showShopWishlistNotice(
+            getShopWishlistText('wishlistError', 'Wishlist could not be updated. Please try again.')
+          );
           return null;
         }
 
@@ -2426,7 +2460,9 @@
         return saved;
       })
       .catch(() => {
-        window.alert(getShopWishlistText('wishlistError', 'Wishlist could not be updated. Please try again.'));
+        showShopWishlistNotice(
+          getShopWishlistText('wishlistError', 'Wishlist could not be updated. Please try again.')
+        );
         return null;
       })
       .finally(() => {
@@ -2571,6 +2607,83 @@
       return link && link.href ? link.href : null;
     };
 
+    const returnStateKey = 'noyonaShopReturnState:v1';
+    const currentListingUrl = window.location.pathname + window.location.search;
+    const readReturnState = () => {
+      try {
+        const raw = window.sessionStorage ? window.sessionStorage.getItem(returnStateKey) : '';
+        return raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        return null;
+      }
+    };
+    const findCardByProductId = (productId) => {
+      return Array.from(grid.querySelectorAll('.wc-block-product')).find(
+        (card) => card.getAttribute('data-product-id') === String(productId)
+      );
+    };
+    const writeReturnState = (card) => {
+      if (!window.sessionStorage || !card) return;
+
+      const productId = card.getAttribute('data-product-id') || '';
+      const meta = container.querySelector('.noyona-shop-infinite-meta');
+      const pagination = container.querySelector('.wp-block-query-pagination');
+      const count = document.querySelector('.noyona-shop-count');
+
+      try {
+        window.sessionStorage.setItem(
+          returnStateKey,
+          JSON.stringify({
+            url: currentListingUrl,
+            productId: productId,
+            scrollY: window.pageYOffset || 0,
+            gridHtml: grid.innerHTML,
+            metaHtml: meta ? meta.outerHTML : '',
+            paginationHtml: pagination ? pagination.outerHTML : '',
+            countText: count ? count.textContent : '',
+            savedAt: Date.now(),
+          })
+        );
+      } catch (error) {
+        // Storage can fail in private mode or when the loaded grid is too large.
+      }
+    };
+    const restoreReturnState = () => {
+      const state = readReturnState();
+      if (!state || state.url !== currentListingUrl || !state.gridHtml) return null;
+
+      grid.innerHTML = state.gridHtml;
+
+      const oldMeta = container.querySelector('.noyona-shop-infinite-meta');
+      if (oldMeta) oldMeta.remove();
+      if (state.metaHtml) {
+        container.insertAdjacentHTML('beforeend', state.metaHtml);
+      }
+
+      const oldPagination = container.querySelector('.wp-block-query-pagination');
+      if (oldPagination) oldPagination.remove();
+      if (state.paginationHtml) {
+        container.insertAdjacentHTML('beforeend', state.paginationHtml);
+      }
+
+      const count = document.querySelector('.noyona-shop-count');
+      if (count && state.countText) {
+        count.textContent = state.countText;
+      }
+
+      grid.querySelectorAll('.wc-block-product').forEach((card) => {
+        card.removeAttribute('data-noyona-actions-ready');
+        card.removeAttribute('data-noyona-card-click-bound');
+        card.querySelectorAll('[data-noyona-wishlist-bound]').forEach((button) => {
+          button.removeAttribute('data-noyona-wishlist-bound');
+        });
+        card.querySelectorAll('.noyona-shop-product-actions').forEach((actions) => actions.remove());
+      });
+
+      return state;
+    };
+    const restoredState = restoreReturnState();
+
     let nextUrl = findNextUrl();
 
     // If there is no next URL AND no pagination markup at all, we are showing
@@ -2654,6 +2767,21 @@
         window.scrollTo({ top: Math.max(0, targetTop), behavior: 'auto' });
       });
     };
+    const scrollToRestoredProduct = () => {
+      if (!restoredState || !restoredState.productId) return;
+
+      requestAnimationFrame(() => {
+        const card = findCardByProductId(restoredState.productId);
+        const target = card || null;
+        if (!target) {
+          window.scrollTo({ top: restoredState.scrollY || 0, behavior: 'auto' });
+          return;
+        }
+
+        const targetTop = target.getBoundingClientRect().top + window.pageYOffset - getShopStickyOffset();
+        window.scrollTo({ top: Math.max(0, targetTop), behavior: 'auto' });
+      });
+    };
 
     container.classList.add('is-infinite-active');
     container.dataset.noyonaInfiniteReady = '1';
@@ -2673,6 +2801,24 @@
     sentinel.className = 'noyona-shop-infinite-sentinel';
     sentinel.setAttribute('aria-hidden', 'true');
     container.appendChild(sentinel);
+
+    container.addEventListener(
+      'click',
+      (event) => {
+        const card = event.target.closest('.wc-block-product');
+        if (!card || !container.contains(card)) return;
+
+        const productLink = card.querySelector('.wp-block-post-title a, .wc-block-components-product-image a');
+        const clickedLink = event.target.closest('a');
+        const clickedProductLink = clickedLink && productLink && clickedLink.href === productLink.href;
+        const clickedCardSurface = !event.target.closest('button, input, select, textarea, label, summary, details');
+
+        if (clickedProductLink || clickedCardSurface) {
+          writeReturnState(card);
+        }
+      },
+      true
+    );
 
     const setLoaderState = (state, message) => {
       loader.dataset.state = state;
@@ -2800,6 +2946,7 @@
     };
 
     let observer = null;
+    let suppressAutoLoadUntil = restoredState ? Date.now() + 800 : 0;
     const teardownObserver = () => {
       if (observer) {
         observer.disconnect();
@@ -2807,16 +2954,24 @@
       }
     };
 
+    const shouldLoadFromSentinel = () => {
+      const rect = sentinel.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const triggerLine = viewportHeight * 0.88;
+
+      return Date.now() >= suppressAutoLoadUntil && rect.bottom >= 0 && rect.top <= triggerLine;
+    };
+
     if ('IntersectionObserver' in window) {
       observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting) {
+            if (entry.isIntersecting && shouldLoadFromSentinel()) {
               loadNext();
             }
           });
         },
-        { rootMargin: '600px 0px 600px 0px', threshold: 0 }
+        { rootMargin: '0px 0px -12% 0px', threshold: 0 }
       );
       observer.observe(sentinel);
     } else {
@@ -2827,13 +2982,18 @@
         scrollScheduled = true;
         window.requestAnimationFrame(() => {
           scrollScheduled = false;
-          const rect = sentinel.getBoundingClientRect();
-          if (rect.top < (window.innerHeight || document.documentElement.clientHeight) + 600) {
+          if (shouldLoadFromSentinel()) {
             loadNext();
           }
         });
       };
       window.addEventListener('scroll', onScroll, { passive: true });
+    }
+
+    if (restoredState) {
+      initShopProductActions();
+      updateResultCount();
+      scrollToRestoredProduct();
     }
   }
 
@@ -2940,12 +3100,93 @@
       window.location.assign(window.location.pathname + (query ? '?' + query : ''));
     };
 
+    const closeSortDropdowns = (except) => {
+      document.querySelectorAll('.noyona-shop-sort-dropdown[open]').forEach((dropdown) => {
+        if (dropdown !== except) {
+          dropdown.removeAttribute('open');
+        }
+      });
+    };
+
+    const closePriceDropdowns = () => {
+      document.querySelectorAll('.noyona-shop-price-dropdown[open]').forEach((dropdown) => {
+        dropdown.removeAttribute('open');
+      });
+    };
+
+    const buildSortDropdown = (select) => {
+      const dropdown = document.createElement('details');
+      const summary = document.createElement('summary');
+      const panel = document.createElement('div');
+      const currentOption = select.options[select.selectedIndex] || select.options[0];
+
+      dropdown.className = 'noyona-shop-sort-dropdown';
+      summary.className = 'noyona-shop-sort-dropdown__summary';
+      summary.textContent = currentOption ? currentOption.textContent : 'Default sorting';
+      panel.className = 'noyona-shop-sort-dropdown__panel';
+
+      Array.from(select.options).forEach((option) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'noyona-shop-sort-dropdown__option';
+        item.textContent = option.textContent;
+        item.dataset.sortValue = String(option.value || 'menu_order');
+        item.setAttribute('role', 'menuitemradio');
+        item.setAttribute('aria-checked', option.value === select.value ? 'true' : 'false');
+
+        if (option.value === select.value) {
+          item.classList.add('is-active');
+        }
+
+        item.addEventListener('click', () => {
+          const value = String(item.dataset.sortValue || 'menu_order').toLowerCase();
+          dropdown.removeAttribute('open');
+          if (value === select.value) {
+            return;
+          }
+          select.value = value;
+          applySort(value);
+        });
+
+        panel.appendChild(item);
+      });
+
+      dropdown.append(summary, panel);
+      dropdown.addEventListener('toggle', () => {
+        if (dropdown.open) {
+          closeSortDropdowns(dropdown);
+          closePriceDropdowns();
+        }
+      });
+
+      select.classList.add('noyona-shop-sort-select--native');
+      select.setAttribute('aria-hidden', 'true');
+      select.tabIndex = -1;
+      select.insertAdjacentElement('afterend', dropdown);
+    };
+
     selects.forEach((select) => {
       select.value = current;
+      if (!select.dataset.noyonaSortEnhanced) {
+        select.dataset.noyonaSortEnhanced = '1';
+        buildSortDropdown(select);
+      }
       select.addEventListener('change', () => {
         const value = String(select.value || 'menu_order').toLowerCase();
         applySort(value);
       });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.noyona-shop-sort-dropdown')) {
+        closeSortDropdowns(null);
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeSortDropdowns(null);
+      }
     });
   }
 
@@ -2959,6 +3200,10 @@
           dropdown.removeAttribute('open');
         }
       });
+
+      document.querySelectorAll('.noyona-shop-sort-dropdown[open]').forEach((dropdown) => {
+        dropdown.removeAttribute('open');
+      });
     };
 
     dropdowns.forEach((dropdown) => {
@@ -2971,7 +3216,8 @@
 
     document.addEventListener('click', (event) => {
       const target = event.target;
-      const clickedInside = dropdowns.some((dropdown) => dropdown.contains(target));
+      const clickedInside = dropdowns.some((dropdown) => dropdown.contains(target))
+        || !!target.closest('.noyona-shop-sort-dropdown');
       if (!clickedInside) {
         closeAll(null);
       }

@@ -5,6 +5,19 @@
     });
   }
 
+  function showContactGeoNotice(wrapper, message) {
+    if (wrapper && typeof window.noyonaShowNotice === "function") {
+      window.noyonaShowNotice(message, {
+        root: wrapper,
+        key: "contact-geo",
+        type: "error",
+        insertBefore: wrapper.firstChild,
+      });
+      return;
+    }
+    window.alert(message);
+  }
+
   function getFavoritesSet(wrapper) {
     const raw = wrapper && wrapper.dataset ? wrapper.dataset.nslFavorites : "";
     if (!raw) return new Set();
@@ -442,7 +455,7 @@
       if (locationBtn) {
         locationBtn.addEventListener("click", function () {
           if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser.");
+            showContactGeoNotice(wrapper, "Geolocation is not supported by your browser.");
             return;
           }
           navigator.geolocation.getCurrentPosition(
@@ -452,7 +465,11 @@
               map.setView([userLat, userLng], 14, { animate: true });
               L.circleMarker([userLat, userLng], { radius: 7 }).addTo(map).bindPopup("You are here").openPopup();
             },
-            () => alert("Could not get your location. Please allow location access."),
+            () =>
+              showContactGeoNotice(
+                wrapper,
+                "Could not get your location. Please allow location access."
+              ),
             { enableHighAccuracy: true, timeout: 8000 }
           );
         });

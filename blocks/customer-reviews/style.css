@@ -5,15 +5,9 @@
   padding-bottom: clamp(1.75rem, 3.5vw, 2.75rem);
 }
 
-.customer-reviews-grid__notice {
+/* Notice banners: global styles in assets/css/noyona-notices.css */
+.customer-reviews-grid > .noyona-notice {
   margin: 0 0 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  background: var(--noyona-color-pink-accent, #e91e8c);
-  color: var(--noyona-color-white, #fff);
-  font-size: 0.9375rem;
-  line-height: 1.45;
-  text-align: center;
 }
 
 .customer-reviews-grid__header {

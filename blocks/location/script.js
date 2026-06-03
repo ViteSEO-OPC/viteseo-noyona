@@ -12,6 +12,19 @@
     });
   }
 
+  function showLocatorGeoNotice(wrapper, message) {
+    if (wrapper && typeof window.noyonaShowNotice === "function") {
+      window.noyonaShowNotice(message, {
+        root: wrapper,
+        key: "location-geo",
+        type: "error",
+        insertBefore: wrapper.firstChild,
+      });
+      return;
+    }
+    window.alert(message);
+  }
+
   function buildDirectionsUrl(store) {
     return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(store.lat + "," + store.lng);
   }
@@ -732,7 +745,7 @@
     function requestUserLocationAndRoute(store) {
       if (!store) return;
       if (!navigator.geolocation) {
-        alert("Geolocation is not supported by your browser.");
+        showLocatorGeoNotice(wrapper, "Geolocation is not supported by your browser.");
         return;
       }
       navigator.geolocation.getCurrentPosition(
@@ -741,7 +754,10 @@
           drawRouteToStore(store);
         },
         function () {
-          alert("Unable to access location. Please allow location permission in your browser.");
+          showLocatorGeoNotice(
+            wrapper,
+            "Unable to access location. Please allow location permission in your browser."
+          );
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
@@ -1173,7 +1189,7 @@
     function applyQuickFilter(nextQuickFilter) {
       if (nextQuickFilter === "near" && !userLocation) {
         if (!navigator.geolocation) {
-          alert("Geolocation is not supported by your browser.");
+          showLocatorGeoNotice(wrapper, "Geolocation is not supported by your browser.");
           renderExtraFilters();
           return;
         }
@@ -1187,7 +1203,10 @@
             renderStoresAndMap();
           },
           function () {
-            alert("Unable to access location. Please allow location permission in your browser.");
+            showLocatorGeoNotice(
+              wrapper,
+              "Unable to access location. Please allow location permission in your browser."
+            );
             renderExtraFilters();
           },
           { enableHighAccuracy: true, timeout: 10000 }
@@ -1405,7 +1424,7 @@
     if (useLocationBtn) {
       useLocationBtn.addEventListener("click", function () {
         if (!navigator.geolocation) {
-          alert("Geolocation is not supported by your browser.");
+          showLocatorGeoNotice(wrapper, "Geolocation is not supported by your browser.");
           return;
         }
         navigator.geolocation.getCurrentPosition(
@@ -1420,7 +1439,10 @@
             renderStoresAndMap();
           },
           function () {
-            alert("Unable to access location. Please allow location permission in your browser.");
+            showLocatorGeoNotice(
+              wrapper,
+              "Unable to access location. Please allow location permission in your browser."
+            );
           },
           { enableHighAccuracy: true, timeout: 10000 }
         );
