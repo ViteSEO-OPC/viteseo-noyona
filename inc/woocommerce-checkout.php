@@ -150,6 +150,85 @@ function noyona_redirect_preview_to_checkout() {
 }
 
 /**
+ * Build the My Account "Orders" URL that opens a specific order's details modal.
+ *
+ * The account orders panel (inc/shortcodes.php + noyona-order-tracking) groups
+ * orders into filter tabs by status (to-pay, to-ship, to-receive, complete,
+ * cancel-refund), paginates 10 per page (newest first), and renders one modal
+ * per line item with id "noyona-account-order-modal-{order_id}-{item_id}",
+ * opened via the matching URL hash (CSS :target). A bare hash to /orders/ won't
+ * open the modal unless that order's row is actually rendered — which only
+ * happens under the right `order_filter` tab and `orders_page`. This resolves
+ * both so the deep link reliably opens the modal.
+ *
+ * @param WC_Order $order Order to deep-link to.
+ * @return string Absolute URL with query args + modal hash, or '' on failure.
+ */
+function noyona_get_account_order_modal_url( $order ) {
+	if ( ! $order instanceof WC_Order ) {
+		return '';
+	}
+
+	$orders_url = function_exists( 'wc_get_account_endpoint_url' )
+		? wc_get_account_endpoint_url( 'orders' )
+		: ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' ) );
+
+	// The panel renders one modal per product line item; target the first.
+	$first_item_id = 0;
+	foreach ( $order->get_items( 'line_item' ) as $line_item ) {
+		if ( $line_item instanceof WC_Order_Item_Product ) {
+			$first_item_id = (int) $line_item->get_id();
+			break;
+		}
+	}
+
+	if ( ! $first_item_id ) {
+		return $orders_url;
+	}
+
+	// Map the order's status to its filter tab.
+	$status          = sanitize_key( $order->get_status() );
+	$filters         = function_exists( 'noyona_ot_get_order_status_filters' ) ? (array) noyona_ot_get_order_status_filters() : array();
+	$filter_key      = '';
+	$filter_statuses = array();
+	foreach ( $filters as $key => $config ) {
+		$statuses = isset( $config['statuses'] ) ? array_map( 'sanitize_key', (array) $config['statuses'] ) : array();
+		if ( in_array( $status, $statuses, true ) ) {
+			$filter_key      = (string) $key;
+			$filter_statuses = $statuses;
+			break;
+		}
+	}
+
+	$query_args = array();
+	if ( '' !== $filter_key ) {
+		// Page = position among same-tab orders (newest first, 10/page).
+		$orders_page = 1;
+		$created     = $order->get_date_created();
+		if ( function_exists( 'wc_get_orders' ) && $created instanceof WC_DateTime ) {
+			$newer = wc_get_orders(
+				array(
+					'customer_id'  => (int) $order->get_user_id(),
+					'status'       => $filter_statuses,
+					'date_created' => '>' . (int) $created->getTimestamp(),
+					'return'       => 'ids',
+					'limit'        => -1,
+				)
+			);
+			$newer_count = is_array( $newer ) ? count( $newer ) : 0;
+			$orders_page = (int) floor( $newer_count / 10 ) + 1;
+		}
+
+		$query_args['order_filter'] = $filter_key;
+		$query_args['orders_page']  = $orders_page;
+	}
+
+	$base = empty( $query_args ) ? $orders_url : add_query_arg( $query_args, $orders_url );
+
+	return $base . '#noyona-account-order-modal-' . (int) $order->get_id() . '-' . $first_item_id;
+}
+
+/**
  * AJAX: lightweight order payment status probe for order-received polling.
  *
  * Uses order ID + order key validation so guests can safely query their own
