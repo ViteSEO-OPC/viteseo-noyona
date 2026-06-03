@@ -20,7 +20,7 @@
           "slug": "poppins"
         }
       ],
-      "fluid": true,
+      "fluid": false,
       "fontSizes": [
         { "slug": "body", "name": "Body", "size": "16px" },
         { "slug": "h-3", "name": "H3", "size": "clamp(28px, 2.8vw, 36px)" },
