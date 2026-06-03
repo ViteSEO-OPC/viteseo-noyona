@@ -499,16 +499,22 @@ function noyona_checkout_enqueue_runtime_scripts() {
 }
 
 /**
- * Bridge PayMongo checkout scripts onto the custom /preview/ step.
+ * Bridge PayMongo checkout scripts onto every checkout UI context.
  *
- * The gateway plugin localizes `cynder_paymongo_cc_params` only when its own
- * `is_checkout()` check passes. /preview/ is outside that native check, but it
- * still submits the same Woo checkout form, so card/card-installment token
- * creation must be available here too.
+ * The gateway plugin localizes `cynder_paymongo_cc_params` and binds its card
+ * tokenizer only when its own `is_checkout()` check passes. Since Phase 2 the
+ * review/place-order step is an in-page panel on /checkout/ (the legacy
+ * /preview/ page is gone), but custom step URLs (e.g. /reviews/) can still fall
+ * outside Woo's native detection. Loading + localizing the card scripts across
+ * the whole checkout UI context guarantees `checkout_place_order_paymongo`
+ * tokenization is always wired wherever the order is actually placed; without
+ * it the form submits with an empty cynder_paymongo_method_id and fails with
+ * "Your payment method could not be prepared". Re-enqueue/re-localize is
+ * idempotent if the plugin already handled it.
  */
 add_action( 'wp_enqueue_scripts', 'noyona_checkout_enqueue_paymongo_preview_assets', 35 );
 function noyona_checkout_enqueue_paymongo_preview_assets() {
-	if ( ! function_exists( 'noyona_is_checkout_preview_step' ) || ! noyona_is_checkout_preview_step() ) {
+	if ( ! function_exists( 'noyona_is_checkout_ui_context' ) || ! noyona_is_checkout_ui_context() ) {
 		return;
 	}
 
