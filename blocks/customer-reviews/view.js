@@ -1,4 +1,21 @@
 (function () {
+  function showReviewsNotice(block, message, type) {
+    if (!block || !message) return;
+
+    if (typeof window.noyonaShowNotice !== 'function') {
+      return;
+    }
+
+    var noticeType = type || 'error';
+    window.noyonaShowNotice(message, {
+      root: block,
+      key: 'customer-reviews',
+      type: noticeType,
+      insertBefore: block.firstChild,
+      autoHideMs: noticeType === 'success' ? 6000 : 0,
+    });
+  }
+
   function initCustomerReviews(block) {
     if (!block) return;
 
@@ -437,7 +454,7 @@
                   json && json.data && json.data.message
                     ? String(json.data.message)
                     : 'Could not save your review. Please try again.';
-                window.alert(message);
+                showReviewsNotice(block, message, 'error');
                 return;
               }
 
@@ -447,22 +464,15 @@
               updateReviewCard(card, json.data);
               resetReviewFormMode();
               closeReviewFormModal();
-
-              var notice = document.createElement('p');
-              notice.className = 'customer-reviews-grid__notice';
-              notice.setAttribute('role', 'status');
-              notice.textContent = 'Your review has been updated.';
-              var existingNotice = block.querySelector('.customer-reviews-grid__notice');
-              if (existingNotice) {
-                existingNotice.remove();
-              }
-              block.insertBefore(notice, block.firstChild);
+              showReviewsNotice(block, 'Your review has been updated.', 'success');
             })
             .catch(function (error) {
-              window.alert(
+              showReviewsNotice(
+                block,
                 error && error.message
                   ? error.message
-                  : 'Could not save your review. Please try again.'
+                  : 'Could not save your review. Please try again.',
+                'error'
               );
             })
             .finally(function () {

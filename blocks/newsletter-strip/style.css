@@ -41,6 +41,13 @@
   font-family: var(--wp--preset--font-family--poppins);
 }
 
+/* Notice banners: global styles in assets/css/noyona-notices.css */
+.newsletter-strip__inner > .noyona-notice {
+  width: min(100%, 520px);
+  margin: 0 auto 0.75rem;
+  text-align: left;
+}
+
 .newsletter-strip__subtitle {
   margin: 0.6rem 0 1.1rem;
   font-size: var(--wp--preset--font-size--body);
