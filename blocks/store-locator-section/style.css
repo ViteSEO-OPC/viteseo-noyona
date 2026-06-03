@@ -51,10 +51,10 @@
   min-height: 46px;
   margin-top: 1.25rem;
   padding: 12px 20px;
-  border: 1px solid #D81B60;
+  border: 1px solid var(--noyona-cta-primary-border);
   border-radius: var(--noyona-radius-cta);
-  background: var(--noyona-color-pink-soft, #EFB5BE);
-  color: #000000;
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
   font-size: var(--wp--preset--font-size--nav-button);
   font-weight: 700;
   line-height: normal;
@@ -64,8 +64,8 @@
 
 .store-locator-section__button:hover,
 .store-locator-section__button:focus-visible {
-  background: #D81B60;
-  color: #FFFFFF;
+  background: var(--noyona-cta-primary-hover-bg);
+  color: var(--noyona-cta-primary-hover-text);
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(216, 27, 96, 0.2);
 }

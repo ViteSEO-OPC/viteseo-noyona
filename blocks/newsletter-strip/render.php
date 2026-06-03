@@ -18,11 +18,11 @@ $defaults = array(
     'innerBorderWidth' => '0',
     'innerBorderStyle' => 'all',
     'innerHeight' => '',
-    'ctaTextColor' => '#000000',
-    'ctaBackgroundColor' => '#EFB5BE',
-    'ctaBorderColor' => '#D81B60',
-    'ctaHoverTextColor' => '#ffffff',
-    'ctaHoverBackgroundColor' => '#D81B60',
+    'ctaTextColor' => '#FFFFFF',
+    'ctaBackgroundColor' => '#D91B61',
+    'ctaBorderColor' => '#D91B61',
+    'ctaHoverTextColor' => '#D91B61',
+    'ctaHoverBackgroundColor' => '#FBDDE2',
 );
 
 $atts = wp_parse_args( $attributes, $defaults );
@@ -64,19 +64,19 @@ if ( '' !== $inner_height && ! preg_match( '/^(auto|\d+(\.\d+)?(px|rem|em|vh|svh
     $inner_height = '';
 }
 if ( ! $cta_text ) {
-    $cta_text = '#000000';
+    $cta_text = '#FFFFFF';
 }
 if ( ! $cta_bg ) {
-    $cta_bg = '#EFB5BE';
+    $cta_bg = '#D91B61';
 }
 if ( ! $cta_border ) {
-    $cta_border = '#D81B60';
+    $cta_border = '#D91B61';
 }
 if ( ! $cta_hover_text ) {
-    $cta_hover_text = '#ffffff';
+    $cta_hover_text = '#D91B61';
 }
 if ( ! $cta_hover_bg ) {
-    $cta_hover_bg = '#D81B60';
+    $cta_hover_bg = '#FBDDE2';
 }
 
 $style_vars = array(

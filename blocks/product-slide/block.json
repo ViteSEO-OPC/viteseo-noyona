@@ -71,19 +71,19 @@
     },
     "ctaBackgroundColor": {
       "type": "string",
-      "default": "#EFB5BE"
+      "default": "#D91B61"
     },
     "ctaTextColor": {
       "type": "string",
-      "default": "#000000"
+      "default": "#FFFFFF"
     },
     "ctaHoverBackgroundColor": {
       "type": "string",
-      "default": "#D81B60"
+      "default": "#FBDDE2"
     },
     "ctaHoverTextColor": {
       "type": "string",
-      "default": "#FFFFFF"
+      "default": "#D91B61"
     },
     "swatchSelectedColor": {
       "type": "string",

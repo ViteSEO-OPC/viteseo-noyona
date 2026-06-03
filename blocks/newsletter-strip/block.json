@@ -69,23 +69,23 @@
     },
     "ctaTextColor": {
       "type": "string",
-      "default": "#000000"
+      "default": "#FFFFFF"
     },
     "ctaBackgroundColor": {
       "type": "string",
-      "default": "#EFB5BE"
+      "default": "#D91B61"
     },
     "ctaBorderColor": {
       "type": "string",
-      "default": "#D81B60"
+      "default": "#D91B61"
     },
     "ctaHoverTextColor": {
       "type": "string",
-      "default": "#ffffff"
+      "default": "#D91B61"
     },
     "ctaHoverBackgroundColor": {
       "type": "string",
-      "default": "#D81B60"
+      "default": "#FBDDE2"
     }
   },
   "style": "file:./style.css",

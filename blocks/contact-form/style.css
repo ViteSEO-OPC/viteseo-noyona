@@ -263,15 +263,15 @@
     min-height: 44px;
     box-sizing: border-box;
     border-radius: 16px;
-    background: var(--noyona-color-pink-soft, #EFB5BE);
-    color: #000000;
+    background: var(--noyona-cta-primary-bg);
+    color: var(--noyona-cta-primary-text);
     text-decoration: none;
     font-weight: 700;
     font-family: var(--wp--preset--font-family--poppins);
     font-size: 16px;
     box-shadow: 0 10px 7.5px 0 rgba(0, 0, 0, 0.25);
     white-space: nowrap;
-    border: 1px solid #D81B60;
+    border: 1px solid var(--noyona-cta-primary-border);
     position: relative;
     overflow: hidden;
     transform: translateZ(0);
@@ -282,9 +282,9 @@
 
 .contact-form__map-button:hover,
 .contact-form__map-button:focus-visible {
-    background: #D81B60;
-    color: #FFFFFF;
-    border: 1px solid #D81B60;
+    background: var(--noyona-cta-primary-hover-bg);
+    color: var(--noyona-cta-primary-hover-text);
+    border: 1px solid var(--noyona-cta-primary-hover-border);
 }
 
 .contact-form__map-button::after {
@@ -361,15 +361,15 @@
     min-height: 44px;
     box-sizing: border-box;
     border-radius: 16px;
-    background: var(--noyona-color-pink-soft, #EFB5BE);
-    color: #000000;
+    background: var(--noyona-cta-primary-bg);
+    color: var(--noyona-cta-primary-text);
     text-decoration: none;
     font-weight: 700;
     font-family: var(--wp--preset--font-family--poppins);
     font-size: 16px;
     box-shadow: 0 10px 7.5px 0 rgba(0, 0, 0, 0.25);
     white-space: nowrap;
-    border: 1px solid #D81B60;
+    border: 1px solid var(--noyona-cta-primary-border);
     position: relative;
     /* overflow: hidden; */
     transform: translateZ(0);
@@ -380,9 +380,9 @@
 
 .contact-form__submit:hover,
 .contact-form__submit:focus-visible {
-    background: #D81B60;
-    color: #FFFFFF;
-    border: 1px solid #D81B60;
+    background: var(--noyona-cta-primary-hover-bg);
+    color: var(--noyona-cta-primary-hover-text);
+    border: 1px solid var(--noyona-cta-primary-hover-border);
 }
 
 .contact-form__submit::after {
