@@ -610,7 +610,7 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
         . ' data-current-page="' . esc_attr( (string) $paged ) . '"'
         . ' data-max-pages="' . esc_attr( (string) $max_pages ) . '"'
         . ' data-total="' . esc_attr( (string) $total_results ) . '">'
-        . '<div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;">';
+        . '<div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:50px;">';
     foreach ( $products as $product ) {
         echo noyona_render_product_card( $product );
     }

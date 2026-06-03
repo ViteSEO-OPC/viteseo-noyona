@@ -2607,6 +2607,83 @@
       return link && link.href ? link.href : null;
     };
 
+    const returnStateKey = 'noyonaShopReturnState:v1';
+    const currentListingUrl = window.location.pathname + window.location.search;
+    const readReturnState = () => {
+      try {
+        const raw = window.sessionStorage ? window.sessionStorage.getItem(returnStateKey) : '';
+        return raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        return null;
+      }
+    };
+    const findCardByProductId = (productId) => {
+      return Array.from(grid.querySelectorAll('.wc-block-product')).find(
+        (card) => card.getAttribute('data-product-id') === String(productId)
+      );
+    };
+    const writeReturnState = (card) => {
+      if (!window.sessionStorage || !card) return;
+
+      const productId = card.getAttribute('data-product-id') || '';
+      const meta = container.querySelector('.noyona-shop-infinite-meta');
+      const pagination = container.querySelector('.wp-block-query-pagination');
+      const count = document.querySelector('.noyona-shop-count');
+
+      try {
+        window.sessionStorage.setItem(
+          returnStateKey,
+          JSON.stringify({
+            url: currentListingUrl,
+            productId: productId,
+            scrollY: window.pageYOffset || 0,
+            gridHtml: grid.innerHTML,
+            metaHtml: meta ? meta.outerHTML : '',
+            paginationHtml: pagination ? pagination.outerHTML : '',
+            countText: count ? count.textContent : '',
+            savedAt: Date.now(),
+          })
+        );
+      } catch (error) {
+        // Storage can fail in private mode or when the loaded grid is too large.
+      }
+    };
+    const restoreReturnState = () => {
+      const state = readReturnState();
+      if (!state || state.url !== currentListingUrl || !state.gridHtml) return null;
+
+      grid.innerHTML = state.gridHtml;
+
+      const oldMeta = container.querySelector('.noyona-shop-infinite-meta');
+      if (oldMeta) oldMeta.remove();
+      if (state.metaHtml) {
+        container.insertAdjacentHTML('beforeend', state.metaHtml);
+      }
+
+      const oldPagination = container.querySelector('.wp-block-query-pagination');
+      if (oldPagination) oldPagination.remove();
+      if (state.paginationHtml) {
+        container.insertAdjacentHTML('beforeend', state.paginationHtml);
+      }
+
+      const count = document.querySelector('.noyona-shop-count');
+      if (count && state.countText) {
+        count.textContent = state.countText;
+      }
+
+      grid.querySelectorAll('.wc-block-product').forEach((card) => {
+        card.removeAttribute('data-noyona-actions-ready');
+        card.removeAttribute('data-noyona-card-click-bound');
+        card.querySelectorAll('[data-noyona-wishlist-bound]').forEach((button) => {
+          button.removeAttribute('data-noyona-wishlist-bound');
+        });
+        card.querySelectorAll('.noyona-shop-product-actions').forEach((actions) => actions.remove());
+      });
+
+      return state;
+    };
+    const restoredState = restoreReturnState();
+
     let nextUrl = findNextUrl();
 
     // If there is no next URL AND no pagination markup at all, we are showing
@@ -2690,6 +2767,21 @@
         window.scrollTo({ top: Math.max(0, targetTop), behavior: 'auto' });
       });
     };
+    const scrollToRestoredProduct = () => {
+      if (!restoredState || !restoredState.productId) return;
+
+      requestAnimationFrame(() => {
+        const card = findCardByProductId(restoredState.productId);
+        const target = card || null;
+        if (!target) {
+          window.scrollTo({ top: restoredState.scrollY || 0, behavior: 'auto' });
+          return;
+        }
+
+        const targetTop = target.getBoundingClientRect().top + window.pageYOffset - getShopStickyOffset();
+        window.scrollTo({ top: Math.max(0, targetTop), behavior: 'auto' });
+      });
+    };
 
     container.classList.add('is-infinite-active');
     container.dataset.noyonaInfiniteReady = '1';
@@ -2709,6 +2801,24 @@
     sentinel.className = 'noyona-shop-infinite-sentinel';
     sentinel.setAttribute('aria-hidden', 'true');
     container.appendChild(sentinel);
+
+    container.addEventListener(
+      'click',
+      (event) => {
+        const card = event.target.closest('.wc-block-product');
+        if (!card || !container.contains(card)) return;
+
+        const productLink = card.querySelector('.wp-block-post-title a, .wc-block-components-product-image a');
+        const clickedLink = event.target.closest('a');
+        const clickedProductLink = clickedLink && productLink && clickedLink.href === productLink.href;
+        const clickedCardSurface = !event.target.closest('button, input, select, textarea, label, summary, details');
+
+        if (clickedProductLink || clickedCardSurface) {
+          writeReturnState(card);
+        }
+      },
+      true
+    );
 
     const setLoaderState = (state, message) => {
       loader.dataset.state = state;
@@ -2836,6 +2946,7 @@
     };
 
     let observer = null;
+    let suppressAutoLoadUntil = restoredState ? Date.now() + 800 : 0;
     const teardownObserver = () => {
       if (observer) {
         observer.disconnect();
@@ -2843,16 +2954,24 @@
       }
     };
 
+    const shouldLoadFromSentinel = () => {
+      const rect = sentinel.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const triggerLine = viewportHeight * 0.88;
+
+      return Date.now() >= suppressAutoLoadUntil && rect.bottom >= 0 && rect.top <= triggerLine;
+    };
+
     if ('IntersectionObserver' in window) {
       observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            if (entry.isIntersecting) {
+            if (entry.isIntersecting && shouldLoadFromSentinel()) {
               loadNext();
             }
           });
         },
-        { rootMargin: '600px 0px 600px 0px', threshold: 0 }
+        { rootMargin: '0px 0px -12% 0px', threshold: 0 }
       );
       observer.observe(sentinel);
     } else {
@@ -2863,13 +2982,18 @@
         scrollScheduled = true;
         window.requestAnimationFrame(() => {
           scrollScheduled = false;
-          const rect = sentinel.getBoundingClientRect();
-          if (rect.top < (window.innerHeight || document.documentElement.clientHeight) + 600) {
+          if (shouldLoadFromSentinel()) {
             loadNext();
           }
         });
       };
       window.addEventListener('scroll', onScroll, { passive: true });
+    }
+
+    if (restoredState) {
+      initShopProductActions();
+      updateResultCount();
+      scrollToRestoredProduct();
     }
   }
 

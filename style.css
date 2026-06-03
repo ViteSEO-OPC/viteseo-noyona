@@ -2103,7 +2103,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   justify-content: center;
   aspect-ratio: 1 / 1;
   margin-bottom: 16px;
-  border-radius: 22px 22px 0px 0px;
+  border-radius: var(--noyona-radius-cta) var(--noyona-radius-cta) 0 0;
   overflow: hidden;
   background: var(--noyona-color-pink-muted-rose);
 }
@@ -2126,6 +2126,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   max-height: 100%;
   object-fit: contain;
   object-position: center;
+  border-radius: inherit;
 }
 
 /* Product title */
@@ -2380,13 +2381,13 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product {
   align-items: start;
   align-self: start;
   height: auto;
-  border-radius: 22px;
+  border-radius: var(--noyona-radius-cta);
   padding: 10px 16px 14px 10px;
   min-height: 176px;
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product::after {
-  border-radius: 0 0 22px 22px;
+  border-radius: 0 0 var(--noyona-radius-cta) var(--noyona-radius-cta);
 }
 
 body.noyona-shop-view-list .noyona-shop-products .wc-block-product:hover,
@@ -3239,7 +3240,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 
 .noyona-product-search-page .noyona-search-grid .wc-block-components-product-image {
   margin-bottom: 14px;
-  border-radius: 10px;
+  border-radius: var(--noyona-radius-cta);
   overflow: hidden;
   display: block;
 }
@@ -3248,6 +3249,11 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   width: 100%;
   height: auto;
   display: block;
+  border-radius: inherit;
+}
+
+.noyona-shop-products .wc-block-components-product-image img {
+  border: none;
 }
 
 .noyona-product-search-page .noyona-search-grid .wc-block-product .wp-block-post-title {
