@@ -3391,15 +3391,17 @@ function noyona_render_account_page_shortcode() {
                 'noyona_dismiss_welcome_modal',
                 'noyona_welcome_nonce'
             );
-            // Complete Profile dismisses the welcome modal (clears the flag via the same
-            // handler) and returns to the normal My Account page. It intentionally does NOT
-            // auto-open the Edit Profile modal — the user can open it via the existing
-            // "Edit Profile Details" button — to avoid redundant modal chaining.
+            // "Set a Password" dismisses the welcome modal (clears the flag via the same
+            // handler) and lands on My Account with the existing Set Password modal opened
+            // via its CSS :target fragment — the same mechanism the profile "Set Password"
+            // button uses. This reuses the existing Set Password flow as-is (no new workflow,
+            // no change to password validation, and the modal's existing close controls work
+            // because it opens via :target rather than the is-open query-arg path).
             $noyona_welcome_complete_url = wp_nonce_url(
                 add_query_arg(
                     array(
                         'action'      => 'noyona_dismiss_welcome_modal',
-                        'redirect_to' => $account_url,
+                        'redirect_to' => $account_url . '#noyona-account-set-password-modal',
                     ),
                     admin_url( 'admin-post.php' )
                 ),
@@ -3413,18 +3415,18 @@ function noyona_render_account_page_shortcode() {
             aria-hidden="false"
         >
             <a href="<?php echo esc_url( $noyona_welcome_continue_url ); ?>" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close modal', 'noyona-childtheme' ); ?>"></a>
-            <div class="noyona-account-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Welcome to Noyona', 'noyona-childtheme' ); ?>">
+            <div class="noyona-account-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Account Created Successfully', 'noyona-childtheme' ); ?>">
                 <a href="<?php echo esc_url( $noyona_welcome_continue_url ); ?>" class="noyona-account-modal-back">
                     <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                 </a>
-                <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Welcome to Noyona!', 'noyona-childtheme' ); ?></h4>
+                <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Account Created Successfully', 'noyona-childtheme' ); ?></h4>
 
-                <p><?php esc_html_e( 'Your account has been created successfully using Google.', 'noyona-childtheme' ); ?></p>
-                <p><?php esc_html_e( 'You can continue using Google to sign in, or set a password later if you would like to sign in using your email address.', 'noyona-childtheme' ); ?></p>
+                <p><?php esc_html_e( 'Your account was created successfully with Google.', 'noyona-childtheme' ); ?></p>
+                <p><?php esc_html_e( "You can keep signing in with Google, or set a password now if you'd prefer to log in with your email too.", 'noyona-childtheme' ); ?></p>
 
                 <div class="noyona-account-modal-actions">
-                    <a href="<?php echo esc_url( $noyona_welcome_continue_url ); ?>" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Continue Later', 'noyona-childtheme' ); ?></a>
-                    <a href="<?php echo esc_url( $noyona_welcome_complete_url ); ?>" class="noyona-account-btn noyona-account-btn--primary"><?php esc_html_e( 'Complete Profile', 'noyona-childtheme' ); ?></a>
+                    <a href="<?php echo esc_url( $noyona_welcome_continue_url ); ?>" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Maybe Later', 'noyona-childtheme' ); ?></a>
+                    <a href="<?php echo esc_url( $noyona_welcome_complete_url ); ?>" class="noyona-account-btn noyona-account-btn--primary"><?php esc_html_e( 'Set a Password', 'noyona-childtheme' ); ?></a>
                 </div>
             </div>
         </div>
