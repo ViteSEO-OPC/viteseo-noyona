@@ -229,6 +229,74 @@ function noyona_get_account_order_modal_url( $order ) {
 }
 
 /**
+ * Safety net for PayMongo's redirect catcher (remediation plan Phase 3.3).
+ *
+ * The gateway's cynder_paymongo_catch_redirect() only handles the intent
+ * statuses succeeded / processing / awaiting_payment_method / awaiting_next_action.
+ * Any other status falls through the if/else with no redirect and no exit,
+ * leaving the customer staring at a blank `?wc-api=` response. We hook the SAME
+ * WooCommerce API action at a later priority: the plugin handler calls exit() on
+ * every path it handles (success, awaiting, and all validation failures), so
+ * once it runs PHP terminates and this never fires. It executes ONLY on that
+ * unhandled fall-through, where we send the customer somewhere sensible with a
+ * clear message instead of a blank screen.
+ *
+ * Implemented as a hook (not a plugin edit) so a PayMongo plugin update can't
+ * wipe it. Resolving an already-paid order to the received page also makes it
+ * safe even if a future plugin version returns without exit on a success path.
+ */
+add_action( 'woocommerce_api_cynder_paymongo_catch_redirect', 'noyona_paymongo_catch_redirect_fallback', 20 );
+function noyona_paymongo_catch_redirect_fallback() {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- mirrors the gateway's own GET-based redirect handler.
+	$order_id  = isset( $_GET['order'] ) ? absint( wp_unslash( $_GET['order'] ) ) : 0;
+	$order_key = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+	$order = null;
+	if ( '' !== $order_key && function_exists( 'wc_get_order_id_by_order_key' ) ) {
+		$resolved = wc_get_order_id_by_order_key( $order_key );
+		if ( $resolved ) {
+			$candidate = wc_get_order( $resolved );
+			if ( $candidate instanceof WC_Order && ( 0 === $order_id || (int) $candidate->get_id() === $order_id ) ) {
+				$order = $candidate;
+			}
+		}
+	}
+
+	if ( function_exists( 'wc_get_logger' ) ) {
+		wc_get_logger()->log(
+			'warning',
+			'[Noyona Catch Redirect Fallback] Unhandled PayMongo intent status for order '
+				. ( $order instanceof WC_Order ? $order->get_id() : 'unknown' )
+				. '. Redirecting away from a blank page.'
+		);
+	}
+
+	if ( $order instanceof WC_Order ) {
+		// Already paid (e.g. webhook beat the redirect): send to the Done page.
+		if ( $order->is_paid() ) {
+			wp_safe_redirect( $order->get_checkout_order_received_url() );
+			exit;
+		}
+
+		if ( function_exists( 'wc_add_notice' ) ) {
+			wc_add_notice(
+				__( 'We could not confirm your payment status. Your order is awaiting payment — please try again or choose another method.', 'noyona' ),
+				'error'
+			);
+		}
+		wp_safe_redirect( $order->get_checkout_payment_url() );
+		exit;
+	}
+
+	if ( function_exists( 'wc_add_notice' ) ) {
+		wc_add_notice( __( 'We could not verify your payment. Please try again.', 'noyona' ), 'error' );
+	}
+	wp_safe_redirect( function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' ) );
+	exit;
+}
+
+/**
  * AJAX: lightweight order payment status probe for order-received polling.
  *
  * Uses order ID + order key validation so guests can safely query their own

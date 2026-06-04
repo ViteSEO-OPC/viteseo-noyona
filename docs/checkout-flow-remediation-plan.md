@@ -230,6 +230,17 @@ This removes the fragile cross-page machinery. UI work; ship after Phase 1.
 
 ## Phase 3 — Standardize the payment hand-off
 
+> **STATUS (2026-06-04):** 3.1 and 3.2 were already satisfied by the existing
+> gateway flow + `thankyou.php` (paid vs awaiting-payment + QR poller). 3.3 is
+> now **IMPLEMENTED** as a theme-side hook (no plugin edit): an unexpected
+> PayMongo intent status used to fall through `cynder_paymongo_catch_redirect()`
+> with no redirect → blank page. `noyona_paymongo_catch_redirect_fallback()`
+> (`inc/woocommerce-checkout.php`, hooked at priority 20 on
+> `woocommerce_api_cynder_paymongo_catch_redirect`) now catches that case and
+> sends the customer to the re-pay page (or Done page if already paid) with a
+> clear notice. It only fires on the fall-through, since the plugin handler
+> `exit`s on every status it handles.
+
 Make all four methods follow the same predictable path.
 
 ### 3.1 One model for all methods
@@ -299,3 +310,115 @@ Run each row in **test mode**, then repeat the critical ones in live mode with s
 3. **Phase 2** collapse preview — kills the bounce-back class of bugs.
 4. **Phase 3** payment hand-off — consistency + no blank/false-done pages.
 5. **Phase 4/5** test + rollout.
+
+---
+
+## Implementation summary (2026-06-03 → 2026-06-04)
+
+This is the plain-English record of every problem we hit, what fixed it, and why.
+
+### The throughline
+
+Almost every bug traced back to one root cause: **the custom multi-step checkout
+fought WooCommerce's standard model** — one form, on one page, with the
+**PayMongo webhook as the source of truth** for whether an order is paid. All
+four methods (QR Ph, Card, GCash, Maya) create the order *before* money moves, so
+any logic that treats "order created" as "checkout done" is wrong. Realigning
+with that model is what made payments reliable.
+
+### 1. Retry / duplicate-order dead-end (Phase 1)
+
+- **Problem:** A failed or abandoned payment created a `pending` order, which the
+  idempotency logic marked as "completed," then blocked the customer with
+  *"This checkout attempt already created order #1914."* — a hard dead end, and
+  it risked orphaned duplicate orders.
+- **Fix:** Only block a retry when the attempt's order is **actually paid**
+  (`is_paid()`). Unpaid retries pass through and WooCommerce resumes the **same**
+  pending order via `order_awaiting_payment` (no duplicates). The double-submit
+  lock TTL was cut to 30s and released earlier (priority 5) so a failed
+  payment-intent can't strand the customer.
+- **Why:** A `pending` order means "not paid yet," so it must never lock out a
+  legitimate second attempt.
+- **File:** `inc/woocommerce-checkout.php`.
+
+### 2. Card details wiped on the Preview page (Phase 2)
+
+- **Problem:** Card fields were typed on `/checkout/`, but clicking Preview
+  loaded a **separate `/preview/` page** that re-rendered the form empty. PayMongo
+  had nothing to tokenize → *"Your payment method could not be prepared."*
+- **Fix:** Collapsed Preview into an **in-page panel** on `/checkout/` (a CSS/JS
+  toggle, no navigation). The form never moves, so entered values survive to
+  Place Order. `/preview/` now 301-redirects to `/checkout/`; the obsolete
+  server-side preview step-guard was removed.
+- **Why:** A second page load is what destroyed the card data. Keeping everything
+  in one DOM is exactly how stock WooCommerce already works.
+- **Files:** `woocommerce/checkout/form-checkout.php`,
+  `assets/css/noyona-checkout.css`, `inc/woocommerce-checkout.php`,
+  `inc/security.php`.
+
+### 3. Card input fields were completely hidden
+
+- **Problem:** After Phase 2 there were **no card fields at all**. The theme had
+  `.payment_box { display: none !important; }`, which hid the panel where PayMongo
+  renders card number / expiry / CVC. QR/GCash/Maya were unaffected (they redirect
+  and have no fields), so only card looked broken.
+- **Fix:** Scoped the rule to reveal the **selected** method's box using
+  `:has(input:checked)` — choosing "Credit Card" now shows its fields.
+- **Why:** A blanket hide removed the only place card details could be entered.
+- **File:** `assets/css/noyona-checkout.css`.
+
+### 4. The real card-killer — jQuery load order
+
+- **Problem:** Even with fields visible, card still failed. The browser console
+  showed `paymongo-cc.js` crashing with **"jQuery is not defined."** The site
+  **defers jQuery** for performance, but the PayMongo gateway loads its scripts as
+  **blocking head scripts** that execute *before* jQuery runs. So `new CCForm()`
+  never ran, the `checkout_place_order_paymongo` tokenizer was never bound, and
+  the form submitted with an empty token → the same "could not be prepared."
+- **Fix:** Forced `strategy=defer` on the four PayMongo scripts so they run
+  **after** deferred jQuery — the same pattern the theme already uses for
+  Wordfence and WooCommerce core. This made card payments work end-to-end.
+- **Why:** A script that uses jQuery must execute after jQuery is defined; matching
+  the gateway's load timing to the site's deferred jQuery fixed it.
+- **File:** `inc/woocommerce-checkout.php`
+  (`noyona_defer_paymongo_checkout_scripts`). The PayMongo asset bridge was also
+  widened from the dead `/preview/` step to the whole checkout UI context.
+
+### 5. "Track Order" → custom order modal
+
+- **Problem:** The Done page's Track Order button used Woo's default view-order
+  page; it should open the custom order modal on the My Account orders panel. A
+  bare hash didn't open it, because the order's row only renders under a specific
+  **filter tab + page**, so the `:target` element wasn't on the page.
+- **Fix:** Added `noyona_get_account_order_modal_url()` which maps the order's
+  **status → filter tab** (e.g. `processing` → `to-ship`), computes its **page**
+  (newest-first, 10/page), and builds the full deep link
+  `…/orders/?order_filter=…&orders_page=…#noyona-account-order-modal-{order}-{item}`.
+- **Why:** The modal opens via CSS `:target`, which requires the target element to
+  actually be rendered — so the link must land on the exact tab/page that contains
+  the order.
+- **Files:** `inc/woocommerce-checkout.php`, `woocommerce/checkout/thankyou.php`.
+
+### 6. Blank-page edge case in the redirect catcher (Phase 3.3)
+
+- **Problem:** PayMongo's `cynder_paymongo_catch_redirect()` only handles four
+  intent statuses; any other status falls through with no redirect → a **blank
+  page** for the customer.
+- **Fix:** Added `noyona_paymongo_catch_redirect_fallback()` on the same WC API
+  hook at a later priority. The plugin handler `exit`s on every status it handles,
+  so ours only fires on the fall-through — redirecting to the re-pay page (or the
+  Done page if the order is already paid) with a clear notice, and logging a
+  warning. Done as a **hook, not a plugin edit**, so a plugin update can't wipe it.
+- **Why:** Customers should always land somewhere actionable, never a blank screen.
+- **File:** `inc/woocommerce-checkout.php`.
+
+### Still open (operational, not code)
+
+These need PayMongo **dashboard access** and are the only remaining gaps:
+
+- [ ] **Enable GCash** on the PayMongo merchant account (it's simply not
+      activated — Maya works on the same keys, proving the keys/integration are
+      fine).
+- [ ] **Confirm the webhook URL** is registered for `payment.paid` +
+      `payment.failed` at `https://<domain>/?wc-api=cynder_paymongo`.
+- [ ] **Set the Test Webhook Secret** for future test-mode work.
