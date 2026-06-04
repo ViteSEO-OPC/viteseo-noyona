@@ -1910,34 +1910,58 @@ body:not(.logged-in) .header-account--logged-out {
   .dropdown-menu {
     position: static;
     transform: none !important;
-    opacity: 1;
+    opacity: 0;
     visibility: visible;
     box-shadow: none;
     padding: 0;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.25s ease-out;
+    margin: 0;
+    pointer-events: none;
+    transition:
+      max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.24s ease,
+      padding 0.24s ease,
+      margin 0.24s ease;
     width: 100%;
     background: #f9f9f9;
-    border-radius: 0;
+    border-radius: var(--noyona-radius-input);
+    will-change: max-height, opacity;
   }
 
   .nav-item.is-open .dropdown-menu {
     max-height: 520px;
-    padding: 0.5rem 0;
+    opacity: 1;
+    padding: 0.45rem 0;
+    margin: 0.2rem 0 0.35rem;
+    pointer-events: auto;
   }
 
   .dropdown-menu li a {
     padding: 0.6rem 1rem;
     font-size: var(--wp--preset--font-size--nav-button);
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s, color 0.2s;
+  }
+
+  .nav-item.is-open .dropdown-menu li a {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   /* Prevent hover opening on mobile */
-  .nav-item:hover .dropdown-menu {
+  .nav-item:not(.is-open):hover .dropdown-menu {
     max-height: 0;
+    opacity: 0;
+    padding: 0;
+    margin: 0;
   }
   .nav-item.is-open:hover .dropdown-menu {
     max-height: 520px;
+    opacity: 1;
+    padding: 0.45rem 0;
+    margin: 0.2rem 0 0.35rem;
   }
 }
 
