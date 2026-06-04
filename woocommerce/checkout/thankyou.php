@@ -275,6 +275,14 @@ defined( 'ABSPATH' ) || exit;
 							<span class="noyona-order-totals__value"><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></span>
 						</div>
 					</div>
+
+					<?php $customer_note = trim( (string) $order->get_customer_note() ); ?>
+					<?php if ( '' !== $customer_note ) : ?>
+						<div class="noyona-order-note">
+							<span class="noyona-order-note__label"><?php esc_html_e( 'Order Notes', 'noyona' ); ?></span>
+							<p class="noyona-order-note__text"><?php echo esc_html( $customer_note ); ?></p>
+						</div>
+					<?php endif; ?>
 				</section>
 
 			<?php elseif ( $is_done_order ) : ?>
@@ -353,6 +361,14 @@ defined( 'ABSPATH' ) || exit;
 							<span class="noyona-order-totals__value"><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></span>
 						</div>
 					</div>
+
+					<?php $customer_note = trim( (string) $order->get_customer_note() ); ?>
+					<?php if ( '' !== $customer_note ) : ?>
+						<div class="noyona-order-note">
+							<span class="noyona-order-note__label"><?php esc_html_e( 'Order Notes', 'noyona' ); ?></span>
+							<p class="noyona-order-note__text"><?php echo esc_html( $customer_note ); ?></p>
+						</div>
+					<?php endif; ?>
 				</section>
 
 				<div class="noyona-done-meta-grid">

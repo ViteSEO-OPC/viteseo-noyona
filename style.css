@@ -4959,6 +4959,31 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	white-space: nowrap;
 }
 
+.noyona-account-order-modal__note {
+	margin-top: 16px;
+	padding: 14px;
+	border: 1px solid #efe8eb;
+	border-radius: var(--noyona-radius-card);
+	background: #faf6f8;
+}
+
+.noyona-account-order-modal__note h4 {
+	margin: 0 0 6px;
+	font-size: var(--wp--preset--font-size--body);
+	font-weight: 700;
+	color: #000000;
+}
+
+.noyona-account-order-modal__note-text {
+	margin: 0;
+	font-size: var(--wp--preset--font-size--body);
+	font-weight: 500;
+	line-height: 1.5;
+	color: #474747;
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}
+
 .noyona-account-order-modal__totals {
 	margin-top: 16px;
 	display: grid;

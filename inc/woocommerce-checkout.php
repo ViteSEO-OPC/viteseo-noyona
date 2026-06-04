@@ -1045,6 +1045,15 @@ function noyona_copy_billing_name_to_shipping( $order, $data ) {
 	}
 }
 
+/* ─── Save custom checkout fields ─────────────────── */
+
+add_action( 'woocommerce_checkout_update_order_meta', 'noyona_save_custom_checkout_fields' );
+function noyona_save_custom_checkout_fields( $order_id ) {
+	if ( ! empty( $_POST['noyona_newsletter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		update_post_meta( $order_id, '_noyona_newsletter_optin', 'yes' );
+	}
+}
+
 add_filter( 'woocommerce_order_button_text', 'noyona_place_order_button_text' );
 function noyona_place_order_button_text( $text ) {
 	return __( 'Place Order', 'noyona' );
@@ -1101,18 +1110,6 @@ add_filter( 'woocommerce_ship_to_different_address_checked', '__return_true' );
 add_filter( 'woocommerce_ship_to_destination', 'noyona_force_ship_to_destination_mode', 20 );
 function noyona_force_ship_to_destination_mode( $destination ) {
 	return 'shipping';
-}
-
-/* ─── Save custom checkout fields ─────────────────── */
-
-add_action( 'woocommerce_checkout_update_order_meta', 'noyona_save_custom_checkout_fields' );
-function noyona_save_custom_checkout_fields( $order_id ) {
-	if ( ! empty( $_POST['noyona_newsletter'] ) ) {
-		update_post_meta( $order_id, '_noyona_newsletter_optin', 'yes' );
-	}
-	if ( ! empty( $_POST['noyona_gift_order'] ) ) {
-		update_post_meta( $order_id, '_noyona_gift_order', 'yes' );
-	}
 }
 
 /**
@@ -1541,8 +1538,7 @@ function noyona_checkout_inline_js() {
 				name === 'order_comments' ||
 				name === 'payment_method' ||
 				name === 'terms' ||
-				name === 'noyona_newsletter' ||
-				name === 'noyona_gift_order'
+				name === 'noyona_newsletter'
 			);
 		}
 
@@ -1746,6 +1742,9 @@ function noyona_checkout_inline_js() {
 			var paymentNode = document.querySelector('[data-review-payment-method]');
 			var emailNode = document.querySelector('[data-review-email]');
 			var phoneNode = document.querySelector('[data-review-phone]');
+			var specialInstructionsNode = document.querySelector('[data-review-special-instructions]');
+			var noteRowNode = document.querySelector('[data-review-note-row]');
+			var noteValueNode = document.querySelector('[data-review-order-note]');
 
 			var firstName = readFieldValue(checkoutForm, 'billing_first_name');
 			var lastName = readFieldValue(checkoutForm, 'billing_last_name');
@@ -1770,6 +1769,11 @@ function noyona_checkout_inline_js() {
 			if (paymentNode) paymentNode.textContent = paymentMethod || 'Payment method';
 			if (emailNode) emailNode.textContent = email || 'Email will appear here.';
 			if (phoneNode) phoneNode.textContent = phone || 'Phone will appear here.';
+
+			var orderNote = readFieldValue(checkoutForm, 'order_comments');
+			if (noteValueNode) noteValueNode.textContent = orderNote;
+			if (noteRowNode) noteRowNode.hidden = !orderNote;
+			if (specialInstructionsNode) specialInstructionsNode.hidden = !orderNote;
 		}
 
 		function wireReviewTerms(checkoutForm) {

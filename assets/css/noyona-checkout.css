@@ -423,6 +423,64 @@ body.noyona-review-step .noyona-order-totals--summary {
   color: #666;
 }
 
+/* Review-step order note */
+.noyona-review-special-instructions {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--noyona-cart-line, #efefef);
+}
+
+.noyona-review-special-instructions__row {
+  margin-top: 0.5rem;
+}
+
+.noyona-review-special-instructions__row > span {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.noyona-review-special-instructions__row > p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #1a1a1a;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* Order note — thank-you / order-received summary */
+.noyona-order-note {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--noyona-cart-line, #efefef);
+  border-radius: 10px;
+  background: #faf7f4;
+}
+
+.noyona-order-note__label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.noyona-order-note__text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #1a1a1a;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
 .noyona-review-terms {
   margin-top: 0.5rem;
   margin-bottom: 0.25rem;

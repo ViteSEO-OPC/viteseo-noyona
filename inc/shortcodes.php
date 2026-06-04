@@ -2547,6 +2547,14 @@ function noyona_render_account_page_shortcode() {
                                             <strong class="noyona-account-order-modal__item-price"><?php echo wp_kses_post( $item_total ); ?></strong>
                                         </section>
 
+                                        <?php $order_customer_note = trim( (string) $account_order->get_customer_note() ); ?>
+                                        <?php if ( '' !== $order_customer_note ) : ?>
+                                            <section class="noyona-account-order-modal__note">
+                                                <h4><?php esc_html_e( 'Order Notes', 'noyona-childtheme' ); ?></h4>
+                                                <p class="noyona-account-order-modal__note-text"><?php echo esc_html( $order_customer_note ); ?></p>
+                                            </section>
+                                        <?php endif; ?>
+
                                         <section class="noyona-account-order-modal__totals">
                                             <div class="noyona-account-order-modal__total-row">
                                                 <span><?php esc_html_e( 'Merchandise Subtotal', 'noyona-childtheme' ); ?></span>
