@@ -666,10 +666,10 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 .single-product .wp-block-add-to-cart-form .noyona-pdp-qty__btn {
   width: 44px;
   height: 44px;
-  border: 0;
+  border: 1px solid var(--noyona-cta-secondary-border);
   border-radius: 13px;
-  background: #f0eff2;
-  color: #63626d;
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
   font-size: 1.8rem;
   line-height: 1;
   display: inline-flex;
@@ -681,13 +681,15 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 
 .single-product form.cart .noyona-pdp-qty__btn--plus,
 .single-product .wp-block-add-to-cart-form .noyona-pdp-qty__btn--plus {
-  background: #e3a0ae;
-  color: #fff;
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
 }
 
 .single-product form.cart .noyona-pdp-qty__btn:hover,
 .single-product .wp-block-add-to-cart-form .noyona-pdp-qty__btn:hover {
-  filter: brightness(0.98);
+  background: var(--noyona-cta-secondary-hover-bg);
+  color: var(--noyona-cta-secondary-hover-text);
+  border: 1px solid var(--noyona-cta-secondary-hover-bg);
 }
 
 @media (max-width: 600px) {
