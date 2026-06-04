@@ -2433,6 +2433,15 @@ function noyona_render_account_page_shortcode() {
                                 if ( method_exists( $account_order, 'get_checkout_payment_url' ) ) {
                                     $pay_now_url = (string) $account_order->get_checkout_payment_url();
                                 }
+                                // QR Ph orders display their QR (and live countdown) on the
+                                // order-received page, not the gateway picker. Resume that view
+                                // instead of re-prompting the customer to choose a method.
+                                $is_qr_payment = function_exists( 'noyona_order_is_qr_payment' )
+                                    ? noyona_order_is_qr_payment( $account_order )
+                                    : ( false !== strpos( strtolower( (string) $account_order->get_payment_method() . ' ' . (string) $account_order->get_payment_method_title() ), 'qr' ) );
+                                if ( $is_qr_payment && method_exists( $account_order, 'get_checkout_order_received_url' ) ) {
+                                    $pay_now_url = (string) $account_order->get_checkout_order_received_url();
+                                }
                                 $show_pay_now = ( $is_to_pay_status && ! $account_order->is_paid() && '' !== trim( $pay_now_url ) );
 
                                 $item_thumb = '';

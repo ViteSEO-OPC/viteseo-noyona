@@ -352,6 +352,122 @@ function noyona_check_order_payment_status() {
 }
 
 /**
+ * Whether an order was paid with a QR Ph style gateway.
+ *
+ * Matches both the PayMongo "QR Ph" gateway and the standalone QR PH plugin by
+ * looking for "qr" in the payment method id/title, so the auto-cancel logic is
+ * gateway-agnostic and survives the theme/plugin folder divergence.
+ *
+ * @param WC_Order|mixed $order Order instance.
+ * @return bool
+ */
+function noyona_order_is_qr_payment( $order ) {
+	if ( ! $order instanceof WC_Order ) {
+		return false;
+	}
+
+	$context = strtolower( trim( (string) $order->get_payment_method() . ' ' . (string) $order->get_payment_method_title() ) );
+
+	return ( false !== strpos( $context, 'qr' ) );
+}
+
+/**
+ * Payment window, in seconds, for QR Ph orders before they auto-cancel.
+ *
+ * Defaults to 30 minutes to match the countdown shown on the order-received
+ * page. Filterable via `noyona_qrph_cancel_timeout`.
+ *
+ * @return int
+ */
+function noyona_qrph_cancel_timeout_seconds() {
+	return (int) apply_filters( 'noyona_qrph_cancel_timeout', 30 * MINUTE_IN_SECONDS );
+}
+
+/**
+ * Schedule a one-off cancellation check when a QR Ph order is placed.
+ *
+ * PayMongo confirms paid QR Ph orders via webhook; an abandoned order would
+ * otherwise sit on-hold indefinitely (WooCommerce hold-stock only auto-cancels
+ * `pending`, never `on-hold`). We schedule a check ~30 minutes out and cancel
+ * the order then if it is still unpaid.
+ *
+ * @param int            $order_id Order ID.
+ * @param WC_Order|null  $order    Order instance (when provided by the hook).
+ * @return void
+ */
+add_action( 'woocommerce_order_status_on-hold', 'noyona_qrph_schedule_cancel', 10, 2 );
+add_action( 'woocommerce_order_status_pending', 'noyona_qrph_schedule_cancel', 10, 2 );
+function noyona_qrph_schedule_cancel( $order_id, $order = null ) {
+	$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
+	if ( ! $order || ! noyona_order_is_qr_payment( $order ) || $order->is_paid() ) {
+		return;
+	}
+
+	$hook  = 'noyona_qrph_maybe_cancel_order';
+	$args  = array( (int) $order_id );
+	$delay = noyona_qrph_cancel_timeout_seconds();
+
+	if ( function_exists( 'as_schedule_single_action' ) && function_exists( 'as_next_scheduled_action' ) ) {
+		if ( false === as_next_scheduled_action( $hook, $args, 'noyona' ) ) {
+			as_schedule_single_action( time() + $delay, $hook, $args, 'noyona' );
+		}
+	} elseif ( ! wp_next_scheduled( $hook, $args ) ) {
+		wp_schedule_single_event( time() + $delay, $hook, $args );
+	}
+}
+
+/**
+ * Clear a pending cancellation check once an order leaves the awaiting state.
+ *
+ * @param int $order_id Order ID.
+ * @return void
+ */
+add_action( 'woocommerce_order_status_processing', 'noyona_qrph_unschedule_cancel', 10, 1 );
+add_action( 'woocommerce_order_status_completed', 'noyona_qrph_unschedule_cancel', 10, 1 );
+add_action( 'woocommerce_order_status_cancelled', 'noyona_qrph_unschedule_cancel', 10, 1 );
+add_action( 'woocommerce_order_status_refunded', 'noyona_qrph_unschedule_cancel', 10, 1 );
+function noyona_qrph_unschedule_cancel( $order_id ) {
+	$hook = 'noyona_qrph_maybe_cancel_order';
+	$args = array( (int) $order_id );
+
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( $hook, $args, 'noyona' );
+	} elseif ( wp_next_scheduled( $hook, $args ) ) {
+		wp_clear_scheduled_hook( $hook, $args );
+	}
+}
+
+/**
+ * Cancel an unpaid QR Ph order once its payment window has elapsed.
+ *
+ * @param int $order_id Order ID.
+ * @return void
+ */
+add_action( 'noyona_qrph_maybe_cancel_order', 'noyona_qrph_maybe_cancel_order' );
+function noyona_qrph_maybe_cancel_order( $order_id ) {
+	$order = wc_get_order( $order_id );
+	if ( ! $order || ! noyona_order_is_qr_payment( $order ) ) {
+		return;
+	}
+
+	// Paid (webhook confirmed) or already moved on — nothing to cancel.
+	if ( $order->is_paid() || ! $order->has_status( array( 'pending', 'on-hold' ) ) ) {
+		return;
+	}
+
+	$minutes = (int) round( noyona_qrph_cancel_timeout_seconds() / MINUTE_IN_SECONDS );
+
+	$order->update_status(
+		'cancelled',
+		sprintf(
+			/* translators: %d: payment window in minutes. */
+			__( 'QR Ph payment window (%d minutes) elapsed without a confirmed payment. Order auto-cancelled.', 'noyona-childtheme' ),
+			$minutes
+		)
+	);
+}
+
+/**
  * AJAX: persist checkout form fields into the WC customer session so that the
  * server-side guard on /preview/ sees populated values and doesn't redirect
  * the user back to /checkout/.
