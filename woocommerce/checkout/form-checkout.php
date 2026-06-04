@@ -289,13 +289,6 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 					<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
 				<?php endforeach; ?>
 				<p class="noyona-checkout-card__hint"><?php esc_html_e( 'e.g. "Leave at the gate" or "Call upon arrival"', 'noyona' ); ?></p>
-				<div class="noyona-checkout-optin noyona-checkout-optin--gift">
-					<label class="noyona-checkout-optin__label">
-						<input type="checkbox" name="noyona_gift_order" value="1" class="noyona-checkout-optin__input">
-						<i class="fa-solid fa-gift noyona-checkout-optin__icon--gift" aria-hidden="true"></i>
-						<span><?php esc_html_e( 'This order is a gift', 'noyona' ); ?></span>
-					</label>
-				</div>
 			</div>
 			<?php endif; ?>
 
@@ -437,6 +430,13 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 								'<strong>' . esc_html( date_i18n( 'M j, Y', strtotime( '+10 days' ) ) ) . '</strong>'
 							);
 						?></span>
+					</div>
+					<div class="noyona-review-special-instructions" data-review-special-instructions hidden>
+						<h3 class="noyona-review-meta__title"><?php esc_html_e( 'Order Notes', 'noyona' ); ?></h3>
+						<div class="noyona-review-special-instructions__row" data-review-note-row hidden>
+							<span><?php esc_html_e( 'Order note', 'noyona' ); ?></span>
+							<p data-review-order-note></p>
+						</div>
 					</div>
 				</div>
 
