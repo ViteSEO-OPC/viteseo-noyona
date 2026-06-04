@@ -1784,13 +1784,46 @@ function noyona_checkout_inline_js() {
 
 			customTerms.checked = !!nativeTerms.checked;
 			customTerms.addEventListener('change', function () {
+				if (customTerms.checked) {
+					clearReviewTermsNotice();
+				}
 				nativeTerms.checked = !!customTerms.checked;
 				nativeTerms.dispatchEvent(new Event('change', { bubbles: true }));
 			});
 
 			nativeTerms.addEventListener('change', function () {
 				customTerms.checked = !!nativeTerms.checked;
+				if (customTerms.checked) {
+					clearReviewTermsNotice();
+				}
 			});
+		}
+
+		function clearReviewTermsNotice() {
+			var existing = document.querySelector('.noyona-review-terms-notice');
+			if (existing) {
+				existing.remove();
+			}
+		}
+
+		function showReviewTermsNotice() {
+			clearReviewTermsNotice();
+
+			var actions = document.querySelector('.noyona-checkout-actions');
+			if (!actions || !actions.parentNode) return;
+
+			var notice = document.createElement('ul');
+			notice.className = 'woocommerce-error noyona-review-terms-notice';
+			notice.setAttribute('role', 'alert');
+
+			var item = document.createElement('li');
+			item.textContent = <?php echo wp_json_encode( __( 'Please agree to the Terms of Service, Shipping Policy, and Refund Policy before placing your order.', 'noyona' ) ); ?>;
+			notice.appendChild(item);
+
+			actions.parentNode.insertBefore(notice, actions);
+			if (typeof notice.scrollIntoView === 'function') {
+				notice.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
 		}
 
 		function ensureStepLink(stepItem, href) {
@@ -2134,7 +2167,7 @@ function noyona_checkout_inline_js() {
 			var btn = document.getElementById('noyona-review-order');
 			if (!btn) return;
 			if (isReviewStep) {
-				btn.innerHTML = '<i class="fa-solid fa-lock" aria-hidden="true"></i> PLACE ORDER';
+				btn.innerHTML = '<span class="noyona-checkout-actions__icon" aria-hidden="true"></span> PLACE ORDER';
 			} else {
 				btn.innerHTML = 'PREVIEW ORDER <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>';
 			}
@@ -2151,6 +2184,7 @@ function noyona_checkout_inline_js() {
 
 		function goToDetailsStep() {
 			isReviewStep = false;
+			clearReviewTermsNotice();
 			applyDetailsStepUI();
 			updateReviewButtonLabel();
 			if (window.scrollTo) {
@@ -2186,9 +2220,11 @@ function noyona_checkout_inline_js() {
 				// Review → place order.
 				var customTerms = document.getElementById('noyona-review-terms');
 				if (customTerms && !customTerms.checked) {
+					showReviewTermsNotice();
 					customTerms.focus();
 					return;
 				}
+				clearReviewTermsNotice();
 				if (form) {
 					var nativeTerms = form.querySelector('#terms');
 					if (nativeTerms) {

@@ -489,6 +489,22 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 					</div>
 				</div>
 
+			<?php $terms_url = home_url( '/terms-and-policies/' ); ?>
+			<div class="noyona-review-terms">
+				<label class="noyona-review-terms__label" for="noyona-review-terms">
+					<input type="checkbox" id="noyona-review-terms" class="noyona-review-terms__checkbox">
+					<span class="noyona-review-terms__text">
+						<?php esc_html_e( 'I agree to the', 'noyona' ); ?>
+						<?php if ( ! empty( $terms_url ) ) : ?>
+							<a href="<?php echo esc_url( $terms_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?></a>
+						<?php else : ?>
+							<?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?>
+						<?php endif; ?>
+						<?php esc_html_e( '. I understand that this order is final.', 'noyona' ); ?>
+					</span>
+				</label>
+			</div>
+
 			<div class="noyona-checkout-actions">
 				<a href="/cart" class="noyona-checkout-actions__back">
 					<i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
@@ -532,22 +548,6 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 					</div>
 				</div>
 			</div>
-
-			<?php $terms_url = home_url( '/terms-and-policies/' ); ?>
-				<div class="noyona-review-terms">
-					<label class="noyona-review-terms__label" for="noyona-review-terms">
-						<input type="checkbox" id="noyona-review-terms" class="noyona-review-terms__checkbox">
-						<span class="noyona-review-terms__text">
-							<?php esc_html_e( 'I agree to the', 'noyona' ); ?>
-							<?php if ( ! empty( $terms_url ) ) : ?>
-								<a href="<?php echo esc_url( $terms_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?></a>
-							<?php else : ?>
-								<?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?>
-							<?php endif; ?>
-							<?php esc_html_e( '. I understand that this order is final.', 'noyona' ); ?>
-						</span>
-					</label>
-				</div>
 
 			<div class="noyona-trust-badges">
 				<div class="noyona-trust-badge">
