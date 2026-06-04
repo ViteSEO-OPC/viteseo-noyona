@@ -3184,6 +3184,13 @@ function noyona_render_account_page_shortcode() {
                 <p><?php esc_html_e( 'Manage and protect your account', 'noyona-childtheme' ); ?></p>
             </header>
 
+            <?php // Page-level success notice shown after a profile save closes the Edit modal. Scoped to profile_updated only. ?>
+            <?php if ( '' === $active_modal && 'profile_updated' === $notice_code && '' !== $notice_message ) : ?>
+                <p class="noyona-notice is-success" role="status" data-noyona-notice-autohide="6000">
+                    <?php echo esc_html( $notice_message ); ?>
+                </p>
+            <?php endif; ?>
+
             <div class="noyona-account-profile-card__body">
                 <div class="noyona-account-profile-fields">
                     <div class="noyona-account-field">
@@ -3214,14 +3221,21 @@ function noyona_render_account_page_shortcode() {
 
         <?php echo noyona_render_account_addresses_card( $address_card_args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
+        <?php
+        // Close target for the Edit Profile modal. Uses remove_query_arg (matching the
+        // Address/Bank/Card modals) instead of href="#" so the modal also closes when it
+        // was opened via ?noyona_modal=edit (the .is-open path, e.g. after a profile save),
+        // not only via the CSS :target path.
+        $noyona_edit_modal_close_url = remove_query_arg( array( 'noyona_modal', 'noyona_account_notice' ), $account_url );
+        ?>
         <div
             id="noyona-account-edit-modal"
             class="noyona-account-modal<?php echo ( 'edit' === $active_modal ) ? ' is-open' : ''; ?>"
             aria-hidden="<?php echo ( 'edit' === $active_modal ) ? 'false' : 'true'; ?>"
         >
-            <a href="#" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close modal', 'noyona-childtheme' ); ?>"></a>
+            <a href="<?php echo esc_url( $noyona_edit_modal_close_url ); ?>" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close modal', 'noyona-childtheme' ); ?>"></a>
             <div class="noyona-account-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Edit profile details', 'noyona-childtheme' ); ?>">
-                <a href="#" class="noyona-account-modal-back">
+                <a href="<?php echo esc_url( $noyona_edit_modal_close_url ); ?>" class="noyona-account-modal-back">
                     <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                 </a>
                 <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit Profile Details', 'noyona-childtheme' ); ?></h4>
@@ -3247,7 +3261,7 @@ function noyona_render_account_page_shortcode() {
                     <input id="noyona-account-modal-phone" type="text" name="phone" value="<?php echo esc_attr( $phone ); ?>" />
 
                     <div class="noyona-account-modal-actions">
-                        <a href="#" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Cancel', 'noyona-childtheme' ); ?></a>
+                        <a href="<?php echo esc_url( $noyona_edit_modal_close_url ); ?>" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Cancel', 'noyona-childtheme' ); ?></a>
                         <button type="submit" class="noyona-account-btn noyona-account-btn--primary"><?php esc_html_e( 'Save Changes', 'noyona-childtheme' ); ?></button>
                     </div>
                 </form>
@@ -3385,11 +3399,15 @@ function noyona_render_account_page_shortcode() {
                 'noyona_dismiss_welcome_modal',
                 'noyona_welcome_nonce'
             );
+            // Complete Profile dismisses the welcome modal (clears the flag via the same
+            // handler) and returns to the normal My Account page. It intentionally does NOT
+            // auto-open the Edit Profile modal — the user can open it via the existing
+            // "Edit Profile Details" button — to avoid redundant modal chaining.
             $noyona_welcome_complete_url = wp_nonce_url(
                 add_query_arg(
                     array(
                         'action'      => 'noyona_dismiss_welcome_modal',
-                        'redirect_to' => add_query_arg( 'noyona_modal', 'edit', $account_url ),
+                        'redirect_to' => $account_url,
                     ),
                     admin_url( 'admin-post.php' )
                 ),
@@ -4035,7 +4053,10 @@ function noyona_update_account_profile_handler() {
 
     update_user_meta( $user_id, 'billing_phone', $phone );
 
-    wp_safe_redirect( add_query_arg( array( 'noyona_modal' => 'edit', 'noyona_account_notice' => 'profile_updated' ), $redirect_to ) );
+    // Success: close the Edit Profile modal (omit noyona_modal=edit) and surface the
+    // confirmation via the page-level My Profile card notice, matching the Address/Bank/Card
+    // pattern. Error paths above intentionally keep noyona_modal=edit so the modal reopens.
+    wp_safe_redirect( add_query_arg( 'noyona_account_notice', 'profile_updated', $redirect_to ) );
     exit;
 }
 
