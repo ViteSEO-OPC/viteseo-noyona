@@ -536,7 +536,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 						<?php esc_html_e( 'Complete payment to finish your order', 'noyona' ); ?>
 					</h3>
 					<p class="noyona-pay-confirm-modal__copy">
-						<?php esc_html_e( 'After clicking Place Order, you will see a QR payment page. Please scan and complete payment (GCash, Maya, GoTyme, and other supported wallets). Your order will be marked Done after payment succeeds.', 'noyona' ); ?>
+						<?php esc_html_e( 'After placing your order, scan the QR code to pay using GCash, Maya, Mastercard, or Visa. Your order will be marked as completed once payment is successful.', 'noyona' ); ?>
 					</p>
 					<div class="noyona-pay-confirm-modal__actions">
 						<button type="button" class="noyona-pay-confirm-modal__btn noyona-pay-confirm-modal__btn--ghost" data-pay-confirm-close>

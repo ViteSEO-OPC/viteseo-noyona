@@ -4,7 +4,7 @@
 (function () {
   'use strict';
 
-  var DEFAULT_NOTICE_AUTOHIDE_MS = 6000;
+  var DEFAULT_NOTICE_AUTOHIDE_MS = 10000;
   var NOTICE_SELECTOR = [
     '.noyona-notice',
     '.noyona-mini-cart-stock-notice',

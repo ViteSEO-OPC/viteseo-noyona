@@ -12,7 +12,7 @@
       key: 'customer-reviews',
       type: noticeType,
       insertBefore: block.firstChild,
-      autoHideMs: noticeType === 'success' ? 6000 : 0,
+      autoHideMs: noticeType === 'success' ? 10000 : 0,
     });
   }
 

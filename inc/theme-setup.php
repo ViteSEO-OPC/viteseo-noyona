@@ -223,7 +223,7 @@ function woocom_ct_add_register_link_to_login() {
             ?>
             <script>
             (function() {
-              var AUTO_HIDE_DELAY_MS = 6000;
+              var AUTO_HIDE_DELAY_MS = 10000;
 
               function findCaptchaErrorNoticeContext() {
                 var wrappers = document.querySelectorAll('.woocommerce-notices-wrapper');
