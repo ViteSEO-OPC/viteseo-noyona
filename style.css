@@ -1263,7 +1263,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 @media (min-width: 1024px) {
   .noyona-shop-layout {
     display: grid !important;
-    grid-template-columns: minmax(160px, 13%) minmax(0, 1fr);
+    grid-template-columns: minmax(220px, 20%) minmax(0, 1fr);
     align-items: start;
     column-gap: 20px;
   }
@@ -1413,6 +1413,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 }
 
 .noyona-shop-filter-section-tags {
+  margin: 0;
   padding-top: 0;
   border-top: 0;
 }
@@ -1425,7 +1426,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 .noyona-shop-filter-section-tags .noyona-shop-tag-radio {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  align-items: flex-start;
+  align-items: center;
   width: 100%;
   margin: 0;
   padding: 7px 10px 7px 0;
@@ -1438,7 +1439,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   max-width: 100%;
   font-size: var(--noyona-filter-panel-text-size, inherit);
   font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.25;
   white-space: normal;
   overflow-wrap: break-word;
@@ -1452,7 +1453,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   flex: 0 0 auto;
   width: 16px;
   height: 16px;
-  margin: 0.05em 0 0;
+  margin: 0;
   border: 2px solid var(--noyona-color-pink-muted-rose);
   border-radius: 999px;
   background: #fff;
@@ -1860,7 +1861,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 .noyona-shop-filter-section-price .noyona-shop-filter-price-thumb {
   width: 36px;
   height: 36px;
-  border: 2px solid #111;
+  border: 2px solid var(--noyona-color-pink-accent, #D81B60);
   border-radius: 50%;
   background: #f4c3cd;
 }

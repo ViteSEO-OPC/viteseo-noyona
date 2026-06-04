@@ -3280,8 +3280,25 @@
     if (!form._noyonaUserSelectedVariation) {
       return false; // Default/preselected only — not user-confirmed yet.
     }
+    return noyonaFormHasValidVariation(form);
+  }
+
+  /**
+   * Does the form currently resolve to a real, purchasable variation? Unlike
+   * noyonaFormHasConfirmedVariation this does NOT require a prior user
+   * interaction, so a WooCommerce default/preselected shade counts.
+   */
+  function noyonaFormHasValidVariation(form) {
+    if (!form || !form.classList.contains('variations_form')) {
+      return true; // Simple product — nothing to resolve.
+    }
     var variationId = form.querySelector('input[name="variation_id"]');
     return !!(variationId && variationId.value && variationId.value !== '0');
+  }
+
+  function noyonaBuySheetIsOpen() {
+    var sheet = getNoyonaBuySheet();
+    return !!(sheet && sheet.classList.contains('is-open'));
   }
 
   /**
@@ -3350,6 +3367,14 @@
         }
         if (noyonaFormHasConfirmedVariation(form)) {
           return; // Confirmed — let the existing buy-now flow run.
+        }
+        // If the sheet is already open the shopper can see exactly which shade
+        // is selected, so a valid (even default/preselected) variation is good
+        // enough to buy. Without this, tapping the in-sheet Buy now on a product
+        // with a preselected shade just re-opens the already-open sheet and the
+        // button appears dead until the shopper pointlessly changes the shade.
+        if (noyonaBuySheetIsOpen() && noyonaFormHasValidVariation(form)) {
+          return;
         }
         event.preventDefault();
         event.stopImmediatePropagation();
