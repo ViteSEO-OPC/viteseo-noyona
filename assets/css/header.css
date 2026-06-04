@@ -2276,3 +2276,14 @@ body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:hove
 body:has(.noyona-lovial-page) .search-icon:hover {
   background: rgba(0, 59, 110, 0.08);
 }
+
+/* === Mini-cart color update (approved scope: 3 selectors, additive) === */
+.noyona-mini-cart-price {
+  color: var(--noyona-color-pink-accent) !important;
+}
+.wc-block-components-quantity-selector .wc-block-components-quantity-selector__button {
+  color: var(--noyona-color-pink-accent);
+}
+.wc-block-mini-cart__drawer .wc-block-cart-item__remove-link {
+  color: var(--noyona-color-pink-accent) !important;
+}
