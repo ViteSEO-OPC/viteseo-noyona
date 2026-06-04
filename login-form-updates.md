@@ -9,7 +9,7 @@
 * Authentication Hardening — core new-user notification suppressed; themed WooCommerce welcome email is the single source of truth; WooCommerce automatic customer_new_account email disabled after the manual send to prevent duplicates.
 * Google Name Forwarding — Google first_name / last_name / display_name forwarded into WooCommerce customer creation (only when provided).
 * Phase 3 — Google-First Registration (COMMITTED, MERGED INTO QA). Register page renders the Google-only CTA by default; manual registration disabled via the `noyona_allow_manual_registration` filter (defaults false) at both the UI and the server handler.
-* Phase 4 — One-time welcome modal for first-time Google-created users (COMMITTED `ec07e4e`; NOT YET MERGED INTO QA). Explicit-dismissal model: new `noyona_welcome_modal_pending` flag set at Google registration; auto-opens on My Account (profile tab) and is cleared ONLY by an explicit dismissal (Continue Later / Complete Profile / Back / backdrop) via the `noyona_dismiss_welcome_modal` handler. Reuses existing modal markup/CSS; fully additive. Kill switch: `noyona_enable_welcome_modal`.
+* Phase 4 — One-time welcome modal for first-time Google-created users (COMMITTED `ec07e4e`; MERGED INTO QA; PENDING QA VALIDATION). Explicit-dismissal model: new `noyona_welcome_modal_pending` flag set at Google registration; auto-opens on My Account (profile tab) and is cleared ONLY by an explicit dismissal (Continue Later / Complete Profile / Back / backdrop) via the `noyona_dismiss_welcome_modal` handler. Reuses existing modal markup/CSS; fully additive. Kill switch: `noyona_enable_welcome_modal`.
 
 ### Currently in QA
 
@@ -18,7 +18,7 @@
 * Authentication Hardening (single welcome email guarantee across edge cases).
 * Google Name Forwarding (Full Name population + welcome email greeting).
 * Phase 3 (Google-only registration CTA, manual-form suppression, direct-POST rejection) — committed and merged into QA; pending QA validation.
-* Phase 4 (welcome modal: appears for new Google users, persists until explicit dismissal, never shows for existing/auto-linked users, Complete Profile opens existing Edit modal) — committed (`ec07e4e`); not yet merged into QA; pending QA validation.
+* Phase 4 (welcome modal: appears for new Google users, persists until explicit dismissal, never shows for existing/auto-linked users, Complete Profile opens existing Edit modal) — committed (`ec07e4e`); merged into QA; pending QA validation.
 
 ### Future Scope
 
@@ -644,7 +644,7 @@ Both login methods must authenticate the same customer account.
 
 # Phase 4 — One-Time Welcome Modal (IMPLEMENTED — Committed `ec07e4e` — Explicit Dismissal)
 
-Status: IMPLEMENTED — COMMITTED (`ec07e4e`) — NOT YET MERGED INTO QA — PENDING QA VALIDATION. Explicit-dismissal approach (clear-on-render REJECTED). Fully additive.
+Status: IMPLEMENTED — COMMITTED (`ec07e4e`) — MERGED INTO QA — PENDING QA VALIDATION. Explicit-dismissal approach (clear-on-render REJECTED). Fully additive.
 
 Implemented in:
 * `inc/google-auth.php` — `NOYONA_WELCOME_MODAL_META` constant, `noyona_user_has_pending_welcome()` helper, flag set in `noyona_nsl_after_google_register()`, and `noyona_dismiss_welcome_modal_handler()` on `admin_post_noyona_dismiss_welcome_modal`.
