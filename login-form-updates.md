@@ -8,8 +8,8 @@
 * Phase 2 — First-time Set Password flow (Set Password button + modal, handler, notices, automatic switch to Change Password, email+password login after creation).
 * Authentication Hardening — core new-user notification suppressed; themed WooCommerce welcome email is the single source of truth; WooCommerce automatic customer_new_account email disabled after the manual send to prevent duplicates.
 * Google Name Forwarding — Google first_name / last_name / display_name forwarded into WooCommerce customer creation (only when provided).
-* Phase 3 — Google-First Registration (IN WORKING TREE, NOT YET COMMITTED). Register page renders the Google-only CTA by default; manual registration disabled via the `noyona_allow_manual_registration` filter (defaults false) at both the UI and the server handler.
-* Phase 4 — One-time welcome modal for first-time Google-created users (IN WORKING TREE, NOT YET COMMITTED). Explicit-dismissal model: new `noyona_welcome_modal_pending` flag set at Google registration; auto-opens on My Account (profile tab) and is cleared ONLY by an explicit dismissal (Continue Later / Complete Profile / Back / backdrop) via the `noyona_dismiss_welcome_modal` handler. Reuses existing modal markup/CSS; fully additive. Kill switch: `noyona_enable_welcome_modal`.
+* Phase 3 — Google-First Registration (COMMITTED, MERGED INTO QA). Register page renders the Google-only CTA by default; manual registration disabled via the `noyona_allow_manual_registration` filter (defaults false) at both the UI and the server handler.
+* Phase 4 — One-time welcome modal for first-time Google-created users (COMMITTED `ec07e4e`; NOT YET MERGED INTO QA). Explicit-dismissal model: new `noyona_welcome_modal_pending` flag set at Google registration; auto-opens on My Account (profile tab) and is cleared ONLY by an explicit dismissal (Continue Later / Complete Profile / Back / backdrop) via the `noyona_dismiss_welcome_modal` handler. Reuses existing modal markup/CSS; fully additive. Kill switch: `noyona_enable_welcome_modal`.
 
 ### Currently in QA
 
@@ -17,12 +17,12 @@
 * Phase 2 (first-time Set Password → email login).
 * Authentication Hardening (single welcome email guarantee across edge cases).
 * Google Name Forwarding (Full Name population + welcome email greeting).
-* Phase 3 (Google-only registration CTA, manual-form suppression, direct-POST rejection) — pending QA; change is uncommitted in the working tree.
-* Phase 4 (welcome modal: appears for new Google users, persists until explicit dismissal, never shows for existing/auto-linked users, Complete Profile opens existing Edit modal) — pending QA; change is uncommitted in the working tree.
+* Phase 3 (Google-only registration CTA, manual-form suppression, direct-POST rejection) — committed and merged into QA; pending QA validation.
+* Phase 4 (welcome modal: appears for new Google users, persists until explicit dismissal, never shows for existing/auto-linked users, Complete Profile opens existing Edit modal) — committed (`ec07e4e`); not yet merged into QA; pending QA validation.
 
 ### Future Scope
 
-* None pending. Phase 4 has moved to implemented (working tree). Future enhancements TBD.
+* None pending. Phase 4 is implemented and committed. Future enhancements TBD.
 
 ---
 
@@ -77,7 +77,7 @@ READY FOR QA
 
 ---
 
-### Pending Improvements (Before Phase 3)
+### Implemented Improvements
 
 #### Authentication Hardening
 
@@ -125,7 +125,7 @@ IMPLEMENTED — READY FOR QA
 
 ---
 
-### Implemented (Working Tree, Uncommitted)
+### Implemented & Committed
 
 #### Phase 3
 
@@ -139,24 +139,21 @@ Scope:
 
 Current state (verified in codebase):
 
-* IMPLEMENTED IN WORKING TREE. The Register page (`[noyona_register_form]` / `woocom_ct_register_form_shortcode`) now renders the "Continue with Google" CTA by default ("Create your account securely with Google.").
+* IMPLEMENTED. The Register page (`[noyona_register_form]` / `woocom_ct_register_form_shortcode`) renders the "Continue with Google" CTA by default ("Create your account securely with Google.").
 * Manual registration is gated behind the `noyona_allow_manual_registration` filter, which defaults to `false`. Nothing in the codebase sets it to `true`.
 * The manual form markup is retained but only renders when that filter is `true` (kept for easy rollback).
 * Server-side enforcement: `woocom_ct_handle_register_form()` short-circuits (redirect to login) BEFORE any account-creation logic when the filter is `false`, so manual account creation is impossible even via a direct/bypassed POST.
 
 Commit status:
 
-* NOT YET COMMITTED. The change exists only as a local modification to `inc/shortcodes.php` (working tree). It is present in no commit.
-* A history search for `noyona_allow_manual_registration` returns nothing; `git grep` confirms it is absent from HEAD.
-* HEAD at time of writing: `3ac6d1a` ("Merge branch 'feat-add-email-validation'").
+* COMMITTED and MERGED INTO QA (part of the Google-first registration / password-setup work, e.g. `b29dfb6`, merged into `qa`).
 
 Status:
 
-IMPLEMENTED IN WORKING TREE — NOT YET COMMITTED — PENDING QA
+IMPLEMENTED — COMMITTED — MERGED INTO QA — PENDING QA VALIDATION
 
 Next steps:
 
-* Commit the working-tree change.
 * QA the Google-only registration path (CTA render, manual-form suppression, direct-POST rejection).
 
 ---
@@ -578,7 +575,7 @@ Proceed to Phase 3.
 
 ---
 
-# Phase 3 Goal (Implemented in Working Tree — Uncommitted — Pending QA)
+# Phase 3 Goal (Implemented — Committed — Merged into QA — Pending QA Validation)
 
 Convert:
 
@@ -610,7 +607,7 @@ This closes the unverified-email ownership issue.
 
 Status note:
 
-* This goal is now realized in the working tree via the `noyona_allow_manual_registration` filter (defaults false), but the change is NOT yet committed and is pending QA.
+* This goal is realized via the `noyona_allow_manual_registration` filter (defaults false). The change is committed and merged into QA, pending QA validation.
 * See the Phase 3 entry under "Current Status" for verification details and commit status.
 
 ---
@@ -645,9 +642,9 @@ Both login methods must authenticate the same customer account.
 
 ---
 
-# Phase 4 — One-Time Welcome Modal (IMPLEMENTED IN WORKING TREE — Explicit Dismissal)
+# Phase 4 — One-Time Welcome Modal (IMPLEMENTED — Committed `ec07e4e` — Explicit Dismissal)
 
-Status: IMPLEMENTED IN WORKING TREE — NOT YET COMMITTED — PENDING QA. Explicit-dismissal approach (clear-on-render REJECTED). Fully additive.
+Status: IMPLEMENTED — COMMITTED (`ec07e4e`) — NOT YET MERGED INTO QA — PENDING QA VALIDATION. Explicit-dismissal approach (clear-on-render REJECTED). Fully additive.
 
 Implemented in:
 * `inc/google-auth.php` — `NOYONA_WELCOME_MODAL_META` constant, `noyona_user_has_pending_welcome()` helper, flag set in `noyona_nsl_after_google_register()`, and `noyona_dismiss_welcome_modal_handler()` on `admin_post_noyona_dismiss_welcome_modal`.
