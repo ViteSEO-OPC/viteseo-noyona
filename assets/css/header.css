@@ -1382,6 +1382,7 @@ body:not(.logged-in) .header-account--logged-out {
   background: var(--noyona-color-pink-soft, #EFB5BE) !important;
   border: 1px solid #D81B60 !important;
   color: #000000 !important;
+  font-weight: bold;
 }
 
 .wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:hover,
