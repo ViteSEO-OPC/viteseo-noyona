@@ -1300,6 +1300,113 @@ function noyona_release_checkout_attempt_lock_on_exception( $order ) {
 	}
 }
 
+/**
+ * Terminate a stale checkout session whose order is already paid.
+ *
+ * Covers the confusing case where a customer completed payment (often confirmed
+ * asynchronously by the PayMongo webhook) but never returned to the
+ * order-received page, so their cart + checkout attempt session survived.
+ * Returning to checkout, they would otherwise walk through the entire multi-step
+ * form only to be blocked at Place Order with "Order #X already paid".
+ *
+ * Running on template_redirect in checkout context, we detect that the order
+ * tied to THIS session's attempt is already paid and the cart is unchanged since
+ * that order, then empty the cart, clear the attempt session, and send them to
+ * the completed order's received page. The Place Order paid-check remains as a
+ * backstop for races between page load and submit.
+ *
+ * Safety rules:
+ *   - Only acts on the order produced by this session's own attempt id.
+ *   - Only acts when that order is paid (unpaid orders stay retryable).
+ *   - Only clears when the cart still matches the completed order, so a genuine
+ *     new purchase (different items) is never wiped.
+ */
+add_action( 'template_redirect', 'noyona_terminate_paid_checkout_session', 5 );
+function noyona_terminate_paid_checkout_session() {
+	if ( is_admin() || wp_doing_ajax() ) {
+		return;
+	}
+
+	if ( ! function_exists( 'noyona_is_checkout_ui_context' ) || ! noyona_is_checkout_ui_context() ) {
+		return;
+	}
+
+	// Never interfere with the order-received / order-pay endpoints themselves
+	// (is_checkout() — and therefore the context check — is also true there).
+	if ( function_exists( 'is_wc_endpoint_url' )
+		&& ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) )
+	) {
+		return;
+	}
+
+	if ( ! function_exists( 'WC' ) || ! WC()->session || ! WC()->cart ) {
+		return;
+	}
+
+	$attempt_order_id = absint( WC()->session->get( 'noyona_checkout_attempt_order_id', 0 ) );
+	if ( $attempt_order_id <= 0 || ! function_exists( 'wc_get_order' ) ) {
+		return;
+	}
+
+	$attempt_id = (string) WC()->session->get( 'noyona_checkout_attempt_id', '' );
+	$order      = wc_get_order( $attempt_order_id );
+
+	if (
+		! $order instanceof WC_Order
+		|| '' === $attempt_id
+		|| ! hash_equals( (string) $order->get_meta( '_noyona_checkout_attempt_id' ), $attempt_id )
+		|| ! $order->is_paid()
+	) {
+		return;
+	}
+
+	// Only clear when the cart is unchanged since that completed order.
+	$current_cart_hash = is_callable( array( WC()->cart, 'get_cart_hash' ) ) ? (string) WC()->cart->get_cart_hash() : '';
+	$attempt_cart_hash = (string) WC()->session->get( 'noyona_checkout_attempt_cart_hash', '' );
+	if ( '' === $current_cart_hash || ! hash_equals( $attempt_cart_hash, $current_cart_hash ) ) {
+		return;
+	}
+
+	// Terminate the stale session.
+	WC()->cart->empty_cart();
+	WC()->session->set( 'order_awaiting_payment', null );
+	WC()->session->set( 'noyona_checkout_attempt_id', '' );
+	WC()->session->set( 'noyona_checkout_attempt_cart_hash', '' );
+	WC()->session->set( 'noyona_checkout_attempt_order_id', 0 );
+
+	$lock_key = (string) WC()->session->get( 'noyona_checkout_attempt_lock_key', '' );
+	if ( '' !== $lock_key ) {
+		delete_transient( $lock_key );
+	}
+	WC()->session->set( 'noyona_checkout_attempt_lock_key', '' );
+	WC()->session->set( 'noyona_checkout_attempt_lock_id', '' );
+
+	if ( function_exists( 'wc_add_notice' ) ) {
+		wc_add_notice(
+			sprintf(
+				/* translators: %s: order number */
+				__( 'Your previous order #%s was completed successfully. We have started a fresh cart for you.', 'noyona' ),
+				esc_html( (string) $order->get_order_number() )
+			),
+			'notice'
+		);
+	}
+
+	$target = $order->get_checkout_order_received_url();
+	if ( ! $target ) {
+		if ( is_user_logged_in() && function_exists( 'wc_get_account_endpoint_url' ) ) {
+			$target = wc_get_account_endpoint_url( 'orders' );
+		} elseif ( function_exists( 'wc_get_page_permalink' ) ) {
+			$target = wc_get_page_permalink( is_user_logged_in() ? 'myaccount' : 'shop' );
+		} else {
+			$target = home_url( '/' );
+		}
+	}
+
+	wp_safe_redirect( $target );
+	exit;
+}
+
 /* ─── Inline JS ───────────────────────────────────── */
 
 add_action( 'wp_footer', 'noyona_checkout_inline_js' );
@@ -1839,6 +1946,21 @@ function noyona_checkout_inline_js() {
 			stepItem.appendChild(link);
 		}
 
+		// On the paid/Done page the order is final, so the stepper must be purely
+		// informational: strip any clickable links and block navigation back to
+		// cart/details/preview/payment.
+		function lockCheckoutSteps() {
+			var nav = document.querySelector('.noyona-checkout-steps');
+			if (!nav) return;
+			nav.classList.add('noyona-checkout-steps--locked');
+			nav.querySelectorAll('a.noyona-checkout-steps__link').forEach(function (link) {
+				var stepItem = link.parentNode;
+				if (stepItem) {
+					stepItem.innerHTML = link.innerHTML;
+				}
+			});
+		}
+
 		function submitCheckoutForm(checkoutForm, placeOrderButton) {
 			if (!checkoutForm) return;
 
@@ -2088,9 +2210,7 @@ function noyona_checkout_inline_js() {
 
 			var doneStepItems = document.querySelectorAll('.noyona-checkout-steps li');
 			if (doneStepItems.length >= 4) {
-				ensureStepLink(doneStepItems[0], cartUrl);
-				ensureStepLink(doneStepItems[1], detailsUrl);
-				ensureStepLink(doneStepItems[2], reviewUrl);
+				lockCheckoutSteps();
 				doneStepItems.forEach(function (item) {
 					item.classList.remove('is-active');
 					item.classList.remove('is-pending');

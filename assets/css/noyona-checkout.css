@@ -74,6 +74,13 @@ body.woocommerce-checkout .wp-site-blocks {
   opacity: 0.85;
 }
 
+/* Paid/Done page: stepper is informational only, no navigation back. */
+.noyona-checkout-steps--locked li,
+.noyona-checkout-steps--locked .noyona-checkout-steps__link {
+  pointer-events: none;
+  cursor: default;
+}
+
 /* ═══════════════════════════════════════
    TWO-COLUMN LAYOUT
    ═══════════════════════════════════════ */

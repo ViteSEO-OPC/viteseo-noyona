@@ -103,7 +103,7 @@ defined( 'ABSPATH' ) || exit;
 					<div class="noyona-pay-hero__icon" aria-hidden="true">
 						<i class="fa-solid fa-check"></i>
 					</div>
-					<h1 class="noyona-pay-hero__title"><?php esc_html_e( 'Order Received!', 'noyona' ); ?></h1>
+					<h1 class="noyona-pay-hero__title"><?php esc_html_e( 'Order will be processed upon payment', 'noyona' ); ?></h1>
 					<p class="noyona-pay-hero__subtitle">
 						<?php esc_html_e( 'Thank you! Order has been received!', 'noyona' ); ?>
 					</p>
