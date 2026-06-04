@@ -1291,6 +1291,10 @@ function noyona_pdp_enqueue_assets() {
 				'outOfStockLeft'        => __( 'Out of stock (%d left)', 'viteseo-noyona-childtheme' ),
 				'outOfStockCartError'   => __( 'This product is out of stock.', 'viteseo-noyona-childtheme' ),
 				'cartError'             => __( 'This product cannot be added to cart right now.', 'viteseo-noyona-childtheme' ),
+				/* translators: %d: available stock quantity. */
+				'maxInCart'             => __( 'You already have all available stock (%d) of this item in your cart.', 'viteseo-noyona-childtheme' ),
+				/* translators: %1$d: available stock quantity; %2$d: quantity already in cart. */
+				'notEnoughStock'        => __( 'Only %1$d left in stock, and you already have %2$d in your cart.', 'viteseo-noyona-childtheme' ),
 				'selectOptionsAvailability' => __( 'Select options to see availability', 'viteseo-noyona-childtheme' ),
 				'selectShade'           => __( 'Select shade', 'viteseo-noyona-childtheme' ),
 				'wishlistAdd'           => __( 'Add to wishlist', 'viteseo-noyona-childtheme' ),
