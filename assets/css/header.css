@@ -1386,9 +1386,9 @@ body:not(.logged-in) .header-account--logged-out {
   padding: 12px 20px !important;
   margin-inline: auto !important;
   border-radius: var(--noyona-radius-cta) !important;
-  background: var(--noyona-color-pink-soft, #EFB5BE) !important;
-  border: 1px solid #D81B60 !important;
-  color: #000000 !important;
+  background: var(--noyona-cta-primary-bg) !important;
+  border: 1px solid var(--noyona-cta-primary-border) !important;
+  color: var(--noyona-cta-primary-text) !important;
   font-weight: bold;
 }
 
@@ -1396,9 +1396,9 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:focus-visible,
 .wc-block-mini-cart__drawer .wc-block-components-button.wc-block-mini-cart__footer-checkout:hover,
 .wc-block-mini-cart__drawer .wc-block-components-button.wc-block-mini-cart__footer-checkout:focus-visible {
-  background: var(--noyona-color-pink-accent) !important;
-  border-color: var(--noyona-color-pink-accent) !important;
-  color: #ffffff !important;
+  background: var(--noyona-cta-primary-hover-bg) !important;
+  border-color: var(--noyona-cta-primary-hover-border) !important;
+  color: var(--noyona-cta-primary-hover-text) !important;
 }
 
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button.is-disabled {
@@ -2282,4 +2282,15 @@ body:has(.noyona-lovial-page) .header-icon:hover,
 body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:hover,
 body:has(.noyona-lovial-page) .search-icon:hover {
   background: rgba(0, 59, 110, 0.08);
+}
+
+/* === Mini-cart color update (approved scope: 3 selectors, additive) === */
+.noyona-mini-cart-price {
+  color: var(--noyona-color-pink-accent) !important;
+}
+.wc-block-components-quantity-selector .wc-block-components-quantity-selector__button {
+  color: var(--noyona-color-pink-accent);
+}
+.wc-block-mini-cart__drawer .wc-block-cart-item__remove-link {
+  color: var(--noyona-color-pink-accent) !important;
 }
