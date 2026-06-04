@@ -1475,6 +1475,8 @@ function noyona_get_account_wishlist_rows( $items ) {
         $add_to_cart_text    = __( 'Add to Cart', 'noyona-childtheme' );
         $add_to_cart_classes = 'noyona-account-btn noyona-account-btn--primary noyona-account-wishlist-add';
         $add_to_cart_data    = array();
+        $add_target_id       = 0;
+        $can_ajax_add        = false;
 
         if ( ! $is_in_stock ) {
             $add_to_cart_text = __( 'Out of Stock', 'noyona-childtheme' );
@@ -1493,17 +1495,16 @@ function noyona_get_account_wishlist_rows( $items ) {
                     }
                 }
                 $add_to_cart_url = add_query_arg( $query_args, function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) );
+                $add_target_id   = (int) $variation->get_id();
+                $can_ajax_add    = true;
             } else {
                 $add_to_cart_url  = $product->get_permalink();
                 $add_to_cart_text = __( 'Select Options', 'noyona-childtheme' );
             }
         } elseif ( $product->is_type( 'simple' ) && $is_purchasable ) {
             $add_to_cart_url = $product->add_to_cart_url();
-            if ( $product->supports( 'ajax_add_to_cart' ) ) {
-                $add_to_cart_classes .= ' add_to_cart_button ajax_add_to_cart';
-                $add_to_cart_data['product_id'] = (int) $product->get_id();
-                $add_to_cart_data['quantity']   = 1;
-            }
+            $add_target_id   = (int) $product->get_id();
+            $can_ajax_add    = true;
         } else {
             $add_to_cart_url  = $product->get_permalink();
             $add_to_cart_text = $product->is_type( 'variable' ) ? __( 'Select Options', 'noyona-childtheme' ) : $product->add_to_cart_text();
@@ -1524,6 +1525,8 @@ function noyona_get_account_wishlist_rows( $items ) {
             'add_to_cart_text'    => (string) $add_to_cart_text,
             'add_to_cart_classes' => (string) $add_to_cart_classes,
             'add_to_cart_data'    => $add_to_cart_data,
+            'add_target_id'       => (int) $add_target_id,
+            'can_ajax_add'        => (bool) $can_ajax_add,
             'added_at'            => isset( $item['added_at'] ) ? absint( $item['added_at'] ) : 0,
         );
     }
@@ -1701,6 +1704,12 @@ function noyona_render_account_wishlist_card( $args ) {
                                                 <?php foreach ( (array) $row['add_to_cart_data'] as $data_key => $data_value ) : ?>
                                                     data-<?php echo esc_attr( (string) $data_key ); ?>="<?php echo esc_attr( (string) $data_value ); ?>"
                                                 <?php endforeach; ?>
+                                                <?php if ( ! empty( $row['can_ajax_add'] ) && $row['add_target_id'] > 0 ) : ?>
+                                                    data-noyona-wishlist-add="1"
+                                                    data-add-id="<?php echo esc_attr( (string) $row['add_target_id'] ); ?>"
+                                                    data-product-id="<?php echo esc_attr( (string) $row['product_id'] ); ?>"
+                                                    data-variation-id="<?php echo esc_attr( (string) $row['variation_id'] ); ?>"
+                                                <?php endif; ?>
                                             >
                                                 <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
                                                 <?php echo esc_html( (string) $row['add_to_cart_text'] ); ?>

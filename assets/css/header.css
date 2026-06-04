@@ -659,14 +659,21 @@ body:not(.logged-in) .header-account--logged-out {
     rotate(8deg);
 }
 
-.noyona-add-cart-flyer--fallback {
+.noyona-add-cart-flyer--badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--noyona-color-pink-accent);
+  border-radius: 999px;
+  background: #d6249f;
   color: #fff;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
+  box-shadow: 0 10px 26px rgba(214, 36, 159, 0.4);
+}
+
+.noyona-add-cart-flyer--badge i {
+  font-size: 0.95em;
+  line-height: 1;
 }
 
 .noyona-cart-success-pulse {

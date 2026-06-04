@@ -1277,7 +1277,7 @@ function noyona_render_product_search_page_shortcode() {
                 data-current-page="<?php echo esc_attr( (string) $current_page ); ?>"
                 data-max-pages="<?php echo esc_attr( (string) max( 1, (int) $products_query->max_num_pages ) ); ?>"
                 data-total="<?php echo esc_attr( (string) $result_count ); ?>">
-                <div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;">
+                <div class="wc-block-product-template" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:18px;row-gap:18px;">
                     <?php if ( $products_query->have_posts() ) : ?>
                         <?php
                         while ( $products_query->have_posts() ) :

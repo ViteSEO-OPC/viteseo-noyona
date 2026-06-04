@@ -5421,6 +5421,12 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	opacity: 0.72;
 }
 
+.noyona-account-wishlist-add.is-loading {
+	pointer-events: none;
+	opacity: 0.7;
+	cursor: progress;
+}
+
 .noyona-account-wishlist-remove {
 	display: inline-flex;
 	align-items: center;
