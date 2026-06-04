@@ -25,6 +25,15 @@ if ( ! defined( 'NOYONA_PASSWORD_SETUP_META' ) ) {
 }
 
 /**
+ * User meta flag: first-time Google-created user who has not yet dismissed the one-time
+ * welcome modal (Phase 4). Independent of the password-setup flag: this one is cleared
+ * only by an explicit dismissal action, never on render.
+ */
+if ( ! defined( 'NOYONA_WELCOME_MODAL_META' ) ) {
+	define( 'NOYONA_WELCOME_MODAL_META', 'noyona_welcome_modal_pending' );
+}
+
+/**
  * Whether the given user still needs to create a first-time password.
  *
  * @param int $user_id User ID.
@@ -37,6 +46,21 @@ function noyona_user_requires_password_setup( $user_id ) {
 	}
 
 	return '1' === (string) get_user_meta( $user_id, NOYONA_PASSWORD_SETUP_META, true );
+}
+
+/**
+ * Whether the given user still has a pending (not-yet-dismissed) welcome modal.
+ *
+ * @param int $user_id User ID.
+ * @return bool
+ */
+function noyona_user_has_pending_welcome( $user_id ) {
+	$user_id = (int) $user_id;
+	if ( $user_id <= 0 ) {
+		return false;
+	}
+
+	return '1' === (string) get_user_meta( $user_id, NOYONA_WELCOME_MODAL_META, true );
 }
 
 /**
@@ -125,6 +149,13 @@ function noyona_nsl_after_google_register( $user_id, $provider ) {
 
 	// Mark the account as needing a first-time password.
 	update_user_meta( $user_id, NOYONA_PASSWORD_SETUP_META, '1' );
+
+	// Phase 4: flag the new Google user for the one-time welcome modal. Set here (only on
+	// genuine new registrations, never on auto-link of existing users). Cleared only by an
+	// explicit dismissal action — never on render. Kill switch: noyona_enable_welcome_modal.
+	if ( apply_filters( 'noyona_enable_welcome_modal', true ) ) {
+		update_user_meta( $user_id, NOYONA_WELCOME_MODAL_META, '1' );
+	}
 
 	// Safety: guarantee the customer role even if customer creation conventions change.
 	$user = get_userdata( $user_id );
@@ -249,5 +280,44 @@ function noyona_set_account_password_handler() {
 	wp_set_auth_cookie( (int) $user_id, true );
 
 	wp_safe_redirect( add_query_arg( array( 'noyona_account_notice' => 'password_set' ), $redirect_to ) );
+	exit;
+}
+
+/**
+ * Phase 4: explicit dismissal of the one-time welcome modal.
+ *
+ * The welcome flag is cleared ONLY here, on a deliberate user action (Continue Later,
+ * Complete Profile, or an explicit close), never on render. This guarantees the user
+ * actually saw and interacted with the modal before it stops appearing. The handler is
+ * idempotent: clearing an absent flag is harmless. It performs no account/auth changes —
+ * it only deletes the welcome meta and redirects back.
+ *
+ * @return void
+ */
+add_action( 'admin_post_noyona_dismiss_welcome_modal', 'noyona_dismiss_welcome_modal_handler' );
+function noyona_dismiss_welcome_modal_handler() {
+	$account_url = function_exists( 'noyona_get_account_page_url' ) ? noyona_get_account_page_url() : home_url( '/my-account/' );
+
+	if ( ! is_user_logged_in() ) {
+		$login_url = function_exists( 'noyona_get_login_page_url' ) ? noyona_get_login_page_url() : wp_login_url();
+		wp_safe_redirect( $login_url );
+		exit;
+	}
+
+	$redirect_to = isset( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : '';
+	if ( '' === $redirect_to ) {
+		$redirect_to = $account_url;
+	}
+
+	$nonce = isset( $_GET['noyona_welcome_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['noyona_welcome_nonce'] ) ) : '';
+	if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'noyona_dismiss_welcome_modal' ) ) {
+		// Invalid/expired nonce: do not clear; just return to the account page.
+		wp_safe_redirect( $redirect_to );
+		exit;
+	}
+
+	delete_user_meta( get_current_user_id(), NOYONA_WELCOME_MODAL_META );
+
+	wp_safe_redirect( $redirect_to );
 	exit;
 }

@@ -3351,6 +3351,66 @@ function noyona_render_account_page_shortcode() {
             </div>
         </div>
         <?php endif; ?>
+
+        <?php
+        // Phase 4: one-time welcome modal for first-time Google-created users. Auto-opens
+        // (server-driven) while the flag is pending; the flag is cleared ONLY by an explicit
+        // dismissal (Continue Later / Complete Profile / Back / backdrop) via the
+        // noyona_dismiss_welcome_modal handler — never on render. Gated on the profile tab
+        // with no other modal requested, so it never stacks on an explicit modal.
+        $noyona_show_welcome = (
+            'profile' === $active_tab
+            && '' === $active_modal
+            && apply_filters( 'noyona_enable_welcome_modal', true )
+            && function_exists( 'noyona_user_has_pending_welcome' )
+            && noyona_user_has_pending_welcome( get_current_user_id() )
+        );
+        if ( $noyona_show_welcome ) :
+            $noyona_welcome_continue_url = wp_nonce_url(
+                add_query_arg(
+                    array(
+                        'action'      => 'noyona_dismiss_welcome_modal',
+                        'redirect_to' => $account_url,
+                    ),
+                    admin_url( 'admin-post.php' )
+                ),
+                'noyona_dismiss_welcome_modal',
+                'noyona_welcome_nonce'
+            );
+            $noyona_welcome_complete_url = wp_nonce_url(
+                add_query_arg(
+                    array(
+                        'action'      => 'noyona_dismiss_welcome_modal',
+                        'redirect_to' => add_query_arg( 'noyona_modal', 'edit', $account_url ),
+                    ),
+                    admin_url( 'admin-post.php' )
+                ),
+                'noyona_dismiss_welcome_modal',
+                'noyona_welcome_nonce'
+            );
+        ?>
+        <div
+            id="noyona-account-welcome-modal"
+            class="noyona-account-modal is-open"
+            aria-hidden="false"
+        >
+            <a href="<?php echo esc_url( $noyona_welcome_continue_url ); ?>" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close modal', 'noyona-childtheme' ); ?>"></a>
+            <div class="noyona-account-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Welcome to Noyona', 'noyona-childtheme' ); ?>">
+                <a href="<?php echo esc_url( $noyona_welcome_continue_url ); ?>" class="noyona-account-modal-back">
+                    <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                </a>
+                <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Welcome to Noyona!', 'noyona-childtheme' ); ?></h4>
+
+                <p><?php esc_html_e( 'Your account has been created successfully using Google.', 'noyona-childtheme' ); ?></p>
+                <p><?php esc_html_e( 'You can continue using Google to sign in, or set a password later if you would like to sign in using your email address.', 'noyona-childtheme' ); ?></p>
+
+                <div class="noyona-account-modal-actions">
+                    <a href="<?php echo esc_url( $noyona_welcome_continue_url ); ?>" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Continue Later', 'noyona-childtheme' ); ?></a>
+                    <a href="<?php echo esc_url( $noyona_welcome_complete_url ); ?>" class="noyona-account-btn noyona-account-btn--primary"><?php esc_html_e( 'Complete Profile', 'noyona-childtheme' ); ?></a>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
         <?php endif; ?>
     </div>
     <?php if ( 'profile' === $active_tab ) : ?>
