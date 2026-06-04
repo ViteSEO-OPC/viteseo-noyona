@@ -18,7 +18,7 @@
 * Authentication Hardening (single welcome email guarantee across edge cases).
 * Google Name Forwarding (Full Name population + welcome email greeting).
 * Phase 3 (Google-only registration CTA, manual-form suppression, direct-POST rejection) — committed and merged into QA; pending QA validation.
-* Phase 4 (welcome modal: appears for new Google users, persists until explicit dismissal, never shows for existing/auto-linked users, Complete Profile opens existing Edit modal) — committed (`ec07e4e`); merged into QA; pending QA validation.
+* Phase 4 (welcome modal: appears for new Google users, persists until explicit dismissal, never shows for existing/auto-linked users, Complete Profile clears the flag and returns to My Account) — committed (`ec07e4e`); merged into QA; pending QA validation. UX refinement: Complete Profile no longer auto-opens the Edit Profile modal (reduces redundant modal chaining); the user opens Edit via the existing "Edit Profile Details" button.
 
 ### Future Scope
 
@@ -726,7 +726,7 @@ Mechanism: every dismissal affordance is a link to a dedicated `admin-post` hand
 * Markup: new modal `#noyona-account-welcome-modal` reusing the existing `.noyona-account-modal` / `.noyona-account-modal-dialog` / `.noyona-account-modal-backdrop` / `.noyona-account-modal-actions` classes. No new CSS.
 * Buttons:
   - Continue Later / Back / backdrop → dismiss handler, redirect to the plain account URL.
-  - Complete Profile (Option A) → dismiss handler, redirect to account URL with `?noyona_modal=edit`, which opens the EXISTING Edit Profile modal server-side. No new onboarding steps; does NOT route into Set Password.
+  - Complete Profile → dismiss handler, redirect to the plain account URL. UX refinement (post-QA): it no longer auto-opens the Edit Profile modal — this avoids redundant modal chaining since the same profile info is already on My Account and reachable via the existing "Edit Profile Details" button. Functionally, Complete Profile and Continue Later now share the same destination; both clear the flag. (Previously Complete Profile redirected to `?noyona_modal=edit`.)
 
 ## Interaction with the existing password-setup flag
 
@@ -745,7 +745,8 @@ Mechanism: every dismissal affordance is a link to a dedicated `admin-post` hand
 * New Google signup → My Account → welcome modal appears.
 * Refresh / navigate away without dismissing → modal re-appears (flag NOT consumed).
 * Continue Later → flag cleared, modal gone, stays on My Account; does not reappear on reload.
-* Complete Profile → flag cleared, opens existing Edit Profile modal; no forced completion.
+* Complete Profile → flag cleared, returns to My Account (does NOT auto-open Edit Profile); no forced completion.
+* "Edit Profile Details" button still opens the Edit Profile modal manually.
 * Back / backdrop → flag cleared, modal gone.
 * Existing email/password user → never shows.
 * Auto-linked Google user → never shows.
