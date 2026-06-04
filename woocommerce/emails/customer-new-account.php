@@ -42,6 +42,11 @@ if ( ! $shop_url ) {
 	$shop_url = home_url( '/shop/' );
 }
 
+$account_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : '';
+if ( ! $account_url ) {
+	$account_url = home_url( '/my-account/' );
+}
+
 /**
  * Fires to output the email header.
  *
@@ -73,7 +78,14 @@ do_action( 'woocommerce_email_header', '', $email ); ?>
 				?>
 			</p>
 			<p class="noyona-email-lede"><?php esc_html_e( 'Welcome to Noyona — beauty rooted in nature.', 'noyona-childtheme' ); ?></p>
-			<p class="noyona-email-copy"><?php esc_html_e( 'Your account is all set. Next time you shop with us, just log in for a faster checkout, plus early access to new shades, restocks, and members-only treats.', 'noyona-childtheme' ); ?></p>
+			<p class="noyona-email-copy"><?php esc_html_e( 'Thank you for creating an account with us. Your account is all set, and you can now:', 'noyona-childtheme' ); ?></p>
+
+			<ul class="noyona-email-benefits">
+				<li><?php esc_html_e( 'Manage your profile', 'noyona-childtheme' ); ?></li>
+				<li><?php esc_html_e( 'Track your orders', 'noyona-childtheme' ); ?></li>
+				<li><?php esc_html_e( 'Update your account information', 'noyona-childtheme' ); ?></li>
+				<li><?php esc_html_e( 'Receive future updates and promotions', 'noyona-childtheme' ); ?></li>
+			</ul>
 
 			<table border="0" cellpadding="0" cellspacing="0" role="presentation" class="noyona-email-button-wrap">
 				<tr>
@@ -86,6 +98,11 @@ do_action( 'woocommerce_email_header', '', $email ); ?>
 			</table>
 
 			<div class="noyona-email-pill"><?php esc_html_e( 'VEGAN · CRUELTY-FREE · PARABEN-FREE', 'noyona-childtheme' ); ?></div>
+
+			<p class="noyona-email-small">
+				<?php esc_html_e( 'Visit your account dashboard:', 'noyona-childtheme' ); ?>
+				<a href="<?php echo esc_url( $account_url ); ?>" target="_blank"><?php echo esc_html( $account_url ); ?></a>
+			</p>
 
 			<?php if ( $password_generated && $set_password_url ) : ?>
 				<p class="noyona-email-small">

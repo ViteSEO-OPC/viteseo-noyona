@@ -271,7 +271,6 @@ function woocom_ct_register_form_shortcode() {
     $account_url = function_exists( 'wc_get_page_permalink' )
         ? wc_get_page_permalink( 'myaccount' )
         : home_url( '/my-account/' );
-    $google_login_url = noyona_get_google_login_url( $account_url );
     $logo_url = trailingslashit( get_stylesheet_directory_uri() ) . 'assets/images/noyona-mobile-logo.webp';
 
     if ( is_user_logged_in() ) {
@@ -351,6 +350,7 @@ function woocom_ct_register_form_shortcode() {
             </div>
 
             <h2 class="noyona-register-title"><?php esc_html_e( 'Register', 'noyona-childtheme' ); ?></h2>
+            <?php if ( apply_filters( 'noyona_allow_manual_registration', false ) ) : ?>
             <p class="noyona-register-subtitle"><?php esc_html_e( 'Enter name, email, and password to create your account.', 'noyona-childtheme' ); ?></p>
             <p class="noyona-register-required-note"><?php esc_html_e( '* All fields are required.', 'noyona-childtheme' ); ?></p>
 
@@ -491,15 +491,17 @@ function woocom_ct_register_form_shortcode() {
             })();
             </script>
 
-            <div class="noyona-register-google-wrap">
-                <a class="noyona-register-google" href="<?php echo esc_url( $google_login_url ); ?>">
-                    <i class="fa-brands fa-google" aria-hidden="true"></i>
-                    <span><?php esc_html_e( 'Sign Up with Google', 'noyona-childtheme' ); ?></span>
-                </a>
-            </div>
-
             <?php if ( function_exists( 'noyona_recaptcha_register_external_widget' ) ) : ?>
                 <?php noyona_recaptcha_register_external_widget( 'noyona-register-recaptcha' ); ?>
+            <?php endif; ?>
+            <?php else : ?>
+            <p class="noyona-register-subtitle"><?php esc_html_e( 'Create your account securely with Google.', 'noyona-childtheme' ); ?></p>
+            <div class="noyona-register-google-wrap">
+                <a class="noyona-register-google" href="<?php echo esc_url( noyona_get_google_login_url( $account_url ) ); ?>">
+                    <i class="fa-brands fa-google" aria-hidden="true"></i>
+                    <span><?php esc_html_e( 'Continue with Google', 'noyona-childtheme' ); ?></span>
+                </a>
+            </div>
             <?php endif; ?>
 
             <p class="noyona-register-login">
@@ -587,6 +589,17 @@ function noyona_is_valid_registration_password( $password ) {
 }
 
 function woocom_ct_handle_register_form() {
+    // Phase 3 (Google-first registration): manual email/password account creation is
+    // disabled. This server-side guard runs BEFORE any account-creation logic, so manual
+    // registration is impossible even if the UI is bypassed via a direct POST. The original
+    // handler body is retained below (unreachable) for easy rollback — remove this block to
+    // restore manual registration.
+    if ( ! apply_filters( 'noyona_allow_manual_registration', false ) ) {
+        $login_url = function_exists( 'noyona_get_login_page_url' ) ? noyona_get_login_page_url() : wp_login_url();
+        wp_safe_redirect( $login_url );
+        exit;
+    }
+
     $redirect = wp_get_referer();
     if ( ! $redirect ) {
         $redirect = home_url( '/register/' );
@@ -1843,6 +1856,8 @@ function noyona_render_account_page_shortcode() {
         'password_too_short'    => array( 'type' => 'error', 'message' => __( 'New password must be at least 6 characters.', 'noyona-childtheme' ) ),
         'password_mismatch'     => array( 'type' => 'error', 'message' => __( 'New password and confirmation do not match.', 'noyona-childtheme' ) ),
         'password_update_failed'=> array( 'type' => 'error', 'message' => __( 'Could not update password right now.', 'noyona-childtheme' ) ),
+        'password_set'          => array( 'type' => 'success', 'message' => __( 'Password set successfully. You can now log in with your email and password.', 'noyona-childtheme' ) ),
+        'password_set_failed'   => array( 'type' => 'error', 'message' => __( 'Could not set your password right now.', 'noyona-childtheme' ) ),
         'address_saved'         => array( 'type' => 'success', 'message' => __( 'Address saved successfully.', 'noyona-childtheme' ) ),
         'address_deleted'       => array( 'type' => 'success', 'message' => __( 'Address deleted successfully.', 'noyona-childtheme' ) ),
         'address_not_found'     => array( 'type' => 'error', 'message' => __( 'Address could not be found.', 'noyona-childtheme' ) ),
@@ -3175,13 +3190,13 @@ function noyona_render_account_page_shortcode() {
                         <label><?php esc_html_e( 'Phone #:', 'noyona-childtheme' ); ?></label>
                         <input type="text" value="<?php echo esc_attr( $phone ); ?>" readonly />
                     </div>
-                    <div class="noyona-account-field">
-                        <label><?php esc_html_e( 'Password:', 'noyona-childtheme' ); ?></label>
-                        <input type="password" value="************" readonly />
-                    </div>
 
                     <div class="noyona-account-profile-actions">
-                        <a class="noyona-account-btn noyona-account-btn--ghost" href="#noyona-account-password-modal"><?php esc_html_e( 'Change Password', 'noyona-childtheme' ); ?></a>
+                        <?php if ( function_exists( 'noyona_user_requires_password_setup' ) && noyona_user_requires_password_setup( get_current_user_id() ) ) : ?>
+                            <a class="noyona-account-btn noyona-account-btn--ghost" href="#noyona-account-set-password-modal"><?php esc_html_e( 'Set Password', 'noyona-childtheme' ); ?></a>
+                        <?php else : ?>
+                            <a class="noyona-account-btn noyona-account-btn--ghost" href="#noyona-account-password-modal"><?php esc_html_e( 'Change Password', 'noyona-childtheme' ); ?></a>
+                        <?php endif; ?>
                         <a class="noyona-account-btn noyona-account-btn--primary" href="#noyona-account-edit-modal"><?php esc_html_e( 'Edit Profile Details', 'noyona-childtheme' ); ?></a>
                     </div>
                 </div>
@@ -3286,6 +3301,56 @@ function noyona_render_account_page_shortcode() {
                 </form>
             </div>
         </div>
+
+        <?php if ( ( function_exists( 'noyona_user_requires_password_setup' ) && noyona_user_requires_password_setup( get_current_user_id() ) ) || 'set_password' === $active_modal ) : ?>
+        <div
+            id="noyona-account-set-password-modal"
+            class="noyona-account-modal<?php echo ( 'set_password' === $active_modal ) ? ' is-open' : ''; ?>"
+            aria-hidden="<?php echo ( 'set_password' === $active_modal ) ? 'false' : 'true'; ?>"
+        >
+            <a href="#" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close modal', 'noyona-childtheme' ); ?>"></a>
+            <div class="noyona-account-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Set password', 'noyona-childtheme' ); ?>">
+                <a href="#" class="noyona-account-modal-back">
+                    <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                </a>
+                <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Set Password', 'noyona-childtheme' ); ?></h4>
+
+                <?php if ( 'set_password' === $active_modal && '' !== $notice_message ) : ?>
+                    <p class="noyona-account-modal-notice<?php echo ( 'success' === $notice_type ) ? ' is-success' : ' is-error'; ?>">
+                        <?php echo esc_html( $notice_message ); ?>
+                    </p>
+                <?php endif; ?>
+
+                <form class="noyona-account-modal-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                    <?php wp_nonce_field( 'noyona_set_account_password', 'noyona_account_set_password_nonce', false ); ?>
+                    <input type="hidden" name="action" value="noyona_set_account_password" />
+                    <input type="hidden" name="redirect_to" value="<?php echo esc_url( $account_url ); ?>" />
+
+                    <label for="noyona-account-modal-set-new-password"><?php esc_html_e( 'New Password', 'noyona-childtheme' ); ?> <span aria-hidden="true">*</span></label>
+                    <div class="noyona-account-modal-password-wrap">
+                        <input id="noyona-account-modal-set-new-password" type="password" name="new_password" placeholder="<?php esc_attr_e( 'Enter new password', 'noyona-childtheme' ); ?>" minlength="6" required />
+                        <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-set-new-password" onclick="return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
+                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <small><?php esc_html_e( 'Must be at least 6 characters long', 'noyona-childtheme' ); ?></small>
+
+                    <label for="noyona-account-modal-set-confirm-password"><?php esc_html_e( 'Confirm New Password', 'noyona-childtheme' ); ?> <span aria-hidden="true">*</span></label>
+                    <div class="noyona-account-modal-password-wrap">
+                        <input id="noyona-account-modal-set-confirm-password" type="password" name="confirm_password" placeholder="<?php esc_attr_e( 'Confirm new password', 'noyona-childtheme' ); ?>" minlength="6" required />
+                        <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-set-confirm-password" onclick="return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
+                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <div class="noyona-account-modal-actions">
+                        <a href="#" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Cancel', 'noyona-childtheme' ); ?></a>
+                        <button type="submit" class="noyona-account-btn noyona-account-btn--primary"><?php esc_html_e( 'Set Password', 'noyona-childtheme' ); ?></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
         <?php endif; ?>
     </div>
     <?php if ( 'profile' === $active_tab ) : ?>
