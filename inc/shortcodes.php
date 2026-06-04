@@ -3176,6 +3176,13 @@ function noyona_render_account_page_shortcode() {
                 <p><?php esc_html_e( 'Manage and protect your account', 'noyona-childtheme' ); ?></p>
             </header>
 
+            <?php // Page-level success notice shown after a profile save closes the Edit modal. Scoped to profile_updated only. ?>
+            <?php if ( '' === $active_modal && 'profile_updated' === $notice_code && '' !== $notice_message ) : ?>
+                <p class="noyona-notice is-success" role="status" data-noyona-notice-autohide="6000">
+                    <?php echo esc_html( $notice_message ); ?>
+                </p>
+            <?php endif; ?>
+
             <div class="noyona-account-profile-card__body">
                 <div class="noyona-account-profile-fields">
                     <div class="noyona-account-field">
@@ -4038,7 +4045,10 @@ function noyona_update_account_profile_handler() {
 
     update_user_meta( $user_id, 'billing_phone', $phone );
 
-    wp_safe_redirect( add_query_arg( array( 'noyona_modal' => 'edit', 'noyona_account_notice' => 'profile_updated' ), $redirect_to ) );
+    // Success: close the Edit Profile modal (omit noyona_modal=edit) and surface the
+    // confirmation via the page-level My Profile card notice, matching the Address/Bank/Card
+    // pattern. Error paths above intentionally keep noyona_modal=edit so the modal reopens.
+    wp_safe_redirect( add_query_arg( 'noyona_account_notice', 'profile_updated', $redirect_to ) );
     exit;
 }
 
