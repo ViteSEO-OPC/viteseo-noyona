@@ -3377,11 +3377,15 @@ function noyona_render_account_page_shortcode() {
                 'noyona_dismiss_welcome_modal',
                 'noyona_welcome_nonce'
             );
+            // Complete Profile dismisses the welcome modal (clears the flag via the same
+            // handler) and returns to the normal My Account page. It intentionally does NOT
+            // auto-open the Edit Profile modal — the user can open it via the existing
+            // "Edit Profile Details" button — to avoid redundant modal chaining.
             $noyona_welcome_complete_url = wp_nonce_url(
                 add_query_arg(
                     array(
                         'action'      => 'noyona_dismiss_welcome_modal',
-                        'redirect_to' => add_query_arg( 'noyona_modal', 'edit', $account_url ),
+                        'redirect_to' => $account_url,
                     ),
                     admin_url( 'admin-post.php' )
                 ),
