@@ -23,9 +23,9 @@
   padding: 12px 1.2rem;
   border-radius: 16px;
   text-decoration: none;
-  background: var(--noyona-color-pink-soft, #EFB5BE);
-  color: #000000;
-  border: 1px solid #D81B60;
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
+  border: 1px solid var(--noyona-cta-primary-border);
   font-family: var(--wp--preset--font-family--poppins);
   font-size: 16px;
   font-weight: 700;
@@ -35,8 +35,8 @@
 }
 
 .cta-blogpost__button:hover {
-  background-color: #D81B60;
-  color: #FFFFFF;
+  background-color: var(--noyona-cta-primary-hover-bg);
+  color: var(--noyona-cta-primary-hover-text);
   transform: translateY(-1px);
   box-shadow: 0 12px 22px rgba(216, 27, 96, 0.34);
   filter: brightness(1.02);

@@ -292,9 +292,9 @@
     font-size: 16px;
     font-weight: 700;
     line-height: 1;
-    border: 1px solid #D81B60;
-    background: var(--noyona-color-pink-soft, #EFB5BE);
-    color: #000000;
+    border: 1px solid var(--noyona-cta-secondary-border);
+    background: var(--noyona-cta-secondary-bg);
+    color: var(--noyona-cta-secondary-text);
     text-decoration: none;
     cursor: pointer;
     white-space: nowrap;
@@ -306,8 +306,9 @@
 }
 
 .pg-add-to-cart-button:hover {
-    background: #D81B60;
-    color: #FFFFFF;
+    background: var(--noyona-cta-secondary-hover-bg);
+    color: var(--noyona-cta-secondary-hover-text);
+    border-color: var(--noyona-cta-secondary-hover-border);
 }
 
 /* =========================

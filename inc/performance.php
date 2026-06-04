@@ -133,6 +133,39 @@ function noyona_restore_defer_on_woocommerce_js( $tag, $handle, $src ) {
     return preg_replace( '/<script(\s+)(?=src=)/', '<script$1defer ', $tag, 1 );
 }
 
+/* ----- Force jQuery to load blocking on the frontend (root fix for deferred-jQuery race) ----- */
+// On the hosted environment a plugin/host optimization (Site Kit, Wordfence,
+// the host's own JS optimizer, etc. — none of which exist on local) registers
+// jQuery with `strategy=defer`. Core scripts that depend on jQuery but are
+// printed as BLOCKING — `wp-util`, `woocommerce`, `wc-add-to-cart`,
+// `wc-add-to-cart-variation` — then execute at parse time BEFORE deferred
+// jQuery runs, throwing `Uncaught ReferenceError: jQuery is not defined`.
+// With jQuery missing, `wp.template` never initializes, WooCommerce's
+// variation form cannot resolve the selected variation (variation_id stays 0),
+// and Add to Cart / Buy Now fail with a generic error toast — while the same
+// code works locally because nothing defers jQuery there.
+//
+// Rather than play whack-a-mole deferring every single jQuery dependent to
+// match (the approach above, which missed `wp-util` and the add-to-cart
+// handles), we make jQuery load blocking again. The entire dependency chain
+// then executes in natural print order, exactly like local. This is robust
+// regardless of WHICH hosted plugin defers jQuery. Runs at priority 100 so it
+// strips any defer/async added by earlier `script_loader_tag` filters.
+add_filter( 'script_loader_tag', 'noyona_force_blocking_jquery', 100, 3 );
+function noyona_force_blocking_jquery( $tag, $handle, $src ) {
+    if ( is_admin() ) {
+        return $tag;
+    }
+
+    if ( ! in_array( $handle, array( 'jquery', 'jquery-core', 'jquery-migrate' ), true ) ) {
+        return $tag;
+    }
+
+    // Strip any defer/async attribute so jQuery executes synchronously at parse
+    // time, before its (blocking) dependents such as wp-util and woocommerce.
+    return preg_replace( '/\s+(?:defer|async)(?:=(?:"[^"]*"|\'[^\']*\'|[^\s>]+))?/i', '', $tag );
+}
+
 /* ----- Trim non-commerce assets (noop guard, retained intent) ----- */
 add_action( 'wp_enqueue_scripts', 'noyona_trim_noncommerce_assets', 100 );
 function noyona_trim_noncommerce_assets() {

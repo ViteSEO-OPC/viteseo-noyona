@@ -79,9 +79,22 @@ defined( 'ABSPATH' ) || exit;
 			}
 
 			$shop_url  = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
-			$track_url = ( is_user_logged_in() && (int) $order->get_user_id() === (int) get_current_user_id() )
-				? $order->get_view_order_url()
-				: wc_get_page_permalink( 'myaccount' );
+
+			// Track Order should open the custom order-details modal on the
+			// My Account "Orders" panel rather than Woo's default view-order page.
+			// noyona_get_account_order_modal_url() resolves the correct filter
+			// tab + page + modal hash so the modal actually opens. Guests (who
+			// can't see the account orders panel) fall back to the account page.
+			$track_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' );
+			if ( is_user_logged_in()
+				&& (int) $order->get_user_id() === (int) get_current_user_id()
+				&& function_exists( 'noyona_get_account_order_modal_url' )
+			) {
+				$modal_url = noyona_get_account_order_modal_url( $order );
+				if ( '' !== $modal_url ) {
+					$track_url = $modal_url;
+				}
+			}
 			?>
 
 			<?php if ( $is_awaiting_payment ) : ?>
