@@ -196,9 +196,9 @@
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    background: var(--noyona-cta-primary-bg);
-    color: var(--noyona-cta-primary-text);
-    border: 1px solid var(--noyona-cta-primary-border);
+    background: var(--noyona-cta-secondary-bg   );
+    color: var(--noyona-cta-secondary-text);
+    border: 1px solid var(--noyona-cta-secondary-border);
     border-radius: 16px;
     padding: 0.75rem 1.25rem;
     font-size: 16px;
@@ -208,8 +208,8 @@
 
 .collection-grid__button:hover,
 .collection-grid__button:focus-visible{
-    background-color: var(--noyona-cta-primary-hover-bg);
-    color: var(--noyona-cta-primary-hover-text);
+    background-color: var(--noyona-cta-secondary-hover-bg);
+    color: var(--noyona-cta-secondary-hover-text);
     filter: brightness(1.04);
     transform: translateY(-1px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
