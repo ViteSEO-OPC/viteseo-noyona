@@ -26,19 +26,6 @@ body.search-expand-open header.wp-block-template-part {
   opacity: 1;
 }
 
-body:has(.noyona-lovial-page) .header-brand-strip .brand-carousel,
-body:has(.noyona-lovial-page) .header-brand-strip .noyona-brand-strip-fallback {
-  --brand-bg-color: #BAD8F2 !important;
-  --brand-font-color: #000000 !important;
-  background: #BAD8F2 !important;
-  color: #000000 !important;
-}
-
-body:has(.noyona-lovial-page) .header-brand-strip .brand-carousel__text,
-body:has(.noyona-lovial-page) .header-brand-strip .noyona-brand-strip-fallback__item {
-  color: #000000 !important;
-}
-
 .noyona-brand-strip-fallback {
   background: var(--noyona-color-pink-soft);
   overflow: hidden;
@@ -923,16 +910,16 @@ body:not(.logged-in) .header-account--logged-out {
 }
 
 .wc-block-mini-cart__drawer .wc-block-components-button--primary {
-  background: var(--noyona-cta-primary-bg) !important;
-  border: 1px solid var(--noyona-cta-primary-border) !important;
-  color: var(--noyona-cta-primary-text) !important;
+  background: var(--noyona-color-pink-soft, #EFB5BE) !important;
+  border: 1px solid #D81B60 !important;
+  color: #000000 !important;
 }
 
 .wc-block-mini-cart__drawer .wc-block-components-button--primary:hover,
 .wc-block-mini-cart__drawer .wc-block-components-button--primary:focus-visible {
-  background: var(--noyona-cta-primary-hover-bg) !important;
-  border-color: var(--noyona-cta-primary-hover-border) !important;
-  color: var(--noyona-cta-primary-hover-text) !important;
+  background: #D81B60 !important;
+  border-color: #D81B60 !important;
+  color: #FFFFFF !important;
 }
 
 /* Noyona mini-cart template skin */
@@ -1158,11 +1145,46 @@ body:not(.logged-in) .header-account--logged-out {
   opacity: 0.65;
 }
 
-/*
- * Mini-cart stock errors use global notice styling (noyona-notices.css) on
- * ul.woocommerce-error.noyona-mini-cart-stock-notice. Hide native WC block
- * banners in the drawer so we never duplicate them.
- */
+.wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice {
+  margin: 10px 16px 14px;
+  padding: 10px 14px 10px 36px;
+  border-left: 4px solid #c62828;
+  border-radius: 12px;
+  background: #fdecea;
+  color: #c62828;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  list-style: none;
+  position: relative;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice::before {
+  content: "!";
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #c62828;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice li {
+  margin: 0;
+  padding: 0;
+}
+
+/* Hide the WooCommerce store-notices toast inside the mini-cart drawer
+   entirely. Stock issues are surfaced via our own <ul class="noyona-mini-cart-stock-notice">
+   so we never want the duplicate native banner to render alongside it. */
 .wc-block-mini-cart__drawer .wc-block-components-notice-banner,
 .wc-block-mini-cart__drawer .wp-block-woocommerce-store-notices,
 .wc-block-mini-cart__drawer .wc-block-store-notices {
@@ -1311,7 +1333,7 @@ body:not(.logged-in) .header-account--logged-out {
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-terms a {
-  color: inherit;
+  color: var(--noyona-color-pink-accent);
   text-decoration: underline;
 }
 
@@ -1344,9 +1366,9 @@ body:not(.logged-in) .header-account--logged-out {
   justify-content: center;
   gap: 10px;
   border-radius: var(--noyona-radius-cta) !important;
-  background: var(--noyona-cta-primary-bg) !important;
-  border: 1px solid var(--noyona-cta-primary-border) !important;
-  color: var(--noyona-cta-primary-text) !important;
+  background: var(--noyona-color-pink-soft, #EFB5BE) !important;
+  border: 1px solid #D81B60 !important;
+  color: #000000 !important;
   margin-inline: auto !important;
 }
 
@@ -1357,18 +1379,18 @@ body:not(.logged-in) .header-account--logged-out {
   padding: 12px 20px !important;
   margin-inline: auto !important;
   border-radius: var(--noyona-radius-cta) !important;
-  background: var(--noyona-cta-primary-bg) !important;
-  border: 1px solid var(--noyona-cta-primary-border) !important;
-  color: var(--noyona-cta-primary-text) !important;
+  background: var(--noyona-color-pink-soft, #EFB5BE) !important;
+  border: 1px solid #D81B60 !important;
+  color: #000000 !important;
 }
 
 .wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:hover,
 .wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:focus-visible,
 .wc-block-mini-cart__drawer .wc-block-components-button.wc-block-mini-cart__footer-checkout:hover,
 .wc-block-mini-cart__drawer .wc-block-components-button.wc-block-mini-cart__footer-checkout:focus-visible {
-  background: var(--noyona-cta-primary-hover-bg) !important;
-  border-color: var(--noyona-cta-primary-hover-border) !important;
-  color: var(--noyona-cta-primary-hover-text) !important;
+  background: var(--noyona-color-pink-accent) !important;
+  border-color: var(--noyona-color-pink-accent) !important;
+  color: #ffffff !important;
 }
 
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button.is-disabled {
@@ -1377,9 +1399,9 @@ body:not(.logged-in) .header-account--logged-out {
 }
 
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button > span {
-  font-size: var(--wp--preset--font-size--nav-button);
-  line-height: normal;
-  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 600;
 }
 
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button .noyona-mini-cart-checkout-arrow {
@@ -1732,14 +1754,12 @@ body:not(.logged-in) .header-account--logged-out {
   .site-header {
     justify-content: space-between !important;
     gap: 0.35rem;
-    flex-wrap: nowrap !important;
   }
 
   /* Logo stays left */
   .site-logo {
     order: 1;
     min-width: 0;
-    flex: 0 1 auto;
   }
 
   .site-logo-link {
@@ -1770,7 +1790,6 @@ body:not(.logged-in) .header-account--logged-out {
     order: 2;
     margin-left: auto !important;
     gap: 0.75rem;
-    flex: 0 0 auto;
   }
 
   /* Hamburger after icons */
@@ -1783,34 +1802,8 @@ body:not(.logged-in) .header-account--logged-out {
   }
 
   .mobile-menu-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     margin-left: 0;
-    width: 44px;
-    height: 44px;
-    flex: 0 0 44px;
-    border-radius: var(--noyona-radius-cta);
-    color: var(--noyona-color-pink-muted-rose);
-    position: relative;
-    z-index: 1004;
-  }
-
-  body.is-menu-open {
-    overflow: hidden;
-  }
-
-  body.is-menu-open header.wp-block-template-part {
-    z-index: 1100;
-  }
-
-  body.is-menu-open .mobile-menu-toggle {
-    position: fixed;
-    top: max(14px, var(--page-gutter-left, 16px));
-    right: max(14px, var(--page-gutter-right, 16px));
-    z-index: 1006;
-    background: #fff;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
   }
 
   /* Hide topbar account icon on mobile (account is in drawer) */
@@ -1834,14 +1827,13 @@ body:not(.logged-in) .header-account--logged-out {
     background: #fff;
     flex-direction: column;
     align-items: flex-start;
-    padding: 5.25rem clamp(1rem, 5vw, 2rem) 2rem;
+    padding: 5rem 2rem 2rem;
     gap: 1rem;
     transform: translateX(100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1005;
+    z-index: 1001;
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
-    overscroll-behavior: contain;
   }
 
   body.is-menu-open .nav-list {
@@ -1854,7 +1846,7 @@ body:not(.logged-in) .header-account--logged-out {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
-    z-index: 999;
+    z-index: 1000;
     backdrop-filter: blur(2px);
   }
 
@@ -1869,7 +1861,7 @@ body:not(.logged-in) .header-account--logged-out {
   }
 
   .nav-link {
-    font-size: var(--wp--preset--font-size--body);
+    font-size: 1.1rem;
     padding: 0.75rem 0;
     flex: 1;
     border-bottom: none;
@@ -1891,58 +1883,34 @@ body:not(.logged-in) .header-account--logged-out {
   .dropdown-menu {
     position: static;
     transform: none !important;
-    opacity: 0;
+    opacity: 1;
     visibility: visible;
     box-shadow: none;
     padding: 0;
     max-height: 0;
     overflow: hidden;
-    margin: 0;
-    pointer-events: none;
-    transition:
-      max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 0.24s ease,
-      padding 0.24s ease,
-      margin 0.24s ease;
+    transition: max-height 0.25s ease-out;
     width: 100%;
     background: #f9f9f9;
-    border-radius: var(--noyona-radius-input);
-    will-change: max-height, opacity;
+    border-radius: 0;
   }
 
   .nav-item.is-open .dropdown-menu {
     max-height: 520px;
-    opacity: 1;
-    padding: 0.45rem 0;
-    margin: 0.2rem 0 0.35rem;
-    pointer-events: auto;
+    padding: 0.5rem 0;
   }
 
   .dropdown-menu li a {
     padding: 0.6rem 1rem;
     font-size: var(--wp--preset--font-size--nav-button);
-    opacity: 0;
-    transform: translateY(-4px);
-    transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s, color 0.2s;
-  }
-
-  .nav-item.is-open .dropdown-menu li a {
-    opacity: 1;
-    transform: translateY(0);
   }
 
   /* Prevent hover opening on mobile */
-  .nav-item:not(.is-open):hover .dropdown-menu {
+  .nav-item:hover .dropdown-menu {
     max-height: 0;
-    opacity: 0;
-    padding: 0;
-    margin: 0;
   }
   .nav-item.is-open:hover .dropdown-menu {
     max-height: 520px;
-    opacity: 1;
-    padding: 0.45rem 0;
-    margin: 0.2rem 0 0.35rem;
   }
 }
 
@@ -2072,27 +2040,6 @@ body:has(.noyona-lovial-page) .site-logo-img--lovial {
   display: inline-block !important;
 }
 
-@media (max-width: 650px) {
-  body:has(.noyona-lovial-page) .site-logo-mark {
-    width: auto !important;
-    height: auto !important;
-    flex-basis: auto !important;
-  }
-
-  body:has(.noyona-lovial-page) .site-logo-img--lovial {
-    width: clamp(74px, 23vw, 104px) !important;
-    max-width: clamp(74px, 23vw, 104px) !important;
-    height: auto !important;
-  }
-}
-
-@media (max-width: 430px) {
-  body:has(.noyona-lovial-page) .site-logo-img--lovial {
-    width: clamp(68px, 21vw, 88px) !important;
-    max-width: clamp(68px, 21vw, 88px) !important;
-  }
-}
-
 
 /* =========================================================
    SEARCH EXPAND FIX (mobile)
@@ -2161,82 +2108,4 @@ body:has(.noyona-lovial-page) .site-logo-img--lovial {
   .wp-site-blocks {
     padding-top: var(--noyona-header-total-offset, 72px);
   }
-}
-
-/* Standardize visible header icon glyphs to 24px (FA glyphs in search,
-   wishlist, store, account; WooCommerce mini-cart SVG). Touch targets
-   (32/44/48) are handled separately below. */
-.header-icon i {
-  font-size: 24px;
-}
-
-.header-mini-cart .wc-block-mini-cart__button svg {
-  width: 34px;
-  height: 34px;
-}
-
-/* Header icon touch targets per image/icon spec:
-   24px icon glyph, 32px target desktop / 44px tablet / 48px mobile. */
-@media (max-width: 1024px) {
-  .header-icon,
-  .header-mini-cart .wc-block-mini-cart__button {
-    width: 44px;
-    height: 44px;
-  }
-}
-
-@media (max-width: 767px) {
-  .header-icon,
-  .header-mini-cart .wc-block-mini-cart__button {
-    width: 48px;
-    height: 48px;
-  }
-}
-
-body:has(.noyona-lovial-page) .nav-link,
-body:has(.noyona-lovial-page) .dropdown-menu li a {
-  color: #000000;
-}
-
-body:has(.noyona-lovial-page) .nav-link:hover,
-body:has(.noyona-lovial-page) .nav-link.is-active,
-body:has(.noyona-lovial-page) .dropdown-menu li a:hover,
-body:has(.noyona-lovial-page) .dropdown-menu li a.is-active,
-body:has(.noyona-lovial-page) .mobile-drawer-links a:hover,
-body:has(.noyona-lovial-page) .mobile-drawer-links a.is-active {
-  color: #003B6E;
-}
-
-body:has(.noyona-lovial-page) .nav-link.is-active,
-body:has(.noyona-lovial-page) .nav-item.has-active-child > .nav-link-wrapper > .nav-link {
-  color: #003B6E;
-  border-bottom-color: #003B6E;
-}
-
-body:has(.noyona-lovial-page) .header-icons,
-body:has(.noyona-lovial-page) .header-icon,
-body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button,
-body:has(.noyona-lovial-page) .search-icon,
-body:has(.noyona-lovial-page) .mobile-menu-toggle,
-body:has(.noyona-lovial-page) .submenu-toggle {
-  color: #000000;
-}
-
-body:has(.noyona-lovial-page) .header-icon:hover,
-body:has(.noyona-lovial-page) .header-icon:focus-visible,
-body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:hover,
-body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:focus-visible,
-body:has(.noyona-lovial-page) .search-icon:hover,
-body:has(.noyona-lovial-page) .search-icon:focus-visible,
-body:has(.noyona-lovial-page) .mobile-menu-toggle:hover,
-body:has(.noyona-lovial-page) .mobile-menu-toggle:focus-visible,
-body:has(.noyona-lovial-page) .submenu-toggle:hover,
-body:has(.noyona-lovial-page) .submenu-toggle:focus-visible {
-  color: #003B6E;
-}
-
-body:has(.noyona-lovial-page) .header-icon:hover,
-body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:hover,
-body:has(.noyona-lovial-page) .search-icon:hover {
-  background: rgba(0, 59, 110, 0.08);
 }
