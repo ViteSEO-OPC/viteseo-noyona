@@ -1803,8 +1803,34 @@ body:not(.logged-in) .header-account--logged-out {
   }
 
   .mobile-menu-toggle {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin-left: 0;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border-radius: var(--noyona-radius-cta);
+    color: var(--noyona-color-pink-muted-rose);
+    position: relative;
+    z-index: 1004;
+  }
+
+  body.is-menu-open {
+    overflow: hidden;
+  }
+
+  body.is-menu-open header.wp-block-template-part {
+    z-index: 1100;
+  }
+
+  body.is-menu-open .mobile-menu-toggle {
+    position: fixed;
+    top: max(14px, var(--page-gutter-left, 16px));
+    right: max(14px, var(--page-gutter-right, 16px));
+    z-index: 1006;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
   }
 
   /* Hide topbar account icon on mobile (account is in drawer) */
@@ -2109,4 +2135,120 @@ body:has(.noyona-lovial-page) .site-logo-img--lovial {
   .wp-site-blocks {
     padding-top: var(--noyona-header-total-offset, 72px);
   }
+}
+
+/* === Restored from 1933253 (regression source: 55cf56c) — minimal header restoration patch === */
+
+/* Lovial brand-strip colors */
+body:has(.noyona-lovial-page) .header-brand-strip .brand-carousel,
+body:has(.noyona-lovial-page) .header-brand-strip .noyona-brand-strip-fallback {
+  --brand-bg-color: #BAD8F2 !important;
+  --brand-font-color: #000000 !important;
+  background: #BAD8F2 !important;
+  color: #000000 !important;
+}
+
+body:has(.noyona-lovial-page) .header-brand-strip .brand-carousel__text,
+body:has(.noyona-lovial-page) .header-brand-strip .noyona-brand-strip-fallback__item {
+  color: #000000 !important;
+}
+
+/* Lovial responsive logo sizing */
+@media (max-width: 650px) {
+  body:has(.noyona-lovial-page) .site-logo-mark {
+    width: auto !important;
+    height: auto !important;
+    flex-basis: auto !important;
+  }
+
+  body:has(.noyona-lovial-page) .site-logo-img--lovial {
+    width: clamp(74px, 23vw, 104px) !important;
+    max-width: clamp(74px, 23vw, 104px) !important;
+    height: auto !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body:has(.noyona-lovial-page) .site-logo-img--lovial {
+    width: clamp(68px, 21vw, 88px) !important;
+    max-width: clamp(68px, 21vw, 88px) !important;
+  }
+}
+
+/* Standardize visible header icon glyphs to 24px (FA glyphs in search,
+   wishlist, store, account; WooCommerce mini-cart SVG). Touch targets
+   (32/44/48) are handled separately below. */
+.header-icon i {
+  font-size: 24px;
+}
+
+.header-mini-cart .wc-block-mini-cart__button svg {
+  width: 34px;
+  height: 34px;
+}
+
+/* Header icon touch targets per image/icon spec:
+   24px icon glyph, 32px target desktop / 44px tablet / 48px mobile. */
+@media (max-width: 1024px) {
+  .header-icon,
+  .header-mini-cart .wc-block-mini-cart__button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 767px) {
+  .header-icon,
+  .header-mini-cart .wc-block-mini-cart__button {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+body:has(.noyona-lovial-page) .nav-link,
+body:has(.noyona-lovial-page) .dropdown-menu li a {
+  color: #000000;
+}
+
+body:has(.noyona-lovial-page) .nav-link:hover,
+body:has(.noyona-lovial-page) .nav-link.is-active,
+body:has(.noyona-lovial-page) .dropdown-menu li a:hover,
+body:has(.noyona-lovial-page) .dropdown-menu li a.is-active,
+body:has(.noyona-lovial-page) .mobile-drawer-links a:hover,
+body:has(.noyona-lovial-page) .mobile-drawer-links a.is-active {
+  color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .nav-link.is-active,
+body:has(.noyona-lovial-page) .nav-item.has-active-child > .nav-link-wrapper > .nav-link {
+  color: #003B6E;
+  border-bottom-color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .header-icons,
+body:has(.noyona-lovial-page) .header-icon,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button,
+body:has(.noyona-lovial-page) .search-icon,
+body:has(.noyona-lovial-page) .mobile-menu-toggle,
+body:has(.noyona-lovial-page) .submenu-toggle {
+  color: #000000;
+}
+
+body:has(.noyona-lovial-page) .header-icon:hover,
+body:has(.noyona-lovial-page) .header-icon:focus-visible,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:hover,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:focus-visible,
+body:has(.noyona-lovial-page) .search-icon:hover,
+body:has(.noyona-lovial-page) .search-icon:focus-visible,
+body:has(.noyona-lovial-page) .mobile-menu-toggle:hover,
+body:has(.noyona-lovial-page) .mobile-menu-toggle:focus-visible,
+body:has(.noyona-lovial-page) .submenu-toggle:hover,
+body:has(.noyona-lovial-page) .submenu-toggle:focus-visible {
+  color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .header-icon:hover,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:hover,
+body:has(.noyona-lovial-page) .search-icon:hover {
+  background: rgba(0, 59, 110, 0.08);
 }
