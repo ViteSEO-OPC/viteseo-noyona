@@ -3912,6 +3912,21 @@ function noyona_download_einvoice_handler() {
         wp_die( esc_html__( 'You are not allowed to download this invoice.', 'noyona-childtheme' ), esc_html__( 'Unauthorized', 'noyona-childtheme' ), array( 'response' => 403 ) );
     }
 
+    // PDF generator (Dompdf) — loaded from the theme's Composer vendor dir.
+    if ( ! class_exists( '\\Dompdf\\Dompdf' ) ) {
+        $noyona_pdf_autoload = get_stylesheet_directory() . '/vendor/autoload.php';
+        if ( is_readable( $noyona_pdf_autoload ) ) {
+            require_once $noyona_pdf_autoload;
+        }
+    }
+    if ( ! class_exists( '\\Dompdf\\Dompdf' ) ) {
+        wp_die(
+            esc_html__( 'The invoice PDF generator is currently unavailable. Please contact us and we will email your invoice.', 'noyona-childtheme' ),
+            esc_html__( 'Invoice unavailable', 'noyona-childtheme' ),
+            array( 'response' => 500 )
+        );
+    }
+
     $order_created = $order->get_date_created();
     $order_date    = ( $order_created instanceof WC_DateTime ) ? $order_created->date_i18n( get_option( 'date_format' ) ) : '';
 
@@ -3940,6 +3955,36 @@ function noyona_download_einvoice_handler() {
         $payment_label = (string) $order->get_payment_method();
     }
 
+    $customer_name  = trim( (string) $order->get_billing_first_name() . ' ' . (string) $order->get_billing_last_name() );
+    $customer_email = trim( (string) $order->get_billing_email() );
+    $customer_phone = trim( (string) $order->get_billing_phone() );
+
+    // Store details from WooCommerce settings.
+    $store_name          = (string) get_bloginfo( 'name' );
+    $store_address_parts = array_filter(
+        array(
+            get_option( 'woocommerce_store_address' ),
+            get_option( 'woocommerce_store_address_2' ),
+            get_option( 'woocommerce_store_city' ),
+            get_option( 'woocommerce_store_postcode' ),
+        )
+    );
+    $store_country_code = (string) get_option( 'woocommerce_default_country' );
+    if ( '' !== $store_country_code && function_exists( 'WC' ) && WC() && isset( WC()->countries ) ) {
+        $store_country_only = ( false !== strpos( $store_country_code, ':' ) )
+            ? substr( $store_country_code, 0, strpos( $store_country_code, ':' ) )
+            : $store_country_code;
+        $wc_countries = (array) WC()->countries->get_countries();
+        if ( isset( $wc_countries[ $store_country_only ] ) ) {
+            $store_address_parts[] = $wc_countries[ $store_country_only ];
+        }
+    }
+    $store_address = implode( ', ', array_map( 'wc_clean', $store_address_parts ) );
+    $store_email   = (string) get_option( 'woocommerce_email_from_address' );
+    if ( '' === $store_email ) {
+        $store_email = (string) get_option( 'admin_email' );
+    }
+
     $items_html = '';
     foreach ( $order->get_items( 'line_item' ) as $order_item ) {
         if ( ! $order_item instanceof WC_Order_Item_Product ) {
@@ -3964,27 +4009,77 @@ function noyona_download_einvoice_handler() {
         $totals_html .= '</tr>';
     }
 
-    $invoice_html  = '<!doctype html><html><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '"><meta http-equiv="Content-Type" content="text/html; charset=' . esc_attr( get_bloginfo( 'charset' ) ) . '"><title>' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</title></head><body style="font-family:Arial,sans-serif;color:#1d1d1d;line-height:normal;padding:28px;">';
-    $invoice_html .= '<h1 style="margin:0 0 4px;">' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</h1>';
-    $invoice_html .= '<p style="margin:0 0 16px;">' . esc_html__( 'Order', 'noyona-childtheme' ) . ' #' . esc_html( $order->get_order_number() ) . '</p>';
-    $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Order Date:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $order_date ) . '</p>';
-    $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Customer:', 'noyona-childtheme' ) . '</strong> ' . esc_html( trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() ) ) . '</p>';
-    $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Shipping Address:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $shipping_text ) . '</p>';
-    $invoice_html .= '<p style="margin:0 0 16px;"><strong>' . esc_html__( 'Payment Method:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $payment_label ) . '</p>';
-    $invoice_html .= '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;"><thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Item', 'noyona-childtheme' ) . '</th><th style="text-align:center;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Qty', 'noyona-childtheme' ) . '</th><th style="text-align:right;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Total', 'noyona-childtheme' ) . '</th></tr></thead><tbody>' . $items_html . '</tbody></table>';
-    $invoice_html .= '<table style="width:100%;max-width:420px;border-collapse:collapse;margin-left:auto;"><tbody>' . $totals_html . '</tbody></table>';
+    $invoice_charset = get_bloginfo( 'charset' );
+    $invoice_html  = '<!doctype html><html><head><meta charset="' . esc_attr( $invoice_charset ) . '"><title>' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</title>';
+    $invoice_html .= '<style>* { font-family: "DejaVu Sans", Arial, sans-serif; } body { color:#1d1d1d; line-height:1.4; font-size:12px; } h1 { font-size:20px; margin:0 0 2px; } h2 { font-size:15px; margin:10px 0 8px; } h3 { font-size:13px; margin:8px 0 4px; } .muted { color:#555; } table { width:100%; border-collapse:collapse; }</style>';
+    $invoice_html .= '</head><body>';
+
+    // Store details (header).
+    $invoice_html .= '<h1>' . esc_html( $store_name ) . '</h1>';
+    if ( '' !== $store_address ) {
+        $invoice_html .= '<p class="muted" style="margin:0;">' . esc_html( $store_address ) . '</p>';
+    }
+    if ( '' !== $store_email ) {
+        $invoice_html .= '<p class="muted" style="margin:0 0 14px;">' . esc_html( $store_email ) . '</p>';
+    }
+
+    // Order summary.
+    $invoice_html .= '<h2 style="border-top:2px solid #d8d8d8;padding-top:10px;">' . esc_html__( 'E-invoice', 'noyona-childtheme' ) . ' &mdash; ' . esc_html__( 'Order', 'noyona-childtheme' ) . ' #' . esc_html( $order->get_order_number() ) . '</h2>';
+    $invoice_html .= '<p style="margin:0 0 4px;"><strong>' . esc_html__( 'Order Date:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $order_date ) . '</p>';
+    $invoice_html .= '<p style="margin:0 0 14px;"><strong>' . esc_html__( 'Payment Method:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $payment_label ) . '</p>';
+
+    // Customer details.
+    $invoice_html .= '<h3>' . esc_html__( 'Billed To', 'noyona-childtheme' ) . '</h3>';
+    if ( '' !== $customer_name ) {
+        $invoice_html .= '<p style="margin:0 0 2px;">' . esc_html( $customer_name ) . '</p>';
+    }
+    if ( '' !== $customer_email ) {
+        $invoice_html .= '<p style="margin:0 0 2px;">' . esc_html( $customer_email ) . '</p>';
+    }
+    if ( '' !== $customer_phone ) {
+        $invoice_html .= '<p style="margin:0 0 2px;">' . esc_html( $customer_phone ) . '</p>';
+    }
+    if ( '' !== $shipping_text ) {
+        $invoice_html .= '<p style="margin:0 0 16px;"><strong>' . esc_html__( 'Shipping Address:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $shipping_text ) . '</p>';
+    }
+
+    // Items table.
+    $invoice_html .= '<table style="margin-bottom:16px;"><thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Item', 'noyona-childtheme' ) . '</th><th style="text-align:center;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Qty', 'noyona-childtheme' ) . '</th><th style="text-align:right;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Total', 'noyona-childtheme' ) . '</th></tr></thead><tbody>' . $items_html . '</tbody></table>';
+
+    // Totals table.
+    $invoice_html .= '<table style="max-width:420px;margin-left:auto;"><tbody>' . $totals_html . '</tbody></table>';
     $invoice_html .= '</body></html>';
+
+    // Render the invoice HTML to a real (non-editable) PDF, server-side.
+    $dompdf = new \Dompdf\Dompdf(
+        array(
+            'isRemoteEnabled'      => false,
+            'isHtml5ParserEnabled' => true,
+            'defaultFont'          => 'DejaVu Sans',
+        )
+    );
+    $dompdf->loadHtml( $invoice_html, (string) $invoice_charset );
+    $dompdf->setPaper( 'A4', 'portrait' );
+    $dompdf->render();
+    $pdf_output = (string) $dompdf->output();
+
+    $filename = sanitize_file_name( 'noyona-order-' . $order->get_order_number() . '.pdf' );
 
     if ( function_exists( 'nocache_headers' ) ) {
         nocache_headers();
     }
 
-    $filename = sanitize_file_name( 'noyona-einvoice-order-' . $order->get_order_number() . '.doc' );
-    header( 'Content-Type: application/msword; charset=' . get_bloginfo( 'charset' ) );
+    // Discard any buffered output so the PDF stream is not corrupted.
+    while ( ob_get_level() > 0 ) {
+        ob_end_clean();
+    }
+
+    header( 'Content-Type: application/pdf' );
     header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+    header( 'Content-Length: ' . strlen( $pdf_output ) );
     header( 'X-Content-Type-Options: nosniff' );
 
-    echo $invoice_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    echo $pdf_output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     exit;
 }
 
