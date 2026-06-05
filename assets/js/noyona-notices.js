@@ -4,22 +4,40 @@
 (function () {
   'use strict';
 
-  var DEFAULT_SUCCESS_AUTOHIDE_MS = 6000;
+  var DEFAULT_NOTICE_AUTOHIDE_MS = 10000;
+  var NOTICE_SELECTOR = [
+    '.noyona-notice',
+    '.noyona-mini-cart-stock-notice',
+    'ul.woocommerce-message',
+    'ul.woocommerce-error',
+    'ul.woocommerce-info',
+    'p.woocommerce-info',
+    '.wc-block-components-notice-banner',
+  ].join(',');
+
+  function isNoticeBanner(el) {
+    if (!el || !el.matches || !el.matches(NOTICE_SELECTOR)) {
+      return false;
+    }
+
+    // Inline field validation uses the same Woo classes but should stay tied to the field.
+    return !el.closest('.form-row');
+  }
+
+  function resolveAutoHideDelay(ms) {
+    var delay = parseInt(ms, 10);
+    return delay > 0 ? delay : DEFAULT_NOTICE_AUTOHIDE_MS;
+  }
 
   function scheduleAutoHide(el, ms) {
-    var delay = parseInt(ms, 10);
     if (!el) {
       return;
     }
+    var delay = resolveAutoHideDelay(ms);
 
     if (el._noyonaAutoHideTimer) {
       window.clearTimeout(el._noyonaAutoHideTimer);
       el._noyonaAutoHideTimer = null;
-    }
-
-    if (!delay || delay < 1) {
-      el.removeAttribute('data-noyona-notice-autohide');
-      return;
     }
 
     el.setAttribute('data-noyona-notice-autohide', String(delay));
@@ -90,10 +108,7 @@
     var scope = getNoticeScope(opts);
     var key = String(opts.key || 'default');
 
-    var autoHideMs = parseInt(opts.autoHideMs, 10);
-    if ((!autoHideMs || autoHideMs < 1) && type === 'success') {
-      autoHideMs = DEFAULT_SUCCESS_AUTOHIDE_MS;
-    }
+    var autoHideMs = resolveAutoHideDelay(opts.autoHideMs);
 
     var existing = findNoticeInScope(scope, key);
     removeExtraNoticesInScope(scope, existing);
@@ -116,18 +131,53 @@
   }
 
   function initAutoHideNotices() {
-    document.querySelectorAll('[data-noyona-notice-autohide]').forEach(function (el) {
-      if (!el._noyonaAutoHideTimer) {
+    document.querySelectorAll(NOTICE_SELECTOR + ',[data-noyona-notice-autohide]').forEach(function (el) {
+      if (isNoticeBanner(el) && !el._noyonaAutoHideTimer) {
         scheduleAutoHide(el, el.getAttribute('data-noyona-notice-autohide'));
       }
     });
   }
 
+  function observeAutoHideNotices() {
+    if (!window.MutationObserver) {
+      return;
+    }
+
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+          if (!node || node.nodeType !== 1) {
+            return;
+          }
+
+          if (isNoticeBanner(node) && !node._noyonaAutoHideTimer) {
+            scheduleAutoHide(node, node.getAttribute('data-noyona-notice-autohide'));
+          }
+
+          if (node.querySelectorAll) {
+            node.querySelectorAll(NOTICE_SELECTOR + ',[data-noyona-notice-autohide]').forEach(function (el) {
+              if (isNoticeBanner(el) && !el._noyonaAutoHideTimer) {
+                scheduleAutoHide(el, el.getAttribute('data-noyona-notice-autohide'));
+              }
+            });
+          }
+        });
+      });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  function initNotices() {
+    initAutoHideNotices();
+    observeAutoHideNotices();
+  }
+
   window.noyonaShowNotice = showNotice;
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAutoHideNotices);
+    document.addEventListener('DOMContentLoaded', initNotices);
   } else {
-    initAutoHideNotices();
+    initNotices();
   }
 })();

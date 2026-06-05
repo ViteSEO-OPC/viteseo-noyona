@@ -96,6 +96,141 @@ function noyona_proceed_to_checkout_button() {
 }
 
 /**
+ * Convert WooCommerce notice arrays into plain text messages for JSON responses.
+ *
+ * @param array $notices WooCommerce notices.
+ * @return array
+ */
+function noyona_cart_notice_messages( $notices ) {
+	$messages = array();
+
+	foreach ( (array) $notices as $notice ) {
+		$message = is_array( $notice ) && isset( $notice['notice'] )
+			? (string) $notice['notice']
+			: (string) $notice;
+		$message = trim( wp_specialchars_decode( wp_strip_all_tags( $message ), ENT_QUOTES ) );
+
+		if ( '' !== $message ) {
+			$messages[] = $message;
+		}
+	}
+
+	return array_values( array_unique( $messages ) );
+}
+
+/**
+ * Revalidate applied cart coupons with WooCommerce's native rules.
+ *
+ * @param bool  $persist_notices Whether newly generated notices should stay in the WC session.
+ * @param array $removed_coupons Coupon codes removed during validation.
+ * @return array
+ */
+function noyona_validate_cart_coupons_for_checkout( $persist_notices = false, &$removed_coupons = array() ) {
+	if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		return array();
+	}
+
+	$before_coupons = WC()->cart->get_applied_coupons();
+	$before_notices = function_exists( 'wc_get_notices' ) ? wc_get_notices() : array();
+	$before_errors  = isset( $before_notices['error'] ) ? (array) $before_notices['error'] : array();
+	$before_count   = count( $before_errors );
+
+	WC()->cart->check_cart_coupons();
+
+	$after_coupons   = WC()->cart->get_applied_coupons();
+	$removed_coupons = array_values(
+		array_filter(
+			$before_coupons,
+			static function ( $coupon_code ) use ( $after_coupons ) {
+				foreach ( $after_coupons as $applied_coupon ) {
+					if ( function_exists( 'wc_is_same_coupon' ) ? wc_is_same_coupon( $applied_coupon, $coupon_code ) : strtolower( (string) $applied_coupon ) === strtolower( (string) $coupon_code ) ) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+		)
+	);
+
+	$after_notices = function_exists( 'wc_get_notices' ) ? wc_get_notices() : array();
+	$after_errors  = isset( $after_notices['error'] ) ? (array) $after_notices['error'] : array();
+	$new_errors    = array_slice( $after_errors, $before_count );
+	$messages      = noyona_cart_notice_messages( $new_errors );
+
+	if ( ! empty( $messages ) ) {
+		WC()->cart->calculate_totals();
+	}
+
+	if ( ! $persist_notices && function_exists( 'wc_set_notices' ) ) {
+		wc_set_notices( $before_notices );
+	}
+
+	return $messages;
+}
+
+add_action( 'wp_ajax_noyona_validate_cart_before_checkout', 'noyona_validate_cart_before_checkout' );
+add_action( 'wp_ajax_nopriv_noyona_validate_cart_before_checkout', 'noyona_validate_cart_before_checkout' );
+function noyona_validate_cart_before_checkout() {
+	$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	if ( ! wp_verify_nonce( $nonce, 'noyona_validate_cart_before_checkout' ) ) {
+		wp_send_json_error(
+			array(
+				'messages' => array( __( 'Unable to validate your cart. Please refresh the cart page and try again.', 'noyona' ) ),
+			),
+			403
+		);
+	}
+
+	$removed_coupons = array();
+	$messages        = noyona_validate_cart_coupons_for_checkout( false, $removed_coupons );
+
+	wp_send_json_success(
+		array(
+			'valid'          => empty( $messages ),
+			'messages'       => $messages,
+			'removedCoupons' => $removed_coupons,
+			'checkoutUrl'    => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' ),
+		)
+	);
+}
+
+add_action( 'template_redirect', 'noyona_redirect_checkout_with_coupon_issues_to_cart', 3 );
+function noyona_redirect_checkout_with_coupon_issues_to_cart() {
+	if ( is_admin() || wp_doing_ajax() ) {
+		return;
+	}
+
+	if ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() ) {
+		return;
+	}
+
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		return;
+	}
+
+	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() ) {
+		return;
+	}
+
+	if ( function_exists( 'is_wc_endpoint_url' ) && ( is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'order-received' ) ) ) {
+		return;
+	}
+
+	if ( ! function_exists( 'WC' ) || ! WC()->cart || WC()->cart->is_empty() ) {
+		return;
+	}
+
+	$messages = noyona_validate_cart_coupons_for_checkout( true );
+	if ( empty( $messages ) ) {
+		return;
+	}
+
+	wp_safe_redirect( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) );
+	exit;
+}
+
+/**
  * Auto-submit cart form on quantity change.
  * Small inline script — no external JS file needed.
  */
@@ -109,6 +244,11 @@ function noyona_cart_auto_update_script() {
 	(function () {
 		var form = document.querySelector('.woocommerce-cart-form');
 		if (!form) return;
+		var validateCartRequest = {
+			url: '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>',
+			nonce: '<?php echo esc_js( wp_create_nonce( 'noyona_validate_cart_before_checkout' ) ); ?>',
+			action: 'noyona_validate_cart_before_checkout'
+		};
 		var cartErrorNoticeClass = 'woocommerce-error noyona-mini-cart-stock-notice';
 		var cartErrorNoticeSelector = '.woocommerce-error[data-noyona-cart-error="1"]';
 		var nativeErrorNoticeSelector = [
@@ -255,15 +395,93 @@ function noyona_cart_auto_update_script() {
 			return '"' + name + '" is sold out — remove it to continue to checkout.';
 		}
 
+		function normalizeCouponCode(code) {
+			return String(code || '').trim().toLowerCase();
+		}
+
+		function removeAppliedCouponChips(couponCodes) {
+			var normalizedCodes = normalizeCartErrorMessages(couponCodes).map(normalizeCouponCode);
+			if (!normalizedCodes.length) return;
+
+			Array.prototype.slice.call(document.querySelectorAll('.noyona-coupon-chip')).forEach(function (chip) {
+				var removeLink = chip.querySelector('.noyona-coupon-remove');
+				var couponCode = '';
+
+				if (removeLink && removeLink.href) {
+					try {
+						couponCode = new URL(removeLink.href, window.location.href).searchParams.get('remove_coupon') || '';
+					} catch (error) {
+						couponCode = '';
+					}
+				}
+
+				if (!couponCode) {
+					couponCode = String(chip.textContent || '').replace(/[×x]\s*$/i, '');
+				}
+
+				if (normalizedCodes.indexOf(normalizeCouponCode(couponCode)) !== -1) {
+					chip.remove();
+				}
+			});
+
+			Array.prototype.slice.call(document.querySelectorAll('.noyona-applied-coupons')).forEach(function (couponList) {
+				if (!couponList.querySelector('.noyona-coupon-chip')) {
+					couponList.remove();
+				}
+			});
+		}
+
 		document.addEventListener('click', function (e) {
 			var checkoutBtn = e.target.closest('.noyona-checkout-btn');
 			if (!checkoutBtn) return;
+			if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 
 			var stockMessage = getFirstOutOfStockCartMessage();
-			if (!stockMessage) return;
+			if (stockMessage) {
+				e.preventDefault();
+				showCartErrorNotice(stockMessage);
+				return;
+			}
+
+			if (checkoutBtn.getAttribute('data-noyona-validating-cart') === '1') {
+				e.preventDefault();
+				return;
+			}
 
 			e.preventDefault();
-			showCartErrorNotice(stockMessage);
+			checkoutBtn.setAttribute('data-noyona-validating-cart', '1');
+			checkoutBtn.setAttribute('aria-busy', 'true');
+
+			var body = new window.URLSearchParams();
+			body.set('action', validateCartRequest.action);
+			body.set('nonce', validateCartRequest.nonce);
+
+			window.fetch(validateCartRequest.url, {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+				},
+				body: body.toString()
+			}).then(function (response) {
+				return response.json();
+			}).then(function (payload) {
+				var data = payload && payload.data ? payload.data : {};
+				var messages = data.messages || [];
+				var removedCoupons = data.removedCoupons || [];
+
+				if (payload && payload.success && data.valid) {
+					window.location.assign(data.checkoutUrl || checkoutBtn.href);
+					return;
+				}
+
+				removeAppliedCouponChips(removedCoupons);
+				showCartErrorNotice(messages.length ? messages : '<?php echo esc_js( __( 'Please review your promo code before continuing to checkout.', 'noyona' ) ); ?>');
+				checkoutBtn.removeAttribute('data-noyona-validating-cart');
+				checkoutBtn.removeAttribute('aria-busy');
+			}).catch(function () {
+				window.location.assign(checkoutBtn.href);
+			});
 		});
 
 		var serverErrorNotice = findNativeCartErrorNotice();

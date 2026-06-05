@@ -74,6 +74,13 @@ body.woocommerce-checkout .wp-site-blocks {
   opacity: 0.85;
 }
 
+/* Paid/Done page: stepper is informational only, no navigation back. */
+.noyona-checkout-steps--locked li,
+.noyona-checkout-steps--locked .noyona-checkout-steps__link {
+  pointer-events: none;
+  cursor: default;
+}
+
 /* ═══════════════════════════════════════
    TWO-COLUMN LAYOUT
    ═══════════════════════════════════════ */
@@ -157,14 +164,16 @@ body.noyona-review-step .noyona-checkout-card--review-totals .noyona-order-total
 }
 
 body.noyona-review-step .noyona-checkout-actions__submit {
-  background: #f8dce3;
-  color: var(--noyona-color-pink-muted-rose);
+  background: var(--noyona-cta-primary-bg) !important;
+  color: var(--noyona-cta-primary-text) !important;
+  border: 1px solid var(--noyona-cta-primary-border);
   box-shadow: none;
 }
 
 body.noyona-review-step .noyona-checkout-actions__submit:hover {
-  background: #f3cdd6;
-  box-shadow: none;
+  background: var(--noyona-cta-primary-hover-bg) !important;
+  border: 1px solid var(--noyona-cta-primary-hover-border) !important;
+  color: var(--noyona-cta-primary-hover-text) !important;
 }
 
 /* In-page review toggle: review-only blocks live in the DOM at all times and are
@@ -222,10 +231,10 @@ body.noyona-review-step .noyona-order-totals--summary {
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.03);
 }
 
-/* Summary card — warm cream tint */
+/* Summary card */
 .noyona-checkout-card--summary {
-  background: #fdf8f3;
-  border-color: #f0e8df;
+  background: #fff;
+  border-color: var(--noyona-cart-line, #efefef);
 }
 
 /* Card header row (title + action button) */
@@ -423,9 +432,76 @@ body.noyona-review-step .noyona-order-totals--summary {
   color: #666;
 }
 
-.noyona-review-terms {
+/* Review-step order note */
+.noyona-review-special-instructions {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--noyona-cart-line, #efefef);
+}
+
+.noyona-review-special-instructions__row {
   margin-top: 0.5rem;
+}
+
+.noyona-review-special-instructions__row > span {
+  display: block;
   margin-bottom: 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.noyona-review-special-instructions__row > p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #1a1a1a;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* Order note — thank-you / order-received summary */
+.noyona-order-note {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--noyona-cart-line, #efefef);
+  border-radius: 10px;
+  background: #faf7f4;
+}
+
+.noyona-order-note__label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.noyona-order-note__text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #1a1a1a;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.noyona-review-terms {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.noyona-review-terms-notice {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.noyona-review-terms-notice + .noyona-checkout-actions {
+  margin-top: 0;
 }
 
 .noyona-review-terms__label {
@@ -692,6 +768,58 @@ body.noyona-review-step .noyona-order-totals--summary {
   background: #fff;
 }
 
+/* Open dropdown panel (province/state, country, etc.).
+   Select2 appends this to <body>, outside .noyona-checkout-form, so style it
+   here to match the rest of the checkout fields. */
+body.woocommerce-checkout .select2-container--default .select2-dropdown {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(16, 24, 40, 0.1);
+  overflow: hidden;
+}
+
+body.woocommerce-checkout .select2-container--default .select2-search--dropdown {
+  padding: 8px;
+}
+
+body.woocommerce-checkout .select2-container--default .select2-search--dropdown .select2-search__field {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0 0.75rem;
+  height: 40px;
+  background: #fafafa;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--input);
+  color: #1a1a1a;
+  outline: none;
+}
+
+body.woocommerce-checkout .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+  border-color: var(--noyona-cart-pink, #e199a4);
+  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.12);
+  background: #fff;
+}
+
+body.woocommerce-checkout .select2-container--default .select2-results__option {
+  padding: 10px 14px;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--input);
+  color: #1a1a1a;
+}
+
+body.woocommerce-checkout .select2-container--default .select2-results__option--highlighted[aria-selected],
+body.woocommerce-checkout .select2-container--default .select2-results__option--highlighted[data-selected] {
+  background: var(--noyona-cart-pink, #e199a4);
+  color: #fff;
+}
+
+body.woocommerce-checkout .select2-container--default .select2-results__option[aria-selected="true"],
+body.woocommerce-checkout .select2-container--default .select2-results__option[data-selected="true"] {
+  background: rgba(216, 27, 96, 0.08);
+  color: #1a1a1a;
+}
+
 /* ═══════════════════════════════════════
    PAYMENT METHODS
    ═══════════════════════════════════════ */
@@ -800,6 +928,12 @@ body.noyona-review-step .noyona-order-totals--summary {
   margin-left: 2px;
 }
 
+/* Maya wordmark is wider than GCash; bump height so it reads at a similar visual size */
+.noyona-checkout-form .wc_payment_method.payment_method_paymongo_paymaya > label img.paymongo-method-logo {
+  max-height: 32px;
+  min-width: 56px;
+}
+
 /* Hide every payment box by default, but reveal the box of the currently
    selected method so card number/expiry/CVC fields can be entered. Hiding all
    boxes unconditionally previously made card payments impossible (no fields ->
@@ -810,6 +944,18 @@ body.noyona-review-step .noyona-order-totals--summary {
 
 .noyona-checkout-form .wc_payment_method:has(input.input-radio:checked) .payment_box {
   display: block !important;
+}
+
+.noyona-checkout-form .wc_payment_method .payment_box {
+  background: #fff !important;
+  color: #4b5563;
+  padding: 14px 16px 18px 46px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.noyona-checkout-form .wc_payment_method .payment_box::before,
+.noyona-checkout-form .wc_payment_method .payment_box::after {
+  display: none !important;
 }
 
 .noyona-checkout-form .payment_box p {
@@ -844,6 +990,67 @@ body.noyona-review-step .noyona-order-totals--summary {
 
 .noyona-checkout-form .payment_box .form-row:last-child {
   margin-bottom: 0;
+}
+
+.noyona-checkout-form .payment_box .form-row label {
+  color: #333;
+  font-weight: 700;
+}
+
+.noyona-checkout-form .payment_box .form-row label .required,
+.noyona-checkout-form .payment_box .required {
+  color: #cf343d !important;
+}
+
+.noyona-checkout-form .payment_box input.input-text,
+.noyona-checkout-form .payment_box input[type="text"],
+.noyona-checkout-form .payment_box input[type="password"],
+.noyona-checkout-form .payment_box input[type="email"],
+.noyona-checkout-form .payment_box select,
+.noyona-checkout-form .payment_box textarea,
+.noyona-checkout-form .payment_box .paymongo_ccNo,
+.noyona-checkout-form .payment_box .paymongo_expdate,
+.noyona-checkout-form .payment_box .paymongo_cvv {
+  width: 100%;
+  min-height: 56px;
+  height: 56px;
+  padding: 0 1rem;
+  border: 1.5px solid #21a653;
+  border-radius: 10px;
+  background: #fff !important;
+  color: #1a1a1a;
+  font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
+  font-size: var(--wp--preset--font-size--input);
+  outline: none;
+  box-shadow: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.noyona-checkout-form .payment_box textarea {
+  height: auto;
+  min-height: 90px;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+.noyona-checkout-form .payment_box input::placeholder,
+.noyona-checkout-form .payment_box textarea::placeholder {
+  color: #9ca3af;
+}
+
+.noyona-checkout-form .payment_box input.input-text:focus,
+.noyona-checkout-form .payment_box input[type="text"]:focus,
+.noyona-checkout-form .payment_box input[type="password"]:focus,
+.noyona-checkout-form .payment_box input[type="email"]:focus,
+.noyona-checkout-form .payment_box select:focus,
+.noyona-checkout-form .payment_box textarea:focus,
+.noyona-checkout-form .payment_box .paymongo_ccNo:focus,
+.noyona-checkout-form .payment_box .paymongo_expdate:focus,
+.noyona-checkout-form .payment_box .paymongo_cvv:focus {
+  border-color: #21a653;
+  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(33, 166, 83, 0.12);
 }
 
 /* Collapse Woo's default place-order/terms block in details step.
@@ -1022,6 +1229,16 @@ box-shadow: 0 6px 20px rgba(216, 27, 96, 0.4);
 .noyona-checkout-actions__submit i {
 font-size: 0.8em;
 line-height: 1;
+}
+
+.noyona-checkout-actions__submit .noyona-checkout-actions__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask: url('../images/box_icon.webp') center / contain no-repeat;
+  mask: url('../images/box_icon.webp') center / contain no-repeat;
 }
 
 /* QR payment reminder modal on review step */
@@ -1348,6 +1565,18 @@ body.noyona-pay-confirm-open {
 
 .noyona-order-totals__row--discount .noyona-order-totals__value {
   color: #66bb6a;
+}
+
+.noyona-order-totals__value .woocommerce-remove-coupon {
+  color: #cf343d !important;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.noyona-order-totals__value .woocommerce-remove-coupon:hover,
+.noyona-order-totals__value .woocommerce-remove-coupon:focus {
+  color: #a92730 !important;
+  text-decoration: underline;
 }
 
 .noyona-order-totals__row--total {

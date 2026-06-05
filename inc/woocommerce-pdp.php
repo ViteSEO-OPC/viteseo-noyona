@@ -1526,6 +1526,7 @@ function noyona_pdp_render_buy_bar_and_sheet() {
 					<div class="noyona-pdp-buysheet__title"><?php echo $title; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
 					<div class="noyona-pdp-buysheet__price" data-noyona-buysheet-price></div>
 					<div class="noyona-pdp-buysheet__variant" data-noyona-buysheet-variant></div>
+					<div class="noyona-pdp-buysheet__stock noyona-pdp-stock-shipping__stock" data-noyona-buysheet-stock aria-live="polite" hidden></div>
 				</div>
 			</div>
 			<div class="noyona-pdp-buysheet__body" data-noyona-buysheet-form-slot></div>

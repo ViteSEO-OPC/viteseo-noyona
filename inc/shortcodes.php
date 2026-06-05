@@ -359,7 +359,7 @@ function woocom_ct_register_form_shortcode() {
                     class="noyona-notice is-<?php echo esc_attr( $notice_type ); ?>"
                     role="<?php echo 'error' === $notice_type ? 'alert' : 'status'; ?>"
                     <?php if ( 'success' === $notice_type ) : ?>
-                        data-noyona-notice-autohide="6000"
+                        data-noyona-notice-autohide="10000"
                     <?php endif; ?>
                 >
                     <?php echo esc_html( $message ); ?>
@@ -1184,7 +1184,7 @@ function noyona_render_account_addresses_card( $args ) {
         </header>
 
         <?php if ( $show_address_notice && ! $is_address_modal_open ) : ?>
-            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                 <?php echo esc_html( $notice_message ); ?>
             </p>
         <?php endif; ?>
@@ -1332,7 +1332,7 @@ function noyona_render_account_addresses_card( $args ) {
                     <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit My Address', 'noyona-childtheme' ); ?></h4>
 
                     <?php if ( 'address' === $active_modal && '' !== $notice_message ) : ?>
-                        <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                        <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                             <?php echo esc_html( $notice_message ); ?>
                         </p>
                     <?php endif; ?>
@@ -1475,6 +1475,8 @@ function noyona_get_account_wishlist_rows( $items ) {
         $add_to_cart_text    = __( 'Add to Cart', 'noyona-childtheme' );
         $add_to_cart_classes = 'noyona-account-btn noyona-account-btn--primary noyona-account-wishlist-add';
         $add_to_cart_data    = array();
+        $add_target_id       = 0;
+        $can_ajax_add        = false;
 
         if ( ! $is_in_stock ) {
             $add_to_cart_text = __( 'Out of Stock', 'noyona-childtheme' );
@@ -1493,17 +1495,16 @@ function noyona_get_account_wishlist_rows( $items ) {
                     }
                 }
                 $add_to_cart_url = add_query_arg( $query_args, function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) );
+                $add_target_id   = (int) $variation->get_id();
+                $can_ajax_add    = true;
             } else {
                 $add_to_cart_url  = $product->get_permalink();
                 $add_to_cart_text = __( 'Select Options', 'noyona-childtheme' );
             }
         } elseif ( $product->is_type( 'simple' ) && $is_purchasable ) {
             $add_to_cart_url = $product->add_to_cart_url();
-            if ( $product->supports( 'ajax_add_to_cart' ) ) {
-                $add_to_cart_classes .= ' add_to_cart_button ajax_add_to_cart';
-                $add_to_cart_data['product_id'] = (int) $product->get_id();
-                $add_to_cart_data['quantity']   = 1;
-            }
+            $add_target_id   = (int) $product->get_id();
+            $can_ajax_add    = true;
         } else {
             $add_to_cart_url  = $product->get_permalink();
             $add_to_cart_text = $product->is_type( 'variable' ) ? __( 'Select Options', 'noyona-childtheme' ) : $product->add_to_cart_text();
@@ -1524,6 +1525,8 @@ function noyona_get_account_wishlist_rows( $items ) {
             'add_to_cart_text'    => (string) $add_to_cart_text,
             'add_to_cart_classes' => (string) $add_to_cart_classes,
             'add_to_cart_data'    => $add_to_cart_data,
+            'add_target_id'       => (int) $add_target_id,
+            'can_ajax_add'        => (bool) $can_ajax_add,
             'added_at'            => isset( $item['added_at'] ) ? absint( $item['added_at'] ) : 0,
         );
     }
@@ -1626,7 +1629,7 @@ function noyona_render_account_wishlist_card( $args ) {
         </header>
 
         <?php if ( '' !== $notice_message ) : ?>
-            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                 <?php echo esc_html( $notice_message ); ?>
             </p>
         <?php endif; ?>
@@ -1701,6 +1704,12 @@ function noyona_render_account_wishlist_card( $args ) {
                                                 <?php foreach ( (array) $row['add_to_cart_data'] as $data_key => $data_value ) : ?>
                                                     data-<?php echo esc_attr( (string) $data_key ); ?>="<?php echo esc_attr( (string) $data_value ); ?>"
                                                 <?php endforeach; ?>
+                                                <?php if ( ! empty( $row['can_ajax_add'] ) && $row['add_target_id'] > 0 ) : ?>
+                                                    data-noyona-wishlist-add="1"
+                                                    data-add-id="<?php echo esc_attr( (string) $row['add_target_id'] ); ?>"
+                                                    data-product-id="<?php echo esc_attr( (string) $row['product_id'] ); ?>"
+                                                    data-variation-id="<?php echo esc_attr( (string) $row['variation_id'] ); ?>"
+                                                <?php endif; ?>
                                             >
                                                 <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
                                                 <?php echo esc_html( (string) $row['add_to_cart_text'] ); ?>
@@ -2433,6 +2442,15 @@ function noyona_render_account_page_shortcode() {
                                 if ( method_exists( $account_order, 'get_checkout_payment_url' ) ) {
                                     $pay_now_url = (string) $account_order->get_checkout_payment_url();
                                 }
+                                // QR Ph orders display their QR (and live countdown) on the
+                                // order-received page, not the gateway picker. Resume that view
+                                // instead of re-prompting the customer to choose a method.
+                                $is_qr_payment = function_exists( 'noyona_order_is_qr_payment' )
+                                    ? noyona_order_is_qr_payment( $account_order )
+                                    : ( false !== strpos( strtolower( (string) $account_order->get_payment_method() . ' ' . (string) $account_order->get_payment_method_title() ), 'qr' ) );
+                                if ( $is_qr_payment && method_exists( $account_order, 'get_checkout_order_received_url' ) ) {
+                                    $pay_now_url = (string) $account_order->get_checkout_order_received_url();
+                                }
                                 $show_pay_now = ( $is_to_pay_status && ! $account_order->is_paid() && '' !== trim( $pay_now_url ) );
 
                                 $item_thumb = '';
@@ -2546,6 +2564,14 @@ function noyona_render_account_page_shortcode() {
                                             </div>
                                             <strong class="noyona-account-order-modal__item-price"><?php echo wp_kses_post( $item_total ); ?></strong>
                                         </section>
+
+                                        <?php $order_customer_note = trim( (string) $account_order->get_customer_note() ); ?>
+                                        <?php if ( '' !== $order_customer_note ) : ?>
+                                            <section class="noyona-account-order-modal__note">
+                                                <h4><?php esc_html_e( 'Order Notes', 'noyona-childtheme' ); ?></h4>
+                                                <p class="noyona-account-order-modal__note-text"><?php echo esc_html( $order_customer_note ); ?></p>
+                                            </section>
+                                        <?php endif; ?>
 
                                         <section class="noyona-account-order-modal__totals">
                                             <div class="noyona-account-order-modal__total-row">
@@ -2672,7 +2698,7 @@ function noyona_render_account_page_shortcode() {
             </header>
 
             <?php if ( '' !== $notice_message && ! $is_address_modal_open ) : ?>
-                <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                     <?php echo esc_html( $notice_message ); ?>
                 </p>
             <?php endif; ?>
@@ -2820,7 +2846,7 @@ function noyona_render_account_page_shortcode() {
                         <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit My Address', 'noyona-childtheme' ); ?></h4>
 
                         <?php if ( 'address' === $active_modal && '' !== $notice_message ) : ?>
-                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                                 <?php echo esc_html( $notice_message ); ?>
                             </p>
                         <?php endif; ?>
@@ -2871,7 +2897,7 @@ function noyona_render_account_page_shortcode() {
         <?php elseif ( $show_payments_tab && 'payments' === $active_tab ) : ?>
         <div class="noyona-account-payments-wrap">
             <?php if ( '' !== $notice_message && ! $is_bank_modal_open && ! $is_card_modal_open ) : ?>
-                <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                     <?php echo esc_html( $notice_message ); ?>
                 </p>
             <?php endif; ?>
@@ -3089,7 +3115,7 @@ function noyona_render_account_page_shortcode() {
                         <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit Bank Account', 'noyona-childtheme' ); ?></h4>
 
                         <?php if ( 'bank' === $active_modal && '' !== $notice_message ) : ?>
-                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                                 <?php echo esc_html( $notice_message ); ?>
                             </p>
                         <?php endif; ?>
@@ -3132,7 +3158,7 @@ function noyona_render_account_page_shortcode() {
                         <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit Credit / Debit Card', 'noyona-childtheme' ); ?></h4>
 
                         <?php if ( 'card' === $active_modal && '' !== $notice_message ) : ?>
-                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                                 <?php echo esc_html( $notice_message ); ?>
                             </p>
                         <?php endif; ?>
@@ -3178,7 +3204,7 @@ function noyona_render_account_page_shortcode() {
 
             <?php // Page-level success notice shown after a profile save closes the Edit modal. Scoped to profile_updated only. ?>
             <?php if ( '' === $active_modal && 'profile_updated' === $notice_code && '' !== $notice_message ) : ?>
-                <p class="noyona-notice is-success" role="status" data-noyona-notice-autohide="6000">
+                <p class="noyona-notice is-success" role="status" data-noyona-notice-autohide="10000">
                     <?php echo esc_html( $notice_message ); ?>
                 </p>
             <?php endif; ?>
@@ -3233,7 +3259,7 @@ function noyona_render_account_page_shortcode() {
                 <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit Profile Details', 'noyona-childtheme' ); ?></h4>
 
                 <?php if ( 'edit' === $active_modal && '' !== $notice_message ) : ?>
-                    <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                    <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                         <?php echo esc_html( $notice_message ); ?>
                     </p>
                 <?php endif; ?>
@@ -3273,7 +3299,7 @@ function noyona_render_account_page_shortcode() {
                 <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Change Password', 'noyona-childtheme' ); ?></h4>
 
                 <?php if ( 'password' === $active_modal && '' !== $notice_message ) : ?>
-                    <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                    <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                         <?php echo esc_html( $notice_message ); ?>
                     </p>
                 <?php endif; ?>

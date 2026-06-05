@@ -352,6 +352,122 @@ function noyona_check_order_payment_status() {
 }
 
 /**
+ * Whether an order was paid with a QR Ph style gateway.
+ *
+ * Matches both the PayMongo "QR Ph" gateway and the standalone QR PH plugin by
+ * looking for "qr" in the payment method id/title, so the auto-cancel logic is
+ * gateway-agnostic and survives the theme/plugin folder divergence.
+ *
+ * @param WC_Order|mixed $order Order instance.
+ * @return bool
+ */
+function noyona_order_is_qr_payment( $order ) {
+	if ( ! $order instanceof WC_Order ) {
+		return false;
+	}
+
+	$context = strtolower( trim( (string) $order->get_payment_method() . ' ' . (string) $order->get_payment_method_title() ) );
+
+	return ( false !== strpos( $context, 'qr' ) );
+}
+
+/**
+ * Payment window, in seconds, for QR Ph orders before they auto-cancel.
+ *
+ * Defaults to 30 minutes to match the countdown shown on the order-received
+ * page. Filterable via `noyona_qrph_cancel_timeout`.
+ *
+ * @return int
+ */
+function noyona_qrph_cancel_timeout_seconds() {
+	return (int) apply_filters( 'noyona_qrph_cancel_timeout', 30 * MINUTE_IN_SECONDS );
+}
+
+/**
+ * Schedule a one-off cancellation check when a QR Ph order is placed.
+ *
+ * PayMongo confirms paid QR Ph orders via webhook; an abandoned order would
+ * otherwise sit on-hold indefinitely (WooCommerce hold-stock only auto-cancels
+ * `pending`, never `on-hold`). We schedule a check ~30 minutes out and cancel
+ * the order then if it is still unpaid.
+ *
+ * @param int            $order_id Order ID.
+ * @param WC_Order|null  $order    Order instance (when provided by the hook).
+ * @return void
+ */
+add_action( 'woocommerce_order_status_on-hold', 'noyona_qrph_schedule_cancel', 10, 2 );
+add_action( 'woocommerce_order_status_pending', 'noyona_qrph_schedule_cancel', 10, 2 );
+function noyona_qrph_schedule_cancel( $order_id, $order = null ) {
+	$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
+	if ( ! $order || ! noyona_order_is_qr_payment( $order ) || $order->is_paid() ) {
+		return;
+	}
+
+	$hook  = 'noyona_qrph_maybe_cancel_order';
+	$args  = array( (int) $order_id );
+	$delay = noyona_qrph_cancel_timeout_seconds();
+
+	if ( function_exists( 'as_schedule_single_action' ) && function_exists( 'as_next_scheduled_action' ) ) {
+		if ( false === as_next_scheduled_action( $hook, $args, 'noyona' ) ) {
+			as_schedule_single_action( time() + $delay, $hook, $args, 'noyona' );
+		}
+	} elseif ( ! wp_next_scheduled( $hook, $args ) ) {
+		wp_schedule_single_event( time() + $delay, $hook, $args );
+	}
+}
+
+/**
+ * Clear a pending cancellation check once an order leaves the awaiting state.
+ *
+ * @param int $order_id Order ID.
+ * @return void
+ */
+add_action( 'woocommerce_order_status_processing', 'noyona_qrph_unschedule_cancel', 10, 1 );
+add_action( 'woocommerce_order_status_completed', 'noyona_qrph_unschedule_cancel', 10, 1 );
+add_action( 'woocommerce_order_status_cancelled', 'noyona_qrph_unschedule_cancel', 10, 1 );
+add_action( 'woocommerce_order_status_refunded', 'noyona_qrph_unschedule_cancel', 10, 1 );
+function noyona_qrph_unschedule_cancel( $order_id ) {
+	$hook = 'noyona_qrph_maybe_cancel_order';
+	$args = array( (int) $order_id );
+
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( $hook, $args, 'noyona' );
+	} elseif ( wp_next_scheduled( $hook, $args ) ) {
+		wp_clear_scheduled_hook( $hook, $args );
+	}
+}
+
+/**
+ * Cancel an unpaid QR Ph order once its payment window has elapsed.
+ *
+ * @param int $order_id Order ID.
+ * @return void
+ */
+add_action( 'noyona_qrph_maybe_cancel_order', 'noyona_qrph_maybe_cancel_order' );
+function noyona_qrph_maybe_cancel_order( $order_id ) {
+	$order = wc_get_order( $order_id );
+	if ( ! $order || ! noyona_order_is_qr_payment( $order ) ) {
+		return;
+	}
+
+	// Paid (webhook confirmed) or already moved on — nothing to cancel.
+	if ( $order->is_paid() || ! $order->has_status( array( 'pending', 'on-hold' ) ) ) {
+		return;
+	}
+
+	$minutes = (int) round( noyona_qrph_cancel_timeout_seconds() / MINUTE_IN_SECONDS );
+
+	$order->update_status(
+		'cancelled',
+		sprintf(
+			/* translators: %d: payment window in minutes. */
+			__( 'QR Ph payment window (%d minutes) elapsed without a confirmed payment. Order auto-cancelled.', 'noyona-childtheme' ),
+			$minutes
+		)
+	);
+}
+
+/**
  * AJAX: persist checkout form fields into the WC customer session so that the
  * server-side guard on /preview/ sees populated values and doesn't redirect
  * the user back to /checkout/.
@@ -1045,6 +1161,15 @@ function noyona_copy_billing_name_to_shipping( $order, $data ) {
 	}
 }
 
+/* ─── Save custom checkout fields ─────────────────── */
+
+add_action( 'woocommerce_checkout_update_order_meta', 'noyona_save_custom_checkout_fields' );
+function noyona_save_custom_checkout_fields( $order_id ) {
+	if ( ! empty( $_POST['noyona_newsletter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		update_post_meta( $order_id, '_noyona_newsletter_optin', 'yes' );
+	}
+}
+
 add_filter( 'woocommerce_order_button_text', 'noyona_place_order_button_text' );
 function noyona_place_order_button_text( $text ) {
 	return __( 'Place Order', 'noyona' );
@@ -1101,18 +1226,6 @@ add_filter( 'woocommerce_ship_to_different_address_checked', '__return_true' );
 add_filter( 'woocommerce_ship_to_destination', 'noyona_force_ship_to_destination_mode', 20 );
 function noyona_force_ship_to_destination_mode( $destination ) {
 	return 'shipping';
-}
-
-/* ─── Save custom checkout fields ─────────────────── */
-
-add_action( 'woocommerce_checkout_update_order_meta', 'noyona_save_custom_checkout_fields' );
-function noyona_save_custom_checkout_fields( $order_id ) {
-	if ( ! empty( $_POST['noyona_newsletter'] ) ) {
-		update_post_meta( $order_id, '_noyona_newsletter_optin', 'yes' );
-	}
-	if ( ! empty( $_POST['noyona_gift_order'] ) ) {
-		update_post_meta( $order_id, '_noyona_gift_order', 'yes' );
-	}
 }
 
 /**
@@ -1301,6 +1414,113 @@ function noyona_release_checkout_attempt_lock_on_exception( $order ) {
 		delete_transient( $lock_key );
 		WC()->session->set( 'noyona_checkout_attempt_lock_key', '' );
 	}
+}
+
+/**
+ * Terminate a stale checkout session whose order is already paid.
+ *
+ * Covers the confusing case where a customer completed payment (often confirmed
+ * asynchronously by the PayMongo webhook) but never returned to the
+ * order-received page, so their cart + checkout attempt session survived.
+ * Returning to checkout, they would otherwise walk through the entire multi-step
+ * form only to be blocked at Place Order with "Order #X already paid".
+ *
+ * Running on template_redirect in checkout context, we detect that the order
+ * tied to THIS session's attempt is already paid and the cart is unchanged since
+ * that order, then empty the cart, clear the attempt session, and send them to
+ * the completed order's received page. The Place Order paid-check remains as a
+ * backstop for races between page load and submit.
+ *
+ * Safety rules:
+ *   - Only acts on the order produced by this session's own attempt id.
+ *   - Only acts when that order is paid (unpaid orders stay retryable).
+ *   - Only clears when the cart still matches the completed order, so a genuine
+ *     new purchase (different items) is never wiped.
+ */
+add_action( 'template_redirect', 'noyona_terminate_paid_checkout_session', 5 );
+function noyona_terminate_paid_checkout_session() {
+	if ( is_admin() || wp_doing_ajax() ) {
+		return;
+	}
+
+	if ( ! function_exists( 'noyona_is_checkout_ui_context' ) || ! noyona_is_checkout_ui_context() ) {
+		return;
+	}
+
+	// Never interfere with the order-received / order-pay endpoints themselves
+	// (is_checkout() — and therefore the context check — is also true there).
+	if ( function_exists( 'is_wc_endpoint_url' )
+		&& ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) )
+	) {
+		return;
+	}
+
+	if ( ! function_exists( 'WC' ) || ! WC()->session || ! WC()->cart ) {
+		return;
+	}
+
+	$attempt_order_id = absint( WC()->session->get( 'noyona_checkout_attempt_order_id', 0 ) );
+	if ( $attempt_order_id <= 0 || ! function_exists( 'wc_get_order' ) ) {
+		return;
+	}
+
+	$attempt_id = (string) WC()->session->get( 'noyona_checkout_attempt_id', '' );
+	$order      = wc_get_order( $attempt_order_id );
+
+	if (
+		! $order instanceof WC_Order
+		|| '' === $attempt_id
+		|| ! hash_equals( (string) $order->get_meta( '_noyona_checkout_attempt_id' ), $attempt_id )
+		|| ! $order->is_paid()
+	) {
+		return;
+	}
+
+	// Only clear when the cart is unchanged since that completed order.
+	$current_cart_hash = is_callable( array( WC()->cart, 'get_cart_hash' ) ) ? (string) WC()->cart->get_cart_hash() : '';
+	$attempt_cart_hash = (string) WC()->session->get( 'noyona_checkout_attempt_cart_hash', '' );
+	if ( '' === $current_cart_hash || ! hash_equals( $attempt_cart_hash, $current_cart_hash ) ) {
+		return;
+	}
+
+	// Terminate the stale session.
+	WC()->cart->empty_cart();
+	WC()->session->set( 'order_awaiting_payment', null );
+	WC()->session->set( 'noyona_checkout_attempt_id', '' );
+	WC()->session->set( 'noyona_checkout_attempt_cart_hash', '' );
+	WC()->session->set( 'noyona_checkout_attempt_order_id', 0 );
+
+	$lock_key = (string) WC()->session->get( 'noyona_checkout_attempt_lock_key', '' );
+	if ( '' !== $lock_key ) {
+		delete_transient( $lock_key );
+	}
+	WC()->session->set( 'noyona_checkout_attempt_lock_key', '' );
+	WC()->session->set( 'noyona_checkout_attempt_lock_id', '' );
+
+	if ( function_exists( 'wc_add_notice' ) ) {
+		wc_add_notice(
+			sprintf(
+				/* translators: %s: order number */
+				__( 'Your previous order #%s was completed successfully. We have started a fresh cart for you.', 'noyona' ),
+				esc_html( (string) $order->get_order_number() )
+			),
+			'notice'
+		);
+	}
+
+	$target = $order->get_checkout_order_received_url();
+	if ( ! $target ) {
+		if ( is_user_logged_in() && function_exists( 'wc_get_account_endpoint_url' ) ) {
+			$target = wc_get_account_endpoint_url( 'orders' );
+		} elseif ( function_exists( 'wc_get_page_permalink' ) ) {
+			$target = wc_get_page_permalink( is_user_logged_in() ? 'myaccount' : 'shop' );
+		} else {
+			$target = home_url( '/' );
+		}
+	}
+
+	wp_safe_redirect( $target );
+	exit;
 }
 
 /* ─── Inline JS ───────────────────────────────────── */
@@ -1541,8 +1761,7 @@ function noyona_checkout_inline_js() {
 				name === 'order_comments' ||
 				name === 'payment_method' ||
 				name === 'terms' ||
-				name === 'noyona_newsletter' ||
-				name === 'noyona_gift_order'
+				name === 'noyona_newsletter'
 			);
 		}
 
@@ -1746,6 +1965,9 @@ function noyona_checkout_inline_js() {
 			var paymentNode = document.querySelector('[data-review-payment-method]');
 			var emailNode = document.querySelector('[data-review-email]');
 			var phoneNode = document.querySelector('[data-review-phone]');
+			var specialInstructionsNode = document.querySelector('[data-review-special-instructions]');
+			var noteRowNode = document.querySelector('[data-review-note-row]');
+			var noteValueNode = document.querySelector('[data-review-order-note]');
 
 			var firstName = readFieldValue(checkoutForm, 'billing_first_name');
 			var lastName = readFieldValue(checkoutForm, 'billing_last_name');
@@ -1770,6 +1992,11 @@ function noyona_checkout_inline_js() {
 			if (paymentNode) paymentNode.textContent = paymentMethod || 'Payment method';
 			if (emailNode) emailNode.textContent = email || 'Email will appear here.';
 			if (phoneNode) phoneNode.textContent = phone || 'Phone will appear here.';
+
+			var orderNote = readFieldValue(checkoutForm, 'order_comments');
+			if (noteValueNode) noteValueNode.textContent = orderNote;
+			if (noteRowNode) noteRowNode.hidden = !orderNote;
+			if (specialInstructionsNode) specialInstructionsNode.hidden = !orderNote;
 		}
 
 		function wireReviewTerms(checkoutForm) {
@@ -1780,13 +2007,46 @@ function noyona_checkout_inline_js() {
 
 			customTerms.checked = !!nativeTerms.checked;
 			customTerms.addEventListener('change', function () {
+				if (customTerms.checked) {
+					clearReviewTermsNotice();
+				}
 				nativeTerms.checked = !!customTerms.checked;
 				nativeTerms.dispatchEvent(new Event('change', { bubbles: true }));
 			});
 
 			nativeTerms.addEventListener('change', function () {
 				customTerms.checked = !!nativeTerms.checked;
+				if (customTerms.checked) {
+					clearReviewTermsNotice();
+				}
 			});
+		}
+
+		function clearReviewTermsNotice() {
+			var existing = document.querySelector('.noyona-review-terms-notice');
+			if (existing) {
+				existing.remove();
+			}
+		}
+
+		function showReviewTermsNotice() {
+			clearReviewTermsNotice();
+
+			var actions = document.querySelector('.noyona-checkout-actions');
+			if (!actions || !actions.parentNode) return;
+
+			var notice = document.createElement('ul');
+			notice.className = 'woocommerce-error noyona-review-terms-notice';
+			notice.setAttribute('role', 'alert');
+
+			var item = document.createElement('li');
+			item.textContent = <?php echo wp_json_encode( __( 'Please agree to the Terms of Service, Shipping Policy, and Refund Policy before placing your order.', 'noyona' ) ); ?>;
+			notice.appendChild(item);
+
+			actions.parentNode.insertBefore(notice, actions);
+			if (typeof notice.scrollIntoView === 'function') {
+				notice.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
 		}
 
 		function ensureStepLink(stepItem, href) {
@@ -1800,6 +2060,21 @@ function noyona_checkout_inline_js() {
 			link.href = href;
 			link.innerHTML = content;
 			stepItem.appendChild(link);
+		}
+
+		// On the paid/Done page the order is final, so the stepper must be purely
+		// informational: strip any clickable links and block navigation back to
+		// cart/details/preview/payment.
+		function lockCheckoutSteps() {
+			var nav = document.querySelector('.noyona-checkout-steps');
+			if (!nav) return;
+			nav.classList.add('noyona-checkout-steps--locked');
+			nav.querySelectorAll('a.noyona-checkout-steps__link').forEach(function (link) {
+				var stepItem = link.parentNode;
+				if (stepItem) {
+					stepItem.innerHTML = link.innerHTML;
+				}
+			});
 		}
 
 		function submitCheckoutForm(checkoutForm, placeOrderButton) {
@@ -2051,9 +2326,7 @@ function noyona_checkout_inline_js() {
 
 			var doneStepItems = document.querySelectorAll('.noyona-checkout-steps li');
 			if (doneStepItems.length >= 4) {
-				ensureStepLink(doneStepItems[0], cartUrl);
-				ensureStepLink(doneStepItems[1], detailsUrl);
-				ensureStepLink(doneStepItems[2], reviewUrl);
+				lockCheckoutSteps();
 				doneStepItems.forEach(function (item) {
 					item.classList.remove('is-active');
 					item.classList.remove('is-pending');
@@ -2130,7 +2403,7 @@ function noyona_checkout_inline_js() {
 			var btn = document.getElementById('noyona-review-order');
 			if (!btn) return;
 			if (isReviewStep) {
-				btn.innerHTML = '<i class="fa-solid fa-lock" aria-hidden="true"></i> PLACE ORDER';
+				btn.innerHTML = '<span class="noyona-checkout-actions__icon" aria-hidden="true"></span> PLACE ORDER';
 			} else {
 				btn.innerHTML = 'PREVIEW ORDER <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>';
 			}
@@ -2147,6 +2420,7 @@ function noyona_checkout_inline_js() {
 
 		function goToDetailsStep() {
 			isReviewStep = false;
+			clearReviewTermsNotice();
 			applyDetailsStepUI();
 			updateReviewButtonLabel();
 			if (window.scrollTo) {
@@ -2182,9 +2456,11 @@ function noyona_checkout_inline_js() {
 				// Review → place order.
 				var customTerms = document.getElementById('noyona-review-terms');
 				if (customTerms && !customTerms.checked) {
+					showReviewTermsNotice();
 					customTerms.focus();
 					return;
 				}
+				clearReviewTermsNotice();
 				if (form) {
 					var nativeTerms = form.querySelector('#terms');
 					if (nativeTerms) {

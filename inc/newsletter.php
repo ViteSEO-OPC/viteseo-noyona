@@ -81,7 +81,7 @@ function noyona_newsletter_success_notice() {
 	return array(
 		'type'     => 'success',
 		'message'  => __( 'Thank you! You are subscribed to our newsletter updates.', 'noyona-childtheme' ),
-		'autohide' => 6000,
+		'autohide' => 10000,
 	);
 }
 

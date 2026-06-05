@@ -160,9 +160,9 @@
   align-items: center;
   gap: 8px;
   border-radius: var(--noyona-radius-cta);
-  border: 1.25px solid #111;
-  background: #fff;
-  color: #111;
+  border: 1.25px solid var(--noyona-cta-secondary-border);
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
   text-decoration: none;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--body);
@@ -175,8 +175,8 @@
 
 .customer-reviews-grid__write-link:hover,
 .customer-reviews-grid__write-link:focus-visible {
-  background: #111;
-  color: #fff;
+  background: var(--noyona-cta-secondary-hover-bg);
+  color: var(--noyona-cta-secondary-hover-text);
 }
 
 .customer-reviews-grid__cards {

@@ -157,6 +157,7 @@
   padding: 0;
   border: 0;
   background: transparent;
+  color: var(--noyona-cta-primary-text);
   border-radius: var(--noyona-radius-input);
   /* border: 1px solid #ebebeb;
   background: #fff;
@@ -189,6 +190,7 @@
   background-size: 30px 30px;
   background-position: center;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%23e199a4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='21' r='1'/%3E%3Ccircle cx='20' cy='21' r='1'/%3E%3Cpath d='M1 1h4l2.68 13.39A2 2 0 0 0 9.62 16h9.76a2 2 0 0 0 1.94-1.52L23 6H6'/%3E%3C/svg%3E");
+  filter: brightness(0) saturate(100%) invert(18%) sepia(86%) saturate(4540%) hue-rotate(328deg) brightness(89%) contrast(90%);
   transition: filter 0.18s ease, transform 0.18s ease;
 }
 

@@ -659,14 +659,21 @@ body:not(.logged-in) .header-account--logged-out {
     rotate(8deg);
 }
 
-.noyona-add-cart-flyer--fallback {
+.noyona-add-cart-flyer--badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--noyona-color-pink-accent);
+  border-radius: 999px;
+  background: #d6249f;
   color: #fff;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
+  box-shadow: 0 10px 26px rgba(214, 36, 159, 0.4);
+}
+
+.noyona-add-cart-flyer--badge i {
+  font-size: 0.95em;
+  line-height: 1;
 }
 
 .noyona-cart-success-pulse {
@@ -714,6 +721,33 @@ body:not(.logged-in) .header-account--logged-out {
   color: #fff;
   font-size: 14px;
   font-weight: 900;
+}
+
+@media (max-width: 767px) {
+  .noyona-add-cart-toast {
+    left: 12px;
+    right: 12px;
+    top: calc(var(--noyona-header-total-offset, 72px) + 10px);
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    max-width: none;
+    padding: 12px 14px;
+    border-radius: 18px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+    transform: translateY(-10px) scale(0.98);
+  }
+
+  .noyona-add-cart-toast.is-visible {
+    transform: translateY(0) scale(1);
+  }
+
+  .noyona-add-cart-toast__icon {
+    flex: 0 0 22px;
+  }
 }
 
 @keyframes noyonaCartSuccessPulse {
@@ -1379,9 +1413,10 @@ body:not(.logged-in) .header-account--logged-out {
   padding: 12px 20px !important;
   margin-inline: auto !important;
   border-radius: var(--noyona-radius-cta) !important;
-  background: var(--noyona-color-pink-soft, #EFB5BE) !important;
-  border: 1px solid #D81B60 !important;
-  color: #000000 !important;
+  background: var(--noyona-cta-primary-bg) !important;
+  border: 1px solid var(--noyona-cta-primary-border) !important;
+  color: var(--noyona-cta-primary-text) !important;
+  font-weight: bold;
 }
 
 .wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:hover,
@@ -2108,4 +2143,131 @@ body:has(.noyona-lovial-page) .site-logo-img--lovial {
   .wp-site-blocks {
     padding-top: var(--noyona-header-total-offset, 72px);
   }
+}
+
+/* === Restored from 1933253 (regression source: 55cf56c) — minimal header restoration patch === */
+
+/* Lovial brand-strip colors */
+body:has(.noyona-lovial-page) .header-brand-strip .brand-carousel,
+body:has(.noyona-lovial-page) .header-brand-strip .noyona-brand-strip-fallback {
+  --brand-bg-color: #BAD8F2 !important;
+  --brand-font-color: #000000 !important;
+  background: #BAD8F2 !important;
+  color: #000000 !important;
+}
+
+body:has(.noyona-lovial-page) .header-brand-strip .brand-carousel__text,
+body:has(.noyona-lovial-page) .header-brand-strip .noyona-brand-strip-fallback__item {
+  color: #000000 !important;
+}
+
+/* Lovial responsive logo sizing */
+@media (max-width: 650px) {
+  body:has(.noyona-lovial-page) .site-logo-mark {
+    width: auto !important;
+    height: auto !important;
+    flex-basis: auto !important;
+  }
+
+  body:has(.noyona-lovial-page) .site-logo-img--lovial {
+    width: clamp(74px, 23vw, 104px) !important;
+    max-width: clamp(74px, 23vw, 104px) !important;
+    height: auto !important;
+  }
+}
+
+@media (max-width: 430px) {
+  body:has(.noyona-lovial-page) .site-logo-img--lovial {
+    width: clamp(68px, 21vw, 88px) !important;
+    max-width: clamp(68px, 21vw, 88px) !important;
+  }
+}
+
+/* Standardize visible header icon glyphs to 24px (FA glyphs in search,
+   wishlist, store, account; WooCommerce mini-cart SVG). Touch targets
+   (32/44/48) are handled separately below. */
+.header-icon i {
+  font-size: 24px;
+}
+
+.header-mini-cart .wc-block-mini-cart__button svg {
+  width: 34px;
+  height: 34px;
+}
+
+/* Header icon touch targets per image/icon spec:
+   24px icon glyph, 32px target desktop / 44px tablet / 48px mobile. */
+@media (max-width: 1024px) {
+  .header-icon,
+  .header-mini-cart .wc-block-mini-cart__button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 767px) {
+  .header-icon,
+  .header-mini-cart .wc-block-mini-cart__button {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+body:has(.noyona-lovial-page) .nav-link,
+body:has(.noyona-lovial-page) .dropdown-menu li a {
+  color: #000000;
+}
+
+body:has(.noyona-lovial-page) .nav-link:hover,
+body:has(.noyona-lovial-page) .nav-link.is-active,
+body:has(.noyona-lovial-page) .dropdown-menu li a:hover,
+body:has(.noyona-lovial-page) .dropdown-menu li a.is-active,
+body:has(.noyona-lovial-page) .mobile-drawer-links a:hover,
+body:has(.noyona-lovial-page) .mobile-drawer-links a.is-active {
+  color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .nav-link.is-active,
+body:has(.noyona-lovial-page) .nav-item.has-active-child > .nav-link-wrapper > .nav-link {
+  color: #003B6E;
+  border-bottom-color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .header-icons,
+body:has(.noyona-lovial-page) .header-icon,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button,
+body:has(.noyona-lovial-page) .search-icon,
+body:has(.noyona-lovial-page) .mobile-menu-toggle,
+body:has(.noyona-lovial-page) .submenu-toggle {
+  color: #000000;
+}
+
+body:has(.noyona-lovial-page) .header-icon:hover,
+body:has(.noyona-lovial-page) .header-icon:focus-visible,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:hover,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:focus-visible,
+body:has(.noyona-lovial-page) .search-icon:hover,
+body:has(.noyona-lovial-page) .search-icon:focus-visible,
+body:has(.noyona-lovial-page) .mobile-menu-toggle:hover,
+body:has(.noyona-lovial-page) .mobile-menu-toggle:focus-visible,
+body:has(.noyona-lovial-page) .submenu-toggle:hover,
+body:has(.noyona-lovial-page) .submenu-toggle:focus-visible {
+  color: #003B6E;
+}
+
+body:has(.noyona-lovial-page) .header-icon:hover,
+body:has(.noyona-lovial-page) .header-mini-cart .wc-block-mini-cart__button:hover,
+body:has(.noyona-lovial-page) .search-icon:hover {
+  background: rgba(0, 59, 110, 0.08);
+}
+
+/* === Mini-cart color update (approved scope: 3 selectors, additive) === */
+.noyona-mini-cart-price {
+  color: var(--noyona-color-pink-accent) !important;
+}
+.wc-block-components-quantity-selector .wc-block-components-quantity-selector__button {
+  color: var(--noyona-color-pink-accent);
+}
+.wc-block-mini-cart__drawer .wc-block-cart-item__remove-link {
+  color: var(--noyona-color-pink-accent) !important;
 }

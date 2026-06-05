@@ -3120,6 +3120,16 @@
     return document.querySelector('.single-product form.cart, body.single-product form.cart');
   }
 
+  function getNoyonaPdpCartSheetTarget() {
+    var simpleBlock = document.querySelector('.single-product .wp-block-add-to-cart-form');
+    var simpleRoot = simpleBlock || getSimplePdpCartRoot();
+    var stockBadge = getPdpStockBadge();
+    if (stockBadge && stockBadge.getAttribute('data-noyona-product-type') === 'simple' && simpleBlock) {
+      return simpleBlock;
+    }
+    return getNoyonaPdpCartForm() || simpleRoot;
+  }
+
   function getNoyonaMainPriceNode() {
     return document.querySelector(
       '.single-product .wp-block-woocommerce-product-price .wc-block-components-product-price'
@@ -3133,7 +3143,7 @@
    * restoration is exact even if sibling nodes change.
    */
   function relocateNoyonaFormForViewport() {
-    var form = getNoyonaPdpCartForm();
+    var form = getNoyonaPdpCartSheetTarget();
     var sheet = getNoyonaBuySheet();
     if (!form || !sheet) {
       return;
@@ -3148,13 +3158,14 @@
       form.parentNode.insertBefore(marker, form);
       form._noyonaBuysheetOrigin = marker;
       form._noyonaOriginWrapper = form.parentNode;
+      form._noyonaHideOriginWrapper = form.matches && form.matches('form.cart');
     }
 
     if (noyonaIsMobileViewport()) {
       if (form.parentNode !== slot) {
         slot.appendChild(form);
       }
-      if (form._noyonaOriginWrapper) {
+      if (form._noyonaHideOriginWrapper && form._noyonaOriginWrapper) {
         form._noyonaOriginWrapper.classList.add('noyona-pdp-form-relocated');
       }
     } else {
@@ -3162,7 +3173,7 @@
       if (origin && origin.parentNode && form.parentNode !== origin.parentNode) {
         origin.parentNode.insertBefore(form, origin.nextSibling);
       }
-      if (form._noyonaOriginWrapper) {
+      if (form._noyonaHideOriginWrapper && form._noyonaOriginWrapper) {
         form._noyonaOriginWrapper.classList.remove('noyona-pdp-form-relocated');
       }
       // Never leave the sheet open on desktop.
@@ -3199,6 +3210,20 @@
           }
         });
       variantTarget.textContent = parts.join(' / ');
+    }
+
+    var stockTarget = sheet.querySelector('[data-noyona-buysheet-stock]');
+    var stockSource = getPdpStockBadge();
+    if (stockTarget && stockSource) {
+      var stockText = (stockSource.textContent || '').trim();
+      stockTarget.textContent = stockText;
+      stockTarget.hidden = !stockText;
+      stockTarget.className = 'noyona-pdp-buysheet__stock ' + stockSource.className;
+      stockTarget.setAttribute('data-noyona-in-stock', stockSource.getAttribute('data-noyona-in-stock') || '');
+      stockTarget.setAttribute('data-noyona-stock-count', stockSource.getAttribute('data-noyona-stock-count') || '');
+    } else if (stockTarget) {
+      stockTarget.textContent = '';
+      stockTarget.hidden = true;
     }
   }
 
@@ -3280,8 +3305,25 @@
     if (!form._noyonaUserSelectedVariation) {
       return false; // Default/preselected only — not user-confirmed yet.
     }
+    return noyonaFormHasValidVariation(form);
+  }
+
+  /**
+   * Does the form currently resolve to a real, purchasable variation? Unlike
+   * noyonaFormHasConfirmedVariation this does NOT require a prior user
+   * interaction, so a WooCommerce default/preselected shade counts.
+   */
+  function noyonaFormHasValidVariation(form) {
+    if (!form || !form.classList.contains('variations_form')) {
+      return true; // Simple product — nothing to resolve.
+    }
     var variationId = form.querySelector('input[name="variation_id"]');
     return !!(variationId && variationId.value && variationId.value !== '0');
+  }
+
+  function noyonaBuySheetIsOpen() {
+    var sheet = getNoyonaBuySheet();
+    return !!(sheet && sheet.classList.contains('is-open'));
   }
 
   /**
@@ -3350,6 +3392,14 @@
         }
         if (noyonaFormHasConfirmedVariation(form)) {
           return; // Confirmed — let the existing buy-now flow run.
+        }
+        // If the sheet is already open the shopper can see exactly which shade
+        // is selected, so a valid (even default/preselected) variation is good
+        // enough to buy. Without this, tapping the in-sheet Buy now on a product
+        // with a preselected shade just re-opens the already-open sheet and the
+        // button appears dead until the shopper pointlessly changes the shade.
+        if (noyonaBuySheetIsOpen() && noyonaFormHasValidVariation(form)) {
+          return;
         }
         event.preventDefault();
         event.stopImmediatePropagation();

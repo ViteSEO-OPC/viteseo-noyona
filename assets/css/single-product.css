@@ -348,6 +348,10 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
     flex-wrap: wrap;
     white-space: normal;
   }
+
+  body.single-product .noyona-pdp-stock-shipping > .noyona-pdp-stock-shipping__stock {
+    display: none;
+  }
 }
 
 .single-product form.cart .quantity {
@@ -643,7 +647,8 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   min-width: 2.25rem;
   border: 0;
   padding: 0;
-  margin-right: 0;
+  margin: 0 !important;
+  margin-inline-end: 0 !important;
   text-align: center;
   font-size: 1.75rem;
   font-weight: 700;
@@ -708,7 +713,6 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
     font-size: 1.35rem;
     width: 1.8rem;
     min-width: 1.8rem;
-    margin-right: 0;
   }
 
   .single-product form.cart .noyona-pdp-qty__btn,
@@ -1902,6 +1906,15 @@ html.noyona-pdp-buysheet-open body {
     display: none;
   }
 
+  .noyona-pdp-buysheet__stock {
+    width: fit-content;
+    margin-top: 5px;
+    padding: 0.12rem 0.48rem;
+    font-size: 0.66rem;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+  }
+
   /* Relocated form: black body text + labels on the white sheet. */
   .noyona-pdp-buysheet__body {
     color: #000000;
@@ -1932,7 +1945,8 @@ html.noyona-pdp-buysheet-open body {
     margin-top: 18px;
   }
 
-  body.single-product .noyona-pdp-buysheet__body form.cart .single_add_to_cart_button {
+  body.single-product .noyona-pdp-buysheet__body form.cart .single_add_to_cart_button,
+  body.single-product .noyona-pdp-buysheet__body .wp-block-add-to-cart-form .single_add_to_cart_button {
     flex: 1 1 100%;
     width: 100%;
     min-height: 48px;
@@ -1943,7 +1957,9 @@ html.noyona-pdp-buysheet-open body {
   }
 
   body.single-product .noyona-pdp-buysheet__body form.cart .single_add_to_cart_button:hover,
-  body.single-product .noyona-pdp-buysheet__body form.cart .single_add_to_cart_button:active {
+  body.single-product .noyona-pdp-buysheet__body form.cart .single_add_to_cart_button:active,
+  body.single-product .noyona-pdp-buysheet__body .wp-block-add-to-cart-form .single_add_to_cart_button:hover,
+  body.single-product .noyona-pdp-buysheet__body .wp-block-add-to-cart-form .single_add_to_cart_button:active {
     background: #efb5be !important;
     color: #d81b60 !important;
   }
