@@ -71,7 +71,7 @@ if ( empty( $related_ids ) ) {
 			<?php endif; ?>
 		</div>
 		<?php if ( '' !== $view_text ) : ?>
-			<a class="noyona-pdp-related__view-all" href="<?php echo esc_url( '' !== $view_url ? $view_url : home_url( '/shop/' ) ); ?>">
+			<a class="noyona-pdp-related__view-all noyona-cta-tertiary" href="<?php echo esc_url( '' !== $view_url ? $view_url : home_url( '/shop/' ) ); ?>">
 				<?php echo esc_html( $view_text ); ?>
 				<span aria-hidden="true">→</span>
 			</a>

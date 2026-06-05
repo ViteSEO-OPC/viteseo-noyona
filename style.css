@@ -91,6 +91,7 @@ Tags:
   --noyona-color-input-bg: var(--wp--preset--color--input-bg, #FFFFFF);
   --noyona-color-placeholder: var(--wp--preset--color--placeholder, #525252);
   --noyona-color-border-strong: var(--wp--preset--color--border-strong, #000000);
+  --noyona-color-tertiary: var(--wp--preset--color--tertiary, #D91B61);
 
   /* === Semantic CTA token layer (CTA Migration Batch 1) ===
      Built on the brand tokens above so hue stays single-sourced.
@@ -105,6 +106,7 @@ Tags:
   --noyona-cta-primary-hover-bg: var(--noyona-color-pink-light-blush);   /* #FBDDE2 */
   --noyona-cta-primary-hover-text: var(--noyona-color-pink-accent);      /* #D91B61 */
   --noyona-cta-primary-hover-border: var(--noyona-color-pink-accent);    /* #D91B61 */
+  --noyona-cta-tertiary-bg: var(--noyona-color-tertiary);               /* #D91B61 */
   /* Secondary */
   --noyona-cta-secondary-bg: var(--noyona-color-white);               /* #FFFFFF */
   --noyona-cta-secondary-text: var(--noyona-color-pink-accent);       /* #D91B61 */
@@ -7148,3 +7150,15 @@ body.page-login .noyona-login-register-link {
 	}
 }
 
+/* === CTA Tertiary === */
+.noyona-cta-tertiary {
+  color: var(--noyona-cta-tertiary-bg);
+  text-decoration: underline;
+  text-underline-offset: 0.1em;
+  font-weight: 700;
+  font-size: var(--wp--preset--font-size--nav-button);
+}
+
+.noyona-cta-tertiary:hover {
+  color: var(--noyona-color-pink-muted-rose) !important;
+}
