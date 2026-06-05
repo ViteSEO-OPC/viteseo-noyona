@@ -24,6 +24,24 @@
     return !el.closest('.form-row');
   }
 
+  function isPersistentEmptyCartNotice(el) {
+    if (!el || !document.body) {
+      return false;
+    }
+
+    var isCartPage =
+      document.body.classList.contains('woocommerce-cart') ||
+      !!document.querySelector('.noyona-cart-summary-card, .noyona-cart-ajax-region, .woocommerce-cart-form, .cart-empty') ||
+      /\/cart\/?$/i.test(window.location.pathname || '');
+
+    if (!isCartPage) {
+      return false;
+    }
+
+    var message = String(el.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    return message.indexOf('your cart is currently empty') !== -1;
+  }
+
   function resolveAutoHideDelay(ms) {
     var delay = parseInt(ms, 10);
     return delay > 0 ? delay : DEFAULT_NOTICE_AUTOHIDE_MS;
@@ -33,6 +51,15 @@
     if (!el) {
       return;
     }
+    if (isPersistentEmptyCartNotice(el)) {
+      el.removeAttribute('data-noyona-notice-autohide');
+      if (el._noyonaAutoHideTimer) {
+        window.clearTimeout(el._noyonaAutoHideTimer);
+        el._noyonaAutoHideTimer = null;
+      }
+      return;
+    }
+
     var delay = resolveAutoHideDelay(ms);
 
     if (el._noyonaAutoHideTimer) {

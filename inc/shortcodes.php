@@ -1617,8 +1617,7 @@ function noyona_render_account_wishlist_card( $args ) {
                 <p><?php esc_html_e( 'View and manage your wishlist items', 'noyona-childtheme' ); ?></p>
             </div>
             <form class="noyona-account-wishlist-sort" method="get" action="<?php echo esc_url( $wishlist_url ); ?>">
-                <label for="noyona-account-wishlist-sort"><?php esc_html_e( 'Sort by', 'noyona-childtheme' ); ?></label>
-                <select id="noyona-account-wishlist-sort" name="wishlist_sort" onchange="this.form.submit()">
+                <select id="noyona-account-wishlist-sort" name="wishlist_sort" aria-label="<?php esc_attr_e( 'Sort wishlist', 'noyona-childtheme' ); ?>" onchange="this.form.submit()">
                     <?php foreach ( $sort_options as $sort_key => $sort_label ) : ?>
                         <option value="<?php echo esc_attr( $sort_key ); ?>" <?php selected( $selected_sort, $sort_key ); ?>>
                             <?php echo esc_html( $sort_label ); ?>
@@ -3899,16 +3898,42 @@ function noyona_download_einvoice_handler() {
         $payment_label = (string) $order->get_payment_method();
     }
 
+    $brand_pink      = '#D81B60';
+    $brand_rose      = '#9C6470';
+    $brand_soft      = '#FEF0F2';
+    $brand_blush     = '#FBDDE2';
+    $brand_ink       = '#1D1D1D';
+    $brand_muted     = '#6B5A60';
+    $logo_url        = trailingslashit( get_stylesheet_directory_uri() ) . 'assets/images/noyona-logo.webp';
+    $customer_name   = trim( (string) $order->get_billing_first_name() . ' ' . (string) $order->get_billing_last_name() );
+    $customer_email  = trim( (string) $order->get_billing_email() );
+    $customer_phone  = trim( (string) $order->get_billing_phone() );
+    $invoice_heading = __( 'Noyona E-invoice', 'noyona-childtheme' );
+
+    if ( '' === $customer_name ) {
+        $customer_name = __( 'Customer', 'noyona-childtheme' );
+    }
+
     $items_html = '';
     foreach ( $order->get_items( 'line_item' ) as $order_item ) {
         if ( ! $order_item instanceof WC_Order_Item_Product ) {
             continue;
         }
 
+        $item_meta = wc_display_item_meta(
+            $order_item,
+            array(
+                'before'    => '<div style="margin-top:4px;color:' . $brand_muted . ';font-size:11px;line-height:1.35;">',
+                'after'     => '</div>',
+                'separator' => '<br>',
+                'echo'      => false,
+            )
+        );
+
         $items_html .= '<tr>';
-        $items_html .= '<td style="padding:8px;border-bottom:1px solid #ececec;">' . esc_html( $order_item->get_name() ) . '</td>';
-        $items_html .= '<td style="padding:8px;border-bottom:1px solid #ececec;text-align:center;">' . esc_html( (string) $order_item->get_quantity() ) . '</td>';
-        $items_html .= '<td style="padding:8px;border-bottom:1px solid #ececec;text-align:right;">' . wp_kses_post( $order->get_formatted_line_subtotal( $order_item ) ) . '</td>';
+        $items_html .= '<td style="padding:14px 12px;border-bottom:1px solid #F1E6EA;color:' . $brand_ink . ';font-weight:700;">' . esc_html( $order_item->get_name() ) . wp_kses_post( $item_meta ) . '</td>';
+        $items_html .= '<td style="padding:14px 12px;border-bottom:1px solid #F1E6EA;text-align:center;color:' . $brand_muted . ';font-weight:700;">' . esc_html( (string) $order_item->get_quantity() ) . '</td>';
+        $items_html .= '<td style="padding:14px 12px;border-bottom:1px solid #F1E6EA;text-align:right;color:' . $brand_ink . ';font-weight:700;">' . wp_kses_post( $order->get_formatted_line_subtotal( $order_item ) ) . '</td>';
         $items_html .= '</tr>';
     }
 
@@ -3916,22 +3941,36 @@ function noyona_download_einvoice_handler() {
     foreach ( (array) $order->get_order_item_totals() as $total_row ) {
         $label = isset( $total_row['label'] ) ? wp_strip_all_tags( (string) $total_row['label'] ) : '';
         $value = isset( $total_row['value'] ) ? (string) $total_row['value'] : '';
+        $is_grand_total = false !== stripos( $label, 'total' );
+        $row_bg         = $is_grand_total ? $brand_soft : '#FFFFFF';
+        $row_color      = $is_grand_total ? $brand_pink : $brand_ink;
+        $row_weight     = $is_grand_total ? '800' : '600';
 
         $totals_html .= '<tr>';
-        $totals_html .= '<td style="padding:8px;border-bottom:1px solid #ececec;">' . esc_html( $label ) . '</td>';
-        $totals_html .= '<td style="padding:8px;border-bottom:1px solid #ececec;text-align:right;">' . wp_kses_post( $value ) . '</td>';
+        $totals_html .= '<td style="padding:10px 12px;border-bottom:1px solid #F1E6EA;background:' . esc_attr( $row_bg ) . ';color:' . esc_attr( $brand_muted ) . ';font-weight:' . esc_attr( $row_weight ) . ';">' . esc_html( $label ) . '</td>';
+        $totals_html .= '<td style="padding:10px 12px;border-bottom:1px solid #F1E6EA;background:' . esc_attr( $row_bg ) . ';text-align:right;color:' . esc_attr( $row_color ) . ';font-weight:' . esc_attr( $row_weight ) . ';">' . wp_kses_post( $value ) . '</td>';
         $totals_html .= '</tr>';
     }
 
-    $invoice_html  = '<!doctype html><html><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '"><meta http-equiv="Content-Type" content="text/html; charset=' . esc_attr( get_bloginfo( 'charset' ) ) . '"><title>' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</title></head><body style="font-family:Arial,sans-serif;color:#1d1d1d;line-height:normal;padding:28px;">';
-    $invoice_html .= '<h1 style="margin:0 0 4px;">' . esc_html__( 'Noyona E-invoice', 'noyona-childtheme' ) . '</h1>';
-    $invoice_html .= '<p style="margin:0 0 16px;">' . esc_html__( 'Order', 'noyona-childtheme' ) . ' #' . esc_html( $order->get_order_number() ) . '</p>';
-    $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Order Date:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $order_date ) . '</p>';
-    $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Customer:', 'noyona-childtheme' ) . '</strong> ' . esc_html( trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() ) ) . '</p>';
-    $invoice_html .= '<p style="margin:0 0 6px;"><strong>' . esc_html__( 'Shipping Address:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $shipping_text ) . '</p>';
-    $invoice_html .= '<p style="margin:0 0 16px;"><strong>' . esc_html__( 'Payment Method:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $payment_label ) . '</p>';
-    $invoice_html .= '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;"><thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Item', 'noyona-childtheme' ) . '</th><th style="text-align:center;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Qty', 'noyona-childtheme' ) . '</th><th style="text-align:right;padding:8px;border-bottom:2px solid #d8d8d8;">' . esc_html__( 'Total', 'noyona-childtheme' ) . '</th></tr></thead><tbody>' . $items_html . '</tbody></table>';
-    $invoice_html .= '<table style="width:100%;max-width:420px;border-collapse:collapse;margin-left:auto;"><tbody>' . $totals_html . '</tbody></table>';
+    $invoice_html  = '<!doctype html><html><head><meta charset="' . esc_attr( get_bloginfo( 'charset' ) ) . '"><meta http-equiv="Content-Type" content="text/html; charset=' . esc_attr( get_bloginfo( 'charset' ) ) . '"><title>' . esc_html( $invoice_heading ) . '</title></head>';
+    $invoice_html .= '<body style="margin:0;background:#FFF8FA;font-family:Arial,Helvetica,sans-serif;color:' . esc_attr( $brand_ink ) . ';line-height:1.45;padding:32px;">';
+    $invoice_html .= '<div style="max-width:760px;margin:0 auto;background:#FFFFFF;border:1px solid ' . esc_attr( $brand_blush ) . ';border-radius:18px;overflow:hidden;">';
+    $invoice_html .= '<table role="presentation" style="width:100%;border-collapse:collapse;background:' . esc_attr( $brand_soft ) . ';"><tr>';
+    $invoice_html .= '<td style="padding:26px 28px;vertical-align:middle;"><img src="' . esc_url( $logo_url ) . '" alt="' . esc_attr__( 'Noyona', 'noyona-childtheme' ) . '" style="display:block;width:150px;max-width:150px;height:auto;margin:0 0 14px;"><h1 style="margin:0;color:' . esc_attr( $brand_pink ) . ';font-size:28px;line-height:1.1;font-weight:800;">' . esc_html( $invoice_heading ) . '</h1><p style="margin:8px 0 0;color:' . esc_attr( $brand_rose ) . ';font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">' . esc_html__( 'Official order record', 'noyona-childtheme' ) . '</p></td>';
+    $invoice_html .= '<td style="padding:26px 28px;vertical-align:middle;text-align:right;"><p style="margin:0 0 6px;color:' . esc_attr( $brand_muted ) . ';font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">' . esc_html__( 'Order', 'noyona-childtheme' ) . '</p><p style="margin:0;color:' . esc_attr( $brand_ink ) . ';font-size:22px;font-weight:800;">#' . esc_html( $order->get_order_number() ) . '</p><p style="margin:8px 0 0;color:' . esc_attr( $brand_muted ) . ';font-size:13px;">' . esc_html( $order_date ) . '</p></td>';
+    $invoice_html .= '</tr></table>';
+    $invoice_html .= '<div style="padding:26px 28px;">';
+    $invoice_html .= '<table role="presentation" style="width:100%;border-collapse:collapse;margin-bottom:22px;"><tr>';
+    $invoice_html .= '<td style="width:50%;vertical-align:top;padding:16px;border:1px solid #F1E6EA;border-radius:14px;background:#FFFFFF;"><p style="margin:0 0 8px;color:' . esc_attr( $brand_pink ) . ';font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;">' . esc_html__( 'Customer', 'noyona-childtheme' ) . '</p><p style="margin:0 0 5px;font-size:15px;font-weight:800;color:' . esc_attr( $brand_ink ) . ';">' . esc_html( $customer_name ) . '</p><p style="margin:0 0 4px;color:' . esc_attr( $brand_muted ) . ';font-size:12px;">' . esc_html( $customer_email ) . '</p><p style="margin:0;color:' . esc_attr( $brand_muted ) . ';font-size:12px;">' . esc_html( $customer_phone ) . '</p></td>';
+    $invoice_html .= '<td style="width:4%;"></td>';
+    $invoice_html .= '<td style="width:46%;vertical-align:top;padding:16px;border:1px solid #F1E6EA;border-radius:14px;background:#FFFFFF;"><p style="margin:0 0 8px;color:' . esc_attr( $brand_pink ) . ';font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;">' . esc_html__( 'Ship To', 'noyona-childtheme' ) . '</p><p style="margin:0 0 10px;color:' . esc_attr( $brand_ink ) . ';font-size:13px;font-weight:600;">' . esc_html( $shipping_text ) . '</p><p style="margin:0;color:' . esc_attr( $brand_muted ) . ';font-size:12px;"><strong>' . esc_html__( 'Payment:', 'noyona-childtheme' ) . '</strong> ' . esc_html( $payment_label ) . '</p></td>';
+    $invoice_html .= '</tr></table>';
+    $invoice_html .= '<h2 style="margin:0 0 10px;color:' . esc_attr( $brand_ink ) . ';font-size:18px;font-weight:800;">' . esc_html__( 'Order Items', 'noyona-childtheme' ) . '</h2>';
+    $invoice_html .= '<table style="width:100%;border-collapse:collapse;margin-bottom:20px;border:1px solid #F1E6EA;border-radius:14px;overflow:hidden;"><thead><tr><th style="text-align:left;padding:12px;background:' . esc_attr( $brand_pink ) . ';color:#FFFFFF;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;">' . esc_html__( 'Item', 'noyona-childtheme' ) . '</th><th style="text-align:center;padding:12px;background:' . esc_attr( $brand_pink ) . ';color:#FFFFFF;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;">' . esc_html__( 'Qty', 'noyona-childtheme' ) . '</th><th style="text-align:right;padding:12px;background:' . esc_attr( $brand_pink ) . ';color:#FFFFFF;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;">' . esc_html__( 'Total', 'noyona-childtheme' ) . '</th></tr></thead><tbody>' . $items_html . '</tbody></table>';
+    $invoice_html .= '<table role="presentation" style="width:100%;border-collapse:collapse;"><tr><td style="width:46%;vertical-align:top;"><p style="margin:0;color:' . esc_attr( $brand_muted ) . ';font-size:12px;">' . esc_html__( 'Thank you for shopping with Noyona. Please keep this e-invoice for your records.', 'noyona-childtheme' ) . '</p></td><td style="width:8%;"></td><td style="width:46%;vertical-align:top;"><table style="width:100%;border-collapse:collapse;border:1px solid #F1E6EA;border-radius:14px;overflow:hidden;"><tbody>' . $totals_html . '</tbody></table></td></tr></table>';
+    $invoice_html .= '</div>';
+    $invoice_html .= '<div style="padding:16px 28px;background:#FFF8FA;border-top:1px solid #F1E6EA;color:' . esc_attr( $brand_rose ) . ';font-size:11px;text-align:center;">' . esc_html( get_bloginfo( 'name', 'display' ) ) . ' &bull; ' . esc_html__( 'Beauty rooted in nature', 'noyona-childtheme' ) . '</div>';
+    $invoice_html .= '</div>';
     $invoice_html .= '</body></html>';
 
     if ( function_exists( 'nocache_headers' ) ) {
