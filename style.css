@@ -1140,6 +1140,63 @@ body.woocommerce-account.woocommerce-lost-password .noyona-lost-password-submit.
   }
 }
 
+/* Reset password form: inherits the .noyona-lost-password-form card/field/button
+   styles above; this block only adds the show/hide password toggle so the two
+   password fields match the Login/Register password controls. */
+.noyona-reset-password-form .password-input {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible;
+}
+
+.noyona-reset-password-form .password-input .input-text {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding-right: 2.9rem !important;
+}
+
+.noyona-reset-password-form .noyona-password-toggle {
+  position: absolute !important;
+  top: 50% !important;
+  right: 0.74rem !important;
+  left: auto !important;
+  transform: translateY(-50%) !important;
+  width: 22px !important;
+  height: 22px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #71809a;
+  cursor: pointer;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.noyona-reset-password-form .noyona-password-toggle i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Hide Woo's auto-injected toggle inside reset password wrappers. */
+.noyona-reset-password-form .show-password-input {
+  display: none !important;
+}
+
+/* Hide Edge/IE native password reveal/clear controls on reset password fields. */
+.noyona-reset-password-form input[type="password"]::-ms-reveal,
+.noyona-reset-password-form input[type="password"]::-ms-clear {
+  display: none !important;
+}
+
 .noyona-account-favorites {
   margin-top: 24px;
 }
