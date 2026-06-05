@@ -4,8 +4,8 @@
  *
  * Overrides: woocommerce/templates/cart/cart.php
  * Renders cart items as styled cards with quantity selectors and remove links.
- * All cart functionality (update, remove, coupon) is handled by WooCommerce's
- * native form handler — no custom JS required.
+ * Cart updates still use WooCommerce's native handlers; cart-page JS swaps the
+ * updated server-rendered fragments to avoid a full page reload.
  *
  * @see https://woocommerce.com/document/template-structure/
  */
@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
 do_action( 'woocommerce_before_cart' );
 ?>
 
+<div class="noyona-cart-ajax-region">
 <form class="woocommerce-cart-form" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
 	<?php do_action( 'woocommerce_before_cart_table' ); ?>
 
@@ -129,6 +130,7 @@ do_action( 'woocommerce_before_cart' );
 
 <div class="cart-collaterals">
 	<?php do_action( 'woocommerce_cart_collaterals' ); ?>
+</div>
 </div>
 
 <?php do_action( 'woocommerce_after_cart' ); ?>

@@ -4,7 +4,7 @@
  *
  * - Enqueues cart-only stylesheet
  * - Removes cross-sells from the cart page
- * - Auto-submits the cart form on quantity change (small inline script)
+ * - Updates quantities, coupons, and remove actions without a full page reload
  *
  * Shipping costs are computed by Noyona_Shipping (J&T zone × weight matrix) in
  * inc/woocommerce-shipping.php. No filter here overrides them.
@@ -231,8 +231,8 @@ function noyona_redirect_checkout_with_coupon_issues_to_cart() {
 }
 
 /**
- * Auto-submit cart form on quantity change.
- * Small inline script — no external JS file needed.
+ * Cart page AJAX behavior and checkout validation.
+ * Uses WooCommerce's native cart response and swaps the updated fragments.
  */
 add_action( 'wp_footer', 'noyona_cart_auto_update_script', 40 );
 function noyona_cart_auto_update_script() {
@@ -242,8 +242,10 @@ function noyona_cart_auto_update_script() {
 	?>
 	<script>
 	(function () {
-		var form = document.querySelector('.woocommerce-cart-form');
-		if (!form) return;
+		var cartFormSelector = '.woocommerce-cart-form';
+		var cartCollateralsSelector = '.cart-collaterals';
+		var cartNoticeSelector = '.woocommerce-notices-wrapper';
+		if (!document.querySelector(cartFormSelector) && !document.querySelector('.noyona-coupon-form')) return;
 		var validateCartRequest = {
 			url: '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>',
 			nonce: '<?php echo esc_js( wp_create_nonce( 'noyona_validate_cart_before_checkout' ) ); ?>',
@@ -259,18 +261,171 @@ function noyona_cart_auto_update_script() {
 		].join(', ');
 
 		var timer;
-		form.addEventListener('change', function (e) {
-			if (e.target.matches('input.qty')) {
-				clearTimeout(timer);
-				timer = setTimeout(function () {
-					var btn = form.querySelector('[name="update_cart"]');
-					if (btn) {
-						btn.disabled = false;
-						btn.removeAttribute('aria-disabled');
-						btn.click();
-					}
-				}, 600);
+		var cartAjaxRequestId = 0;
+		var lastQuantityInputAt = 0;
+
+		function getCartForm() {
+			return document.querySelector(cartFormSelector);
+		}
+
+		function setCartBusy(isBusy) {
+			var currentForm = getCartForm();
+			var couponForm = document.querySelector('.noyona-coupon-form');
+			var scope = document.querySelector('.noyona-cart-summary-card') || document.body;
+
+			scope.classList.toggle('noyona-cart-is-updating', !!isBusy);
+			[currentForm, couponForm].forEach(function (el) {
+				if (!el) return;
+				if (isBusy) {
+					el.setAttribute('aria-busy', 'true');
+				} else {
+					el.removeAttribute('aria-busy');
+				}
+			});
+		}
+
+		function replaceFragment(selector, nextDocument) {
+			var current = document.querySelector(selector);
+			var next = nextDocument.querySelector(selector);
+			if (current && next) {
+				current.replaceWith(next);
+				return true;
 			}
+			return false;
+		}
+
+		function syncCartHtml(html, updateNotices) {
+			var parser = new window.DOMParser();
+			var nextDocument = parser.parseFromString(html, 'text/html');
+			var replacedForm = replaceFragment(cartFormSelector, nextDocument);
+			var replacedCollaterals = replaceFragment(cartCollateralsSelector, nextDocument);
+
+			if (updateNotices) {
+				var currentNotice = document.querySelector(cartNoticeSelector);
+				var nextNotice = nextDocument.querySelector(cartNoticeSelector);
+
+				if (currentNotice && nextNotice) {
+					currentNotice.replaceWith(nextNotice);
+				} else if (!currentNotice && nextNotice && nextNotice.textContent.trim()) {
+					var anchor = document.querySelector(cartFormSelector) || document.querySelector('.noyona-cart-summary-card');
+					if (anchor && anchor.parentNode) {
+						anchor.parentNode.insertBefore(nextNotice, anchor);
+					}
+				}
+			}
+
+			if (!replacedForm && !replacedCollaterals) {
+				window.location.reload();
+				return;
+			}
+
+			var serverErrorNotice = findNativeCartErrorNotice();
+			if (serverErrorNotice) {
+				showCartErrorNotice(getNoticeMessages(serverErrorNotice));
+			}
+		}
+
+		function fetchCartHtml(url, options) {
+			var requestId = ++cartAjaxRequestId;
+			var fetchOptions = Object.assign({}, options || {});
+			var updateNotices = fetchOptions.noyonaUpdateNotices !== false;
+			delete fetchOptions.noyonaUpdateNotices;
+			setCartBusy(true);
+
+			return window.fetch(url, Object.assign({
+				credentials: 'same-origin'
+			}, fetchOptions)).then(function (response) {
+				if (!response.ok) {
+					throw new Error('Cart request failed');
+				}
+				return response.text();
+			}).then(function (html) {
+				if (requestId === cartAjaxRequestId) {
+					syncCartHtml(html, updateNotices);
+				}
+			}).catch(function () {
+				window.location.assign(url || window.location.href);
+			}).finally(function () {
+				if (requestId === cartAjaxRequestId) {
+					setCartBusy(false);
+				}
+			});
+		}
+
+		function submitCartFormAjax(currentForm) {
+			if (!currentForm) return;
+
+			var updateButton = currentForm.querySelector('[name="update_cart"]');
+			var body = new window.FormData(currentForm);
+			if (updateButton) {
+				updateButton.disabled = false;
+				updateButton.removeAttribute('aria-disabled');
+				body.set('update_cart', updateButton.value || 'Update cart');
+			}
+
+			return fetchCartHtml(currentForm.getAttribute('action') || window.location.href, {
+				method: 'POST',
+				body: body,
+				noyonaUpdateNotices: false
+			});
+		}
+
+		function scheduleCartQuantityUpdate(input) {
+			var currentForm = input ? input.closest(cartFormSelector) : getCartForm();
+			if (!currentForm) return;
+
+			clearTimeout(timer);
+			timer = setTimeout(function () {
+				submitCartFormAjax(currentForm);
+			}, 600);
+		}
+
+		document.addEventListener('input', function (e) {
+			if (e.target.matches(cartFormSelector + ' input.qty')) {
+				lastQuantityInputAt = Date.now();
+				scheduleCartQuantityUpdate(e.target);
+			}
+		});
+
+		document.addEventListener('change', function (e) {
+			if (e.target.matches(cartFormSelector + ' input.qty')) {
+				if (Date.now() - lastQuantityInputAt < 1200) return;
+				scheduleCartQuantityUpdate(e.target);
+			}
+		});
+
+		document.addEventListener('submit', function (e) {
+			var currentForm = e.target.closest(cartFormSelector);
+			if (currentForm) {
+				e.preventDefault();
+				clearTimeout(timer);
+				submitCartFormAjax(currentForm);
+				return;
+			}
+
+			var couponForm = e.target.closest('.noyona-coupon-form');
+			if (!couponForm) return;
+
+			e.preventDefault();
+			var body = new window.FormData(couponForm);
+			if (!body.has('apply_coupon')) {
+				var applyButton = couponForm.querySelector('[name="apply_coupon"]');
+				body.set('apply_coupon', applyButton ? applyButton.value : 'Apply coupon');
+			}
+			fetchCartHtml(couponForm.getAttribute('action') || window.location.href, {
+				method: 'POST',
+				body: body
+			});
+		});
+
+		document.addEventListener('click', function (e) {
+			var ajaxLink = e.target.closest('.noyona-remove-item, .noyona-coupon-remove');
+			if (!ajaxLink) return;
+			if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+			e.preventDefault();
+			clearTimeout(timer);
+			fetchCartHtml(ajaxLink.href, { method: 'GET' });
 		});
 
 		function normalizeCartErrorMessages(messages) {
@@ -316,6 +471,31 @@ function noyona_cart_auto_update_script() {
 			return notices.find(function (notice) {
 				return !notice.closest('.wc-block-mini-cart__drawer');
 			}) || null;
+		}
+
+		function scrollCartNoticeIntoView(notice) {
+			if (!notice || typeof notice.getBoundingClientRect !== 'function') return;
+
+			window.requestAnimationFrame(function () {
+				var rootStyles = window.getComputedStyle(document.documentElement);
+				var headerOffset = parseInt(rootStyles.getPropertyValue('--noyona-header-total-offset'), 10) || 0;
+				var rect = notice.getBoundingClientRect();
+				var top = Math.max(0, window.pageYOffset + rect.top - headerOffset - 16);
+
+				window.scrollTo({
+					top: top,
+					behavior: 'smooth'
+				});
+
+				if (!notice.hasAttribute('tabindex')) {
+					notice.setAttribute('tabindex', '-1');
+				}
+				try {
+					notice.focus({ preventScroll: true });
+				} catch (error) {
+					notice.focus();
+				}
+			});
 		}
 
 		function createCartErrorNotice() {
@@ -380,7 +560,7 @@ function noyona_cart_auto_update_script() {
 				item.textContent = message;
 				existing.appendChild(item);
 			});
-			existing.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			scrollCartNoticeIntoView(existing);
 		}
 
 		function getFirstOutOfStockCartMessage() {
