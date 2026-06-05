@@ -25,6 +25,13 @@ body.woocommerce-cart .wp-site-blocks {
   padding-bottom: clamp(2rem, 5vw, 4rem);
 }
 
+.noyona-cart-is-updating .woocommerce-cart-form,
+.noyona-cart-is-updating .cart-collaterals {
+  opacity: 0.65;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
 /* ───────────────────────────────────────
    Checkout progress (Cart active)
    ─────────────────────────────────────── */
@@ -266,6 +273,7 @@ body.woocommerce-cart .noyona-cart-page-title {
   font-weight: 700;
   font-size: var(--wp--preset--font-size--input);
   background: transparent;
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 
