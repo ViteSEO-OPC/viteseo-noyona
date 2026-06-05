@@ -3446,6 +3446,55 @@
     });
   }
 
+  /**
+   * Tablet band (641–767px): the header search renders as an icon only, and
+   * tapping it opens the existing fixed search overlay — the same UI the search
+   * block already uses at <=640px. The block's own toggle is gated to
+   * matchMedia('(max-width: 640px)'), so this restores that behavior for the
+   * 641–767px band WITHOUT modifying the search block. CSS for the overlay in
+   * this band lives in assets/css/header.css.
+   */
+  function initTabletSearchOverlay() {
+    const band = window.matchMedia('(min-width: 641px) and (max-width: 767px)');
+    const form = document.querySelector('.search-inline-form');
+    if (!form) return;
+    const input = form.querySelector('.search-inline-input');
+    const submit = form.querySelector('.search-inline-submit');
+    if (!input || !submit) return;
+
+    const collapse = () => form.classList.remove('is-mobile-expanded');
+
+    submit.addEventListener('click', (evt) => {
+      if (!band.matches) return;
+      if (!form.classList.contains('is-mobile-expanded')) {
+        // First tap: open the overlay instead of submitting an empty query.
+        evt.preventDefault();
+        form.classList.add('is-mobile-expanded');
+        setTimeout(() => input.focus(), 0);
+      }
+      // When already expanded, let the normal submit proceed.
+    });
+
+    document.addEventListener('click', (evt) => {
+      if (!band.matches) return;
+      if (!form.contains(evt.target)) collapse();
+    });
+
+    input.addEventListener('keydown', (evt) => {
+      if (evt.key === 'Escape' && band.matches) {
+        collapse();
+        submit.focus();
+      }
+    });
+
+    const onBandChange = () => { if (!band.matches) collapse(); };
+    if (typeof band.addEventListener === 'function') {
+      band.addEventListener('change', onBandChange);
+    } else if (typeof band.addListener === 'function') {
+      band.addListener(onBandChange);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     initBrandStripFallback();
     normalizeHeaderLogos();
@@ -3464,6 +3513,7 @@
     initAccountDropdown();
     initLogoutLinks();
     initMobileMenu();
+    initTabletSearchOverlay();
     initMobileSubmenus();
     normalizeShopDropdownLinks();
     initActiveNavLinks();
