@@ -689,8 +689,8 @@ body.nsl-v2-review-modal-open {
     width: 100%;
     border: 0;
     border-radius: 10px;
-    background: var(--noyona-color-pink-soft);
-    color: #333333;
+    background: var(--noyona-cta-primary-bg);
+    color: var(--noyona-cta-primary-text);
     padding: 10px 12px;
     font-weight: 700;
     cursor: pointer;
@@ -699,8 +699,8 @@ body.nsl-v2-review-modal-open {
 
 .nsl-v2-review-submit:hover,
 .nsl-v2-review-submit:focus-visible {
-    background: var(--noyona-color-pink-accent);
-    color: #ffffff;
+    background: var(--noyona-cta-primary-hover-bg);
+    color: var(--noyona-cta-primary-hover-text);
 }
 
 .nsl-v2-route-btn {
@@ -718,8 +718,8 @@ body.nsl-v2-review-modal-open {
     justify-content: center;
     border-radius: 10px;
     padding: 9px 12px;
-    background: var(--noyona-color-pink-soft);
-    color: #333333;
+    background: var(--noyona-cta-primary-bg);
+    color: var(--noyona-cta-primary-text);
     text-decoration: none;
     font-weight: 600;
     transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
@@ -727,8 +727,8 @@ body.nsl-v2-review-modal-open {
 
 .nsl-v2-directions:hover,
 .nsl-v2-directions:focus-visible {
-    background: var(--noyona-color-pink-accent);
-    color: #ffffff;
+    background: var(--noyona-cta-primary-hover-bg);
+    color: var(--noyona-cta-primary-hover-text);
     transform: translateY(-1px);
     box-shadow: 0 8px 18px rgba(216, 27, 96, 0.22);
 }

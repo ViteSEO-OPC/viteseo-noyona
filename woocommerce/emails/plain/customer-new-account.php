@@ -42,6 +42,11 @@ if ( ! $shop_url ) {
 	$shop_url = home_url( '/shop/' );
 }
 
+$account_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : '';
+if ( ! $account_url ) {
+	$account_url = home_url( '/my-account/' );
+}
+
 echo "Noyona Essentials\n";
 echo "BEAUTY ROOTED IN NATURE\n\n";
 
@@ -60,7 +65,12 @@ printf(
 echo "\n\n";
 
 echo esc_html__( 'Welcome to Noyona — beauty rooted in nature.', 'noyona-childtheme' ) . "\n\n";
-echo esc_html__( 'Your account is all set. Next time you shop with us, just log in for a faster checkout, plus early access to new shades, restocks, and members-only treats.', 'noyona-childtheme' ) . "\n\n";
+echo esc_html__( 'Thank you for creating an account with us. Your account is all set, and you can now:', 'noyona-childtheme' ) . "\n";
+echo '- ' . esc_html__( 'Manage your profile', 'noyona-childtheme' ) . "\n";
+echo '- ' . esc_html__( 'Track your orders', 'noyona-childtheme' ) . "\n";
+echo '- ' . esc_html__( 'Update your account information', 'noyona-childtheme' ) . "\n";
+echo '- ' . esc_html__( 'Receive future updates and promotions', 'noyona-childtheme' ) . "\n\n";
+echo esc_html__( 'Visit your account dashboard:', 'noyona-childtheme' ) . ' ' . esc_url( $account_url ) . "\n\n";
 echo esc_html__( 'Start shopping:', 'noyona-childtheme' ) . ' ' . esc_url( $shop_url ) . "\n\n";
 echo esc_html__( 'Vegan · Cruelty-free · Paraben-free', 'noyona-childtheme' ) . "\n\n";
 

@@ -77,9 +77,9 @@
     justify-content: center;
     padding: 12px 32px;
     border-radius: var(--noyona-radius-cta);
-    background: var(--noyona-color-pink-soft, #EFB5BE);
-    color: #000000;
-    border: 1px solid #D81B60;
+    background: var(--noyona-cta-primary-bg);
+    color: var(--noyona-cta-primary-text);
+    border: 1px solid var(--noyona-cta-primary-border);
     font-weight: 700;
     font-size: var(--wp--preset--font-size--nav-button);
     text-decoration: none;
@@ -91,8 +91,8 @@
 .noyona-404__cta:focus-visible {
     transform: translateY(-1px);
     box-shadow: 0 12px 24px rgba(216, 27, 96, 0.3);
-    background-color: var(--noyona-color-pink-accent);
-    color: #ffffff;
+    background-color: var(--noyona-cta-primary-hover-bg);
+    color: var(--noyona-cta-primary-hover-text);
 }
 
 @media (max-width: 960px) {

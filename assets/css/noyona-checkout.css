@@ -167,6 +167,40 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   box-shadow: none;
 }
 
+/* In-page review toggle: review-only blocks live in the DOM at all times and are
+   revealed only when the checkout switches to review mode. Because there is no
+   page navigation, entered card details keep their values into Place Order. */
+.noyona-summary-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.noyona-summary-title--review {
+  display: none;
+}
+.noyona-checkout-card--review-meta,
+.noyona-checkout-card--review-totals,
+.noyona-review-terms {
+  display: none;
+}
+
+body.noyona-review-step .noyona-summary-title--details {
+  display: none;
+}
+body.noyona-review-step .noyona-summary-title--review {
+  display: inline-flex;
+}
+body.noyona-review-step .noyona-checkout-card--review-meta,
+body.noyona-review-step .noyona-checkout-card--review-totals {
+  display: block;
+}
+body.noyona-review-step .noyona-review-terms {
+  display: block;
+}
+body.noyona-review-step .noyona-order-totals--summary {
+  display: none;
+}
+
 /* ═══════════════════════════════════════
    CARDS
    ═══════════════════════════════════════ */
@@ -766,8 +800,16 @@ body.noyona-review-step .noyona-checkout-actions__submit:hover {
   margin-left: 2px;
 }
 
-.noyona-checkout-form .payment_box {
+/* Hide every payment box by default, but reveal the box of the currently
+   selected method so card number/expiry/CVC fields can be entered. Hiding all
+   boxes unconditionally previously made card payments impossible (no fields ->
+   no token -> "payment method could not be prepared"). */
+.noyona-checkout-form .wc_payment_method .payment_box {
   display: none !important;
+}
+
+.noyona-checkout-form .wc_payment_method:has(input.input-radio:checked) .payment_box {
+  display: block !important;
 }
 
 .noyona-checkout-form .payment_box p {
@@ -930,22 +972,22 @@ box-sizing: border-box;
 .noyona-checkout-actions__back {
 flex: 0 0 36%;
 padding: 0 1.25rem;
-border: 2px solid #ddd;
+border: 1px solid var(--noyona-cta-secondary-border);
 border-radius: var(--noyona-radius-input);
-background: #fff;
+background: var(--noyona-cta-secondary-bg);
 font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
 font-size: var(--wp--preset--font-size--nav-button);
 font-weight: 700;
-color: #666;
+color: var(--noyona-cta-secondary-text);
 text-decoration: none;
 transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
 cursor: pointer;
 }
 
 .noyona-checkout-actions__back:hover {
-border-color: #bbb;
-color: #1a1a1a;
-background: #fafafa;
+border-color: var(--noyona-cta-secondary-hover-border);
+color: var(--noyona-cta-secondary-hover-text);
+background: var(--noyona-cta-secondary-hover-bg);
 }
 
 .noyona-checkout-actions__back i {
@@ -956,14 +998,14 @@ line-height: 1;
 .noyona-checkout-actions__submit {
 flex: 1 1 auto;
 padding: 0 1.5rem;
-border: none;
+border: 1px solid var(--noyona-cta-primary-border);
 border-radius: var(--noyona-radius-input);
-background: var(--noyona-cart-pink, #e199a4);
+background: var(--noyona-cta-primary-bg);
 font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
 font-size: var(--wp--preset--font-size--nav-button);
 font-weight: 700;
 letter-spacing: 0.04em;
-color: #333333;
+color: var(--noyona-cta-primary-text);
 box-shadow: 0 4px 16px rgba(216, 27, 96, 0.3);
 transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 cursor: pointer;
@@ -971,8 +1013,9 @@ cursor: pointer;
 
 .noyona-checkout-actions__submit:hover,
 .noyona-checkout-actions__submit:focus-visible {
-background: var(--noyona-cart-pink-dark, #D81B60);
-color: #ffffff;
+background: var(--noyona-cta-primary-hover-bg);
+color: var(--noyona-cta-primary-hover-text);
+border-color: var(--noyona-cta-primary-hover-border);
 box-shadow: 0 6px 20px rgba(216, 27, 96, 0.4);
 }
 
@@ -1074,14 +1117,15 @@ body.noyona-pay-confirm-open {
 }
 
 .noyona-pay-confirm-modal__btn--primary {
-  border: 1px solid var(--noyona-cart-pink, #e199a4);
-  background: var(--noyona-cart-pink, #e199a4);
-  color: #fff;
+  border: 1px solid var(--noyona-cta-primary-border);
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
 }
 
 .noyona-pay-confirm-modal__btn--primary:hover {
-  background: var(--noyona-cart-pink-dark, #D81B60);
-  border-color: var(--noyona-cart-pink-dark, #D81B60);
+  background: var(--noyona-cta-primary-hover-bg);
+  color: var(--noyona-cta-primary-hover-text);
+  border-color: var(--noyona-cta-primary-hover-border);
   box-shadow: 0 8px 18px rgba(216, 27, 96, 0.24);
 }
 

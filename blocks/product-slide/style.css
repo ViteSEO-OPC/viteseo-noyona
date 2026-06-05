@@ -427,21 +427,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--ps-cta-bg);
-  color: var(--ps-cta-color);
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
   border-radius: 16px;
   text-decoration: none;
   transition:
     transform 0.2s,
     box-shadow 0.2s;
   outline: none;
-  border: 1px solid var(--ps-swatch-selected-color);
+  border: 1px solid var(--noyona-cta-secondary-border);
 }
 
 .ps-btn-cart:hover {
-  background: var(--ps-cta-hover-bg) !important;
-  color: var(--ps-cta-hover-color) !important;
-  border: 1px solid var(--ps-swatch-selected-color);
+  background: var(--noyona-cta-secondary-hover-bg) !important;
+  color: var(--noyona-cta-secondary-hover-text) !important;
+  border: 1px solid var(--noyona-cta-secondary-hover-border);
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }

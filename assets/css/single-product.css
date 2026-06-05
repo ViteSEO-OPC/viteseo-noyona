@@ -666,10 +666,10 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 .single-product .wp-block-add-to-cart-form .noyona-pdp-qty__btn {
   width: 44px;
   height: 44px;
-  border: 0;
+  border: 1px solid var(--noyona-cta-secondary-border);
   border-radius: 13px;
-  background: #f0eff2;
-  color: #63626d;
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
   font-size: 1.8rem;
   line-height: 1;
   display: inline-flex;
@@ -681,13 +681,15 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 
 .single-product form.cart .noyona-pdp-qty__btn--plus,
 .single-product .wp-block-add-to-cart-form .noyona-pdp-qty__btn--plus {
-  background: #e3a0ae;
-  color: #fff;
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
 }
 
 .single-product form.cart .noyona-pdp-qty__btn:hover,
 .single-product .wp-block-add-to-cart-form .noyona-pdp-qty__btn:hover {
-  filter: brightness(0.98);
+  background: var(--noyona-cta-secondary-hover-bg);
+  color: var(--noyona-cta-secondary-hover-text);
+  border: 1px solid var(--noyona-cta-secondary-hover-bg);
 }
 
 @media (max-width: 600px) {
@@ -746,9 +748,9 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   padding: 0.85rem 1.5rem !important;
   font-weight: 700 !important;
   font-size: 16px !important;
-  background: #FFFFFF !important;
-  color: #D81B60 !important;
-  border: 1px solid #D81B60 !important;
+  background: var(--noyona-cta-secondary-bg) !important;
+  color: var(--noyona-cta-secondary-text) !important;
+  border: 1px solid var(--noyona-cta-secondary-border) !important;
   box-shadow: 0 4px 14px rgba(216, 27, 96, 0.2);
 }
 
@@ -756,8 +758,9 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
 .single-product form.cart .single_add_to_cart_button:focus-visible,
 .single-product .noyona-pdp-cart-actions--unavailable .single_add_to_cart_button:hover,
 .single-product .noyona-pdp-cart-actions--unavailable .single_add_to_cart_button:focus-visible {
-  background: #D81B60 !important;
-  color: #FFFFFF !important;
+  background: var(--noyona-cta-secondary-hover-bg) !important;
+  color: var(--noyona-cta-secondary-hover-text) !important;
+  border: 1px solid var(--noyona-cta-secondary-hover-border) !important;
 }
 
 .single-product .noyona-pdp-cart-actions .noyona-pdp-buy-now,
@@ -770,18 +773,18 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   padding: 0.85rem 1.5rem !important;
   font-weight: 700 !important;
   font-size: 16px !important;
-  background: var(--noyona-color-pink-soft, #EFB5BE) !important;
-  color: #000000 !important;
-  border: 1px solid #D81B60 !important;
+  background: var(--noyona-cta-primary-bg) !important;
+  color: var(--noyona-cta-primary-text) !important;
+  border: 1px solid var(--noyona-cta-primary-border) !important;
   box-shadow: none !important;
   margin-top: 0;
 }
 
 .single-product .noyona-pdp-buy-now:hover,
 .single-product .noyona-pdp-buy-now:focus-visible {
-  background: #D81B60 !important;
-  border: 1px solid #D81B60 !important;
-  color: #FFFFFF !important;
+  background: var(--noyona-cta-primary-hover-bg) !important;
+  border: 1px solid var(--noyona-cta-primary-hover-border) !important;
+  color: var(--noyona-cta-primary-hover-text) !important;
 }
 
 .single-product .noyona-pdp-cart-actions--unavailable button {
@@ -1734,32 +1737,32 @@ html.noyona-pdp-buysheet-open body {
       border-color 0.2s ease;
   }
 
-  /* Frame 82 — Add to cart (outline) */
+  /* Add to cart = Secondary */
   .noyona-pdp-buybar__btn--cart {
-    background: #ffffff;
-    color: #d81b60;
-    border: 1px solid #d81b60;
+    background: var(--noyona-cta-secondary-bg);
+    color: var(--noyona-cta-secondary-text);
+    border: 1px solid var(--noyona-cta-secondary-border);
   }
 
   .noyona-pdp-buybar__btn--cart:hover,
   .noyona-pdp-buybar__btn--cart:active {
-    background: #efb5be;
-    color: #d81b60;
-    border: 1px solid #d81b60;
+    background: var(--noyona-cta-secondary-hover-bg);
+    color: var(--noyona-cta-secondary-hover-text);
+    border: 1px solid var(--noyona-cta-secondary-hover-border);
   }
 
-  /* Frame 83 — Buy now (filled) */
+  /* Buy now = Primary */
   .noyona-pdp-buybar__btn--buy {
-    background: var(--noyona-color-pink-soft, #efb5be);
-    color: #000000;
-    border: 1px solid #d81b60;
+    background: var(--noyona-cta-primary-bg);
+    color: var(--noyona-cta-primary-text);
+    border: 1px solid var(--noyona-cta-primary-border);
   }
 
   .noyona-pdp-buybar__btn--buy:hover,
   .noyona-pdp-buybar__btn--buy:active {
-    background: #d81b60;
-    color: #ffffff;
-    border: 1px solid #d81b60;
+    background: var(--noyona-cta-primary-hover-bg);
+    color: var(--noyona-cta-primary-hover-text);
+    border: 1px solid var(--noyona-cta-primary-hover-border);
   }
 
   /* ---------- Slide-up buy sheet ---------- */
