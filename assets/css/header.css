@@ -1885,6 +1885,33 @@ body:not(.logged-in) .header-account--logged-out {
     backdrop-filter: blur(2px);
   }
 
+  /* Drawer-owned close button.
+     When the menu is open the hamburger becomes a clean close (X) pinned to the
+     drawer's top-right corner, above the panel (z-index > the 1001 drawer) and
+     clear of the menu items — the drawer's 5rem top padding leaves an ~18px gap
+     below the 44px button before "Home". It is the SAME button, so the existing
+     open/close + icon-swap JS, outside-click, and ESC handling keep working.
+     Without this rule the X stayed at the hamburger's in-header position, which
+     on the compact two-row layout floats over the drawer content. */
+  body.is-menu-open .mobile-menu-toggle {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--noyona-color-pink-muted-rose);
+    z-index: 1006;
+  }
+
   .nav-item {
     width: 100%;
   }
