@@ -1880,6 +1880,90 @@ function noyona_checkout_inline_js() {
 			}
 		}
 
+		var checkoutSummaryRefreshController = null;
+		var pendingCouponSummaryRefresh = false;
+
+		function replaceCheckoutSummaryFromDocument(nextDocument) {
+			if (!nextDocument) return false;
+
+			var selectors = [
+				'.noyona-checkout-card--review-items',
+				'.noyona-checkout-card--review-totals'
+			];
+			var didReplace = false;
+
+			selectors.forEach(function (selector) {
+				var current = document.querySelector(selector);
+				var next = nextDocument.querySelector(selector);
+				if (current && next) {
+					current.replaceWith(next);
+					didReplace = true;
+				}
+			});
+
+			if (isReviewStep && form) {
+				syncReviewSnapshot(form);
+			}
+
+			return didReplace;
+		}
+
+		function refreshCheckoutSummaryFromPage() {
+			var summaryCard = document.querySelector('.noyona-checkout-card--review-items');
+			var totalsCard = document.querySelector('.noyona-checkout-card--review-totals');
+			if (!summaryCard && !totalsCard) return;
+
+			if (checkoutSummaryRefreshController && typeof checkoutSummaryRefreshController.abort === 'function') {
+				checkoutSummaryRefreshController.abort();
+			}
+			checkoutSummaryRefreshController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+
+			[summaryCard, totalsCard].forEach(function (card) {
+				if (card) {
+					card.setAttribute('aria-busy', 'true');
+				}
+			});
+
+			var url = new URL(window.location.href);
+			url.searchParams.set('noyona_checkout_summary_refresh', String(Date.now()));
+
+			fetch(url.toString(), {
+				credentials: 'same-origin',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest'
+				},
+				signal: checkoutSummaryRefreshController ? checkoutSummaryRefreshController.signal : undefined
+			}).then(function (response) {
+				if (!response.ok) {
+					throw new Error('Checkout summary refresh failed');
+				}
+				return response.text();
+			}).then(function (html) {
+				var parser = new DOMParser();
+				var nextDocument = parser.parseFromString(html, 'text/html');
+				replaceCheckoutSummaryFromDocument(nextDocument);
+			}).catch(function (error) {
+				if (error && error.name === 'AbortError') return;
+			}).finally(function () {
+				document.querySelectorAll('.noyona-checkout-card--review-items, .noyona-checkout-card--review-totals').forEach(function (card) {
+					card.removeAttribute('aria-busy');
+				});
+				checkoutSummaryRefreshController = null;
+			});
+		}
+
+		function queueCheckoutSummaryRefresh() {
+			pendingCouponSummaryRefresh = true;
+			if (window.jQuery) {
+				window.jQuery(document.body).trigger('update_checkout');
+			}
+			window.setTimeout(function () {
+				if (!pendingCouponSummaryRefresh) return;
+				pendingCouponSummaryRefresh = false;
+				refreshCheckoutSummaryFromPage();
+			}, 350);
+		}
+
 		function readFieldValue(checkoutForm, name) {
 			if (!checkoutForm || !name) return '';
 			var nodes = checkoutForm.querySelectorAll('[name="' + name + '"]');
@@ -2790,6 +2874,13 @@ function noyona_checkout_inline_js() {
 			if (window.jQuery) {
 				window.jQuery(document.body).on('updated_checkout', function() {
 					syncReviewSnapshot(form);
+					if (pendingCouponSummaryRefresh) {
+						pendingCouponSummaryRefresh = false;
+						refreshCheckoutSummaryFromPage();
+					}
+				});
+				window.jQuery(document.body).on('removed_coupon_in_checkout applied_coupon_in_checkout', function() {
+					queueCheckoutSummaryRefresh();
 				});
 			}
 		}
