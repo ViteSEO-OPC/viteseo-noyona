@@ -164,14 +164,16 @@ body.noyona-review-step .noyona-checkout-card--review-totals .noyona-order-total
 }
 
 body.noyona-review-step .noyona-checkout-actions__submit {
-  background: #f8dce3;
-  color: var(--noyona-color-pink-muted-rose);
+  background: var(--noyona-cta-primary-bg) !important;
+  color: var(--noyona-cta-primary-text) !important;
+  border: 1px solid var(--noyona-cta-primary-border);
   box-shadow: none;
 }
 
 body.noyona-review-step .noyona-checkout-actions__submit:hover {
-  background: #f3cdd6;
-  box-shadow: none;
+  background: var(--noyona-cta-primary-hover-bg) !important;
+  border: 1px solid var(--noyona-cta-primary-hover-border) !important;
+  color: var(--noyona-cta-primary-hover-text) !important;
 }
 
 /* In-page review toggle: review-only blocks live in the DOM at all times and are

@@ -586,6 +586,100 @@ function noyona_normalize_register_form_controls() {
     <?php
 }
 
+/* ----- Normalize reset-password form password toggles (footer script) ----- */
+add_action( 'wp_footer', 'noyona_normalize_reset_form_controls', 90 );
+function noyona_normalize_reset_form_controls() {
+    if ( is_admin() || wp_doing_ajax() ) {
+        return;
+    }
+    if ( function_exists( 'noyona_is_account_recovery_context' ) && ! noyona_is_account_recovery_context() ) {
+        return;
+    }
+    ?>
+    <script>
+    (function () {
+      function normalizeResetPasswords() {
+        var form = document.querySelector('.noyona-reset-password-form');
+        if (!form) return;
+
+        var fields = [
+          form.querySelector('#password_1'),
+          form.querySelector('#password_2')
+        ].filter(Boolean);
+
+        fields.forEach(function (password) {
+          var fieldRow = password.closest('.woocommerce-form-row');
+
+          var wrapper = password.closest('.password-input');
+          if (!wrapper) {
+            wrapper = document.createElement('span');
+            wrapper.className = 'password-input';
+            password.parentNode.insertBefore(wrapper, password);
+            wrapper.appendChild(password);
+          }
+
+          // Remove Woo's auto-injected toggle and password-manager icon roots in this field.
+          if (fieldRow) {
+            fieldRow.querySelectorAll('.show-password-input, [data-lastpass-icon-root], [data-lastpass-root]').forEach(function (el) {
+              el.remove();
+            });
+          }
+
+          // Purge any stale toggles outside the active wrapper.
+          if (fieldRow) {
+            fieldRow.querySelectorAll('.noyona-password-toggle').forEach(function (el) {
+              if (!wrapper.contains(el)) {
+                el.remove();
+              }
+            });
+          }
+
+          // De-duplicate any extra toggles inside the active wrapper, keep the first.
+          var wrapperToggles = wrapper.querySelectorAll('.noyona-password-toggle');
+          for (var i = 1; i < wrapperToggles.length; i++) {
+            wrapperToggles[i].remove();
+          }
+
+          var customToggle = wrapper.querySelector('.noyona-password-toggle');
+          if (!customToggle) {
+            customToggle = document.createElement('button');
+            customToggle.type = 'button';
+            customToggle.className = 'noyona-password-toggle';
+            customToggle.setAttribute('aria-label', 'Show password');
+            customToggle.innerHTML = '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>';
+            wrapper.appendChild(customToggle);
+
+            customToggle.addEventListener('click', function () {
+              var isHidden = password.getAttribute('type') === 'password';
+              password.setAttribute('type', isHidden ? 'text' : 'password');
+              customToggle.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+              customToggle.innerHTML = isHidden
+                ? '<i class="fa-regular fa-eye" aria-hidden="true"></i>'
+                : '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>';
+            });
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', normalizeResetPasswords);
+      } else {
+        normalizeResetPasswords();
+      }
+      setTimeout(normalizeResetPasswords, 250);
+      setTimeout(normalizeResetPasswords, 850);
+
+      if (typeof MutationObserver !== 'undefined') {
+        var observer = new MutationObserver(function () {
+          normalizeResetPasswords();
+        });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+      }
+    })();
+    </script>
+    <?php
+}
+
 /* ----- Register custom blocks ----- */
 // Register custom blocks
 add_action( 'init', 'woocom_ct_register_blocks' );
