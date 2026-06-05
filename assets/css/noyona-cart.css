@@ -376,21 +376,24 @@ body.woocommerce-cart .noyona-cart-page-title {
 .noyona-coupon-apply {
   height: 48px;
   padding: 0 1.5rem;
-  border: none;
+  border: 1px solid var(--noyona-cta-secondary-border);
   border-radius: var(--noyona-radius-input);
-  background: #dfe3e8;
-  color: #8da1b5;
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
+  box-sizing: border-box;
   font-family: var(--wp--preset--font-family--poppins),
     system-ui, sans-serif;
   font-weight: 700;
-  font-size: var(--wp--preset--font-size--nav-button);
+  font-size: 16px;
+  line-height: normal;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .noyona-coupon-apply:hover {
-  background: #cdd3d9;
-  color: #5a6f82;
+  background: var(--noyona-cta-secondary-hover-bg);
+  color: var(--noyona-cta-secondary-hover-text);
+  border-color: var(--noyona-cta-secondary-hover-border);
 }
 
 /* Applied coupon chips */
