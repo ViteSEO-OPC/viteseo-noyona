@@ -723,6 +723,33 @@ body:not(.logged-in) .header-account--logged-out {
   font-weight: 900;
 }
 
+@media (max-width: 767px) {
+  .noyona-add-cart-toast {
+    left: 12px;
+    right: 12px;
+    top: calc(var(--noyona-header-total-offset, 72px) + 10px);
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    max-width: none;
+    padding: 12px 14px;
+    border-radius: 18px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+    transform: translateY(-10px) scale(0.98);
+  }
+
+  .noyona-add-cart-toast.is-visible {
+    transform: translateY(0) scale(1);
+  }
+
+  .noyona-add-cart-toast__icon {
+    flex: 0 0 22px;
+  }
+}
+
 @keyframes noyonaCartSuccessPulse {
   0% {
     transform: scale(1);
