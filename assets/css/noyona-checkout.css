@@ -2180,7 +2180,6 @@ body.noyona-pay-step h1.wp-block-post-title {
     grid-column: 1;
     grid-row: auto;
     position: static;
-    order: -1;
   }
 
   .noyona-checkout-card {

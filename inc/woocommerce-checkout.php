@@ -1542,9 +1542,17 @@ function noyona_checkout_inline_js() {
 		if (!form && !isOrderReceivedPath && !isOrderPayPath && !orderPayForm) return;
 
 		/* 1. Scroll to validation errors */
+		var lastScrolledCheckoutNoticeSignature = '';
+		function getCheckoutNoticeSignature(notice) {
+			if (!notice) return '';
+			return String(notice.textContent || '').replace(/\s+/g, ' ').trim();
+		}
+
 		var observer = new MutationObserver(function() {
 			var notice = document.querySelector('.woocommerce-NoticeGroup-checkout');
-			if (notice) {
+			var noticeSignature = getCheckoutNoticeSignature(notice);
+			if (notice && noticeSignature && noticeSignature !== lastScrolledCheckoutNoticeSignature) {
+				lastScrolledCheckoutNoticeSignature = noticeSignature;
 				notice.scrollIntoView({ behavior: 'smooth', block: 'center' });
 				var firstInvalid = document.querySelector('.woocommerce-invalid input, .woocommerce-invalid select');
 				if (firstInvalid) {
@@ -2499,6 +2507,123 @@ function noyona_checkout_inline_js() {
 			});
 		}
 
+		function getSelectedPaymentMethod(checkoutForm) {
+			if (!checkoutForm) return '';
+			var checked = checkoutForm.querySelector('input[name="payment_method"]:checked');
+			return checked ? String(checked.value || '') : '';
+		}
+
+		function normalizeCardDigits(value) {
+			return String(value || '').replace(/\D+/g, '');
+		}
+
+		function isValidLuhnNumber(digits) {
+			if (!/^\d{13,19}$/.test(digits || '')) return false;
+
+			var sum = 0;
+			var shouldDouble = false;
+			for (var i = digits.length - 1; i >= 0; i--) {
+				var digit = parseInt(digits.charAt(i), 10);
+				if (shouldDouble) {
+					digit *= 2;
+					if (digit > 9) digit -= 9;
+				}
+				sum += digit;
+				shouldDouble = !shouldDouble;
+			}
+
+			return sum % 10 === 0;
+		}
+
+		function isValidCardExpiry(value) {
+			var match = String(value || '').trim().match(/^(\d{1,2})\s*\/\s*(\d{2}|\d{4})$/);
+			if (!match) return false;
+
+			var month = parseInt(match[1], 10);
+			var year = parseInt(match[2], 10);
+			if (year < 100) year += 2000;
+			if (month < 1 || month > 12) return false;
+
+			var now = new Date();
+			var currentMonth = now.getMonth() + 1;
+			var currentYear = now.getFullYear();
+			return year > currentYear || (year === currentYear && month >= currentMonth);
+		}
+
+		function addCheckoutValidationError(errors, field, message) {
+			if (field) {
+				markCheckoutFieldRow(field, true);
+			}
+			errors.push({ field: field || null, message: message });
+		}
+
+		function markCheckoutFieldValid(field) {
+			if (field) {
+				markCheckoutFieldRow(field, false);
+			}
+		}
+
+		function validatePayMongoCardFields(checkoutForm, errors) {
+			var paymentMethod = getSelectedPaymentMethod(checkoutForm);
+			if (!paymentMethod) {
+				var firstMethod = checkoutForm.querySelector('input[name="payment_method"]');
+				addCheckoutValidationError(errors, firstMethod, 'Please select a payment method.');
+				return;
+			}
+
+			var isInstallment = paymentMethod === 'paymongo_card_installment';
+			var isCard = paymentMethod === 'paymongo' || isInstallment;
+			if (!isCard) return;
+
+			var cardNumber = checkoutForm.querySelector(isInstallment ? '#paymongo_cc_installment_ccNo' : '#paymongo_ccNo');
+			var expiry = checkoutForm.querySelector(isInstallment ? '#paymongo_cc_installment_expdate' : '#paymongo_expdate');
+			var cvc = checkoutForm.querySelector(isInstallment ? '#paymongo_cc_installment_cvv' : '#paymongo_cvv');
+			var cardDigits = normalizeCardDigits(cardNumber ? cardNumber.value : '');
+			var cvcDigits = normalizeCardDigits(cvc ? cvc.value : '');
+
+			if (!cardNumber || !cardDigits) {
+				addCheckoutValidationError(errors, cardNumber, 'Card number is required.');
+			} else if (!isValidLuhnNumber(cardDigits)) {
+				addCheckoutValidationError(errors, cardNumber, 'Please enter a valid card number.');
+			} else {
+				markCheckoutFieldValid(cardNumber);
+			}
+
+			if (!expiry || !String(expiry.value || '').trim()) {
+				addCheckoutValidationError(errors, expiry, 'Card expiry date is required.');
+			} else if (!isValidCardExpiry(expiry.value)) {
+				addCheckoutValidationError(errors, expiry, 'Please enter a valid future expiry date (MM/YY).');
+			} else {
+				markCheckoutFieldValid(expiry);
+			}
+
+			if (!cvc || !cvcDigits) {
+				addCheckoutValidationError(errors, cvc, 'Card security code is required.');
+			} else if (!/^\d{3,4}$/.test(cvcDigits)) {
+				addCheckoutValidationError(errors, cvc, 'Please enter a valid 3-4 digit card security code.');
+			} else {
+				markCheckoutFieldValid(cvc);
+			}
+
+			if (isInstallment) {
+				var issuer = checkoutForm.querySelector('#paymongo_cc_installment_issuer');
+				var tenure = checkoutForm.querySelector('input[name="paymongo_cc_installment_tenure"]:checked');
+				var firstTenure = checkoutForm.querySelector('input[name="paymongo_cc_installment_tenure"]');
+
+				if (issuer && !String(issuer.value || '').trim()) {
+					addCheckoutValidationError(errors, issuer, 'Please select an installment bank.');
+				} else {
+					markCheckoutFieldValid(issuer);
+				}
+
+				if (firstTenure && !tenure) {
+					addCheckoutValidationError(errors, firstTenure, 'Please select an installment plan.');
+				} else {
+					markCheckoutFieldValid(firstTenure);
+				}
+			}
+		}
+
 		function validateNoyonaCheckoutDetails(checkoutForm) {
 			if (!checkoutForm) {
 				return { ok: false, errors: [{ message: 'Checkout form not found.' }], firstField: null };
@@ -2563,6 +2688,8 @@ function noyona_checkout_inline_js() {
 					if (!firstField) firstField = postcodeField;
 				}
 			}
+
+			validatePayMongoCardFields(checkoutForm, errors);
 
 			// Sort errors by DOM document order so the "first" error always
 			// matches the topmost-on-screen field, regardless of push order

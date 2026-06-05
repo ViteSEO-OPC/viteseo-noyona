@@ -262,7 +262,9 @@ function noyona_cart_auto_update_script() {
 
 		var timer;
 		var cartAjaxRequestId = 0;
-		var lastQuantityInputAt = 0;
+		var lastSubmittedQuantitySignature = '';
+		var lastSubmittedQuantityAt = 0;
+		var quantityAjaxInFlight = false;
 
 		function getCartForm() {
 			return document.querySelector(cartFormSelector);
@@ -329,7 +331,12 @@ function noyona_cart_auto_update_script() {
 			var requestId = ++cartAjaxRequestId;
 			var fetchOptions = Object.assign({}, options || {});
 			var updateNotices = fetchOptions.noyonaUpdateNotices !== false;
+			var isQuantityUpdate = !!fetchOptions.noyonaQuantityUpdate;
 			delete fetchOptions.noyonaUpdateNotices;
+			delete fetchOptions.noyonaQuantityUpdate;
+			if (isQuantityUpdate) {
+				quantityAjaxInFlight = true;
+			}
 			setCartBusy(true);
 
 			return window.fetch(url, Object.assign({
@@ -349,7 +356,18 @@ function noyona_cart_auto_update_script() {
 				if (requestId === cartAjaxRequestId) {
 					setCartBusy(false);
 				}
+				if (isQuantityUpdate) {
+					quantityAjaxInFlight = false;
+				}
 			});
+		}
+
+		function getCartQuantitySignature(currentForm) {
+			if (!currentForm) return '';
+
+			return Array.prototype.slice.call(currentForm.querySelectorAll('input.qty')).map(function (input) {
+				return String(input.name || '') + '=' + String(input.value || '');
+			}).join('&');
 		}
 
 		function submitCartFormAjax(currentForm) {
@@ -357,6 +375,8 @@ function noyona_cart_auto_update_script() {
 
 			var updateButton = currentForm.querySelector('[name="update_cart"]');
 			var body = new window.FormData(currentForm);
+			lastSubmittedQuantitySignature = getCartQuantitySignature(currentForm);
+			lastSubmittedQuantityAt = Date.now();
 			if (updateButton) {
 				updateButton.disabled = false;
 				updateButton.removeAttribute('aria-disabled');
@@ -366,7 +386,8 @@ function noyona_cart_auto_update_script() {
 			return fetchCartHtml(currentForm.getAttribute('action') || window.location.href, {
 				method: 'POST',
 				body: body,
-				noyonaUpdateNotices: false
+				noyonaUpdateNotices: false,
+				noyonaQuantityUpdate: true
 			});
 		}
 
@@ -382,14 +403,18 @@ function noyona_cart_auto_update_script() {
 
 		document.addEventListener('input', function (e) {
 			if (e.target.matches(cartFormSelector + ' input.qty')) {
-				lastQuantityInputAt = Date.now();
 				scheduleCartQuantityUpdate(e.target);
 			}
 		});
 
 		document.addEventListener('change', function (e) {
 			if (e.target.matches(cartFormSelector + ' input.qty')) {
-				if (Date.now() - lastQuantityInputAt < 1200) return;
+				var currentForm = e.target.closest(cartFormSelector);
+				var currentSignature = getCartQuantitySignature(currentForm);
+				var recentlySubmittedSameQuantity = currentSignature
+					&& currentSignature === lastSubmittedQuantitySignature
+					&& Date.now() - lastSubmittedQuantityAt < 8000;
+				if (quantityAjaxInFlight || recentlySubmittedSameQuantity) return;
 				scheduleCartQuantityUpdate(e.target);
 			}
 		});
