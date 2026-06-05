@@ -2352,6 +2352,11 @@ function noyona_render_account_page_shortcode() {
                                 if ( function_exists( 'noyona_ot_get_timeline_rows' ) ) {
                                     $timeline_rows = (array) noyona_ot_get_timeline_rows( $account_order );
                                 }
+                                // Exception statuses (cancelled/refunded/failed) render a single
+                                // status card instead of the fulfillment timeline.
+                                $status_card = function_exists( 'noyona_ot_get_status_card' )
+                                    ? noyona_ot_get_status_card( $account_order )
+                                    : null;
                                 if ( empty( $timeline_rows ) ) {
                                     $status_progress_map = array(
                                         'pending'    => 1,
@@ -2438,6 +2443,8 @@ function noyona_render_account_page_shortcode() {
                                         : ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' ) );
                                 }
                                 $is_to_pay_status = in_array( $status_key, array( 'pending', 'on-hold', 'failed', 'to-pay' ), true );
+                                // "Write a Review" is shown only for completed orders.
+                                $can_write_review = ( 'completed' === $status_key );
                                 $pay_now_url      = '';
                                 if ( method_exists( $account_order, 'get_checkout_payment_url' ) ) {
                                     $pay_now_url = (string) $account_order->get_checkout_payment_url();
@@ -2531,25 +2538,33 @@ function noyona_render_account_page_shortcode() {
                                             </section>
 
                                             <section class="noyona-account-order-modal__progress">
-                                                <h4><?php esc_html_e( 'Order Progress', 'noyona-childtheme' ); ?></h4>
-                                                <ol class="noyona-account-order-modal__timeline">
-                                                    <?php foreach ( $timeline_rows as $timeline_row ) : ?>
-                                                        <?php
-                                                        $step_state = isset( $timeline_row['state'] ) ? sanitize_html_class( (string) $timeline_row['state'] ) : 'is-pending';
-                                                        $step_date  = isset( $timeline_row['date_label'] ) ? (string) $timeline_row['date_label'] : '';
-                                                        $step_label = isset( $timeline_row['label'] ) ? (string) $timeline_row['label'] : '';
-                                                        ?>
-                                                        <li class="noyona-account-order-modal__timeline-item <?php echo esc_attr( $step_state ); ?>">
-                                                            <span class="noyona-account-order-modal__timeline-dot" aria-hidden="true"></span>
-                                                            <span class="noyona-account-order-modal__timeline-copy">
-                                                                <?php if ( '' !== $step_date ) : ?>
-                                                                    <small><?php echo esc_html( $step_date ); ?></small>
-                                                                <?php endif; ?>
-                                                                <strong><?php echo esc_html( $step_label ); ?></strong>
-                                                            </span>
-                                                        </li>
-                                                    <?php endforeach; ?>
-                                                </ol>
+                                                <?php if ( is_array( $status_card ) ) : ?>
+                                                    <h4><?php esc_html_e( 'Order Status', 'noyona-childtheme' ); ?></h4>
+                                                    <div class="noyona-account-order-modal__status-card noyona-account-order-modal__status-card--<?php echo esc_attr( $status_key ); ?>">
+                                                        <strong class="noyona-account-order-modal__status-card-title"><?php echo esc_html( (string) $status_card['title'] ); ?></strong>
+                                                        <p class="noyona-account-order-modal__status-card-message"><?php echo esc_html( (string) $status_card['message'] ); ?></p>
+                                                    </div>
+                                                <?php else : ?>
+                                                    <h4><?php esc_html_e( 'Order Progress', 'noyona-childtheme' ); ?></h4>
+                                                    <ol class="noyona-account-order-modal__timeline">
+                                                        <?php foreach ( $timeline_rows as $timeline_row ) : ?>
+                                                            <?php
+                                                            $step_state = isset( $timeline_row['state'] ) ? sanitize_html_class( (string) $timeline_row['state'] ) : 'is-pending';
+                                                            $step_date  = isset( $timeline_row['date_label'] ) ? (string) $timeline_row['date_label'] : '';
+                                                            $step_label = isset( $timeline_row['label'] ) ? (string) $timeline_row['label'] : '';
+                                                            ?>
+                                                            <li class="noyona-account-order-modal__timeline-item <?php echo esc_attr( $step_state ); ?>">
+                                                                <span class="noyona-account-order-modal__timeline-dot" aria-hidden="true"></span>
+                                                                <span class="noyona-account-order-modal__timeline-copy">
+                                                                    <?php if ( '' !== $step_date ) : ?>
+                                                                        <small><?php echo esc_html( $step_date ); ?></small>
+                                                                    <?php endif; ?>
+                                                                    <strong><?php echo esc_html( $step_label ); ?></strong>
+                                                                </span>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ol>
+                                                <?php endif; ?>
                                             </section>
                                         </div>
 
@@ -2600,7 +2615,9 @@ function noyona_render_account_page_shortcode() {
                                             <?php if ( $show_pay_now ) : ?>
                                                 <a class="noyona-account-btn noyona-account-btn--primary" href="<?php echo esc_url( $pay_now_url ); ?>"><?php esc_html_e( 'Pay Now', 'noyona-childtheme' ); ?></a>
                                             <?php endif; ?>
-                                            <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $review_url ); ?>"><?php esc_html_e( 'Write a Review', 'noyona-childtheme' ); ?></a>
+                                            <?php if ( $can_write_review ) : ?>
+                                                <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $review_url ); ?>"><?php esc_html_e( 'Write a Review', 'noyona-childtheme' ); ?></a>
+                                            <?php endif; ?>
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $invoice_url ); ?>" download><?php esc_html_e( 'Download E-invoice', 'noyona-childtheme' ); ?></a>
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $contact_url ); ?>"><?php esc_html_e( 'Contact Us', 'noyona-childtheme' ); ?></a>
                                             <?php if ( ! $is_to_pay_status ) : ?>
