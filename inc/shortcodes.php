@@ -2353,10 +2353,34 @@ function noyona_render_account_page_shortcode() {
                                     $timeline_rows = (array) noyona_ot_get_timeline_rows( $account_order );
                                 }
                                 // Exception statuses (cancelled/refunded/failed) render a single
-                                // status card instead of the fulfillment timeline.
-                                $status_card = function_exists( 'noyona_ot_get_status_card' )
-                                    ? noyona_ot_get_status_card( $account_order )
+                                // status card instead of the fulfillment timeline. Classified here
+                                // from the real order status ($status_key) so it works even when the
+                                // order-tracking mu-plugin helper is unavailable at runtime (e.g.
+                                // stale opcache / not-yet-reloaded bytecode). When the mu-plugin
+                                // helper IS loaded it may override the copy (single source of truth).
+                                $exception_status_cards = array(
+                                    'cancelled' => array(
+                                        'title'   => __( 'Order Cancelled', 'noyona-childtheme' ),
+                                        'message' => __( 'This order was cancelled and will not be processed further.', 'noyona-childtheme' ),
+                                    ),
+                                    'refunded'  => array(
+                                        'title'   => __( 'Refund Completed', 'noyona-childtheme' ),
+                                        'message' => __( 'Your payment has been successfully refunded.', 'noyona-childtheme' ),
+                                    ),
+                                    'failed'    => array(
+                                        'title'   => __( 'Payment Failed', 'noyona-childtheme' ),
+                                        'message' => __( 'Your payment could not be processed. Please retry payment or place a new order.', 'noyona-childtheme' ),
+                                    ),
+                                );
+                                $status_card = isset( $exception_status_cards[ $status_key ] )
+                                    ? $exception_status_cards[ $status_key ]
                                     : null;
+                                if ( function_exists( 'noyona_ot_get_status_card' ) ) {
+                                    $ot_status_card = noyona_ot_get_status_card( $account_order );
+                                    if ( is_array( $ot_status_card ) && isset( $ot_status_card['title'], $ot_status_card['message'] ) ) {
+                                        $status_card = $ot_status_card;
+                                    }
+                                }
                                 if ( empty( $timeline_rows ) ) {
                                     $status_progress_map = array(
                                         'pending'    => 1,
