@@ -81,6 +81,8 @@ if ( $email_improvements_enabled ) {
 	$link_color = $base;
 }
 
+$link_color = '#E199A4';
+
 $border_color    = wc_light_or_dark( $body, 'rgba(0, 0, 0, .2)', 'rgba(255, 255, 255, .2)' );
 $bg_darker_10    = wc_hex_darker( $bg, 10 );
 $body_darker_10  = wc_hex_darker( $body, 10 );
@@ -171,7 +173,7 @@ body {
 }
 
 .email-logo-text {
-	color: #d45f7f;
+	color: #E199A4;
 	font-family: <?php echo $safe_font_family; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 	font-size: 18px;
 	font-weight: 700;
@@ -410,7 +412,7 @@ body {
 
 #template_footer #credit,
 #template_footer #credit a {
-	color: <?php echo esc_attr( $footer_text ); ?>;
+	color: #E199A4;
 }
 
 h1 {
@@ -557,7 +559,7 @@ h2.email-order-detail-heading span a {
 }
 
 .noyona-email-button {
-	background: #a9185f;
+	background: #E199A4;
 	border-radius: 999px;
 	color: #ffffff !important;
 	display: inline-block;
@@ -597,7 +599,7 @@ h2.email-order-detail-heading span a {
 }
 
 .noyona-email-store-link a {
-	color: #d45f7f !important;
+	color: #E199A4 !important;
 	text-decoration: none;
 }
 
@@ -647,7 +649,7 @@ h2.email-order-detail-heading span a {
 }
 
 .noyona-order-store-link {
-	color: #d45f7f !important;
+	color: #E199A4 !important;
 	font-size: 12px;
 	font-weight: 700;
 	text-decoration: none;
@@ -920,7 +922,7 @@ h2.email-order-detail-heading span a {
 }
 
 .noyona-whats-next-link a {
-	color: #a9185f !important;
+	color: #E199A4 !important;
 	font-weight: 800;
 	text-decoration: none;
 }
@@ -972,7 +974,7 @@ h2.email-order-detail-heading span a {
 }
 
 .noyona-failed-support a {
-	color: #d45f7f !important;
+	color: #E199A4 !important;
 	font-weight: 800;
 	text-decoration: none;
 }
@@ -1074,12 +1076,12 @@ h2.email-order-detail-heading span a {
 }
 
 .noyona-email-footer a {
-	color: #6f6266 !important;
+	color: #E199A4 !important;
 	text-decoration: none;
 }
 
 .noyona-email-footer-links {
-	color: #6f6266 !important;
+	color: #E199A4 !important;
 	font-size: 12px !important;
 	font-weight: 600;
 	margin-bottom: 24px !important;
