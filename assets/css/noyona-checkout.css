@@ -1819,6 +1819,7 @@ body.noyona-done-step .noyona-done-actions__btn {
   flex: 1 1 0;
   min-height: 60px;
   border-radius: var(--noyona-radius-cta);
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1841,22 +1842,27 @@ body.noyona-done-step .noyona-done-actions__label {
 }
 
 body.noyona-done-step .noyona-done-actions__btn--primary {
-  background: #e7a6b3;
-  color: #fff;
-  border: 1px solid #e7a6b3;
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
+  border: 1px solid var(--noyona-cta-primary-border);
+  font-size: 16px;
+  line-height: normal;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 body.noyona-done-step .noyona-done-actions__btn--primary:hover {
-  background: #d996a3;
-  border-color: #d996a3;
+  background: var(--noyona-cta-primary-hover-bg);
+  color: var(--noyona-cta-primary-hover-text);
+  border-color: var(--noyona-cta-primary-hover-border);
 }
 
 body.noyona-done-step .noyona-done-actions__btn--outline {
-  background: #fff;
-  color: #3b3b3b;
-  border: 2px solid #a5a5a5;
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
+  border: 1px solid var(--noyona-cta-secondary-border);
+  font-size: 16px;
+  line-height: normal;
 }
 
 body.noyona-done-step .noyona-done-actions__btn--outline i {
@@ -1869,9 +1875,9 @@ body.noyona-done-step .noyona-done-actions__btn--outline i {
 }
 
 body.noyona-done-step .noyona-done-actions__btn--outline:hover {
-  border-color: #bfbfbf;
-  color: #1a1a1a;
-  background: #fafafa;
+  background: var(--noyona-cta-secondary-hover-bg);
+  color: var(--noyona-cta-secondary-hover-text);
+  border-color: var(--noyona-cta-secondary-hover-border);
 }
 
 body.noyona-done-step .woocommerce-customer-details,
