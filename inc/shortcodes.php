@@ -1617,8 +1617,7 @@ function noyona_render_account_wishlist_card( $args ) {
                 <p><?php esc_html_e( 'View and manage your wishlist items', 'noyona-childtheme' ); ?></p>
             </div>
             <form class="noyona-account-wishlist-sort" method="get" action="<?php echo esc_url( $wishlist_url ); ?>">
-                <label for="noyona-account-wishlist-sort"><?php esc_html_e( 'Sort by', 'noyona-childtheme' ); ?></label>
-                <select id="noyona-account-wishlist-sort" name="wishlist_sort" onchange="this.form.submit()">
+                <select id="noyona-account-wishlist-sort" name="wishlist_sort" aria-label="<?php esc_attr_e( 'Sort wishlist', 'noyona-childtheme' ); ?>" onchange="this.form.submit()">
                     <?php foreach ( $sort_options as $sort_key => $sort_label ) : ?>
                         <option value="<?php echo esc_attr( $sort_key ); ?>" <?php selected( $selected_sort, $sort_key ); ?>>
                             <?php echo esc_html( $sort_label ); ?>

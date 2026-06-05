@@ -3406,6 +3406,99 @@
     });
   }
 
+  function initAccountWishlistSort() {
+    const forms = Array.from(document.querySelectorAll('.noyona-account-wishlist-sort'));
+    if (!forms.length) return;
+
+    const closeWishlistSortDropdowns = (except) => {
+      document.querySelectorAll('.noyona-account-wishlist-sort .noyona-shop-sort-dropdown[open]').forEach((dropdown) => {
+        if (dropdown !== except) {
+          dropdown.removeAttribute('open');
+        }
+      });
+    };
+
+    const buildWishlistSortDropdown = (form, select) => {
+      const dropdown = document.createElement('details');
+      const summary = document.createElement('summary');
+      const panel = document.createElement('div');
+      const currentOption = select.options[select.selectedIndex] || select.options[0];
+
+      dropdown.className = 'noyona-shop-sort-dropdown';
+      summary.className = 'noyona-shop-sort-dropdown__summary';
+      summary.textContent = currentOption ? currentOption.textContent : 'Default sorting';
+      panel.className = 'noyona-shop-sort-dropdown__panel';
+
+      Array.from(select.options).forEach((option) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'noyona-shop-sort-dropdown__option';
+        item.textContent = option.textContent;
+        item.dataset.sortValue = String(option.value || 'default');
+        item.setAttribute('role', 'menuitemradio');
+        item.setAttribute('aria-checked', option.value === select.value ? 'true' : 'false');
+
+        if (option.value === select.value) {
+          item.classList.add('is-active');
+        }
+
+        item.addEventListener('click', () => {
+          const value = String(item.dataset.sortValue || 'default');
+          dropdown.removeAttribute('open');
+          if (value === select.value) {
+            return;
+          }
+
+          select.value = value;
+          if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
+          } else {
+            form.submit();
+          }
+        });
+
+        panel.appendChild(item);
+      });
+
+      dropdown.append(summary, panel);
+      dropdown.addEventListener('toggle', () => {
+        if (dropdown.open) {
+          closeWishlistSortDropdowns(dropdown);
+          document.querySelectorAll('.noyona-shop-sort-dropdown[open]').forEach((openDropdown) => {
+            if (openDropdown !== dropdown && !form.contains(openDropdown)) {
+              openDropdown.removeAttribute('open');
+            }
+          });
+        }
+      });
+
+      select.classList.add('noyona-shop-sort-select--native');
+      select.setAttribute('aria-hidden', 'true');
+      select.tabIndex = -1;
+      select.insertAdjacentElement('afterend', dropdown);
+    };
+
+    forms.forEach((form) => {
+      const select = form.querySelector('select[name="wishlist_sort"]');
+      if (!select || select.dataset.noyonaWishlistSortEnhanced === '1') return;
+
+      select.dataset.noyonaWishlistSortEnhanced = '1';
+      buildWishlistSortDropdown(form, select);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.noyona-account-wishlist-sort .noyona-shop-sort-dropdown')) {
+        closeWishlistSortDropdowns(null);
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeWishlistSortDropdowns(null);
+      }
+    });
+  }
+
   function initShopPriceDropdown() {
     const dropdowns = Array.from(document.querySelectorAll('.noyona-shop-price-dropdown'));
     if (!dropdowns.length) return;
@@ -3528,6 +3621,7 @@
     initScrollTopButton();
     initShopFilterModal();
     initShopSort();
+    initAccountWishlistSort();
     initShopPriceDropdown();
   });
 })();
