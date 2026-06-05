@@ -1071,14 +1071,13 @@
   }
 
   function initAddToCartSuccessAnimation() {
-    const isPdpPage = document.body.classList.contains('single-product');
-    if (!isPdpPage) return;
-
     const ADD_TO_CART_SELECTOR = [
       '.add_to_cart_button',
       '.ajax_add_to_cart',
       '.single_add_to_cart_button',
       '.ps-btn-cart',
+      '.ph-btn-cart',
+      '.noyona-pdp-related__cart-btn--ajax',
       '[name="add-to-cart"]',
     ].join(',');
     const PRODUCT_SCOPE_SELECTOR = [
@@ -1086,12 +1085,19 @@
       '.product',
       '.type-product',
       '.noyona-product-slide',
-      '.noyona-pdp-related-card',
+      '.product-slide__card',
+      '.ps-card',
+      '.product-highlight__card',
+      '.ph-card',
+      '.noyona-pdp-related__card',
       '.summary',
       'form.cart',
     ].join(',');
     const PRODUCT_IMAGE_SELECTOR = [
+      '.ps-card__image',
+      '.ph-card__image',
       '.wc-block-components-product-image img',
+      '.noyona-pdp-related__image-wrap img',
       '.woocommerce-product-gallery__image img',
       '.wp-post-image',
       '.product img',
@@ -1116,21 +1122,24 @@
       return !!el.closest('.wc-block-mini-cart__drawer, .wp-block-woocommerce-mini-cart');
     };
 
-    const isPdpAddToCartSource = (source) => {
+    // Eligible = any add-to-cart action EXCEPT quantity changes inside the
+    // mini-cart drawer (those re-use the cart line and must not re-trigger the
+    // fly-to-cart animation).
+    const isEligibleAddToCartSource = (source) => {
       const el = normalizeEventSource(source);
       if (!el) return false;
       if (isMiniCartContext(el)) return false;
-      return !!el.closest('.single-product form.cart');
+      return true;
     };
 
     const canAnimateFromEvent = (source) => {
-      if (isPdpAddToCartSource(source)) {
+      if (isEligibleAddToCartSource(source)) {
         return true;
       }
       // Some add-to-cart flows emit events without a button reference.
       return !!lastClickedAddToCart
         && Date.now() - lastClickedAt < 1200
-        && isPdpAddToCartSource(lastClickedAddToCart);
+        && isEligibleAddToCartSource(lastClickedAddToCart);
     };
 
     const isVisible = (el) => {
@@ -1141,7 +1150,8 @@
 
     const getProductImage = (source) => {
       if (!source) return null;
-      const scope = source.closest(PRODUCT_SCOPE_SELECTOR) || document;
+      const scope = source.closest(PRODUCT_SCOPE_SELECTOR);
+      if (!scope) return null;
       const image = scope.querySelector(PRODUCT_IMAGE_SELECTOR);
       return isVisible(image) ? image : null;
     };
@@ -1220,36 +1230,33 @@
       }, 850);
     };
 
-    const createFlyer = (sourceEl, sourceRect) => {
-      const sourceImage = sourceEl && sourceEl.tagName === 'IMG'
-        ? sourceEl
-        : getProductImage(sourceEl);
-
-      if (sourceImage && sourceImage.currentSrc) {
-        const flyer = document.createElement('img');
-        flyer.src = sourceImage.currentSrc;
-        flyer.alt = '';
-        flyer.className = 'noyona-add-cart-flyer';
-        return flyer;
-      }
-
+    const createFlyer = () => {
+      // Always a compact magenta badge with a check icon. This reads clearly
+      // against any background and never depends on a product image that may
+      // still be lazy-loading (e.g. wishlist thumbnails with empty currentSrc).
       const flyer = document.createElement('div');
-      flyer.className = 'noyona-add-cart-flyer noyona-add-cart-flyer--fallback';
-      flyer.innerHTML = '<span aria-hidden="true">✓</span>';
-      flyer.style.width = Math.min(54, Math.max(34, sourceRect.width || 44)) + 'px';
-      flyer.style.height = flyer.style.width;
+      flyer.className = 'noyona-add-cart-flyer noyona-add-cart-flyer--badge';
+      flyer.innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i>';
       return flyer;
     };
 
-    const animateSuccess = (source) => {
+    const runFlyAnimation = (sourceEl, options) => {
+      // The throttle only exists to dedupe the auto event-driven path, where a
+      // single add can fire both `added_to_cart` and `noyona_cart_added`.
+      // Explicit callers (flyFrom / flyFromRect) pass `force` because each call
+      // is a distinct, intentional add and must never be swallowed — otherwise
+      // rapid sequential adds (e.g. wishlist on a fast server) stop animating.
+      const forced = !!(options && options.force);
       const now = Date.now();
-      if (now - lastAnimatedAt < 450) {
+      if (!forced && now - lastAnimatedAt < 450) {
         return;
       }
       lastAnimatedAt = now;
 
-      const sourceEl = getSourceElement(source);
-      const sourceRect = isVisible(sourceEl)
+      const explicitRect = options && options.sourceRect ? options.sourceRect : null;
+      const sourceRect = explicitRect
+        ? explicitRect
+        : isVisible(sourceEl)
         ? sourceEl.getBoundingClientRect()
         : {
             left: window.innerWidth / 2 - 22,
@@ -1269,11 +1276,18 @@
       flyer.style.top = startY + 'px';
       flyer.style.width = startSize + 'px';
       flyer.style.height = startSize + 'px';
+      flyer.style.setProperty('--noyona-add-cart-x', Math.round(endX - startX) + 'px');
+      flyer.style.setProperty('--noyona-add-cart-y', Math.round(endY - startY) + 'px');
       document.body.appendChild(flyer);
 
+      // Force the browser to commit the flyer's start state before flipping it
+      // to `is-flying`. Without this, an idle page (e.g. the 2nd+ wishlist add)
+      // coalesces the insert and the class change into a single style recalc,
+      // so the transition never runs and the flight silently skips. A single
+      // requestAnimationFrame is not enough on its own — read layout to flush.
+      void flyer.getBoundingClientRect();
+
       window.requestAnimationFrame(() => {
-        flyer.style.setProperty('--noyona-add-cart-x', Math.round(endX - startX) + 'px');
-        flyer.style.setProperty('--noyona-add-cart-y', Math.round(endY - startY) + 'px');
         flyer.classList.add('is-flying');
       });
 
@@ -1282,15 +1296,44 @@
         pulseCartIcon();
       }, 820);
 
-      showSuccessToast();
+      if (!options || options.toast !== false) {
+        showSuccessToast(options && options.message, 'success');
+      }
     };
 
+    // On PDP the source element is resolved from the click/event (form image).
+    const animateSuccess = (source) => {
+      runFlyAnimation(getSourceElement(source));
+    };
+
+    // Reusable trigger so non-PDP surfaces (e.g. the account wishlist) can run
+    // the exact same fly-to-cart animation, but start it from their own source
+    // element (the wishlist row image) rather than a PDP product form.
+    window.noyonaCartFx = {
+      flyFrom: function (sourceEl, options) {
+        runFlyAnimation(sourceEl || null, Object.assign({ force: true }, options || {}));
+      },
+      flyFromRect: function (sourceRect, options) {
+        runFlyAnimation(null, Object.assign({ force: true }, options || {}, { sourceRect: sourceRect }));
+      },
+      toast: function (message, type) {
+        showSuccessToast(message, type);
+      },
+      pulse: pulseCartIcon,
+    };
+
+    // Auto-binding for every add-to-cart surface (PDP form, shop/related cards,
+    // carousels, etc.): track the clicked add-to-cart button and animate when
+    // WooCommerce reports the line was added. Quantity changes inside the
+    // mini-cart drawer are excluded via the eligibility check. Surfaces without
+    // a Woo add-to-cart event (e.g. the wishlist) drive the animation
+    // explicitly via window.noyonaCartFx.flyFrom().
     document.addEventListener(
       'click',
       (event) => {
         const button = event.target.closest(ADD_TO_CART_SELECTOR);
         if (!button) return;
-        if (!isPdpAddToCartSource(button)) return;
+        if (!isEligibleAddToCartSource(button)) return;
         lastClickedAddToCart = button;
         lastClickedAt = Date.now();
       },
@@ -1306,12 +1349,14 @@
 
     document.body.addEventListener('wc-blocks_added_to_cart', (event) => {
       if (event.detail && event.detail.source === 'header-mini-cart-retry') return;
+      if (event.detail && event.detail.skipAnimation) return;
       const button = event.detail && event.detail.button ? event.detail.button : null;
       if (!canAnimateFromEvent(button)) return;
       animateSuccess(event.detail && event.detail.button ? event.detail.button : null);
     });
 
     document.body.addEventListener('noyona_cart_added', (event) => {
+      if (event.detail && event.detail.skipAnimation) return;
       const button = event.detail && event.detail.button ? event.detail.button : null;
       if (!canAnimateFromEvent(button)) return;
       animateSuccess(event.detail && event.detail.button ? event.detail.button : null);
@@ -1320,6 +1365,177 @@
     document.body.addEventListener('noyona_pdp_toast', (event) => {
       const detail = event.detail || {};
       showSuccessToast(detail.message || '', detail.type || 'error');
+    });
+  }
+
+  // Account > Wishlist: add the item to the cart via AJAX (no redirect to the
+  // cart page), play the shared fly-to-cart animation from the wishlist row
+  // image, open the header mini-cart drawer, then drop the item from the
+  // wishlist once it is in the cart.
+  function initWishlistAddToCart() {
+    const wishlistAddEndpoint = () => {
+      if (
+        typeof window.wc_add_to_cart_params !== 'undefined' &&
+        window.wc_add_to_cart_params &&
+        window.wc_add_to_cart_params.wc_ajax_url
+      ) {
+        return String(window.wc_add_to_cart_params.wc_ajax_url).replace('%%endpoint%%', 'add_to_cart');
+      }
+      return '/?wc-ajax=add_to_cart';
+    };
+
+    const headerData = () => (typeof window.noyonaHeader !== 'undefined' && window.noyonaHeader) || {};
+
+    // Refresh the header cart count / fragments without a button reference, so
+    // the global animation listener does not re-fire (we run the fly-to-cart
+    // explicitly from the wishlist row) and the mini-cart drawer stays closed.
+    const broadcastCartAdded = () => {
+      const detail = { source: 'wishlist', button: null, skipAnimation: true };
+      if (window.jQuery) {
+        window.jQuery(document.body).trigger('wc_fragment_refresh');
+      }
+      document.body.dispatchEvent(new CustomEvent('wc-blocks_added_to_cart', { bubbles: true, detail }));
+      document.body.dispatchEvent(new CustomEvent('noyona_cart_added', { bubbles: true, detail }));
+    };
+
+    const removeFromWishlist = (productId, variationId) => {
+      const data = headerData();
+      const nonce = (data.wishlist && data.wishlist.nonce) || '';
+      const ajaxUrl = data.ajaxUrl || '/wp-admin/admin-ajax.php';
+      if (!nonce) {
+        return Promise.resolve(null);
+      }
+      const body = new URLSearchParams();
+      body.set('action', 'noyona_toggle_product_wishlist');
+      body.set('nonce', nonce);
+      body.set('product_id', String(productId));
+      body.set('variation_id', String(variationId || 0));
+      return fetch(ajaxUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: body.toString(),
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null);
+    };
+
+    const dropRow = (row) => {
+      if (!row) return;
+      const tbody = row.parentNode;
+      row.style.transition = 'opacity .25s ease';
+      row.style.opacity = '0';
+      window.setTimeout(() => {
+        row.remove();
+        // When the last item is gone, reload so the proper empty-state card and
+        // pagination render server-side.
+        if (tbody && !tbody.querySelector('tr')) {
+          window.location.reload();
+        }
+      }, 260);
+    };
+
+    const setBusy = (button, busy) => {
+      if (!button) return;
+      if (busy) {
+        button.classList.add('is-loading');
+        button.setAttribute('aria-disabled', 'true');
+      } else {
+        button.classList.remove('is-loading');
+        button.removeAttribute('aria-disabled');
+      }
+    };
+
+    const showError = () => {
+      if (window.noyonaCartFx && typeof window.noyonaCartFx.toast === 'function') {
+        window.noyonaCartFx.toast('This product cannot be added to cart right now.', 'error');
+      }
+    };
+
+    const handleAdd = (button) => {
+      if (!button || button.getAttribute('aria-disabled') === 'true' || button.classList.contains('is-loading')) {
+        return;
+      }
+      const addId = parseInt(button.getAttribute('data-add-id'), 10) || 0;
+      const productId = parseInt(button.getAttribute('data-product-id'), 10) || 0;
+      const variationId = parseInt(button.getAttribute('data-variation-id'), 10) || 0;
+      if (addId < 1) {
+        return;
+      }
+
+      const row = button.closest('tr');
+      // Start every wishlist fly-to-cart from the "My Wishlist" heading. Product
+      // rows get removed/shift after each add (and bottom rows can sit below the
+      // fold), so a fixed, always-visible anchor is far more reliable than the
+      // per-row button. Captured on click, before any layout changes.
+      const anchor =
+        document.querySelector('.noyona-account-wishlist-header h3') ||
+        document.querySelector('#noyona-account-wishlist-panel h3') ||
+        button;
+      const startRect = anchor.getBoundingClientRect();
+
+      setBusy(button, true);
+
+      const payload = new URLSearchParams();
+      payload.set('product_id', String(addId));
+      if (variationId > 0) {
+        payload.set('variation_id', String(variationId));
+      }
+      payload.set('quantity', '1');
+
+      fetch(wishlistAddEndpoint(), {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: payload.toString(),
+      })
+        .then((res) => res.text())
+        .then((raw) => {
+          let data = null;
+          if (raw) {
+            try {
+              data = JSON.parse(raw);
+            } catch (e) {
+              data = null;
+            }
+          }
+
+          if (data && data.error) {
+            setBusy(button, false);
+            showError();
+            return;
+          }
+
+          if (window.noyonaCartFx && typeof window.noyonaCartFx.flyFromRect === 'function') {
+            window.noyonaCartFx.flyFromRect(startRect);
+          } else if (window.noyonaCartFx && typeof window.noyonaCartFx.flyFrom === 'function') {
+            window.noyonaCartFx.flyFrom(button);
+          }
+
+          broadcastCartAdded();
+
+          removeFromWishlist(productId, variationId).then((resp) => {
+            const removed = !!(resp && resp.success && resp.data && resp.data.saved === false);
+            if (removed) {
+              dropRow(row);
+            } else {
+              // Cart add succeeded but wishlist removal did not; keep the row
+              // interactive so the shopper can remove it manually.
+              setBusy(button, false);
+            }
+          });
+        })
+        .catch(() => {
+          setBusy(button, false);
+          showError();
+        });
+    };
+
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-noyona-wishlist-add]');
+      if (!button) return;
+      event.preventDefault();
+      handleAdd(button);
     });
   }
 
@@ -3242,6 +3458,7 @@
     initMiniCartCloseAction();
     initMiniCartDynamicUi();
     initAddToCartSuccessAnimation();
+    initWishlistAddToCart();
     initHeaderCartFallback();
     initMiniCartAutoOpen();
     initAccountDropdown();

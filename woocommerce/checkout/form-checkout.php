@@ -289,22 +289,18 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 					<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
 				<?php endforeach; ?>
 				<p class="noyona-checkout-card__hint"><?php esc_html_e( 'e.g. "Leave at the gate" or "Call upon arrival"', 'noyona' ); ?></p>
-				<div class="noyona-checkout-optin noyona-checkout-optin--gift">
-					<label class="noyona-checkout-optin__label">
-						<input type="checkbox" name="noyona_gift_order" value="1" class="noyona-checkout-optin__input">
-						<i class="fa-solid fa-gift noyona-checkout-optin__icon--gift" aria-hidden="true"></i>
-						<span><?php esc_html_e( 'This order is a gift', 'noyona' ); ?></span>
-					</label>
-				</div>
 			</div>
 			<?php endif; ?>
 
-			<div class="noyona-checkout-card noyona-checkout-card--summary noyona-checkout-card--sidebar <?php echo $is_review_step ? 'noyona-checkout-card--review-items' : ''; ?>">
-				<h2 class="noyona-checkout-card__title <?php echo $is_review_step ? 'noyona-review-heading' : ''; ?>">
-					<?php if ( ! $is_review_step ) : ?>
+			<div class="noyona-checkout-card noyona-checkout-card--summary noyona-checkout-card--sidebar noyona-checkout-card--review-items">
+				<h2 class="noyona-checkout-card__title noyona-review-heading">
+					<span class="noyona-summary-title noyona-summary-title--details">
 						<i class="fa-solid fa-receipt" aria-hidden="true"></i>
-					<?php endif; ?>
-					<?php echo $is_review_step ? esc_html__( 'Preview Your Order', 'noyona' ) : esc_html__( 'Order Summary', 'noyona' ); ?>
+						<?php esc_html_e( 'Order Summary', 'noyona' ); ?>
+					</span>
+					<span class="noyona-summary-title noyona-summary-title--review">
+						<?php esc_html_e( 'Preview Your Order', 'noyona' ); ?>
+					</span>
 				</h2>
 				<div class="noyona-order-items">
 					<?php
@@ -342,8 +338,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 					}
 					?>
 				</div>
-				<?php if ( ! $is_review_step ) : ?>
-					<div class="noyona-order-totals">
+					<div class="noyona-order-totals noyona-order-totals--summary">
 						<div class="noyona-order-totals__row">
 							<span class="noyona-order-totals__label"><?php esc_html_e( 'Subtotal', 'noyona' ); ?></span>
 							<span class="noyona-order-totals__value"><?php wc_cart_totals_subtotal_html(); ?></span>
@@ -389,10 +384,8 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 							<span class="noyona-order-totals__value"><?php wc_cart_totals_order_total_html(); ?></span>
 						</div>
 					</div>
-				<?php endif; ?>
 			</div>
-			<?php if ( $is_review_step ) : ?>
-				<?php
+			<?php
 				$ship_name  = trim( $checkout->get_value( 'billing_first_name' ) . ' ' . $checkout->get_value( 'billing_last_name' ) );
 				$ship_lines = array_filter(
 					array(
@@ -437,6 +430,13 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 								'<strong>' . esc_html( date_i18n( 'M j, Y', strtotime( '+10 days' ) ) ) . '</strong>'
 							);
 						?></span>
+					</div>
+					<div class="noyona-review-special-instructions" data-review-special-instructions hidden>
+						<h3 class="noyona-review-meta__title"><?php esc_html_e( 'Order Notes', 'noyona' ); ?></h3>
+						<div class="noyona-review-special-instructions__row" data-review-note-row hidden>
+							<span><?php esc_html_e( 'Order note', 'noyona' ); ?></span>
+							<p data-review-order-note></p>
+						</div>
 					</div>
 				</div>
 
@@ -488,7 +488,22 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 						</div>
 					</div>
 				</div>
-			<?php endif; ?>
+
+			<?php $terms_url = home_url( '/terms-and-policies/' ); ?>
+			<div class="noyona-review-terms">
+				<label class="noyona-review-terms__label" for="noyona-review-terms">
+					<input type="checkbox" id="noyona-review-terms" class="noyona-review-terms__checkbox">
+					<span class="noyona-review-terms__text">
+						<?php esc_html_e( 'I agree to the', 'noyona' ); ?>
+						<?php if ( ! empty( $terms_url ) ) : ?>
+							<a href="<?php echo esc_url( $terms_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?></a>
+						<?php else : ?>
+							<?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?>
+						<?php endif; ?>
+						<?php esc_html_e( '. I understand that this order is final.', 'noyona' ); ?>
+					</span>
+				</label>
+			</div>
 
 			<div class="noyona-checkout-actions">
 				<a href="/cart" class="noyona-checkout-actions__back">
@@ -521,7 +536,7 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 						<?php esc_html_e( 'Complete payment to finish your order', 'noyona' ); ?>
 					</h3>
 					<p class="noyona-pay-confirm-modal__copy">
-						<?php esc_html_e( 'After clicking Place Order, you will see a QR payment page. Please scan and complete payment (GCash, Maya, GoTyme, and other supported wallets). Your order will be marked Done after payment succeeds.', 'noyona' ); ?>
+						<?php esc_html_e( 'After placing your order, scan the QR code to pay using GCash, Maya, Mastercard, or Visa. Your order will be marked as completed once payment is successful.', 'noyona' ); ?>
 					</p>
 					<div class="noyona-pay-confirm-modal__actions">
 						<button type="button" class="noyona-pay-confirm-modal__btn noyona-pay-confirm-modal__btn--ghost" data-pay-confirm-close>
@@ -533,26 +548,6 @@ if ( is_user_logged_in() && function_exists( 'noyona_get_account_saved_addresses
 					</div>
 				</div>
 			</div>
-
-			<?php if ( $is_review_step ) : ?>
-				<?php
-				$terms_url = home_url( '/terms-and-policies/' );
-				?>
-				<div class="noyona-review-terms">
-					<label class="noyona-review-terms__label" for="noyona-review-terms">
-						<input type="checkbox" id="noyona-review-terms" class="noyona-review-terms__checkbox">
-						<span class="noyona-review-terms__text">
-							<?php esc_html_e( 'I agree to the', 'noyona' ); ?>
-							<?php if ( ! empty( $terms_url ) ) : ?>
-								<a href="<?php echo esc_url( $terms_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?></a>
-							<?php else : ?>
-								<?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?>
-							<?php endif; ?>
-							<?php esc_html_e( '. I understand that this order is final.', 'noyona' ); ?>
-						</span>
-					</label>
-				</div>
-			<?php endif; ?>
 
 			<div class="noyona-trust-badges">
 				<div class="noyona-trust-badge">

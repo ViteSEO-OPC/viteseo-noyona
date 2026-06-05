@@ -1850,12 +1850,57 @@
     window._noyonaPdpAlertToastBound = true;
     window._noyonaNativeAlert = window.alert;
     window.alert = function (message) {
-      showPdpToast(message, 'error');
+      // WooCommerce's variation script raises native alerts (e.g. "Please select
+      // some product options…" / "Sorry, this product is unavailable…"). Route
+      // them through the same normalizer so Add to Cart matches Buy Now.
+      showPdpToast(normalizePdpMessage(message), 'error');
     };
+  }
+
+  function getPdpSelectOptionsMessage() {
+    return getPdpText('selectOptions', 'Please select all product options before continuing.');
   }
 
   function getPdpOutOfStockMessage() {
     return getPdpText('outOfStockCartError', 'This product is out of stock.');
+  }
+
+  // Single source of truth for cart/variation error wording. Any message coming
+  // from WooCommerce (native alert, variation script, AJAX response) is mapped
+  // to our copy so both Add to Cart and Buy Now always say the same thing.
+  function normalizePdpMessage(message) {
+    var text = String(message || '');
+    var lower = text.toLowerCase();
+    if (!lower) {
+      return text;
+    }
+
+    // Variation/options not chosen.
+    if (
+      lower.indexOf('select some product options') !== -1 ||
+      lower.indexOf('select product options') !== -1 ||
+      lower.indexOf('select all product options') !== -1 ||
+      lower.indexOf('choose product options') !== -1 ||
+      lower.indexOf('make a selection') !== -1
+    ) {
+      return getPdpSelectOptionsMessage();
+    }
+
+    // Out of stock / unavailable variation.
+    if (
+      lower.indexOf('out of stock') !== -1 ||
+      lower.indexOf('cannot be purchased') !== -1 ||
+      lower.indexOf('unavailable') !== -1 ||
+      lower.indexOf('different combination') !== -1
+    ) {
+      return getPdpOutOfStockMessage();
+    }
+
+    return text;
+  }
+
+  function isPdpOutOfStockMessage(message) {
+    return normalizePdpMessage(message) === getPdpOutOfStockMessage();
   }
 
   function getAjaxCartErrorMessage(data) {
@@ -1866,6 +1911,165 @@
       return String(data.data.message);
     }
     return getPdpText('cartError', 'This product cannot be added to cart right now.');
+  }
+
+  // Resolve the product/variation id that the current form would add to cart:
+  // the selected variation id for variable products, otherwise the simple
+  // product id. Used to look up how many are already in the cart.
+  function getPdpSelectedProductId(form) {
+    if (!form) {
+      return 0;
+    }
+    if (form.classList.contains('variations_form')) {
+      var variationId = form.querySelector('input[name="variation_id"]');
+      if (variationId && variationId.value && variationId.value !== '0') {
+        return parseInt(variationId.value, 10) || 0;
+      }
+    }
+    var explicit =
+      form.querySelector('input[name="add-to-cart"]') ||
+      form.querySelector('button[name="add-to-cart"]') ||
+      form.querySelector('input[name="product_id"]');
+    if (explicit && explicit.value) {
+      return parseInt(explicit.value, 10) || 0;
+    }
+    return 0;
+  }
+
+  // Current managed stock count for the active selection, or null when stock is
+  // not managed (treated as unlimited). Variable products read the cached
+  // current variation; simple products read the server-rendered badge.
+  function getPdpCurrentStockCount(form) {
+    if (form && form.classList.contains('variations_form') && form.__noyonaCurrentVariation) {
+      var raw = form.__noyonaCurrentVariation.noyona_stock_quantity;
+      if (raw === null || typeof raw === 'undefined' || raw === '') {
+        raw = form.__noyonaCurrentVariation.max_qty;
+      }
+      var parsedVar = parseInt(raw, 10);
+      return isFinite(parsedVar) && parsedVar >= 0 ? parsedVar : null;
+    }
+
+    var badge = getPdpStockBadge();
+    if (badge) {
+      var count = badge.getAttribute('data-noyona-stock-count');
+      if (count !== null && count !== '') {
+        var parsed = parseInt(count, 10);
+        return isFinite(parsed) && parsed >= 0 ? parsed : null;
+      }
+    }
+    return null;
+  }
+
+  // Whether the active selection is out of stock. For variable products this
+  // depends on the chosen variation; if none is chosen yet we return false so
+  // the "please select options" path handles it instead.
+  function isPdpSelectionOutOfStock(form) {
+    if (form && form.classList.contains('variations_form')) {
+      if (form.__noyonaCurrentVariation && typeof form.__noyonaCurrentVariation.is_in_stock !== 'undefined') {
+        return !form.__noyonaCurrentVariation.is_in_stock;
+      }
+      return false;
+    }
+    var badge = getPdpStockBadge();
+    return !!(badge && badge.getAttribute('data-noyona-in-stock') === '0');
+  }
+
+  // How many of the given product/variation id are already in the cart, via the
+  // Store API. Returns a promise resolving to a quantity (0 on any failure).
+  function fetchPdpCartQuantity(productId) {
+    var id = parseInt(productId, 10) || 0;
+    if (!id) {
+      return Promise.resolve(0);
+    }
+    return fetch('/wp-json/wc/store/cart?_t=' + Date.now(), {
+      credentials: 'same-origin',
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+    })
+      .then(function (res) {
+        return res.ok ? res.json() : null;
+      })
+      .then(function (cart) {
+        if (!cart || !Array.isArray(cart.items)) {
+          return 0;
+        }
+        var qty = 0;
+        cart.items.forEach(function (item) {
+          if (parseInt(item.id, 10) === id) {
+            qty += parseInt(item.quantity, 10) || 0;
+          }
+        });
+        return qty;
+      })
+      .catch(function () {
+        return 0;
+      });
+  }
+
+  // Pick the most specific message for a failed/blocked add based on stock vs.
+  // how many are already in the cart.
+  function buildPdpStockMessage(stockCount, cartQty, inStock) {
+    if (!inStock) {
+      return getPdpOutOfStockMessage();
+    }
+    if (stockCount !== null && cartQty >= stockCount) {
+      return getPdpText(
+        'maxInCart',
+        'You already have all available stock (%d) of this item in your cart.'
+      ).replace('%d', String(stockCount));
+    }
+    if (stockCount !== null) {
+      return getPdpText(
+        'notEnoughStock',
+        'Only %1$d left in stock, and you already have %2$d in your cart.'
+      )
+        .replace('%1$d', String(stockCount))
+        .replace('%2$d', String(cartQty));
+    }
+    return getPdpText('cartError', 'This product cannot be added to cart right now.');
+  }
+
+  // Cache the active variation on the form so the helpers above can read its
+  // real stock without re-querying WooCommerce.
+  function bindVariationCache(form) {
+    if (!form || !form.classList.contains('variations_form') || typeof window.jQuery === 'undefined') {
+      return;
+    }
+    var $form = window.jQuery(form);
+    if ($form.data('noyonaVarCacheBound')) {
+      return;
+    }
+    $form.data('noyonaVarCacheBound', true);
+    $form.on('found_variation show_variation', function (_event, variation) {
+      form.__noyonaCurrentVariation = variation || null;
+    });
+    $form.on('reset_data hide_variation', function () {
+      form.__noyonaCurrentVariation = null;
+    });
+  }
+
+  // Surface any WooCommerce error banner (e.g. a failed full-page Buy Now stock
+  // rejection) as a persistent toast, then remove the raw banner so it does not
+  // flash-and-vanish. Out-of-stock phrasing is normalized to our copy.
+  function promotePdpErrorNoticesToToast() {
+    var nodes = document.querySelectorAll(
+      '.wp-block-woocommerce-store-notices .wc-block-components-notice-banner.is-error,' +
+        '.woocommerce-notices-wrapper .woocommerce-error'
+    );
+    if (!nodes.length) {
+      return;
+    }
+    var seen = {};
+    nodes.forEach(function (node) {
+      var text = normalizePdpMessage((node.textContent || '').trim());
+      if (text) {
+        if (!seen[text]) {
+          seen[text] = true;
+          showPdpToast(text, 'error');
+        }
+      }
+      node.remove();
+    });
   }
 
   function getPdpWishlistAjaxUrl() {
@@ -2347,16 +2551,20 @@
       // Ignore URL parsing errors.
     }
 
+    // Clear stale SUCCESS banners (e.g. legacy ?add-to-cart= flow), but do NOT
+    // silently delete ERROR banners — a failed full-page Buy Now (out of stock /
+    // already-at-max-in-cart) renders its reason there. Promote those to a
+    // persistent toast instead so the shopper can actually read them.
     document
       .querySelectorAll(
         '.wp-block-woocommerce-store-notices .wc-block-components-notice-banner.is-success,' +
-          '.woocommerce-notices-wrapper .woocommerce-message,' +
-          '.wp-block-woocommerce-store-notices .wc-block-components-notice-banner.is-error,' +
-          '.woocommerce-notices-wrapper .woocommerce-error'
+          '.woocommerce-notices-wrapper .woocommerce-message'
       )
       .forEach(function (notice) {
         notice.remove();
       });
+
+    promotePdpErrorNoticesToToast();
   }
 
   function bindAjaxAddToCart(form) {
@@ -2369,18 +2577,46 @@
     var buyNowField = form.querySelector('input[name="noyona_buy_now"]');
     var inFlight = false;
     var lastRequestAt = 0;
+    // Hard lock for Buy now: once a buy-now add is in progress we keep the
+    // button locked until we either navigate to the cart (success) or hit an
+    // error. This makes rapid clicks unable to queue extra cart lines.
+    var buyNowInFlight = false;
 
-    function runAjaxAddToCart() {
+    function setBuyNowLocked(locked) {
+      buyNowInFlight = locked;
+      var buyBtn = form.querySelector('.noyona-pdp-buy-now');
+      if (!buyBtn) {
+        return;
+      }
+      if (locked) {
+        buyBtn.classList.add('loading');
+        buyBtn.setAttribute('aria-disabled', 'true');
+      } else {
+        buyBtn.classList.remove('loading');
+        buyBtn.removeAttribute('aria-disabled');
+      }
+    }
+
+    function runAjaxAddToCart(options) {
+      var isBuyNow = !!(options && options.buyNow);
+      // Spam guard: ignore repeat Buy now clicks while one is already in
+      // flight (the page navigates to the cart on success).
+      if (isBuyNow && buyNowInFlight) {
+        return;
+      }
       addBtn = form.querySelector('.single_add_to_cart_button');
       if (form.classList.contains('variations_form')) {
         var currentVariationId = form.querySelector('input[name="variation_id"]');
         if (!currentVariationId || !currentVariationId.value || currentVariationId.value === '0') {
-          showPdpToast(getPdpText('selectOptions', 'Please select all options.'), 'error');
+          showPdpToast(getPdpSelectOptionsMessage(), 'error');
           return;
         }
       }
 
-      if (!addBtn || addBtn.disabled || addBtn.classList.contains('disabled')) {
+      if (!addBtn) {
+        return;
+      }
+      if (addBtn.disabled || addBtn.classList.contains('disabled') || isPdpSelectionOutOfStock(form)) {
         showPdpToast(getPdpOutOfStockMessage(), 'error');
         return;
       }
@@ -2400,13 +2636,7 @@
         debugVariationFormState(form, 'before-add-to-cart');
         var variationId = form.querySelector('input[name="variation_id"]');
         if (!variationId || !variationId.value || variationId.value === '0') {
-          var msg =
-            typeof window.noyonaPdp !== 'undefined' &&
-            window.noyonaPdp.i18n &&
-            window.noyonaPdp.i18n.selectOptions
-              ? window.noyonaPdp.i18n.selectOptions
-              : 'Please select all options.';
-          showPdpToast(msg, 'error');
+          showPdpToast(getPdpSelectOptionsMessage(), 'error');
           return;
         }
         selectedVariationId = parseInt(variationId.value, 10) || 0;
@@ -2419,6 +2649,9 @@
 
       inFlight = true;
       addBtn.classList.add('loading');
+      if (isBuyNow) {
+        setBuyNowLocked(true);
+      }
 
       var formData = new FormData(form);
       var payload = new URLSearchParams();
@@ -2481,14 +2714,48 @@
           }
 
           if (data && data.error) {
+            if (isBuyNow) {
+              setBuyNowLocked(false);
+            }
             addBtn.classList.add('is-error');
-            showPdpToast(getAjaxCartErrorMessage(data), 'error');
+            // WooCommerce's AJAX add-to-cart error gives no useful reason for a
+            // stock-limit rejection, and for an unavailable/out-of-stock
+            // variation it returns its own "unavailable / choose a different
+            // combination" copy. Normalize all out-of-stock/unavailable cases to
+            // a single message, and compute the already-in-cart / not-enough
+            // case from the live stock count vs. the cart quantity.
+            var serverMsg = String((data && data.message) || (data && data.data && data.data.message) || '');
+            var looksOutOfStock = isPdpSelectionOutOfStock(form) || isPdpOutOfStockMessage(serverMsg);
+
+            if (looksOutOfStock) {
+              showPdpToast(getPdpOutOfStockMessage(), 'error');
+            } else {
+              var stockCount = getPdpCurrentStockCount(form);
+              fetchPdpCartQuantity(getPdpSelectedProductId(form)).then(function (cartQty) {
+                showPdpToast(buildPdpStockMessage(stockCount, cartQty, true), 'error');
+              });
+            }
             return;
           }
 
           addBtn.classList.remove('is-error');
           addBtn.classList.remove('loading');
           addBtn.classList.add('added');
+
+          // Buy now: go straight to the cart page (mirrors the old full-submit
+          // redirect) instead of opening the mini-cart drawer. Navigate FIRST,
+          // before the on-page cart-sync side effects below, so that if any of
+          // them ever throws it cannot abort the redirect (which previously
+          // left the item added but the shopper stranded on the PDP). The
+          // buy-now lock stays engaged so the in-flight navigation can't be
+          // interrupted by extra clicks.
+          if (isBuyNow) {
+            var cartUrl =
+              (typeof window.noyonaHeader !== 'undefined' && window.noyonaHeader && window.noyonaHeader.cartUrl) ||
+              '/cart/';
+            window.location.assign(cartUrl);
+            return;
+          }
 
           if (typeof window.jQuery !== 'undefined') {
             window.jQuery(document.body).trigger('added_to_cart', [
@@ -2510,6 +2777,9 @@
         })
         .catch(function () {
           // Do not fallback-submit the form: this causes reload + duplicate cart lines.
+          if (isBuyNow) {
+            setBuyNowLocked(false);
+          }
         })
         .finally(function () {
           inFlight = false;
@@ -2630,26 +2900,34 @@
         return;
       }
 
-      var msg =
-        typeof window.noyonaPdp !== 'undefined' &&
-        window.noyonaPdp.i18n &&
-        window.noyonaPdp.i18n.selectOptions
-          ? window.noyonaPdp.i18n.selectOptions
-          : 'Please select all options.';
-
       if (form.classList.contains('variations_form')) {
         var variationId = form.querySelector('input[name="variation_id"]');
         if (!variationId || !variationId.value || variationId.value === '0') {
-          showPdpToast(msg, 'error');
+          showPdpToast(getPdpSelectOptionsMessage(), 'error');
           return;
         }
       }
 
-      if (buy.disabled || buy.classList.contains('disabled') || addBtn.disabled || addBtn.classList.contains('disabled')) {
+      if (
+        buy.disabled ||
+        buy.classList.contains('disabled') ||
+        addBtn.disabled ||
+        addBtn.classList.contains('disabled') ||
+        isPdpSelectionOutOfStock(form)
+      ) {
         showPdpToast(getPdpOutOfStockMessage(), 'error');
         return;
       }
 
+      // Buy now adds to cart via AJAX (then redirects to the cart on success),
+      // so a stock rejection surfaces as a toast instead of a full-page reload
+      // that briefly flashes a WooCommerce error banner.
+      if (typeof form.__noyonaRunAjaxAddToCart === 'function') {
+        form.__noyonaRunAjaxAddToCart({ buyNow: true });
+        return;
+      }
+
+      // Fallback (AJAX binding unavailable): legacy full-page buy-now submit.
       var existing = form.querySelector('input[name="noyona_buy_now"]');
       if (!existing) {
         existing = document.createElement('input');
@@ -2842,6 +3120,16 @@
     return document.querySelector('.single-product form.cart, body.single-product form.cart');
   }
 
+  function getNoyonaPdpCartSheetTarget() {
+    var simpleBlock = document.querySelector('.single-product .wp-block-add-to-cart-form');
+    var simpleRoot = simpleBlock || getSimplePdpCartRoot();
+    var stockBadge = getPdpStockBadge();
+    if (stockBadge && stockBadge.getAttribute('data-noyona-product-type') === 'simple' && simpleBlock) {
+      return simpleBlock;
+    }
+    return getNoyonaPdpCartForm() || simpleRoot;
+  }
+
   function getNoyonaMainPriceNode() {
     return document.querySelector(
       '.single-product .wp-block-woocommerce-product-price .wc-block-components-product-price'
@@ -2855,7 +3143,7 @@
    * restoration is exact even if sibling nodes change.
    */
   function relocateNoyonaFormForViewport() {
-    var form = getNoyonaPdpCartForm();
+    var form = getNoyonaPdpCartSheetTarget();
     var sheet = getNoyonaBuySheet();
     if (!form || !sheet) {
       return;
@@ -2870,13 +3158,14 @@
       form.parentNode.insertBefore(marker, form);
       form._noyonaBuysheetOrigin = marker;
       form._noyonaOriginWrapper = form.parentNode;
+      form._noyonaHideOriginWrapper = form.matches && form.matches('form.cart');
     }
 
     if (noyonaIsMobileViewport()) {
       if (form.parentNode !== slot) {
         slot.appendChild(form);
       }
-      if (form._noyonaOriginWrapper) {
+      if (form._noyonaHideOriginWrapper && form._noyonaOriginWrapper) {
         form._noyonaOriginWrapper.classList.add('noyona-pdp-form-relocated');
       }
     } else {
@@ -2884,7 +3173,7 @@
       if (origin && origin.parentNode && form.parentNode !== origin.parentNode) {
         origin.parentNode.insertBefore(form, origin.nextSibling);
       }
-      if (form._noyonaOriginWrapper) {
+      if (form._noyonaHideOriginWrapper && form._noyonaOriginWrapper) {
         form._noyonaOriginWrapper.classList.remove('noyona-pdp-form-relocated');
       }
       // Never leave the sheet open on desktop.
@@ -2921,6 +3210,20 @@
           }
         });
       variantTarget.textContent = parts.join(' / ');
+    }
+
+    var stockTarget = sheet.querySelector('[data-noyona-buysheet-stock]');
+    var stockSource = getPdpStockBadge();
+    if (stockTarget && stockSource) {
+      var stockText = (stockSource.textContent || '').trim();
+      stockTarget.textContent = stockText;
+      stockTarget.hidden = !stockText;
+      stockTarget.className = 'noyona-pdp-buysheet__stock ' + stockSource.className;
+      stockTarget.setAttribute('data-noyona-in-stock', stockSource.getAttribute('data-noyona-in-stock') || '');
+      stockTarget.setAttribute('data-noyona-stock-count', stockSource.getAttribute('data-noyona-stock-count') || '');
+    } else if (stockTarget) {
+      stockTarget.textContent = '';
+      stockTarget.hidden = true;
     }
   }
 
@@ -3002,8 +3305,25 @@
     if (!form._noyonaUserSelectedVariation) {
       return false; // Default/preselected only — not user-confirmed yet.
     }
+    return noyonaFormHasValidVariation(form);
+  }
+
+  /**
+   * Does the form currently resolve to a real, purchasable variation? Unlike
+   * noyonaFormHasConfirmedVariation this does NOT require a prior user
+   * interaction, so a WooCommerce default/preselected shade counts.
+   */
+  function noyonaFormHasValidVariation(form) {
+    if (!form || !form.classList.contains('variations_form')) {
+      return true; // Simple product — nothing to resolve.
+    }
     var variationId = form.querySelector('input[name="variation_id"]');
     return !!(variationId && variationId.value && variationId.value !== '0');
+  }
+
+  function noyonaBuySheetIsOpen() {
+    var sheet = getNoyonaBuySheet();
+    return !!(sheet && sheet.classList.contains('is-open'));
   }
 
   /**
@@ -3072,6 +3392,14 @@
         }
         if (noyonaFormHasConfirmedVariation(form)) {
           return; // Confirmed — let the existing buy-now flow run.
+        }
+        // If the sheet is already open the shopper can see exactly which shade
+        // is selected, so a valid (even default/preselected) variation is good
+        // enough to buy. Without this, tapping the in-sheet Buy now on a product
+        // with a preselected shade just re-opens the already-open sheet and the
+        // button appears dead until the shopper pointlessly changes the shade.
+        if (noyonaBuySheetIsOpen() && noyonaFormHasValidVariation(form)) {
+          return;
         }
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -3289,6 +3617,7 @@
     document.querySelectorAll('form.cart').forEach(function (form) {
       initSwatches(form);
       enhanceQuantity(form);
+      bindVariationCache(form);
       bindVariationPriceSync(form);
       bindVariationStockSync(form);
       bindAjaxAddToCart(form);
@@ -3298,6 +3627,10 @@
 
     initNoyonaBuySheet();
     initSimpleProductStockState();
+
+    // WooCommerce store-notice banners can hydrate after init (block theme),
+    // so catch a late-rendered Buy Now error banner and promote it to a toast.
+    window.setTimeout(promotePdpErrorNoticesToToast, 600);
   }
 
   /**

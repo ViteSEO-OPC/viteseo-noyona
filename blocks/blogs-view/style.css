@@ -308,9 +308,9 @@
 
 .blogs-view__toc-link {
     color: #5a5a5a;
-    font-size: 20px;
+    font-size: 16px;
     font-family: var(--wp--preset--font-family--poppins);
-    font-weight: 300;
+    font-weight: 700;
     text-decoration-line: underline;
     text-decoration-color: currentColor;
     text-decoration-thickness: 1.5px;

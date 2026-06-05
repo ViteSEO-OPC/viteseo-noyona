@@ -537,6 +537,21 @@ h2.email-order-detail-heading span a {
 	text-align: center;
 }
 
+.noyona-email-benefits {
+	color: #8a7f82;
+	font-size: 15px;
+	line-height: 170%;
+	list-style: disc;
+	margin: 0 auto 18px;
+	max-width: 320px;
+	padding: 0 0 0 22px;
+	text-align: left;
+}
+
+.noyona-email-benefits li {
+	margin: 0 0 4px;
+}
+
 .noyona-email-button-wrap {
 	margin: 20px auto 22px;
 }

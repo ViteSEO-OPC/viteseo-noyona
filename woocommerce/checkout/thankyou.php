@@ -79,9 +79,22 @@ defined( 'ABSPATH' ) || exit;
 			}
 
 			$shop_url  = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' );
-			$track_url = ( is_user_logged_in() && (int) $order->get_user_id() === (int) get_current_user_id() )
-				? $order->get_view_order_url()
-				: wc_get_page_permalink( 'myaccount' );
+
+			// Track Order should open the custom order-details modal on the
+			// My Account "Orders" panel rather than Woo's default view-order page.
+			// noyona_get_account_order_modal_url() resolves the correct filter
+			// tab + page + modal hash so the modal actually opens. Guests (who
+			// can't see the account orders panel) fall back to the account page.
+			$track_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' );
+			if ( is_user_logged_in()
+				&& (int) $order->get_user_id() === (int) get_current_user_id()
+				&& function_exists( 'noyona_get_account_order_modal_url' )
+			) {
+				$modal_url = noyona_get_account_order_modal_url( $order );
+				if ( '' !== $modal_url ) {
+					$track_url = $modal_url;
+				}
+			}
 			?>
 
 			<?php if ( $is_awaiting_payment ) : ?>
@@ -90,7 +103,7 @@ defined( 'ABSPATH' ) || exit;
 					<div class="noyona-pay-hero__icon" aria-hidden="true">
 						<i class="fa-solid fa-check"></i>
 					</div>
-					<h1 class="noyona-pay-hero__title"><?php esc_html_e( 'Order Received!', 'noyona' ); ?></h1>
+					<h1 class="noyona-pay-hero__title"><?php esc_html_e( 'Order will be processed upon payment', 'noyona' ); ?></h1>
 					<p class="noyona-pay-hero__subtitle">
 						<?php esc_html_e( 'Thank you! Order has been received!', 'noyona' ); ?>
 					</p>
@@ -262,6 +275,14 @@ defined( 'ABSPATH' ) || exit;
 							<span class="noyona-order-totals__value"><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></span>
 						</div>
 					</div>
+
+					<?php $customer_note = trim( (string) $order->get_customer_note() ); ?>
+					<?php if ( '' !== $customer_note ) : ?>
+						<div class="noyona-order-note">
+							<span class="noyona-order-note__label"><?php esc_html_e( 'Order Notes', 'noyona' ); ?></span>
+							<p class="noyona-order-note__text"><?php echo esc_html( $customer_note ); ?></p>
+						</div>
+					<?php endif; ?>
 				</section>
 
 			<?php elseif ( $is_done_order ) : ?>
@@ -340,6 +361,14 @@ defined( 'ABSPATH' ) || exit;
 							<span class="noyona-order-totals__value"><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></span>
 						</div>
 					</div>
+
+					<?php $customer_note = trim( (string) $order->get_customer_note() ); ?>
+					<?php if ( '' !== $customer_note ) : ?>
+						<div class="noyona-order-note">
+							<span class="noyona-order-note__label"><?php esc_html_e( 'Order Notes', 'noyona' ); ?></span>
+							<p class="noyona-order-note__text"><?php echo esc_html( $customer_note ); ?></p>
+						</div>
+					<?php endif; ?>
 				</section>
 
 				<div class="noyona-done-meta-grid">

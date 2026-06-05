@@ -17,6 +17,7 @@ $theme_inc_files = array(
     'theme-setup.php',
     'enqueue.php',
     'helpers.php',
+    'google-auth.php',
     'recaptcha/loader.php',
     'rewrites.php',
     'shortcodes.php',

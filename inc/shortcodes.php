@@ -271,7 +271,6 @@ function woocom_ct_register_form_shortcode() {
     $account_url = function_exists( 'wc_get_page_permalink' )
         ? wc_get_page_permalink( 'myaccount' )
         : home_url( '/my-account/' );
-    $google_login_url = noyona_get_google_login_url( $account_url );
     $logo_url = trailingslashit( get_stylesheet_directory_uri() ) . 'assets/images/noyona-mobile-logo.webp';
 
     if ( is_user_logged_in() ) {
@@ -351,6 +350,7 @@ function woocom_ct_register_form_shortcode() {
             </div>
 
             <h2 class="noyona-register-title"><?php esc_html_e( 'Register', 'noyona-childtheme' ); ?></h2>
+            <?php if ( apply_filters( 'noyona_allow_manual_registration', false ) ) : ?>
             <p class="noyona-register-subtitle"><?php esc_html_e( 'Enter name, email, and password to create your account.', 'noyona-childtheme' ); ?></p>
             <p class="noyona-register-required-note"><?php esc_html_e( '* All fields are required.', 'noyona-childtheme' ); ?></p>
 
@@ -359,7 +359,7 @@ function woocom_ct_register_form_shortcode() {
                     class="noyona-notice is-<?php echo esc_attr( $notice_type ); ?>"
                     role="<?php echo 'error' === $notice_type ? 'alert' : 'status'; ?>"
                     <?php if ( 'success' === $notice_type ) : ?>
-                        data-noyona-notice-autohide="6000"
+                        data-noyona-notice-autohide="10000"
                     <?php endif; ?>
                 >
                     <?php echo esc_html( $message ); ?>
@@ -491,15 +491,17 @@ function woocom_ct_register_form_shortcode() {
             })();
             </script>
 
-            <div class="noyona-register-google-wrap">
-                <a class="noyona-register-google" href="<?php echo esc_url( $google_login_url ); ?>">
-                    <i class="fa-brands fa-google" aria-hidden="true"></i>
-                    <span><?php esc_html_e( 'Sign Up with Google', 'noyona-childtheme' ); ?></span>
-                </a>
-            </div>
-
             <?php if ( function_exists( 'noyona_recaptcha_register_external_widget' ) ) : ?>
                 <?php noyona_recaptcha_register_external_widget( 'noyona-register-recaptcha' ); ?>
+            <?php endif; ?>
+            <?php else : ?>
+            <p class="noyona-register-subtitle"><?php esc_html_e( 'Create your account securely with Google.', 'noyona-childtheme' ); ?></p>
+            <div class="noyona-register-google-wrap">
+                <a class="noyona-register-google" href="<?php echo esc_url( noyona_get_google_login_url( $account_url ) ); ?>">
+                    <i class="fa-brands fa-google" aria-hidden="true"></i>
+                    <span><?php esc_html_e( 'Continue with Google', 'noyona-childtheme' ); ?></span>
+                </a>
+            </div>
             <?php endif; ?>
 
             <p class="noyona-register-login">
@@ -587,6 +589,17 @@ function noyona_is_valid_registration_password( $password ) {
 }
 
 function woocom_ct_handle_register_form() {
+    // Phase 3 (Google-first registration): manual email/password account creation is
+    // disabled. This server-side guard runs BEFORE any account-creation logic, so manual
+    // registration is impossible even if the UI is bypassed via a direct POST. The original
+    // handler body is retained below (unreachable) for easy rollback — remove this block to
+    // restore manual registration.
+    if ( ! apply_filters( 'noyona_allow_manual_registration', false ) ) {
+        $login_url = function_exists( 'noyona_get_login_page_url' ) ? noyona_get_login_page_url() : wp_login_url();
+        wp_safe_redirect( $login_url );
+        exit;
+    }
+
     $redirect = wp_get_referer();
     if ( ! $redirect ) {
         $redirect = home_url( '/register/' );
@@ -1171,7 +1184,7 @@ function noyona_render_account_addresses_card( $args ) {
         </header>
 
         <?php if ( $show_address_notice && ! $is_address_modal_open ) : ?>
-            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                 <?php echo esc_html( $notice_message ); ?>
             </p>
         <?php endif; ?>
@@ -1319,7 +1332,7 @@ function noyona_render_account_addresses_card( $args ) {
                     <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit My Address', 'noyona-childtheme' ); ?></h4>
 
                     <?php if ( 'address' === $active_modal && '' !== $notice_message ) : ?>
-                        <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                        <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                             <?php echo esc_html( $notice_message ); ?>
                         </p>
                     <?php endif; ?>
@@ -1462,6 +1475,8 @@ function noyona_get_account_wishlist_rows( $items ) {
         $add_to_cart_text    = __( 'Add to Cart', 'noyona-childtheme' );
         $add_to_cart_classes = 'noyona-account-btn noyona-account-btn--primary noyona-account-wishlist-add';
         $add_to_cart_data    = array();
+        $add_target_id       = 0;
+        $can_ajax_add        = false;
 
         if ( ! $is_in_stock ) {
             $add_to_cart_text = __( 'Out of Stock', 'noyona-childtheme' );
@@ -1480,17 +1495,16 @@ function noyona_get_account_wishlist_rows( $items ) {
                     }
                 }
                 $add_to_cart_url = add_query_arg( $query_args, function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) );
+                $add_target_id   = (int) $variation->get_id();
+                $can_ajax_add    = true;
             } else {
                 $add_to_cart_url  = $product->get_permalink();
                 $add_to_cart_text = __( 'Select Options', 'noyona-childtheme' );
             }
         } elseif ( $product->is_type( 'simple' ) && $is_purchasable ) {
             $add_to_cart_url = $product->add_to_cart_url();
-            if ( $product->supports( 'ajax_add_to_cart' ) ) {
-                $add_to_cart_classes .= ' add_to_cart_button ajax_add_to_cart';
-                $add_to_cart_data['product_id'] = (int) $product->get_id();
-                $add_to_cart_data['quantity']   = 1;
-            }
+            $add_target_id   = (int) $product->get_id();
+            $can_ajax_add    = true;
         } else {
             $add_to_cart_url  = $product->get_permalink();
             $add_to_cart_text = $product->is_type( 'variable' ) ? __( 'Select Options', 'noyona-childtheme' ) : $product->add_to_cart_text();
@@ -1511,6 +1525,8 @@ function noyona_get_account_wishlist_rows( $items ) {
             'add_to_cart_text'    => (string) $add_to_cart_text,
             'add_to_cart_classes' => (string) $add_to_cart_classes,
             'add_to_cart_data'    => $add_to_cart_data,
+            'add_target_id'       => (int) $add_target_id,
+            'can_ajax_add'        => (bool) $can_ajax_add,
             'added_at'            => isset( $item['added_at'] ) ? absint( $item['added_at'] ) : 0,
         );
     }
@@ -1613,7 +1629,7 @@ function noyona_render_account_wishlist_card( $args ) {
         </header>
 
         <?php if ( '' !== $notice_message ) : ?>
-            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                 <?php echo esc_html( $notice_message ); ?>
             </p>
         <?php endif; ?>
@@ -1688,6 +1704,12 @@ function noyona_render_account_wishlist_card( $args ) {
                                                 <?php foreach ( (array) $row['add_to_cart_data'] as $data_key => $data_value ) : ?>
                                                     data-<?php echo esc_attr( (string) $data_key ); ?>="<?php echo esc_attr( (string) $data_value ); ?>"
                                                 <?php endforeach; ?>
+                                                <?php if ( ! empty( $row['can_ajax_add'] ) && $row['add_target_id'] > 0 ) : ?>
+                                                    data-noyona-wishlist-add="1"
+                                                    data-add-id="<?php echo esc_attr( (string) $row['add_target_id'] ); ?>"
+                                                    data-product-id="<?php echo esc_attr( (string) $row['product_id'] ); ?>"
+                                                    data-variation-id="<?php echo esc_attr( (string) $row['variation_id'] ); ?>"
+                                                <?php endif; ?>
                                             >
                                                 <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
                                                 <?php echo esc_html( (string) $row['add_to_cart_text'] ); ?>
@@ -1843,6 +1865,8 @@ function noyona_render_account_page_shortcode() {
         'password_too_short'    => array( 'type' => 'error', 'message' => __( 'New password must be at least 6 characters.', 'noyona-childtheme' ) ),
         'password_mismatch'     => array( 'type' => 'error', 'message' => __( 'New password and confirmation do not match.', 'noyona-childtheme' ) ),
         'password_update_failed'=> array( 'type' => 'error', 'message' => __( 'Could not update password right now.', 'noyona-childtheme' ) ),
+        'password_set'          => array( 'type' => 'success', 'message' => __( 'Password set successfully. You can now log in with your email and password.', 'noyona-childtheme' ) ),
+        'password_set_failed'   => array( 'type' => 'error', 'message' => __( 'Could not set your password right now.', 'noyona-childtheme' ) ),
         'address_saved'         => array( 'type' => 'success', 'message' => __( 'Address saved successfully.', 'noyona-childtheme' ) ),
         'address_deleted'       => array( 'type' => 'success', 'message' => __( 'Address deleted successfully.', 'noyona-childtheme' ) ),
         'address_not_found'     => array( 'type' => 'error', 'message' => __( 'Address could not be found.', 'noyona-childtheme' ) ),
@@ -2418,6 +2442,15 @@ function noyona_render_account_page_shortcode() {
                                 if ( method_exists( $account_order, 'get_checkout_payment_url' ) ) {
                                     $pay_now_url = (string) $account_order->get_checkout_payment_url();
                                 }
+                                // QR Ph orders display their QR (and live countdown) on the
+                                // order-received page, not the gateway picker. Resume that view
+                                // instead of re-prompting the customer to choose a method.
+                                $is_qr_payment = function_exists( 'noyona_order_is_qr_payment' )
+                                    ? noyona_order_is_qr_payment( $account_order )
+                                    : ( false !== strpos( strtolower( (string) $account_order->get_payment_method() . ' ' . (string) $account_order->get_payment_method_title() ), 'qr' ) );
+                                if ( $is_qr_payment && method_exists( $account_order, 'get_checkout_order_received_url' ) ) {
+                                    $pay_now_url = (string) $account_order->get_checkout_order_received_url();
+                                }
                                 $show_pay_now = ( $is_to_pay_status && ! $account_order->is_paid() && '' !== trim( $pay_now_url ) );
 
                                 $item_thumb = '';
@@ -2531,6 +2564,14 @@ function noyona_render_account_page_shortcode() {
                                             </div>
                                             <strong class="noyona-account-order-modal__item-price"><?php echo wp_kses_post( $item_total ); ?></strong>
                                         </section>
+
+                                        <?php $order_customer_note = trim( (string) $account_order->get_customer_note() ); ?>
+                                        <?php if ( '' !== $order_customer_note ) : ?>
+                                            <section class="noyona-account-order-modal__note">
+                                                <h4><?php esc_html_e( 'Order Notes', 'noyona-childtheme' ); ?></h4>
+                                                <p class="noyona-account-order-modal__note-text"><?php echo esc_html( $order_customer_note ); ?></p>
+                                            </section>
+                                        <?php endif; ?>
 
                                         <section class="noyona-account-order-modal__totals">
                                             <div class="noyona-account-order-modal__total-row">
@@ -2657,7 +2698,7 @@ function noyona_render_account_page_shortcode() {
             </header>
 
             <?php if ( '' !== $notice_message && ! $is_address_modal_open ) : ?>
-                <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                     <?php echo esc_html( $notice_message ); ?>
                 </p>
             <?php endif; ?>
@@ -2805,7 +2846,7 @@ function noyona_render_account_page_shortcode() {
                         <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit My Address', 'noyona-childtheme' ); ?></h4>
 
                         <?php if ( 'address' === $active_modal && '' !== $notice_message ) : ?>
-                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                                 <?php echo esc_html( $notice_message ); ?>
                             </p>
                         <?php endif; ?>
@@ -2856,7 +2897,7 @@ function noyona_render_account_page_shortcode() {
         <?php elseif ( $show_payments_tab && 'payments' === $active_tab ) : ?>
         <div class="noyona-account-payments-wrap">
             <?php if ( '' !== $notice_message && ! $is_bank_modal_open && ! $is_card_modal_open ) : ?>
-                <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                     <?php echo esc_html( $notice_message ); ?>
                 </p>
             <?php endif; ?>
@@ -3074,7 +3115,7 @@ function noyona_render_account_page_shortcode() {
                         <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit Bank Account', 'noyona-childtheme' ); ?></h4>
 
                         <?php if ( 'bank' === $active_modal && '' !== $notice_message ) : ?>
-                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                                 <?php echo esc_html( $notice_message ); ?>
                             </p>
                         <?php endif; ?>
@@ -3117,7 +3158,7 @@ function noyona_render_account_page_shortcode() {
                         <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit Credit / Debit Card', 'noyona-childtheme' ); ?></h4>
 
                         <?php if ( 'card' === $active_modal && '' !== $notice_message ) : ?>
-                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                            <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                                 <?php echo esc_html( $notice_message ); ?>
                             </p>
                         <?php endif; ?>
@@ -3161,6 +3202,13 @@ function noyona_render_account_page_shortcode() {
                 <p><?php esc_html_e( 'Manage and protect your account', 'noyona-childtheme' ); ?></p>
             </header>
 
+            <?php // Page-level success notice shown after a profile save closes the Edit modal. Scoped to profile_updated only. ?>
+            <?php if ( '' === $active_modal && 'profile_updated' === $notice_code && '' !== $notice_message ) : ?>
+                <p class="noyona-notice is-success" role="status" data-noyona-notice-autohide="10000">
+                    <?php echo esc_html( $notice_message ); ?>
+                </p>
+            <?php endif; ?>
+
             <div class="noyona-account-profile-card__body">
                 <div class="noyona-account-profile-fields">
                     <div class="noyona-account-field">
@@ -3175,13 +3223,13 @@ function noyona_render_account_page_shortcode() {
                         <label><?php esc_html_e( 'Phone #:', 'noyona-childtheme' ); ?></label>
                         <input type="text" value="<?php echo esc_attr( $phone ); ?>" readonly />
                     </div>
-                    <div class="noyona-account-field">
-                        <label><?php esc_html_e( 'Password:', 'noyona-childtheme' ); ?></label>
-                        <input type="password" value="************" readonly />
-                    </div>
 
                     <div class="noyona-account-profile-actions">
-                        <a class="noyona-account-btn noyona-account-btn--ghost" href="#noyona-account-password-modal"><?php esc_html_e( 'Change Password', 'noyona-childtheme' ); ?></a>
+                        <?php if ( function_exists( 'noyona_user_requires_password_setup' ) && noyona_user_requires_password_setup( get_current_user_id() ) ) : ?>
+                            <a class="noyona-account-btn noyona-account-btn--ghost" href="#noyona-account-set-password-modal"><?php esc_html_e( 'Set Password', 'noyona-childtheme' ); ?></a>
+                        <?php else : ?>
+                            <a class="noyona-account-btn noyona-account-btn--ghost" href="#noyona-account-password-modal"><?php esc_html_e( 'Change Password', 'noyona-childtheme' ); ?></a>
+                        <?php endif; ?>
                         <a class="noyona-account-btn noyona-account-btn--primary" href="#noyona-account-edit-modal"><?php esc_html_e( 'Edit Profile Details', 'noyona-childtheme' ); ?></a>
                     </div>
                 </div>
@@ -3191,20 +3239,27 @@ function noyona_render_account_page_shortcode() {
 
         <?php echo noyona_render_account_addresses_card( $address_card_args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
+        <?php
+        // Close target for the Edit Profile modal. Uses remove_query_arg (matching the
+        // Address/Bank/Card modals) instead of href="#" so the modal also closes when it
+        // was opened via ?noyona_modal=edit (the .is-open path, e.g. after a profile save),
+        // not only via the CSS :target path.
+        $noyona_edit_modal_close_url = remove_query_arg( array( 'noyona_modal', 'noyona_account_notice' ), $account_url );
+        ?>
         <div
             id="noyona-account-edit-modal"
             class="noyona-account-modal<?php echo ( 'edit' === $active_modal ) ? ' is-open' : ''; ?>"
             aria-hidden="<?php echo ( 'edit' === $active_modal ) ? 'false' : 'true'; ?>"
         >
-            <a href="#" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close modal', 'noyona-childtheme' ); ?>"></a>
+            <a href="<?php echo esc_url( $noyona_edit_modal_close_url ); ?>" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close modal', 'noyona-childtheme' ); ?>"></a>
             <div class="noyona-account-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Edit profile details', 'noyona-childtheme' ); ?>">
-                <a href="#" class="noyona-account-modal-back">
+                <a href="<?php echo esc_url( $noyona_edit_modal_close_url ); ?>" class="noyona-account-modal-back">
                     <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                 </a>
                 <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Edit Profile Details', 'noyona-childtheme' ); ?></h4>
 
                 <?php if ( 'edit' === $active_modal && '' !== $notice_message ) : ?>
-                    <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                    <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                         <?php echo esc_html( $notice_message ); ?>
                     </p>
                 <?php endif; ?>
@@ -3224,7 +3279,7 @@ function noyona_render_account_page_shortcode() {
                     <input id="noyona-account-modal-phone" type="text" name="phone" value="<?php echo esc_attr( $phone ); ?>" />
 
                     <div class="noyona-account-modal-actions">
-                        <a href="#" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Cancel', 'noyona-childtheme' ); ?></a>
+                        <a href="<?php echo esc_url( $noyona_edit_modal_close_url ); ?>" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Cancel', 'noyona-childtheme' ); ?></a>
                         <button type="submit" class="noyona-account-btn noyona-account-btn--primary"><?php esc_html_e( 'Save Changes', 'noyona-childtheme' ); ?></button>
                     </div>
                 </form>
@@ -3244,7 +3299,7 @@ function noyona_render_account_page_shortcode() {
                 <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Change Password', 'noyona-childtheme' ); ?></h4>
 
                 <?php if ( 'password' === $active_modal && '' !== $notice_message ) : ?>
-                    <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="6000"' : ''; ?>>
+                    <p class="noyona-notice is-<?php echo esc_attr( 'success' === $notice_type ? 'success' : 'error' ); ?>" role="<?php echo 'success' === $notice_type ? 'status' : 'alert'; ?>"<?php echo 'success' === $notice_type ? ' data-noyona-notice-autohide="10000"' : ''; ?>>
                         <?php echo esc_html( $notice_message ); ?>
                     </p>
                 <?php endif; ?>
@@ -3286,6 +3341,122 @@ function noyona_render_account_page_shortcode() {
                 </form>
             </div>
         </div>
+
+        <?php if ( ( function_exists( 'noyona_user_requires_password_setup' ) && noyona_user_requires_password_setup( get_current_user_id() ) ) || 'set_password' === $active_modal ) : ?>
+        <div
+            id="noyona-account-set-password-modal"
+            class="noyona-account-modal<?php echo ( 'set_password' === $active_modal ) ? ' is-open' : ''; ?>"
+            aria-hidden="<?php echo ( 'set_password' === $active_modal ) ? 'false' : 'true'; ?>"
+        >
+            <a href="#" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close modal', 'noyona-childtheme' ); ?>"></a>
+            <div class="noyona-account-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Set password', 'noyona-childtheme' ); ?>">
+                <a href="#" class="noyona-account-modal-back">
+                    <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                </a>
+                <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Set Password', 'noyona-childtheme' ); ?></h4>
+
+                <?php if ( 'set_password' === $active_modal && '' !== $notice_message ) : ?>
+                    <p class="noyona-account-modal-notice<?php echo ( 'success' === $notice_type ) ? ' is-success' : ' is-error'; ?>">
+                        <?php echo esc_html( $notice_message ); ?>
+                    </p>
+                <?php endif; ?>
+
+                <form class="noyona-account-modal-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                    <?php wp_nonce_field( 'noyona_set_account_password', 'noyona_account_set_password_nonce', false ); ?>
+                    <input type="hidden" name="action" value="noyona_set_account_password" />
+                    <input type="hidden" name="redirect_to" value="<?php echo esc_url( $account_url ); ?>" />
+
+                    <label for="noyona-account-modal-set-new-password"><?php esc_html_e( 'New Password', 'noyona-childtheme' ); ?> <span aria-hidden="true">*</span></label>
+                    <div class="noyona-account-modal-password-wrap">
+                        <input id="noyona-account-modal-set-new-password" type="password" name="new_password" placeholder="<?php esc_attr_e( 'Enter new password', 'noyona-childtheme' ); ?>" minlength="6" required />
+                        <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-set-new-password" onclick="return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
+                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <small><?php esc_html_e( 'Must be at least 6 characters long', 'noyona-childtheme' ); ?></small>
+
+                    <label for="noyona-account-modal-set-confirm-password"><?php esc_html_e( 'Confirm New Password', 'noyona-childtheme' ); ?> <span aria-hidden="true">*</span></label>
+                    <div class="noyona-account-modal-password-wrap">
+                        <input id="noyona-account-modal-set-confirm-password" type="password" name="confirm_password" placeholder="<?php esc_attr_e( 'Confirm new password', 'noyona-childtheme' ); ?>" minlength="6" required />
+                        <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-set-confirm-password" onclick="return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
+                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <div class="noyona-account-modal-actions">
+                        <a href="#" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Cancel', 'noyona-childtheme' ); ?></a>
+                        <button type="submit" class="noyona-account-btn noyona-account-btn--primary"><?php esc_html_e( 'Set Password', 'noyona-childtheme' ); ?></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php
+        // Phase 4: one-time welcome modal for first-time Google-created users. Auto-opens
+        // (server-driven) while the flag is pending; the flag is cleared ONLY by an explicit
+        // dismissal (Continue Later / Complete Profile / Back / backdrop) via the
+        // noyona_dismiss_welcome_modal handler — never on render. Gated on the profile tab
+        // with no other modal requested, so it never stacks on an explicit modal.
+        $noyona_show_welcome = (
+            'profile' === $active_tab
+            && '' === $active_modal
+            && apply_filters( 'noyona_enable_welcome_modal', true )
+            && function_exists( 'noyona_user_has_pending_welcome' )
+            && noyona_user_has_pending_welcome( get_current_user_id() )
+        );
+        if ( $noyona_show_welcome ) :
+            $noyona_welcome_continue_url = wp_nonce_url(
+                add_query_arg(
+                    array(
+                        'action'      => 'noyona_dismiss_welcome_modal',
+                        'redirect_to' => $account_url,
+                    ),
+                    admin_url( 'admin-post.php' )
+                ),
+                'noyona_dismiss_welcome_modal',
+                'noyona_welcome_nonce'
+            );
+            // "Set a Password" dismisses the welcome modal (clears the flag via the same
+            // handler) and lands on My Account with the existing Set Password modal opened
+            // via its CSS :target fragment — the same mechanism the profile "Set Password"
+            // button uses. This reuses the existing Set Password flow as-is (no new workflow,
+            // no change to password validation, and the modal's existing close controls work
+            // because it opens via :target rather than the is-open query-arg path).
+            $noyona_welcome_complete_url = wp_nonce_url(
+                add_query_arg(
+                    array(
+                        'action'      => 'noyona_dismiss_welcome_modal',
+                        'redirect_to' => $account_url . '#noyona-account-set-password-modal',
+                    ),
+                    admin_url( 'admin-post.php' )
+                ),
+                'noyona_dismiss_welcome_modal',
+                'noyona_welcome_nonce'
+            );
+        ?>
+        <div
+            id="noyona-account-welcome-modal"
+            class="noyona-account-modal is-open"
+            aria-hidden="false"
+        >
+            <a href="<?php echo esc_url( $noyona_welcome_continue_url ); ?>" class="noyona-account-modal-backdrop" aria-label="<?php esc_attr_e( 'Close modal', 'noyona-childtheme' ); ?>"></a>
+            <div class="noyona-account-modal-dialog" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Account Created Successfully', 'noyona-childtheme' ); ?>">
+                <a href="<?php echo esc_url( $noyona_welcome_continue_url ); ?>" class="noyona-account-modal-back">
+                    <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                </a>
+                <h4 class="noyona-account-modal-title"><?php esc_html_e( 'Account Created Successfully', 'noyona-childtheme' ); ?></h4>
+
+                <p><?php esc_html_e( 'Your account was created successfully with Google.', 'noyona-childtheme' ); ?></p>
+                <p><?php esc_html_e( "You can keep signing in with Google, or set a password now if you'd prefer to log in with your email too.", 'noyona-childtheme' ); ?></p>
+
+                <div class="noyona-account-modal-actions">
+                    <a href="<?php echo esc_url( $noyona_welcome_continue_url ); ?>" class="noyona-account-btn noyona-account-btn--ghost"><?php esc_html_e( 'Maybe Later', 'noyona-childtheme' ); ?></a>
+                    <a href="<?php echo esc_url( $noyona_welcome_complete_url ); ?>" class="noyona-account-btn noyona-account-btn--primary"><?php esc_html_e( 'Set a Password', 'noyona-childtheme' ); ?></a>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
         <?php endif; ?>
     </div>
     <?php if ( 'profile' === $active_tab ) : ?>
@@ -3902,7 +4073,10 @@ function noyona_update_account_profile_handler() {
 
     update_user_meta( $user_id, 'billing_phone', $phone );
 
-    wp_safe_redirect( add_query_arg( array( 'noyona_modal' => 'edit', 'noyona_account_notice' => 'profile_updated' ), $redirect_to ) );
+    // Success: close the Edit Profile modal (omit noyona_modal=edit) and surface the
+    // confirmation via the page-level My Profile card notice, matching the Address/Bank/Card
+    // pattern. Error paths above intentionally keep noyona_modal=edit so the modal reopens.
+    wp_safe_redirect( add_query_arg( 'noyona_account_notice', 'profile_updated', $redirect_to ) );
     exit;
 }
 
