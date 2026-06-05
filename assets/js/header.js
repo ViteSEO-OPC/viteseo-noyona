@@ -1076,6 +1076,8 @@
       '.ajax_add_to_cart',
       '.single_add_to_cart_button',
       '.ps-btn-cart',
+      '.ph-btn-cart',
+      '.noyona-pdp-related__cart-btn--ajax',
       '[name="add-to-cart"]',
     ].join(',');
     const PRODUCT_SCOPE_SELECTOR = [
@@ -1083,12 +1085,19 @@
       '.product',
       '.type-product',
       '.noyona-product-slide',
-      '.noyona-pdp-related-card',
+      '.product-slide__card',
+      '.ps-card',
+      '.product-highlight__card',
+      '.ph-card',
+      '.noyona-pdp-related__card',
       '.summary',
       'form.cart',
     ].join(',');
     const PRODUCT_IMAGE_SELECTOR = [
+      '.ps-card__image',
+      '.ph-card__image',
       '.wc-block-components-product-image img',
+      '.noyona-pdp-related__image-wrap img',
       '.woocommerce-product-gallery__image img',
       '.wp-post-image',
       '.product img',
@@ -1141,7 +1150,8 @@
 
     const getProductImage = (source) => {
       if (!source) return null;
-      const scope = source.closest(PRODUCT_SCOPE_SELECTOR) || document;
+      const scope = source.closest(PRODUCT_SCOPE_SELECTOR);
+      if (!scope) return null;
       const image = scope.querySelector(PRODUCT_IMAGE_SELECTOR);
       return isVisible(image) ? image : null;
     };
