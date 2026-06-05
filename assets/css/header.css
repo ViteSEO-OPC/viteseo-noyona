@@ -2057,12 +2057,25 @@ body:not(.logged-in) .only-logged-in {
     padding-left: 0.75rem !important;
     padding-right: 0.75rem !important;
   }
+  /* NOTE: the Noyona wordmark stays visible down to 376px (scaled in the
+     376–767px block below). The compact mobile mark is swapped in ONLY at
+     <=375px, inside the compact two-row block. */
+}
 
-  .site-logo-img--desktop { display: none !important; }
-  .site-logo-img--mobile { 
-    display: inline-block !important; 
-    width: 50px;
-    height: 50px;
+/* One-row mobile/tablet (376–767px): keep the Noyona WORDMARK (noyona-logo.webp),
+   left-aligned, but scale it so it fits on one line beside the controls without
+   overflow. Tightened icon gaps keep the five controls on the same row. */
+@media (min-width: 376px) and (max-width: 767px) {
+  .site-logo-img--desktop {
+    display: inline-block !important;
+    width: clamp(90px, 24vw, 250px);
+    height: auto;
+  }
+  .site-logo-img--mobile {
+    display: none !important;
+  }
+  .header-icons {
+    gap: 0.25rem;
   }
 }
 
@@ -2210,6 +2223,139 @@ body:has(.noyona-lovial-page) .header-brand-strip .noyona-brand-strip-fallback__
   .header-mini-cart .wc-block-mini-cart__button {
     width: 48px;
     height: 48px;
+  }
+}
+
+/* =========================================================
+   COMPACT MOBILE HEADER (<=375px) — two-row layout
+   Row 1: compact mobile logo (noyona-mobile-logo.webp), centered.
+   Row 2: controls on ONE horizontal row, in DOM/order:
+          search, wishlist, cart, location, hamburger.
+   This is the ONLY range that uses the compact mobile mark / stacked
+   layout. From 376px up the header is a single row with the Noyona
+   wordmark left-aligned (see the 376–767px and tablet blocks).
+========================================================= */
+@media (max-width: 375px) {
+  /* Compact mark swaps in here only. */
+  .site-logo-img--desktop {
+    display: none !important;
+  }
+  .site-logo-img--mobile {
+    display: inline-block !important;
+    width: 50px;
+    height: 50px;
+  }
+
+  /* Allow two rows; center both the logo row and the controls row. */
+  .site-header {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center;
+    column-gap: 0.4rem;
+    row-gap: 0.5rem;
+  }
+
+  /* Row 1 — logo centered, full width so the controls drop below it. */
+  .site-logo {
+    order: 1;
+    flex: 0 0 100%;
+    display: flex !important;
+    justify-content: center;
+    margin: 0;
+  }
+
+  /* Row 2 — search, wishlist, cart, location (icons keep DOM order). */
+  .header-icons {
+    order: 2;
+    margin-left: 0 !important;
+    flex: 0 0 auto;
+    column-gap: 0.4rem;
+    box-sizing: border-box;
+  }
+
+  /* Row 2 — hamburger is last and stays on the same line (no wrap). */
+  .main-nav {
+    order: 3;
+    flex: 0 0 auto;
+  }
+
+  /* Match the 48px icon targets so the row reads as one even strip. */
+  .mobile-menu-toggle {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+  }
+
+  /* Drawer always opens from the right, inside the viewport — never
+     overflowing the left edge or creating horizontal scroll. */
+  .nav-list {
+    right: 0;
+    left: auto;
+    width: min(360px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    box-sizing: border-box;
+  }
+}
+
+/* =========================================================
+   TABLET HEADER (641px–767px) — single row, logo centered
+   One horizontal row: logo optically centered, with the controls
+   (search, wishlist, cart, location, hamburger) clustered at the
+   right. The search shows as an icon only and opens the existing
+   fixed search overlay (wired for this band in header.js); the
+   overlay CSS below mirrors what the search block already uses at
+   <=640px. 481px–640px keep the existing one-row tablet header
+   (logo left) with the block's own <=640px search-icon behavior.
+   Desktop (>=768px) is unchanged.
+========================================================= */
+@media (min-width: 641px) and (max-width: 767px) {
+  /* 641–767px shares the one-row, wordmark-left layout from the 376–767px
+     block above. The ONLY special case here is SEARCH: the search block's own
+     icon→overlay toggle is gated to matchMedia('(max-width: 640px)'), so we
+     re-create its overlay for this band. Search = icon only; the field opens
+     as the existing fixed overlay (toggle wired in header.js:
+     initTabletSearchOverlay). Mirrors blocks/search-expand/style.css <=640px
+     so we don't edit the search block. */
+  .wp-block-noyona-search-expand .search-inline-form {
+    position: static;
+  }
+  .wp-block-noyona-search-expand .search-inline-input {
+    display: block;
+    position: fixed;
+    top: calc(var(--noyona-header-total-offset, 72px) + 8px);
+    left: 12px;
+    right: 12px;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    padding: 0.65rem 0.95rem;
+    border: 1px solid #f0d5db;
+    border-radius: 999px;
+    background: #fff;
+    color: #1f1f1f;
+    font-size: var(--wp--preset--font-size--nav-button);
+    line-height: normal;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.10);
+    z-index: 2100;
+    box-sizing: border-box;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  .wp-block-noyona-search-expand .search-inline-form.is-mobile-expanded .search-inline-input {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .wp-block-noyona-search-expand .search-inline-suggestions {
+    position: fixed;
+    top: calc(var(--noyona-header-total-offset, 72px) + 58px);
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: min(420px, calc(100dvh - var(--noyona-header-total-offset, 72px) - 76px));
+    z-index: 2100;
   }
 }
 
