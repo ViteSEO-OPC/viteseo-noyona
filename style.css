@@ -846,8 +846,9 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
   min-height: 54px;
   border: 0;
   border-radius: var(--noyona-radius-cta);
-  background: var(--noyona-color-pink-muted-rose);
-  color: #fff;
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
+  border: 1px solid var(--noyona-cta-primary-border);
   font-size: var(--wp--preset--font-size--nav-button);
   font-weight: 700;
   padding: 0.6rem 1rem;
@@ -855,7 +856,10 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
 }
 
 body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit:hover {
-  filter: brightness(0.97);
+  background: var(--ps-cta-hover-bg) !important;
+  color: var(--ps-cta-hover-color) !important;
+  border: 1px solid var(--ps-swatch-selected-color);
+  box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
 
 /* Some plugins/extensions inject extra mini buttons near remember row. */
