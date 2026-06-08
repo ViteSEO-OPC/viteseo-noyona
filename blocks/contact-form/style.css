@@ -23,7 +23,7 @@
 }
 
 .contact-form__subtitle {
-    margin: 0 auto;
+    margin: 0px auto 70px;
     max-width: 680px;
     font-size: var(--wp--preset--font-size--body);
     font-weight: 400;

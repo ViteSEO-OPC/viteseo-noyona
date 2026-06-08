@@ -60,11 +60,10 @@
     font-family: var(--wp--preset--font-family--poppins);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
     color: var(--brand-font-color, #fff);
     font-size: var(--wp--preset--font-size--body);
     white-space: nowrap;
-    letter-spacing: var(--noyona-letter-spacing-bugfix);
 }
 
 /* Logo wrapper only exists when logo is passed from PHP */

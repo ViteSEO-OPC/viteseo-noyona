@@ -49,7 +49,7 @@
   font-size: var(--wp--preset--font-size--h-1);
   text-align: center;
   font-family: var(--wp--preset--font-family--poppins);
-  font-weight: 400;
+  font-weight: 700;
   color: #000000;
 }
 
@@ -434,6 +434,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;          /* make children full width */
+  gap: 12px;                     /* vertical space between input and Subscribe CTA */
   width: 100%;
   max-width: 365px;              /* keeps your nice card size */
   margin: 0.75rem auto 0.6rem;

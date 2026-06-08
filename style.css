@@ -242,7 +242,7 @@ body {
 h1 {
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-1);
-  font-weight: 400;
+  font-weight: 700;
   line-height: normal;
 }
 
@@ -518,9 +518,9 @@ body.woocommerce-account .entry-title {
   /* margin-top: 0.85rem; */
   min-height: 52px;
   border-radius: var(--noyona-radius-cta);
-  border: 1.5px solid #d9e2ef;
-  background: #fff;
-  color: #111827;
+  border: 1px solid var(--noyona-cta-secondary-border);
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
   font-size: var(--wp--preset--font-size--nav-button);
   font-weight: 700;
   text-decoration: none;
@@ -856,9 +856,9 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
 }
 
 body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-login .woocommerce-form-login__submit:hover {
-  background: var(--ps-cta-hover-bg) !important;
-  color: var(--ps-cta-hover-color) !important;
-  border: 1px solid var(--ps-swatch-selected-color);
+  background: var(--noyona-cta-primary-hover-bg) !important;
+  color: var(--noyona-cta-primary-hover-text) !important;
+  border: 1px solid var(--noyona-cta-primary-hover-border);
   box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
 
@@ -894,9 +894,9 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
 .noyona-login-google-btn {
   min-height: 52px;
   border-radius: var(--noyona-radius-cta);
-  border: 1.5px solid #d9e2ef;
-  background: #fff;
-  color: #111827;
+  border: 1px solid var(--noyona-cta-secondary-border);
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
   font-size: var(--wp--preset--font-size--nav-button);
   font-weight: 700;
   text-decoration: none;
@@ -1095,16 +1095,16 @@ body.woocommerce-account.woocommerce-lost-password form.noyona-lost-password-for
 }
 
 .noyona-lost-password-cancel {
-  border: 1.5px solid var(--noyona-color-pink-muted-rose);
-  color: var(--noyona-color-pink-muted-rose);
-  background: #fff;
+  border: 1px solid var(--noyona-cta-secondary-border);
+  color: var(--noyona-cta-secondary-text);
+  background: var(--noyona-cta-secondary-bg);
 }
 
 body.woocommerce-account.woocommerce-lost-password .noyona-lost-password-submit.woocommerce-Button.button {
   width: 100%;
-  border: 1.5px solid var(--noyona-color-pink-soft);
-  background: var(--noyona-color-pink-soft);
-  color: #333333;
+  border: 1px solid var(--noyona-cta-primary-border);
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
   margin: 0;
   padding: 0.6rem 1rem;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
@@ -1112,9 +1112,9 @@ body.woocommerce-account.woocommerce-lost-password .noyona-lost-password-submit.
 
 body.woocommerce-account.woocommerce-lost-password .noyona-lost-password-submit.woocommerce-Button.button:hover,
 body.woocommerce-account.woocommerce-lost-password .noyona-lost-password-submit.woocommerce-Button.button:focus-visible {
-  background: var(--noyona-color-pink-accent);
-  border-color: var(--noyona-color-pink-accent);
-  color: #ffffff;
+  background: var(--noyona-cta-primary-hover-bg);
+  border-color: var(--noyona-cta-primary-hover-border);
+  color: var(--noyona-cta-primary-hover-text);
 }
 
 .noyona-lost-password-try {
@@ -1239,7 +1239,7 @@ body.woocommerce-account.woocommerce-lost-password .noyona-lost-password-submit.
   font-size: var(--wp--preset--font-size--h-1);
   line-height: 1;
   letter-spacing: -0.04em;
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .noyona-shop-categories .wc-block-product-categories-list {
@@ -5939,10 +5939,65 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	font-size: var(--wp--preset--font-size--label);
 	font-weight: 400 !important;
 	color: #666 !important;
+	/* Single horizontal row: checkbox left, label right, no wrap. */
+	white-space: nowrap;
+	cursor: pointer;
 }
 
 .noyona-account-address-form__default input {
 	margin: 0 !important;
+}
+
+.noyona-account-address-form__default > span {
+	white-space: nowrap;
+}
+
+/* Custom Noyona-branded checkbox. Overrides the generic
+   `.noyona-account-modal-form input` rule (which otherwise stretches the
+   checkbox to width:100%/height:44px and leaves a native blue check).
+   Higher specificity (class + [type] attribute) so no !important needed for
+   the box model, but background/border use !important to beat that rule. */
+.noyona-account-address-form__default input[type="checkbox"] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width: 20px !important;
+	height: 20px !important;
+	min-width: 20px;
+	flex: 0 0 20px;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 2px solid var(--noyona-cta-primary-border, #D91B61) !important;
+	border-radius: 6px;
+	background: #ffffff !important;
+	box-sizing: border-box;
+	display: inline-block;
+	position: relative;
+	vertical-align: middle;
+	cursor: pointer;
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.noyona-account-address-form__default input[type="checkbox"]:checked {
+	background: var(--noyona-cta-primary-bg, #D91B61) !important;
+	border-color: var(--noyona-cta-primary-bg, #D91B61) !important;
+}
+
+.noyona-account-address-form__default input[type="checkbox"]:checked::after {
+	content: "";
+	position: absolute;
+	left: 6px;
+	top: 2px;
+	width: 5px;
+	height: 10px;
+	border: solid #ffffff;
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+
+.noyona-account-address-form__default input[type="checkbox"]:focus-visible {
+	outline: 2px solid rgba(217, 27, 97, 0.4);
+	outline-offset: 2px;
 }
 
 .noyona-account-address-form__actions {
@@ -7009,14 +7064,26 @@ body.woocommerce-account:not(.logged-in) .woocommerce form.woocommerce-form-logi
 	transform: translateY(-1px);
 }
 
+/* Login + Register Google buttons → approved Secondary hover.
+   Overrides the gray motion/shadow group rule above for colors only. */
+.noyona-login-google-btn:hover,
+.noyona-login-google-btn:focus-visible,
+.noyona-register-google:hover,
+.noyona-register-google:focus-visible {
+	background: var(--noyona-cta-secondary-hover-bg);
+	color: var(--noyona-cta-secondary-hover-text);
+	border-color: var(--noyona-cta-secondary-hover-border);
+}
+
 .noyona-lost-password-cancel {
 	transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
 .noyona-lost-password-cancel:hover,
 .noyona-lost-password-cancel:focus-visible {
-	background: #fdf2f4;
-	color: #c47c87;
+	background: var(--noyona-cta-secondary-hover-bg);
+	color: var(--noyona-cta-secondary-hover-text);
+	border-color: var(--noyona-cta-secondary-hover-border);
 	box-shadow: 0 4px 14px rgba(216, 27, 96, 0.18);
 }
 
