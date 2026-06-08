@@ -3021,23 +3021,24 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   justify-content: center;
   height: 44px;
   padding: 0 22px;
-  border: 0;
+  border: 1px solid var(--noyona-cta-primary-border);
   border-radius: var(--noyona-radius-cta);
-  background: var(--noyona-color-pink-soft);
-  color: var(--wp--preset--color--ink, #333);
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--nav-button);
   font-weight: 700;
   letter-spacing: 0.01em;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
 .noyona-product-search-page .noyona-search-again-form__submit:hover,
 .noyona-product-search-page .noyona-search-again-form__submit:focus-visible {
-  background: var(--noyona-color-pink-accent);
-  color: var(--wp--preset--color--white, #fff);
+  background: var(--noyona-cta-primary-hover-bg);
+  color: var(--noyona-cta-primary-hover-text);
+  border-color: var(--noyona-cta-primary-hover-border);
   transform: translateY(-1px);
 }
 
