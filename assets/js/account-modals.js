@@ -21,7 +21,7 @@
     var icon = button.querySelector("i");
     if (icon) {
       icon.classList.remove("fa-eye", "fa-eye-slash");
-      icon.classList.add(currentlyPassword ? "fa-eye-slash" : "fa-eye");
+      icon.classList.add(currentlyPassword ? "fa-eye" : "fa-eye-slash");
     }
     return false;
   }

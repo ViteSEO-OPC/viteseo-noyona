@@ -159,7 +159,7 @@
 
 /* Links inside answers (e.g. mailto:) */
 .faq-accordion__answer a {
-    color: var(--noyona-color-pink-muted-rose);
+    color: var(--noyona-cta-tertiary-bg);
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -170,8 +170,8 @@
 
 @media (hover: hover) and (pointer: fine) {
     .faq-accordion__answer a:hover {
-        color: #ff2b7b;
-        text-decoration-color: rgba(255, 43, 123, 0.65);
+        color: var(--noyona-color-pink-muted-rose);
+        text-decoration-color: var(--noyona-color-pink-muted-rose);
         background-color: rgba(227, 11, 93, 0.08);
         box-shadow: 0 0 0 6px rgba(227, 11, 93, 0.10);
     }
@@ -179,8 +179,8 @@
 
 .faq-accordion__answer a:focus-visible {
     outline: none;
-    color: #ff2b7b;
-    text-decoration-color: rgba(255, 43, 123, 0.8);
+    color: var(--noyona-color-pink-muted-rose);
+    text-decoration-color: var(--noyona-color-pink-muted-rose);
     background-color: rgba(227, 11, 93, 0.10);
     box-shadow:
         0 0 0 3px rgba(255, 255, 255, 0.9),
@@ -188,7 +188,7 @@
 }
 
 .faq-accordion__answer a:visited {
-    color: #B60E4B;
+    color: var(--noyona-cta-tertiary-bg);
 }
 
 /* Active answer text color - making it slightly tinted or just clear dark */

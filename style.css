@@ -6463,6 +6463,11 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
 	padding-right: 42px;
 }
 
+.noyona-account-modal-password-wrap input[type="password"]::-ms-reveal,
+.noyona-account-modal-password-wrap input[type="password"]::-ms-clear {
+	display: none !important;
+}
+
 .noyona-account-modal-password-toggle {
 	position: absolute;
 	top: 50%;

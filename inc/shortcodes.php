@@ -3353,7 +3353,7 @@ function noyona_render_account_page_shortcode() {
                     <div class="noyona-account-modal-password-wrap">
                         <input id="noyona-account-modal-current-password" type="password" name="current_password" placeholder="<?php esc_attr_e( 'Enter current password', 'noyona-childtheme' ); ?>" required />
                         <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-current-password" onclick="event.stopImmediatePropagation(); return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
-                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                         </button>
                     </div>
 
@@ -3361,7 +3361,7 @@ function noyona_render_account_page_shortcode() {
                     <div class="noyona-account-modal-password-wrap">
                         <input id="noyona-account-modal-new-password" type="password" name="new_password" placeholder="<?php esc_attr_e( 'Enter new password', 'noyona-childtheme' ); ?>" minlength="6" required />
                         <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-new-password" onclick="event.stopImmediatePropagation(); return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
-                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                         </button>
                     </div>
                     <small><?php esc_html_e( 'Must be at least 6 characters long', 'noyona-childtheme' ); ?></small>
@@ -3370,7 +3370,7 @@ function noyona_render_account_page_shortcode() {
                     <div class="noyona-account-modal-password-wrap">
                         <input id="noyona-account-modal-confirm-password" type="password" name="confirm_password" placeholder="<?php esc_attr_e( 'Confirm new password', 'noyona-childtheme' ); ?>" minlength="6" required />
                         <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-confirm-password" onclick="event.stopImmediatePropagation(); return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
-                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                         </button>
                     </div>
 
@@ -3410,7 +3410,7 @@ function noyona_render_account_page_shortcode() {
                     <div class="noyona-account-modal-password-wrap">
                         <input id="noyona-account-modal-set-new-password" type="password" name="new_password" placeholder="<?php esc_attr_e( 'Enter new password', 'noyona-childtheme' ); ?>" minlength="6" required />
                         <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-set-new-password" onclick="event.stopImmediatePropagation(); return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
-                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                         </button>
                     </div>
                     <small><?php esc_html_e( 'Must be at least 6 characters long', 'noyona-childtheme' ); ?></small>
@@ -3419,7 +3419,7 @@ function noyona_render_account_page_shortcode() {
                     <div class="noyona-account-modal-password-wrap">
                         <input id="noyona-account-modal-set-confirm-password" type="password" name="confirm_password" placeholder="<?php esc_attr_e( 'Confirm new password', 'noyona-childtheme' ); ?>" minlength="6" required />
                         <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-set-confirm-password" onclick="event.stopImmediatePropagation(); return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
-                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                         </button>
                     </div>
 
@@ -3529,7 +3529,7 @@ function noyona_render_account_page_shortcode() {
                 var icon = toggle.querySelector('i');
                 if (icon) {
                     icon.classList.remove('fa-eye', 'fa-eye-slash');
-                    icon.classList.add(isPassword ? 'fa-eye-slash' : 'fa-eye');
+                    icon.classList.add(isPassword ? 'fa-eye' : 'fa-eye-slash');
                 }
 
                 return false;

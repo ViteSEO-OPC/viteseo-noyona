@@ -161,15 +161,24 @@ body {
 #template_header_image {
 	padding: 32px 32px 0;
 	text-align: center;
+	background-color: #ffffff !important;
 }
 
 #template_header_image p {
 	margin-bottom: 0;
 	text-align: center;
+	background-color: #ffffff !important;
+}
+
+#template_header_image a {
+	background-color: #ffffff !important;
 }
 
 #template_header_image img {
 	width: <?php echo esc_attr( $logo_image_width ); ?>px;
+	background-color: #ffffff !important;
+	display: block;
+	margin: 0 auto;
 }
 
 .email-logo-text {
