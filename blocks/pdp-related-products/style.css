@@ -1,4 +1,5 @@
 .noyona-pdp-related {
+  --noyona-pdp-related-cta-h: clamp(44px, 5vw, 56px);
   margin-top: clamp(2rem, 4vw, 3rem);
   margin-bottom: clamp(8rem, 12vw, 10rem);
   padding-bottom: clamp(2rem, 4vw, 3rem);
@@ -118,29 +119,128 @@
   line-height: normal;
 }
 
+.noyona-pdp-related .noyona-product-card-price,
 .noyona-pdp-related__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
   margin: auto 0 0;
+}
+
+.noyona-pdp-related .noyona-product-card-price__badge {
+  order: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.25rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--noyona-color-pink-accent);
+  color: #fff;
+  font-size: var(--wp--preset--font-size--caption);
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.single-product .noyona-pdp-related .noyona-product-card-price__old,
+.single-product .noyona-pdp-related .noyona-product-card-price del,
+.noyona-pdp-related .noyona-product-card-price__old,
+.noyona-pdp-related .noyona-product-card-price del,
+.noyona-pdp-related__price del {
+  order: 1;
+  margin: 0;
+  color: #999;
+  font-size: var(--wp--preset--font-size--caption);
+  font-weight: 500;
+  text-decoration: line-through;
+  opacity: 1;
+}
+
+.noyona-pdp-related .noyona-product-card-price__old .woocommerce-Price-amount,
+.noyona-pdp-related .noyona-product-card-price del .woocommerce-Price-amount {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+.single-product .noyona-pdp-related .noyona-product-card-price__current,
+.single-product .noyona-pdp-related .noyona-product-card-price ins,
+.noyona-pdp-related .noyona-product-card-price__current,
+.noyona-pdp-related .noyona-product-card-price ins {
+  order: 2;
+  margin: 0;
+  color: #111;
+  font-size: clamp(1.05rem, 1.3vw, 1.45rem);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.noyona-pdp-related .noyona-product-card-price__current .woocommerce-Price-amount,
+.noyona-pdp-related .noyona-product-card-price ins .woocommerce-Price-amount {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+.noyona-pdp-related__price {
   font-size: clamp(1.05rem, 1.3vw, 1.45rem);
   font-weight: 700;
   color: #111;
 }
 
-.noyona-pdp-related__price del {
-  color: #8d9198;
-}
-
 .noyona-pdp-related__rating {
   margin-top: 0;
   padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
 .noyona-pdp-related__stars {
-  color: #f6c343;
-  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.noyona-pdp-related__stars .star-rating {
+  overflow: hidden;
+  position: relative;
+  display: inline-block;
+  height: 1.618em;
+  line-height: 1.618;
+  width: 5.4em;
+  font-family: star;
   font-size: var(--wp--preset--font-size--caption);
+  margin: 0;
+}
+
+.noyona-pdp-related__stars .star-rating::before {
+  content: "sssss";
+  color: #d3ced2;
+  float: left;
+  top: 0;
+  left: 0;
+  position: absolute;
+}
+
+.noyona-pdp-related__stars .star-rating span {
+  overflow: hidden;
+  float: left;
+  top: 0;
+  left: 0;
+  position: absolute;
+  padding-top: 1.5em;
+}
+
+.noyona-pdp-related__stars .star-rating span::before {
+  content: "SSSSS";
+  top: 0;
+  position: absolute;
+  left: 0;
+  color: #f6c343;
 }
 
 .noyona-pdp-related__rating-text {
@@ -148,63 +248,43 @@
   color: #2c3138;
 }
 
-.noyona-pdp-related__cart-btn {
+.noyona-pdp-related .ps-btn-cart {
   position: absolute;
   right: 0.72rem;
   bottom: 0.66rem;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--noyona-cta-primary-text);
-  border-radius: var(--noyona-radius-input);
-  /* border: 1px solid #ebebeb;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); */
-  display: inline-flex;
+  width: var(--noyona-pdp-related-cta-h);
+  height: var(--noyona-pdp-related-cta-h);
+  flex: 0 0 var(--noyona-pdp-related-cta-h);
+  display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
+  border-radius: 16px;
   text-decoration: none;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  outline: none;
+  border: 1px solid var(--noyona-cta-secondary-border);
   cursor: pointer;
-  transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
-.noyona-pdp-related__cart-btn:hover,
-.noyona-pdp-related__cart-btn:focus-visible {
-  background: var(--noyona-color-pink-muted-rose);
-  box-shadow: 0 8px 18px rgba(225, 153, 164, 0.28);
+.noyona-pdp-related .ps-btn-cart:hover,
+.noyona-pdp-related .ps-btn-cart:focus-visible {
+  background: var(--noyona-cta-secondary-hover-bg) !important;
+  color: var(--noyona-cta-secondary-hover-text) !important;
+  border: 1px solid var(--noyona-cta-secondary-hover-border);
   transform: translateY(-1px);
-}
-
-.noyona-pdp-related__cart-btn:focus-visible {
-  outline: 2px solid var(--noyona-color-pink-muted-rose);
-  outline-offset: 3px;
-}
-
-.noyona-pdp-related__cart-btn::before {
-  content: "";
-  width: 40px;
-  height: 40px;
-  background-repeat: no-repeat;
-  background-size: 30px 30px;
-  background-position: center;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%23e199a4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='21' r='1'/%3E%3Ccircle cx='20' cy='21' r='1'/%3E%3Cpath d='M1 1h4l2.68 13.39A2 2 0 0 0 9.62 16h9.76a2 2 0 0 0 1.94-1.52L23 6H6'/%3E%3C/svg%3E");
-  filter: brightness(0) saturate(100%) invert(18%) sepia(86%) saturate(4540%) hue-rotate(328deg) brightness(89%) contrast(90%);
-  transition: filter 0.18s ease, transform 0.18s ease;
-}
-
-.noyona-pdp-related__cart-btn:hover::before,
-.noyona-pdp-related__cart-btn:focus-visible::before {
-  filter: brightness(0) invert(1);
-  transform: scale(0.94);
+  box-shadow: 0 8px 18px rgba(227, 11, 93, 0.25);
 }
 
 .noyona-pdp-related .added_to_cart.wc-forward {
   display: none !important;
 }
 
-@media (max-width: 990px) {
+@media (max-width: 1399px) {
   .noyona-pdp-related__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

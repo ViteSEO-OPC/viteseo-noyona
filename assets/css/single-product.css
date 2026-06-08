@@ -184,11 +184,59 @@ body.single-product .noyona-pdp-wishlist-message.is-error {
   margin-bottom: 0.75rem;
 }
 
-.single-product .wc-block-components-product-rating .star-rating,
-.single-product .wc-block-components-product-rating .star-rating::before,
-.single-product .wc-block-components-product-rating .star-rating span::before {
+.single-product .noyona-pdp-rating-row__stars {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.single-product .wc-block-components-product-rating.noyona-pdp-rating-row .noyona-pdp-rating-row__stars .star-rating,
+.single-product .wc-block-components-product-rating.noyona-pdp-rating-row .star-rating {
+  overflow: hidden;
+  position: relative;
+  display: inline-block;
+  height: 1.618em;
+  line-height: 1.618;
+  width: 5.4em;
+  font-family: star;
+  font-size: var(--wp--preset--font-size--caption);
   margin: 0;
+  text-align: left;
+}
+
+.single-product .wc-block-components-product-rating.noyona-pdp-rating-row .noyona-pdp-rating-row__stars .star-rating::before,
+.single-product .wc-block-components-product-rating.noyona-pdp-rating-row .star-rating::before {
+  content: "sssss";
+  color: #d3ced2;
+  float: left;
+  top: 0;
+  left: 0;
+  right: 0;
+  position: absolute;
+  white-space: nowrap;
+  opacity: 1;
+}
+
+.single-product .wc-block-components-product-rating.noyona-pdp-rating-row .noyona-pdp-rating-row__stars .star-rating span,
+.single-product .wc-block-components-product-rating.noyona-pdp-rating-row .star-rating span {
+  overflow: hidden;
+  float: left;
+  top: 0;
+  left: 0;
+  right: 0;
+  position: absolute;
+  padding-top: 1.5em;
+}
+
+.single-product .wc-block-components-product-rating.noyona-pdp-rating-row .noyona-pdp-rating-row__stars .star-rating span::before,
+.single-product .wc-block-components-product-rating.noyona-pdp-rating-row .star-rating span::before {
+  content: "SSSSS";
+  top: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
   color: #f6c343;
+  white-space: nowrap;
 }
 
 .single-product .wc-block-components-product-rating__average {
