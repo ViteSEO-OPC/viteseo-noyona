@@ -68,7 +68,7 @@
         "color": { "text": "#000000" },
         "typography": {
           "fontSize": "var(--wp--preset--font-size--h-1)",
-          "fontWeight": "400",
+          "fontWeight": "700",
           "fontFamily": "var(--wp--preset--font-family--poppins)",
           "lineHeight": "normal"
         }

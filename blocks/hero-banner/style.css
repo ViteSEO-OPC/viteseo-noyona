@@ -83,7 +83,7 @@
     display: grid;
     gap: 0.35rem;
     font-size: var(--wp--preset--font-size--h-1);
-    font-weight: 400;
+    font-weight: 700;
     white-space: pre-line;
     font-family: var(--wp--preset--font-family--poppins);
     letter-spacing: var(--noyona-letter-spacing-bugfix);
@@ -93,7 +93,7 @@
 
 .hero-banner__title-line--accent {
     font-style: italic;
-    font-weight: 400;
+    font-weight: 700;
     
 }
 
@@ -101,7 +101,7 @@
 .hero-banner__title .hero-banner__accent {
     font-family: var(--wp--preset--font-family--poppins);
     font-style: italic;
-    font-weight: 400;
+    font-weight: 700;
 }
 
 .hero-banner__title .hero-banner__accent-green {
@@ -110,7 +110,7 @@
     color: #97ab75;
     font-family: var(--wp--preset--font-family--poppins);
     font-style: italic;
-    font-weight: 400;
+    font-weight: 700;
     line-height: normal;
     padding-bottom: 0.24em;
 }
@@ -132,7 +132,7 @@
     color: #fff;
     font-family: var(--wp--preset--font-family--poppins);
     font-style: normal;
-    font-weight: 400;
+    font-weight: 700;
 }
 
 .hero-banner__title .hero-banner__title-white .hero-banner__accent {
