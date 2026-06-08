@@ -87,7 +87,14 @@ if ( empty( $related_ids ) ) {
 			}
 			$item_link  = get_permalink( $related->get_id() );
 			$image_html = $related->get_image( 'large', array( 'loading' => 'lazy', 'decoding' => 'async' ) );
-			$price_html = $related->get_price_html();
+			if ( function_exists( 'noyona_get_product_card_price_html' ) ) {
+				$price_html = noyona_get_product_card_price_html( $related );
+			} else {
+				$price_html = $related->get_price_html();
+				if ( '' !== $price_html ) {
+					$price_html = '<div class="noyona-pdp-related__price">' . $price_html . '</div>';
+				}
+			}
 			$title      = $related->get_name();
 
 			$short = $related->get_short_description();
@@ -106,12 +113,13 @@ if ( empty( $related_ids ) ) {
 			$rating_avg   = (float) $related->get_average_rating();
 			$rating_count = (int) $related->get_rating_count();
 			$rating_label = number_format_i18n( max( 0, $rating_avg ), 1 );
+			$rating_html  = function_exists( 'wc_get_rating_html' ) ? wc_get_rating_html( $rating_avg, $rating_count ) : '';
 
 			$cart_url = $related->add_to_cart_url();
 			$can_ajax = $related->supports( 'ajax_add_to_cart' ) && $related->is_type( 'simple' ) && $related->is_purchasable() && $related->is_in_stock();
-			$cart_classes = 'noyona-pdp-related__cart-btn';
+			$cart_classes = 'ps-btn-cart';
 			if ( $can_ajax ) {
-				$cart_classes .= ' noyona-pdp-related__cart-btn--ajax';
+				$cart_classes .= ' add_to_cart_button ajax_add_to_cart noyona-pdp-related__cart-btn--ajax';
 			}
 			?>
 			<article class="noyona-pdp-related__card">
@@ -132,11 +140,15 @@ if ( empty( $related_ids ) ) {
 					<?php endif; ?>
 
 					<?php if ( '' !== $price_html ) : ?>
-						<div class="noyona-pdp-related__price"><?php echo wp_kses_post( $price_html ); ?></div>
+						<?php echo $price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<?php endif; ?>
 
 					<div class="noyona-pdp-related__rating">
-						<span class="noyona-pdp-related__stars" aria-hidden="true">★★★★★</span>
+						<?php if ( $rating_html ) : ?>
+							<div class="noyona-pdp-related__stars">
+								<?php echo $rating_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							</div>
+						<?php endif; ?>
 						<span class="noyona-pdp-related__rating-text">
 							<?php echo esc_html( $rating_label ); ?>/5
 							<?php if ( $rating_count > 0 ) : ?>
@@ -149,24 +161,25 @@ if ( empty( $related_ids ) ) {
 				</div>
 
 				<?php if ( $can_ajax ) : ?>
-					<button
-						type="button"
+					<a
+						href="<?php echo esc_url( $cart_url ); ?>"
 						class="<?php echo esc_attr( $cart_classes ); ?>"
 						data-product_id="<?php echo esc_attr( $related->get_id() ); ?>"
 						data-product_sku="<?php echo esc_attr( $related->get_sku() ); ?>"
 						data-quantity="1"
 						data-cart-url="<?php echo esc_url( $cart_url ); ?>"
 						aria-label="<?php echo esc_attr( sprintf( __( 'Add %s to cart', 'viteseo-noyona-childtheme' ), $title ) ); ?>"
+						rel="nofollow"
 					>
-						<span class="screen-reader-text"><?php esc_html_e( 'Add to cart', 'viteseo-noyona-childtheme' ); ?></span>
-					</button>
+						<i class="fa-solid fa-cart-shopping"></i>
+					</a>
 				<?php else : ?>
 					<a
 						href="<?php echo esc_url( $item_link ); ?>"
 						class="<?php echo esc_attr( $cart_classes ); ?>"
 						aria-label="<?php echo esc_attr( sprintf( __( 'View %s', 'viteseo-noyona-childtheme' ), $title ) ); ?>"
 					>
-						<span class="screen-reader-text"><?php esc_html_e( 'View product', 'viteseo-noyona-childtheme' ); ?></span>
+						<i class="fa-solid fa-cart-shopping"></i>
 					</a>
 				<?php endif; ?>
 			</article>

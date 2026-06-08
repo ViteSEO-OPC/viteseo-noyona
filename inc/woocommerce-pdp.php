@@ -118,7 +118,11 @@ function noyona_pdp_append_reviews_link_after_rating( $block_content, $block ) {
 
 	// Render a stable custom rating row to avoid Woo default "(x customer review)" output styles.
 	$row  = '<div class="wc-block-components-product-rating noyona-pdp-rating-row">';
-	$row .= $rating_markup;
+	if ( $rating_markup ) {
+		$row .= '<div class="noyona-pdp-rating-row__stars">';
+		$row .= $rating_markup;
+		$row .= '</div>';
+	}
 	$row .= '<span class="wc-block-components-product-rating__average">' . esc_html( $average_label ) . '</span>';
 	$row .= $link;
 	$row .= '</div>';
