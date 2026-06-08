@@ -448,23 +448,24 @@
     const showMiniCartErrorNotice = (root, messages) => {
       if (!root) return;
 
+      const noticeAnchor = root.querySelector('.noyona-mini-cart-message')
+        || root.querySelector('.wp-block-woocommerce-mini-cart-items-block');
+
       let notice = root.querySelector('.noyona-mini-cart-stock-notice');
       if (!notice) {
         notice = document.createElement('ul');
         notice.className = 'woocommerce-error noyona-mini-cart-stock-notice';
         notice.setAttribute('role', 'alert');
+      }
 
-        const anchor = root.querySelector('.noyona-mini-cart-message');
-        if (anchor && anchor.parentNode) {
-          anchor.parentNode.insertBefore(notice, anchor);
+      if (noticeAnchor && noticeAnchor.parentNode && notice.nextElementSibling !== noticeAnchor) {
+        noticeAnchor.parentNode.insertBefore(notice, noticeAnchor);
+      } else if (!notice.parentNode) {
+        const fallback = root.firstElementChild;
+        if (fallback && fallback.parentNode) {
+          fallback.parentNode.insertBefore(notice, fallback);
         } else {
-          const fallback = root.querySelector('.wp-block-woocommerce-mini-cart-items-block')
-            || root.firstElementChild;
-          if (fallback && fallback.parentNode) {
-            fallback.parentNode.insertBefore(notice, fallback);
-          } else {
-            root.prepend(notice);
-          }
+          root.prepend(notice);
         }
       }
 

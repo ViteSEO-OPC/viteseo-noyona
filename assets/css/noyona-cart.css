@@ -93,6 +93,145 @@ body.woocommerce-cart .wp-site-blocks {
   font-size: 1.1em;
 }
 
+/* Completed step — soft green */
+.noyona-checkout-steps li.is-complete {
+  background: #66bb6a;
+  color: #fff;
+}
+
+.noyona-checkout-steps li.is-complete::after {
+  background: #81c784;
+}
+
+/* Awaiting payment on QR flow */
+.noyona-checkout-steps li.is-pending {
+  background: #e4e7ec;
+  color: #667085;
+}
+
+.noyona-checkout-steps li.is-pending::after {
+  background: #d0d5dd;
+}
+
+/* Clickable completed step */
+.noyona-checkout-steps__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.noyona-checkout-steps__link:hover {
+  opacity: 0.85;
+}
+
+/* Paid/Done page: stepper is informational only, no navigation back. */
+.noyona-checkout-steps--locked li,
+.noyona-checkout-steps--locked .noyona-checkout-steps__link {
+  pointer-events: none;
+  cursor: default;
+}
+
+@media (max-width: 900px) {
+  .noyona-checkout-steps ol {
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: stretch;
+    gap: 0;
+    border: 1px solid #d7d7d7;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .noyona-checkout-steps li {
+    flex: 1 1 20%;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 78px;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.55rem 0.35rem;
+    border-radius: 0;
+    background: #fff;
+    color: #b7b7b7;
+    text-align: center;
+  }
+
+  .noyona-checkout-steps li:first-child {
+    border-top-left-radius: 999px;
+    border-bottom-left-radius: 999px;
+  }
+
+  .noyona-checkout-steps li:last-child {
+    border-top-right-radius: 999px;
+    border-bottom-right-radius: 999px;
+  }
+
+  .noyona-checkout-steps li:not(:last-child)::after {
+    display: block;
+    left: auto;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    height: auto;
+    background: #d7d7d7;
+    transform: none;
+  }
+
+  .noyona-checkout-steps li.is-active {
+    background: var(--noyona-cta-primary-bg);
+    color: var(--noyona-cta-primary-text);
+  }
+
+  .noyona-checkout-steps li.is-complete {
+    background: #66bb6a;
+    color: #fff;
+  }
+
+  .noyona-checkout-steps li.is-pending {
+    background: #fff;
+    color: #b7b7b7;
+  }
+
+  .noyona-checkout-steps li.is-pending::after {
+    background: #d7d7d7;
+  }
+
+  .noyona-checkout-steps li.is-complete::after {
+    background: #81c784;
+  }
+
+  .noyona-checkout-steps__link {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35rem;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+  }
+
+  .noyona-checkout-steps__icon {
+    font-size: 1.15em;
+  }
+}
+
+@media (max-width: 600px) {
+  .noyona-checkout-steps ol {
+    gap: 0;
+  }
+
+  .noyona-checkout-steps li {
+    min-height: 70px;
+    padding: 0.45rem 0.2rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.01em;
+  }
+}
+
 /* ───────────────────────────────────────
    Summary card wrapper
    ─────────────────────────────────────── */
@@ -606,18 +745,5 @@ body.woocommerce-cart .noyona-cart-page-title {
 
   .noyona-coupon-apply {
     width: 100%;
-  }
-
-  .noyona-checkout-steps ol {
-    gap: 0.75rem;
-  }
-
-  .noyona-checkout-steps li {
-    font-size: var(--wp--preset--font-size--caption);
-    padding: 0.45rem 0.85rem;
-  }
-
-  .noyona-checkout-steps li:not(:last-child)::after {
-    display: none;
   }
 }

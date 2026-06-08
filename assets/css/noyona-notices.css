@@ -306,6 +306,9 @@ ul.woocommerce-info li:not(:first-child),
 /* Mini-cart drawer: spacing only (typography from tokens above) */
 .wc-block-mini-cart__drawer .noyona-mini-cart-stock-notice {
   margin: 10px 16px 14px;
+  overflow: visible !important;
+  flex-shrink: 0;
+  height: auto;
 }
 
 /*
