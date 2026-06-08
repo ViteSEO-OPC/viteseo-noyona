@@ -4151,10 +4151,12 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   }
 
   .noyona-shop-sort-dropdown__panel {
-    width: min(240px, 88vw);
+    width: min(240px, calc(100vw - 24px));
     max-width: calc(100vw - 24px);
-    left: 0;
-    right: auto;
+    left: auto;
+    right: 0;
+    transform: none;
+    box-sizing: border-box;
   }
 
   .noyona-shop-price-dropdown__panel .noyona-shop-filter-price {
@@ -4293,6 +4295,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
     max-width: 100%;
     width: 100%;
     box-sizing: border-box;
+    overflow: visible;
   }
 
   .noyona-shop-price-dropdown__summary,
@@ -4338,6 +4341,15 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
     left: 0;
     right: auto;
     padding: 12px;
+    box-sizing: border-box;
+  }
+
+  .noyona-shop-sort-dropdown__panel {
+    width: min(240px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    left: auto;
+    right: 0;
+    transform: none;
     box-sizing: border-box;
   }
 
