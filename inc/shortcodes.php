@@ -2439,17 +2439,21 @@ function noyona_render_account_page_shortcode() {
                                     ? $item_permalink . '#reviews'
                                     : $account_order->get_view_order_url();
                                 $contact_url = home_url( '/contact/' );
-                                $invoice_url = wp_nonce_url(
-                                    add_query_arg(
-                                        array(
-                                            'action'   => 'noyona_download_einvoice',
-                                            'order_id' => (int) $account_order->get_id(),
+                                $is_to_pay_status = in_array( $status_key, array( 'pending', 'on-hold', 'failed', 'to-pay' ), true );
+                                $invoice_url      = '';
+                                if ( ! $is_to_pay_status ) {
+                                    $invoice_url = wp_nonce_url(
+                                        add_query_arg(
+                                            array(
+                                                'action'   => 'noyona_download_einvoice',
+                                                'order_id' => (int) $account_order->get_id(),
+                                            ),
+                                            admin_url( 'admin-post.php' )
                                         ),
-                                        admin_url( 'admin-post.php' )
-                                    ),
-                                    'noyona_download_einvoice_' . (int) $account_order->get_id(),
-                                    'noyona_download_nonce'
-                                );
+                                        'noyona_download_einvoice_' . (int) $account_order->get_id(),
+                                        'noyona_download_nonce'
+                                    );
+                                }
                                 $buy_again_url = '';
                                 if ( $item_product instanceof WC_Product ) {
                                     $buy_again_url = add_query_arg(
@@ -2465,7 +2469,6 @@ function noyona_render_account_page_shortcode() {
                                         ? $item_permalink
                                         : ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/shop/' ) );
                                 }
-                                $is_to_pay_status = in_array( $status_key, array( 'pending', 'on-hold', 'failed', 'to-pay' ), true );
                                 // "Write a Review" is shown only for completed orders.
                                 $can_write_review = ( 'completed' === $status_key );
                                 $pay_now_url      = '';
@@ -2641,7 +2644,9 @@ function noyona_render_account_page_shortcode() {
                                             <?php if ( $can_write_review ) : ?>
                                                 <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $review_url ); ?>"><?php esc_html_e( 'Write a Review', 'noyona-childtheme' ); ?></a>
                                             <?php endif; ?>
-                                            <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $invoice_url ); ?>" download><?php esc_html_e( 'Download E-invoice', 'noyona-childtheme' ); ?></a>
+                                            <?php if ( '' !== trim( $invoice_url ) ) : ?>
+                                                <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $invoice_url ); ?>" download><?php esc_html_e( 'Download E-invoice', 'noyona-childtheme' ); ?></a>
+                                            <?php endif; ?>
                                             <a class="noyona-account-btn noyona-account-btn--ghost" href="<?php echo esc_url( $contact_url ); ?>"><?php esc_html_e( 'Contact Us', 'noyona-childtheme' ); ?></a>
                                             <?php if ( ! $is_to_pay_status ) : ?>
                                                 <a class="noyona-account-btn noyona-account-btn--primary" href="<?php echo esc_url( $buy_again_url ); ?>"><?php esc_html_e( 'Buy Again', 'noyona-childtheme' ); ?></a>
@@ -3353,7 +3358,7 @@ function noyona_render_account_page_shortcode() {
                     <div class="noyona-account-modal-password-wrap">
                         <input id="noyona-account-modal-current-password" type="password" name="current_password" placeholder="<?php esc_attr_e( 'Enter current password', 'noyona-childtheme' ); ?>" required />
                         <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-current-password" onclick="event.stopImmediatePropagation(); return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
-                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                         </button>
                     </div>
 
@@ -3361,7 +3366,7 @@ function noyona_render_account_page_shortcode() {
                     <div class="noyona-account-modal-password-wrap">
                         <input id="noyona-account-modal-new-password" type="password" name="new_password" placeholder="<?php esc_attr_e( 'Enter new password', 'noyona-childtheme' ); ?>" minlength="6" required />
                         <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-new-password" onclick="event.stopImmediatePropagation(); return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
-                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                         </button>
                     </div>
                     <small><?php esc_html_e( 'Must be at least 6 characters long', 'noyona-childtheme' ); ?></small>
@@ -3370,7 +3375,7 @@ function noyona_render_account_page_shortcode() {
                     <div class="noyona-account-modal-password-wrap">
                         <input id="noyona-account-modal-confirm-password" type="password" name="confirm_password" placeholder="<?php esc_attr_e( 'Confirm new password', 'noyona-childtheme' ); ?>" minlength="6" required />
                         <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-confirm-password" onclick="event.stopImmediatePropagation(); return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
-                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                         </button>
                     </div>
 
@@ -3410,7 +3415,7 @@ function noyona_render_account_page_shortcode() {
                     <div class="noyona-account-modal-password-wrap">
                         <input id="noyona-account-modal-set-new-password" type="password" name="new_password" placeholder="<?php esc_attr_e( 'Enter new password', 'noyona-childtheme' ); ?>" minlength="6" required />
                         <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-set-new-password" onclick="event.stopImmediatePropagation(); return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
-                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                         </button>
                     </div>
                     <small><?php esc_html_e( 'Must be at least 6 characters long', 'noyona-childtheme' ); ?></small>
@@ -3419,7 +3424,7 @@ function noyona_render_account_page_shortcode() {
                     <div class="noyona-account-modal-password-wrap">
                         <input id="noyona-account-modal-set-confirm-password" type="password" name="confirm_password" placeholder="<?php esc_attr_e( 'Confirm new password', 'noyona-childtheme' ); ?>" minlength="6" required />
                         <button type="button" class="noyona-account-modal-password-toggle" data-toggle-password="#noyona-account-modal-set-confirm-password" onclick="event.stopImmediatePropagation(); return window.noyonaToggleAccountPassword(this);" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'noyona-childtheme' ); ?>">
-                            <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                         </button>
                     </div>
 
@@ -3529,7 +3534,7 @@ function noyona_render_account_page_shortcode() {
                 var icon = toggle.querySelector('i');
                 if (icon) {
                     icon.classList.remove('fa-eye', 'fa-eye-slash');
-                    icon.classList.add(isPassword ? 'fa-eye-slash' : 'fa-eye');
+                    icon.classList.add(isPassword ? 'fa-eye' : 'fa-eye-slash');
                 }
 
                 return false;
@@ -3909,6 +3914,11 @@ function noyona_download_einvoice_handler() {
     $can_manage      = current_user_can( 'manage_woocommerce' ) || current_user_can( 'edit_shop_orders' );
     if ( ! $can_manage && (int) $order->get_user_id() !== (int) $current_user_id ) {
         wp_die( esc_html__( 'You are not allowed to download this invoice.', 'noyona-childtheme' ), esc_html__( 'Unauthorized', 'noyona-childtheme' ), array( 'response' => 403 ) );
+    }
+
+    $order_status = sanitize_key( (string) $order->get_status() );
+    if ( in_array( $order_status, array( 'pending', 'on-hold', 'failed', 'to-pay' ), true ) ) {
+        wp_die( esc_html__( 'E-invoices are available after payment is completed.', 'noyona-childtheme' ), esc_html__( 'Invoice unavailable', 'noyona-childtheme' ), array( 'response' => 403 ) );
     }
 
     // PDF generator (Dompdf) — loaded from the theme's Composer vendor dir.

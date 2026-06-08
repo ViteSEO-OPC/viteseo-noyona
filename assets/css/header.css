@@ -976,7 +976,7 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .noyona-mini-cart-continue {
   border: 0;
   background: transparent;
-  color: var(--noyona-color-pink-muted-rose);
+  color: var(--noyona-cta-tertiary-bg);
   font-weight: 600;
   font-size: 24px;
   display: inline-flex;
@@ -1004,7 +1004,7 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-shipping {
   padding: 10px 16px 6px;
-  color: var(--noyona-color-pink-muted-rose);
+  color: var(--noyona-cta-tertiary-bg);
   font-size: var(--wp--preset--font-size--helper);
   font-weight: 600;
   background: var(--noyona-color-pink-light-blush);

@@ -711,17 +711,17 @@ function noyona_enqueue_checkout_ui_styles() {
 	$cart_css_path     = get_stylesheet_directory() . '/assets/css/noyona-cart.css';
 
 	wp_enqueue_style(
-		'noyona-checkout',
-		get_stylesheet_directory_uri() . '/assets/css/noyona-checkout.css',
-		array( 'woocom-ct-style', 'woocom-ct-header' ),
-		file_exists( $checkout_css_path ) ? (string) filemtime( $checkout_css_path ) : wp_get_theme()->get( 'Version' )
-	);
-
-	wp_enqueue_style(
 		'noyona-cart',
 		get_stylesheet_directory_uri() . '/assets/css/noyona-cart.css',
 		array( 'woocom-ct-style', 'woocom-ct-header' ),
 		file_exists( $cart_css_path ) ? (string) filemtime( $cart_css_path ) : wp_get_theme()->get( 'Version' )
+	);
+
+	wp_enqueue_style(
+		'noyona-checkout',
+		get_stylesheet_directory_uri() . '/assets/css/noyona-checkout.css',
+		array( 'woocom-ct-style', 'woocom-ct-header', 'noyona-cart' ),
+		file_exists( $checkout_css_path ) ? (string) filemtime( $checkout_css_path ) : wp_get_theme()->get( 'Version' )
 	);
 }
 
