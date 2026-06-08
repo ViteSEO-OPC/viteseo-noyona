@@ -201,14 +201,26 @@
 
   .noyona-founder-section__content-column {
     align-self: auto;
+    align-items: center;
+    text-align: center;
     padding-top: clamp(28px, 6vw, 60px);
     padding-bottom: clamp(24px, 6vw, 60px);
+  }
+
+  .noyona-founder-section__body p {
+    text-align: center;
+  }
+
+  .noyona-founder-section--image-right .noyona-founder-section__content-column {
+    align-items: center;
+    text-align: center;
   }
 
   /* when stacked, remove the “push toward image” behavior */
   .noyona-founder-section--image-right .noyona-founder-section__content-column > * {
     max-width: 100%;
-    margin-left: 0;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .noyona-founder-section__image-main {
