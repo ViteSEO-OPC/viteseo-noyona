@@ -2010,6 +2010,15 @@ function noyona_checkout_inline_js() {
 		var payConfirmCloseNodes = payConfirmModal ? payConfirmModal.querySelectorAll('[data-pay-confirm-close]') : [];
 		var payConfirmContinueCallback = null;
 
+		function mountPayConfirmModal() {
+			if (!payConfirmModal || payConfirmModal.parentElement === document.body) {
+				return;
+			}
+			document.body.appendChild(payConfirmModal);
+		}
+
+		mountPayConfirmModal();
+
 		function closePayConfirmModal() {
 			if (!payConfirmModal) return;
 			payConfirmModal.hidden = true;
@@ -2019,6 +2028,7 @@ function noyona_checkout_inline_js() {
 
 		function openPayConfirmModal(onContinue) {
 			if (!payConfirmModal) return false;
+			mountPayConfirmModal();
 			payConfirmContinueCallback = (typeof onContinue === 'function') ? onContinue : null;
 			payConfirmModal.hidden = false;
 			body.classList.add('noyona-pay-confirm-open');

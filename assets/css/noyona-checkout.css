@@ -35,51 +35,7 @@ body.woocommerce-checkout .wp-site-blocks {
   box-sizing: border-box;
 }
 
-/* ═══════════════════════════════════════
-   STEPPER OVERRIDES (base in noyona-cart.css)
-   ═══════════════════════════════════════ */
-
-/* Completed step — soft green */
-.noyona-checkout-steps li.is-complete {
-  background: #66bb6a;
-  color: #fff;
-}
-
-/* Completed connector line turns green too */
-.noyona-checkout-steps li.is-complete::after {
-  background: #81c784;
-}
-
-/* Awaiting payment on QR flow */
-.noyona-checkout-steps li.is-pending {
-  background: #e4e7ec;
-  color: #667085;
-}
-
-.noyona-checkout-steps li.is-pending::after {
-  background: #d0d5dd;
-}
-
-/* Clickable completed step */
-.noyona-checkout-steps__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: inherit;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.noyona-checkout-steps__link:hover {
-  opacity: 0.85;
-}
-
-/* Paid/Done page: stepper is informational only, no navigation back. */
-.noyona-checkout-steps--locked li,
-.noyona-checkout-steps--locked .noyona-checkout-steps__link {
-  pointer-events: none;
-  cursor: default;
-}
+/* Stepper styles live in noyona-cart.css (shared with cart + checkout). */
 
 /* ═══════════════════════════════════════
    TWO-COLUMN LAYOUT
@@ -1256,7 +1212,12 @@ body.noyona-pay-confirm-open {
   z-index: 9999;
   display: grid;
   place-items: center;
-  padding: 18px;
+  align-content: center;
+  padding: clamp(12px, 4vw, 18px);
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .noyona-pay-confirm-modal__backdrop {
@@ -1268,7 +1229,9 @@ body.noyona-pay-confirm-open {
 
 .noyona-pay-confirm-modal__dialog {
   position: relative;
-  width: min(560px, calc(100vw - 24px));
+  width: min(560px, 100%);
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 22px 22px 18px;
   border-radius: var(--noyona-radius-card);
   background: #fff;
@@ -1302,7 +1265,9 @@ body.noyona-pay-confirm-open {
   margin: 0;
   font-size: var(--wp--preset--font-size--body);
   color: #475467;
-  line-height: normal;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .noyona-pay-confirm-modal__actions {
@@ -1319,6 +1284,8 @@ body.noyona-pay-confirm-open {
   font-size: var(--wp--preset--font-size--nav-button);
   font-weight: 700;
   cursor: pointer;
+  box-sizing: border-box;
+  max-width: 100%;
   transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
@@ -2092,9 +2059,14 @@ body.noyona-pay-step h1.wp-block-post-title {
   padding-bottom: 10px !important;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
+  .noyona-pay-confirm-modal {
+    padding: 12px;
+  }
+
   .noyona-pay-confirm-modal__dialog {
-    width: min(560px, calc(100vw - 20px));
+    width: 100%;
+    max-width: 100%;
     padding: 18px 16px 14px;
   }
 
@@ -2105,6 +2077,12 @@ body.noyona-pay-step h1.wp-block-post-title {
 
   .noyona-pay-confirm-modal__btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .noyona-pay-confirm-modal__dialog {
+    padding: 16px 14px 12px;
   }
 
   body.noyona-pay-step .noyona-pay-meta {
@@ -2174,89 +2152,6 @@ body.noyona-pay-step h1.wp-block-post-title {
    RESPONSIVE — TABLET (≤ 900px)
    ═══════════════════════════════════════ */
 @media (max-width: 900px) {
-  .noyona-checkout-steps ol {
-    width: 100%;
-    flex-wrap: nowrap;
-    justify-content: stretch;
-    gap: 0;
-    border: 1px solid #d7d7d7;
-    border-radius: 999px;
-    overflow: hidden;
-    background: #fff;
-  }
-
-  .noyona-checkout-steps li {
-    flex: 1 1 20%;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 78px;
-    justify-content: center;
-    gap: 0.35rem;
-    padding: 0.55rem 0.35rem;
-    border-radius: 0;
-    background: #fff;
-    color: #b7b7b7;
-    text-align: center;
-  }
-
-  .noyona-checkout-steps li:first-child {
-    border-top-left-radius: 999px;
-    border-bottom-left-radius: 999px;
-  }
-
-  .noyona-checkout-steps li:last-child {
-    border-top-right-radius: 999px;
-    border-bottom-right-radius: 999px;
-  }
-
-  .noyona-checkout-steps li:not(:last-child)::after {
-    display: block;
-    left: auto;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    height: auto;
-    background: #d7d7d7;
-    transform: none;
-  }
-
-  .noyona-checkout-steps li.is-active {
-    background: var(--noyona-cta-primary-bg);
-    color: var(--noyona-cta-primary-text);
-  }
-
-  .noyona-checkout-steps li.is-complete {
-    background: #66bb6a;
-    color: #fff;
-  }
-
-  .noyona-checkout-steps li.is-pending {
-    background: #fff;
-    color: #b7b7b7;
-  }
-
-  .noyona-checkout-steps li.is-pending::after {
-    background: #d7d7d7;
-  }
-
-  .noyona-checkout-steps li.is-complete::after {
-    background: #81c784;
-  }
-
-  .noyona-checkout-steps__link {
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.35rem;
-    width: 100%;
-    min-width: 0;
-    height: 100%;
-  }
-
-  .noyona-checkout-steps__icon {
-    font-size: 1.15em;
-  }
-
   .noyona-checkout-columns {
     grid-template-columns: 1fr;
   }
@@ -2345,6 +2240,10 @@ body.noyona-pay-step h1.wp-block-post-title {
     display: grid;
   }
 
+  body.noyona-done-step .noyona-done-actions br {
+    display: none !important;
+  }
+
   body.noyona-done-step .noyona-done-order-number__value {
     font-size: 1.3rem;
   }
@@ -2422,17 +2321,5 @@ body.noyona-pay-step h1.wp-block-post-title {
   
   .noyona-trust-badge span {
     font-size: 0.64rem;
-  }
-
-  /* Stepper — smaller on phone */
-  .noyona-checkout-steps ol {
-    gap: 0;
-  }
-
-  .noyona-checkout-steps li {
-    min-height: 70px;
-    padding: 0.45rem 0.2rem;
-    font-size: 0.62rem;
-    letter-spacing: 0.01em;
   }
 }
