@@ -526,7 +526,7 @@ body.noyona-review-step .noyona-order-totals--summary {
 }
 
 .noyona-review-terms__text a {
-  color: var(--noyona-cart-pink, #e199a4);
+  color: var(--noyona-cta-tertiary-bg);
   text-decoration: none;
   font-weight: 600;
 }
@@ -1323,14 +1323,15 @@ body.noyona-pay-confirm-open {
 }
 
 .noyona-pay-confirm-modal__btn--ghost {
-  border: 1px solid #d0d5dd;
-  background: #fff;
-  color: #344054;
+  border: 1px solid var(--noyona-cta-secondary-border);
+  background: var(--noyona-cta-secondary-bg);
+  color: var(--noyona-cta-secondary-text);
 }
 
 .noyona-pay-confirm-modal__btn--ghost:hover {
-  border-color: #b8c0cc;
-  background: #fafbfc;
+  border-color: var(--noyona-cta-secondary-hover-border);
+  background: var(--noyona-cta-secondary-hover-bg);
+  color: var(--noyona-cta-secondary-hover-text);
 }
 
 .noyona-pay-confirm-modal__btn--primary {

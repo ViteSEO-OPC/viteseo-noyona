@@ -351,7 +351,7 @@
 }
 
 .customer-reviews-grid__product-link {
-  color: #6f6f6f;
+  color: var(--noyona-cta-tertiary-bg);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -456,7 +456,7 @@
 }
 
 .customer-reviews-grid__helpful-btn.is-voted {
-  color: #3f7e46;
+  color: var(--noyona-cta-tertiary-bg);
   font-weight: 700;
 }
 
@@ -486,7 +486,7 @@
   border: 0;
   background: transparent;
   cursor: pointer;
-  color: #787878;
+  color: var(--noyona-cta-tertiary-bg);
   text-decoration: none;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--body);
@@ -505,7 +505,7 @@
 
 .customer-reviews-grid__read-more:hover,
 .customer-reviews-grid__read-more:focus-visible {
-  color: #4f4f4f;
+  color: var(--noyona-cta-tertiary-bg);
 }
 
 .customer-reviews-grid__review-form-wrap {
@@ -561,9 +561,9 @@
   min-height: 44px;
   margin-top: 0.5rem;
   border-radius: var(--noyona-radius-cta);
-  border: 1px solid #111;
-  background: #111;
-  color: #fff;
+  border: 1px solid var(--noyona-cta-primary-border);
+  background: var(--noyona-cta-primary-bg);
+  color: var(--noyona-cta-primary-text);
   padding: 0.6rem 1.2rem;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--nav-button);
@@ -919,9 +919,9 @@
   min-height: 58px;
   margin-top: 0.2rem;
   border-radius: var(--noyona-radius-cta);
-  border: 0;
+  border: 1px solid var(--noyona-cta-primary-border);
   background: #cfd6df;
-  color: #fff;
+  color: var(--noyona-cta-primary-text);
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -935,13 +935,17 @@
 
 .customer-reviews-grid__submit:not(:disabled),
 .customer-reviews-grid__review-form-wrap .submit:not(:disabled) {
-  background: var(--noyona-color-pink-muted-rose);
+  background: var(--noyona-cta-primary-bg);
+  border-color: var(--noyona-cta-primary-border);
+  color: var(--noyona-cta-primary-text);
   cursor: pointer;
 }
 
 .customer-reviews-grid__submit:not(:disabled):hover,
 .customer-reviews-grid__review-form-wrap .submit:not(:disabled):hover {
-  background: #d58895;
+  background: var(--noyona-cta-primary-hover-bg);
+  border-color: var(--noyona-cta-primary-hover-border);
+  color: var(--noyona-cta-primary-hover-text);
 }
 
 .customer-reviews-grid__review-form-wrap .comment-notes,
