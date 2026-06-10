@@ -340,7 +340,7 @@ function noyona_account_replace_lost_password_text( $translated_text, $text, $do
     return $translated_text;
 }
 
-/* ----- Lost-password validation (email format + registered account) ----- */
+/* ----- Lost-password validation (email format only; Wordfence handles unregistered emails) ----- */
 add_filter( 'lostpassword_post', 'noyona_validate_lost_password_email', 10, 2 );
 function noyona_validate_lost_password_email( $errors, $user_data ) {
     if ( ! ( $errors instanceof WP_Error ) ) {
@@ -354,14 +354,6 @@ function noyona_validate_lost_password_email( $errors, $user_data ) {
         $errors->add(
             'invalid_email',
             __( 'Please enter a valid email address.', 'noyona-childtheme' )
-        );
-        return $errors;
-    }
-
-    if ( ! email_exists( $email ) ) {
-        $errors->add(
-            'invalidcombo',
-            __( 'No account is registered with that email address.', 'noyona-childtheme' )
         );
     }
 
@@ -674,6 +666,116 @@ function noyona_normalize_reset_form_controls() {
           normalizeResetPasswords();
         });
         observer.observe(document.documentElement, { childList: true, subtree: true });
+      }
+    })();
+    </script>
+    <?php
+}
+
+/* ----- Lost-password client validation (custom banner, keeps novalidate + Wordfence privacy) ----- */
+add_action( 'wp_footer', 'noyona_lost_password_client_validation', 91 );
+function noyona_lost_password_client_validation() {
+    if ( is_admin() || wp_doing_ajax() ) {
+        return;
+    }
+
+    if ( ! function_exists( 'noyona_is_account_recovery_context' ) || ! noyona_is_account_recovery_context() ) {
+        return;
+    }
+
+    if ( ! empty( $_GET['reset-link-sent'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        return;
+    }
+
+    $invalid_email_message = __( 'Please enter a valid email address.', 'noyona-childtheme' );
+    ?>
+    <script>
+    (function () {
+      var INVALID_EMAIL_MESSAGE = <?php echo wp_json_encode( $invalid_email_message ); ?>;
+
+      function getLostPasswordForm() {
+        return document.querySelector('form.noyona-lost-password-form:not(.noyona-reset-password-form)');
+      }
+
+      function isValidEmail(value) {
+        var email = String(value || '').trim();
+        if (!email) {
+          return false;
+        }
+
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      function findOrCreateNoticesWrapper(form) {
+        var woocommerce = form.closest('.woocommerce');
+        var wrapper = woocommerce ? woocommerce.querySelector('.woocommerce-notices-wrapper') : null;
+
+        if (wrapper) {
+          return wrapper;
+        }
+
+        wrapper = document.createElement('div');
+        wrapper.className = 'woocommerce-notices-wrapper';
+        form.parentNode.insertBefore(wrapper, form);
+        return wrapper;
+      }
+
+      function clearClientError(wrapper) {
+        var existing = wrapper.querySelector('ul.woocommerce-error[data-noyona-lost-password-client]');
+        if (existing) {
+          existing.remove();
+        }
+      }
+
+      function showClientError(form, message) {
+        var wrapper = findOrCreateNoticesWrapper(form);
+        clearClientError(wrapper);
+
+        var list = document.createElement('ul');
+        list.className = 'woocommerce-error';
+        list.setAttribute('role', 'alert');
+        list.setAttribute('data-noyona-lost-password-client', '1');
+
+        var item = document.createElement('li');
+        item.textContent = message;
+        list.appendChild(item);
+
+        wrapper.insertBefore(list, wrapper.firstChild);
+        wrapper.style.display = '';
+        list.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+
+      function bindValidation() {
+        var form = getLostPasswordForm();
+        if (!form || form.dataset.noyonaLostPasswordValidationBound === '1') {
+          return;
+        }
+
+        form.dataset.noyonaLostPasswordValidationBound = '1';
+
+        var emailInput = form.querySelector('#user_login');
+        if (emailInput) {
+          emailInput.addEventListener('input', function () {
+            clearClientError(findOrCreateNoticesWrapper(form));
+          });
+        }
+
+        form.addEventListener('submit', function (event) {
+          var value = emailInput ? String(emailInput.value || '').trim() : '';
+          if (isValidEmail(value)) {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+          showClientError(form, INVALID_EMAIL_MESSAGE);
+        }, true);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindValidation);
+      } else {
+        bindValidation();
       }
     })();
     </script>
