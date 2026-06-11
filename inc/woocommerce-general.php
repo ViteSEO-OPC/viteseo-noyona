@@ -521,11 +521,13 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
     if ( '' !== $selected_tag && ! term_exists( $selected_tag, 'product_tag' ) ) {
         $selected_tag = '';
     }
+    $selected_brand = noyona_get_selected_product_brand_slug();
 
     $has_price_range = null !== $min_price || null !== $max_price;
     if ( '' !== $selected_tag ) {
         $args['tag'] = array( $selected_tag );
     }
+    $args            = noyona_apply_product_brand_to_query_args( $args, $selected_brand );
     $args            = noyona_apply_price_range_to_product_query_args( $args, $min_price, $max_price );
     if ( $has_price_range ) {
         $args['limit'] = -1;

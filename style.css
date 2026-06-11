@@ -1374,7 +1374,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     padding: 14px 11px;
     --noyona-filter-panel-gap: 6px;
-    --noyona-filter-panel-section-space: 12px;
+    --noyona-filter-panel-section-space: 16px;
     --noyona-filter-panel-heading-space: 6px;
     --noyona-filter-panel-heading-size: var(--wp--preset--font-size--label);
     --noyona-filter-panel-pill-height: 30px;
@@ -1444,20 +1444,29 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   cursor: pointer;
 }
 
-#noyona-shop-filter-panel .noyona-shop-categories {
+#noyona-shop-filter-panel .noyona-shop-filter-section-brands,
+#noyona-shop-filter-panel .noyona-shop-categories,
+#noyona-shop-filter-panel .noyona-shop-filter-section-tags {
   display: grid;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   gap: var(--noyona-filter-panel-gap, 8px);
   justify-content: stretch;
-  margin: 0 0 var(--noyona-filter-panel-section-space, 20px);
-  padding: 0 0 var(--noyona-filter-panel-section-space, 20px);
+  margin: 0;
+  padding: var(--noyona-filter-panel-section-space, 28px);
+  border-top: 0;
   border-bottom: 1px solid #f0f0f0;
 }
 
+#noyona-shop-filter-panel .noyona-shop-filter-section-tags {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
 #noyona-shop-filter-panel .noyona-shop-filter-section-title,
-#noyona-shop-filter-panel .noyona-shop-filter-section-tags h5 {
+#noyona-shop-filter-panel .noyona-shop-filter-section-tags h5,
+#noyona-shop-filter-panel .noyona-shop-filter-section-brands h5 {
   margin: 0 0 var(--noyona-filter-panel-heading-space, 8px);
   font-size: var(--noyona-filter-panel-heading-size, var(--wp--preset--font-size--h-5));
   font-weight: 700;
@@ -1492,9 +1501,14 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   overflow-wrap: break-word;
 }
 
-.noyona-shop-filter-section-tags {
-  margin: 0;
-  padding-top: 0;
+#noyona-shop-filter-panel .noyona-shop-filter-section-brands .noyona-shop-tag-radio,
+#noyona-shop-filter-panel .noyona-shop-filter-section-tags .noyona-shop-tag-radio {
+  box-sizing: border-box;
+  padding: var(--noyona-filter-panel-pill-padding, 8px 12px);
+}
+
+.noyona-shop-filter-section-tags,
+.noyona-shop-filter-section-brands {
   border-top: 0;
 }
 
@@ -1503,7 +1517,8 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   gap: var(--noyona-filter-panel-gap, 8px);
 }
 
-.noyona-shop-filter-section-tags .noyona-shop-tag-radio {
+.noyona-shop-filter-section-tags .noyona-shop-tag-radio,
+.noyona-shop-filter-section-brands .noyona-shop-tag-radio {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -1527,7 +1542,8 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.noyona-shop-filter-section-tags .noyona-shop-tag-radio input {
+.noyona-shop-filter-section-tags .noyona-shop-tag-radio input,
+.noyona-shop-filter-section-brands .noyona-shop-tag-radio input {
   appearance: none;
   -webkit-appearance: none;
   flex: 0 0 auto;
@@ -1542,36 +1558,42 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.noyona-shop-filter-section-tags .noyona-shop-tag-radio:hover {
+.noyona-shop-filter-section-tags .noyona-shop-tag-radio:hover,
+.noyona-shop-filter-section-brands .noyona-shop-tag-radio:hover {
   border-color: var(--noyona-color-pink-light-blush);
   background: rgba(251, 221, 226, 0.45);
   color: var(--noyona-color-pink-accent);
 }
 
-.noyona-shop-filter-section-tags .noyona-shop-tag-radio:focus-within {
+.noyona-shop-filter-section-tags .noyona-shop-tag-radio:focus-within,
+.noyona-shop-filter-section-brands .noyona-shop-tag-radio:focus-within {
   border-color: var(--noyona-color-pink-accent);
   box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.12);
 }
 
-.noyona-shop-filter-section-tags .noyona-shop-tag-radio input:checked {
+.noyona-shop-filter-section-tags .noyona-shop-tag-radio input:checked,
+.noyona-shop-filter-section-brands .noyona-shop-tag-radio input:checked {
   border-color: var(--noyona-color-pink-accent);
   background: var(--noyona-color-pink-accent);
   box-shadow: inset 0 0 0 4px #fff;
 }
 
-.noyona-shop-filter-section-tags .noyona-shop-tag-radio.is-active {
+.noyona-shop-filter-section-tags .noyona-shop-tag-radio.is-active,
+.noyona-shop-filter-section-brands .noyona-shop-tag-radio.is-active {
   border-color: var(--noyona-color-pink-accent);
   background: var(--noyona-color-pink-accent);
   color: #ffffff;
 }
 
-.noyona-shop-filter-section-tags .noyona-shop-tag-radio.is-active input {
+.noyona-shop-filter-section-tags .noyona-shop-tag-radio.is-active input,
+.noyona-shop-filter-section-brands .noyona-shop-tag-radio.is-active input {
   border-color: #ffffff;
   background: #ffffff;
   box-shadow: inset 0 0 0 4px var(--noyona-color-pink-accent);
 }
 
-.noyona-shop-filter-section-tags .noyona-shop-tag-radio.is-disabled {
+.noyona-shop-filter-section-tags .noyona-shop-tag-radio.is-disabled,
+.noyona-shop-filter-section-brands .noyona-shop-tag-radio.is-disabled {
   border-color: transparent;
   background: transparent;
   color: #9e9e9e;
@@ -1581,7 +1603,8 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   pointer-events: none;
 }
 
-.noyona-shop-filter-section-tags .noyona-shop-tag-radio.is-disabled input {
+.noyona-shop-filter-section-tags .noyona-shop-tag-radio.is-disabled input,
+.noyona-shop-filter-section-brands .noyona-shop-tag-radio.is-disabled input {
   border-color: #cfcfcf;
   background: #f7f7f7;
   box-shadow: none;
@@ -4174,7 +4197,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
     padding: 12px 10px;
     padding-top: 52px;
     --noyona-filter-panel-gap: 6px;
-    --noyona-filter-panel-section-space: 10px;
+    --noyona-filter-panel-section-space: 14px;
     --noyona-filter-panel-heading-space: 6px;
     --noyona-filter-panel-heading-size: var(--wp--preset--font-size--label);
     --noyona-filter-panel-pill-height: 30px;
