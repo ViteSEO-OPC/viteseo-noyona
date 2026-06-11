@@ -210,6 +210,60 @@ function noyona_get_shop_category_page_slugs() {
 /**
  * Active product_cat slug for the current shop/search filter context.
  */
+function noyona_get_shop_filter_brand_slugs() {
+    return array( 'lovial', 'noyona' );
+}
+
+/**
+ * Active product_brand slug for shop/search filters, or '' for All.
+ */
+function noyona_get_selected_product_brand_slug() {
+    if ( ! taxonomy_exists( 'product_brand' ) ) {
+        return '';
+    }
+
+    $slug = isset( $_GET['product_brand'] ) ? sanitize_key( wp_unslash( $_GET['product_brand'] ) ) : '';
+    if ( '' === $slug ) {
+        return '';
+    }
+
+    if ( ! in_array( $slug, noyona_get_shop_filter_brand_slugs(), true ) ) {
+        return '';
+    }
+
+    if ( ! term_exists( $slug, 'product_brand' ) ) {
+        return '';
+    }
+
+    return $slug;
+}
+
+/**
+ * Append a product_brand slug filter to WP_Query or wc_get_products args.
+ */
+function noyona_apply_product_brand_to_query_args( $args, $brand_slug ) {
+    $brand_slug = sanitize_key( (string) $brand_slug );
+    if ( '' === $brand_slug || ! taxonomy_exists( 'product_brand' ) ) {
+        return $args;
+    }
+
+    if ( ! isset( $args['tax_query'] ) || ! is_array( $args['tax_query'] ) ) {
+        $args['tax_query'] = array();
+    }
+
+    $args['tax_query'][] = array(
+        'taxonomy' => 'product_brand',
+        'field'    => 'slug',
+        'terms'    => array( $brand_slug ),
+    );
+
+    if ( count( $args['tax_query'] ) > 1 ) {
+        $args['tax_query']['relation'] = 'AND';
+    }
+
+    return $args;
+}
+
 function noyona_get_current_shop_filter_category_slug() {
     if ( is_tax( 'product_cat' ) ) {
         $term = get_queried_object();
@@ -316,6 +370,132 @@ function noyona_shop_tag_has_products_in_context( $tag_slug, $category_slug = ''
     $availability_cache[ $cache_key ] = (int) $query->found_posts > 0;
 
     return $availability_cache[ $cache_key ];
+}
+
+/**
+ * Whether any published products match a brand in the current shop filter context.
+ */
+function noyona_shop_brand_has_products_in_context( $brand_slug, $category_slug = '', $search_query = '', $min_price = null, $max_price = null ) {
+    $brand_slug = sanitize_key( (string) $brand_slug );
+    if ( '' === $brand_slug || ! term_exists( $brand_slug, 'product_brand' ) ) {
+        return false;
+    }
+
+    static $availability_cache = array();
+
+    $cache_key = md5(
+        wp_json_encode(
+            array(
+                'brand'    => $brand_slug,
+                'category' => sanitize_key( (string) $category_slug ),
+                'search'   => trim( (string) $search_query ),
+                'min'      => null === $min_price ? null : (float) $min_price,
+                'max'      => null === $max_price ? null : (float) $max_price,
+            )
+        )
+    );
+
+    if ( isset( $availability_cache[ $cache_key ] ) ) {
+        return $availability_cache[ $cache_key ];
+    }
+
+    $tax_query = array(
+        array(
+            'taxonomy' => 'product_brand',
+            'field'    => 'slug',
+            'terms'    => array( $brand_slug ),
+        ),
+    );
+
+    $category_slug = sanitize_key( (string) $category_slug );
+    if ( '' !== $category_slug && term_exists( $category_slug, 'product_cat' ) ) {
+        $tax_query[] = array(
+            'taxonomy' => 'product_cat',
+            'field'    => 'slug',
+            'terms'    => array( $category_slug ),
+        );
+    }
+
+    if ( count( $tax_query ) > 1 ) {
+        $tax_query['relation'] = 'AND';
+    }
+
+    $query_args = array(
+        'post_type'              => 'product',
+        'post_status'            => 'publish',
+        'posts_per_page'         => 1,
+        'fields'                 => 'ids',
+        'ignore_sticky_posts'    => true,
+        'no_found_rows'          => false,
+        'update_post_meta_cache' => false,
+        'update_post_term_cache' => false,
+        'tax_query'              => $tax_query,
+    );
+
+    $search_query = trim( (string) $search_query );
+    if ( '' !== $search_query ) {
+        $query_args['s'] = $search_query;
+    }
+
+    $query_args = noyona_apply_price_range_to_product_query_args( $query_args, $min_price, $max_price );
+
+    $query = new WP_Query( $query_args );
+
+    $availability_cache[ $cache_key ] = (int) $query->found_posts > 0;
+
+    return $availability_cache[ $cache_key ];
+}
+
+/**
+ * Fixed brand options for the filter panel.
+ *
+ * @return array<int, array{slug:string, name:string, hasProducts:bool}>
+ */
+function noyona_get_shop_filter_product_brands() {
+    if ( ! taxonomy_exists( 'product_brand' ) ) {
+        return array();
+    }
+
+    $category_slug = noyona_get_current_shop_filter_category_slug();
+    $search_query  = '';
+
+    $request_post_type = get_query_var( 'post_type' );
+    $request_post_type = is_array( $request_post_type ) ? reset( $request_post_type ) : $request_post_type;
+    $is_product_search = is_search()
+        && (
+            'product' === (string) $request_post_type
+            || ( isset( $_GET['post_type'] ) && 'product' === sanitize_key( wp_unslash( $_GET['post_type'] ) ) )
+        );
+
+    if ( $is_product_search ) {
+        $search_query = get_search_query();
+    }
+
+    $min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : null;
+    $max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : null;
+
+    $brands = array();
+
+    foreach ( noyona_get_shop_filter_brand_slugs() as $brand_slug ) {
+        $term = get_term_by( 'slug', $brand_slug, 'product_brand' );
+        if ( ! $term instanceof WP_Term ) {
+            continue;
+        }
+
+        $brands[] = array(
+            'slug'        => $brand_slug,
+            'name'        => $term->name,
+            'hasProducts' => noyona_shop_brand_has_products_in_context(
+                $brand_slug,
+                $category_slug,
+                $search_query,
+                $min_price,
+                $max_price
+            ),
+        );
+    }
+
+    return $brands;
 }
 
 /**
@@ -983,6 +1163,9 @@ function noyona_keep_product_search_route_when_filtering_by_category( $query_var
     if ( isset( $query_vars['product_tag'] ) ) {
         unset( $query_vars['product_tag'] );
     }
+    if ( isset( $query_vars['product_brand'] ) ) {
+        unset( $query_vars['product_brand'] );
+    }
     return $query_vars;
 }
 
@@ -995,8 +1178,9 @@ function noyona_render_product_search_page_shortcode() {
 
     $query_text     = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : get_search_query( false );
     $query_text     = trim( (string) $query_text );
-    $selected_cat   = isset( $_GET['product_cat'] ) ? sanitize_key( wp_unslash( $_GET['product_cat'] ) ) : '';
-    $selected_tag   = isset( $_GET['product_tag'] ) ? sanitize_key( wp_unslash( $_GET['product_tag'] ) ) : '';
+    $selected_cat    = isset( $_GET['product_cat'] ) ? sanitize_key( wp_unslash( $_GET['product_cat'] ) ) : '';
+    $selected_tag    = isset( $_GET['product_tag'] ) ? sanitize_key( wp_unslash( $_GET['product_tag'] ) ) : '';
+    $selected_brand  = noyona_get_selected_product_brand_slug();
     $selected_order = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
     $min_price      = isset( $_GET['min_price'] ) && '' !== (string) $_GET['min_price'] ? floatval( wp_unslash( $_GET['min_price'] ) ) : null;
     $max_price      = isset( $_GET['max_price'] ) && '' !== (string) $_GET['max_price'] ? floatval( wp_unslash( $_GET['max_price'] ) ) : null;
@@ -1138,6 +1322,13 @@ function noyona_render_product_search_page_shortcode() {
             'terms'    => array( $selected_tag ),
         );
     }
+    if ( '' !== $selected_brand ) {
+        $tax_query[] = array(
+            'taxonomy' => 'product_brand',
+            'field'    => 'slug',
+            'terms'    => array( $selected_brand ),
+        );
+    }
     if ( ! empty( $tax_query ) ) {
         if ( count( $tax_query ) > 1 ) {
             $tax_query['relation'] = 'AND';
@@ -1157,6 +1348,9 @@ function noyona_render_product_search_page_shortcode() {
     }
     if ( '' !== $selected_tag ) {
         $base_params['product_tag'] = $selected_tag;
+    }
+    if ( '' !== $selected_brand ) {
+        $base_params['product_brand'] = $selected_brand;
     }
     if ( 'menu_order' !== $selected_order ) {
         $base_params['orderby'] = $selected_order;
