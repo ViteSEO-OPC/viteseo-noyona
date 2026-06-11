@@ -65,8 +65,13 @@ function noyona_send_robots_headers() {
 /* =================================================
  * SEO: Custom page values
  * ================================================= */
+function noyona_get_noindex_nofollow_robots() {
+    return 'noindex, nofollow';
+}
+
 function noyona_get_static_seo_pages() {
-    $index = 'index, follow';
+    $index            = 'index, follow';
+    $noindex_nofollow = noyona_get_noindex_nofollow_robots();
 
     return array(
         'home' => array(
@@ -169,13 +174,13 @@ function noyona_get_static_seo_pages() {
             'aliases'     => array( 'shipping-policy' ),
             'title'       => 'Noyona Essentials Shipping Policy | Delivery & Orders',
             'description' => 'Review the Noyona Essentials Shipping Policy. Learn about delivery options, order processing times, shipping fees, and trusted service for Filipino vegan cosmetics.',
-            'robots'      => $index,
+            'robots'      => $noindex_nofollow,
         ),
         'refund-policy' => array(
             'aliases'     => array( 'refund-policy' ),
             'title'       => 'Noyona Essentials Refund Policy | Returns & Customer Care',
             'description' => 'Review the Noyona Essentials Refund Policy. Learn about returns, refunds, and customer care support for vegan Filipino cosmetics rooted in nature.',
-            'robots'      => $index,
+            'robots'      => $noindex_nofollow,
         ),
         'products' => array(
             'aliases'     => array( 'products', 'product' ),
@@ -183,17 +188,47 @@ function noyona_get_static_seo_pages() {
             'description' => 'Shop Noyona Essentials products. Explore vegan, cruelty-free Filipino cosmetics rooted in nature, with trusted collections for face, lips, eyes, and hair care.',
             'robots'      => $index,
         ),
+        'cart' => array(
+            'aliases'     => array( 'cart' ),
+            'title'       => 'Noyona Essentials Cart | Your Order',
+            'description' => 'Review items in your Noyona Essentials cart before checkout.',
+            'robots'      => $noindex_nofollow,
+        ),
+        'checkout' => array(
+            'aliases'     => array( 'checkout' ),
+            'title'       => 'Noyona Essentials Checkout | Complete Your Order',
+            'description' => 'Complete your Noyona Essentials order securely.',
+            'robots'      => $noindex_nofollow,
+        ),
+        'preview' => array(
+            'aliases'     => array( 'preview' ),
+            'title'       => 'Noyona Essentials | Order Preview',
+            'description' => 'Review your Noyona Essentials order before placing it.',
+            'robots'      => $noindex_nofollow,
+        ),
         'account' => array(
             'aliases'     => array( 'account', 'accounts', 'my-account' ),
             'title'       => 'Noyona Essentials Account | Manage Your Cosmetics Profile',
             'description' => 'Access your Noyona Essentials account. Manage orders, track shipping, update details, and enjoy personalized service for vegan Filipino cosmetics rooted in nature.',
-            'robots'      => 'noindex, follow',
+            'robots'      => $noindex_nofollow,
+        ),
+        'login' => array(
+            'aliases'     => array( 'login' ),
+            'title'       => 'Noyona Essentials Login | Access Your Account',
+            'description' => 'Log in to your Noyona Essentials account to manage orders, track shipping, and shop vegan Filipino cosmetics.',
+            'robots'      => $noindex_nofollow,
+        ),
+        'register' => array(
+            'aliases'     => array( 'register' ),
+            'title'       => 'Noyona Essentials Register | Create Your Account',
+            'description' => 'Create your Noyona Essentials account to shop vegan, cruelty-free Filipino cosmetics and manage your profile.',
+            'robots'      => $noindex_nofollow,
         ),
         'terms' => array(
             'aliases'     => array( 'terms-of-service', 'terms-and-policies', 'terms' ),
             'title'       => 'Noyona Essentials Terms of Service | Policies & Customer Rights',
             'description' => 'Review the Noyona Essentials Terms of Service. Learn about customer rights, policies, and trusted guidelines for shopping vegan Filipino cosmetics rooted in nature.',
-            'robots'      => $index,
+            'robots'      => $noindex_nofollow,
         ),
         'coming-soon' => array(
             'aliases'     => array( 'coming-soon' ),
@@ -258,7 +293,16 @@ function noyona_get_custom_robots_content() {
         return 'noindex, follow';
     }
 
-    return noyona_get_current_static_seo_value( 'robots' );
+    $static_robots = noyona_get_current_static_seo_value( 'robots' );
+    if ( $static_robots ) {
+        return $static_robots;
+    }
+
+    if ( function_exists( 'is_account_page' ) && is_account_page() ) {
+        return noyona_get_noindex_nofollow_robots();
+    }
+
+    return '';
 }
 
 function noyona_is_rank_math_active() {
