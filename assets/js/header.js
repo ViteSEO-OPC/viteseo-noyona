@@ -2052,6 +2052,108 @@
     }
   }
 
+  function initShopBrandFilters() {
+    const panel = document.querySelector('#noyona-shop-filter-panel');
+    if (!panel || !window.noyonaHeader || !Array.isArray(window.noyonaHeader.shopProductBrands)) return;
+
+    const brands = window.noyonaHeader.shopProductBrands;
+    if (!brands.length || panel.querySelector('.noyona-shop-filter-section-brands')) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const selectedBrand = String(params.get('product_brand') || '').toLowerCase();
+    const section = document.createElement('section');
+    section.className = 'noyona-shop-filter-section noyona-shop-filter-section-brands';
+
+    const title = document.createElement('h5');
+    title.textContent = 'Brands';
+    section.appendChild(title);
+
+    const list = document.createElement('div');
+    list.className = 'noyona-shop-tag-radio-list';
+
+    const isPaginationKey = (key) =>
+      key === 'paged' || key === 'product-page' || key === 'search_page' || /^query-\d+-page$/.test(key);
+
+    const navigate = (brandSlug) => {
+      const nextParams = new URLSearchParams(window.location.search);
+      if (brandSlug) {
+        nextParams.set('product_brand', brandSlug);
+      } else {
+        nextParams.delete('product_brand');
+      }
+      Array.from(nextParams.keys()).forEach((key) => {
+        if (isPaginationKey(key)) {
+          nextParams.delete(key);
+        }
+      });
+
+      const query = nextParams.toString();
+      window.location.assign(window.location.pathname + (query ? '?' + query : ''));
+    };
+
+    const allLabel = document.createElement('label');
+    allLabel.className = 'noyona-shop-tag-radio' + (selectedBrand === '' ? ' is-active' : '');
+    const allInput = document.createElement('input');
+    allInput.type = 'radio';
+    allInput.name = 'noyona-product-brand';
+    allInput.value = '';
+    allInput.checked = selectedBrand === '';
+    allInput.addEventListener('change', () => {
+      if (!allInput.checked) return;
+      navigate('');
+    });
+    const allText = document.createElement('span');
+    allText.textContent = 'All';
+    allLabel.appendChild(allInput);
+    allLabel.appendChild(allText);
+    list.appendChild(allLabel);
+
+    brands.forEach((brand) => {
+      if (!brand || !brand.slug || !brand.name) return;
+
+      const slug = String(brand.slug).toLowerCase();
+      const isAvailable = Boolean(brand.hasProducts);
+      const isSelected = isAvailable && selectedBrand === slug;
+      const label = document.createElement('label');
+      label.className = 'noyona-shop-tag-radio'
+        + (isAvailable ? '' : ' is-disabled')
+        + (isSelected ? ' is-active' : '');
+
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'noyona-product-brand';
+      input.value = slug;
+      input.checked = isSelected;
+      input.disabled = !isAvailable;
+      if (!isAvailable) {
+        input.setAttribute('aria-disabled', 'true');
+      }
+
+      const text = document.createElement('span');
+      text.textContent = String(brand.name);
+
+      if (isAvailable) {
+        input.addEventListener('change', () => {
+          if (!input.checked) return;
+          navigate(slug);
+        });
+      }
+
+      label.appendChild(input);
+      label.appendChild(text);
+      list.appendChild(label);
+    });
+
+    section.appendChild(list);
+
+    const categories = panel.querySelector('.noyona-shop-categories');
+    if (categories) {
+      panel.insertBefore(section, categories);
+    } else {
+      panel.prepend(section);
+    }
+  }
+
   function initShopTagFilters() {
     const panel = document.querySelector('#noyona-shop-filter-panel');
     if (!panel || !window.noyonaHeader || !Array.isArray(window.noyonaHeader.shopProductTags)) return;
@@ -3614,6 +3716,7 @@
     initShopToolbarControlsPlacement();
     initShopArchiveViewToggle();
     initShopMobileCategoriesPlacement();
+    initShopBrandFilters();
     initShopTagFilters();
     initShopCategoryActiveByPath();
     initShopPriceFilter();
