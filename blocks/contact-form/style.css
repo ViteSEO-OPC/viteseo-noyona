@@ -14,7 +14,7 @@
 .contact-form__title {
     margin: 0 0 0.6rem;
     font-size: var(--wp--preset--font-size--h-1);
-    font-weight: 400;
+    font-weight: 700;
     color: #000000;
 }
 
@@ -48,6 +48,12 @@
     flex-direction: column;
     gap: 1.2rem;
     height: 100%;
+    /* Keep padding inside the column and let the grid item shrink instead of
+       forcing its border-box past the viewport at narrow widths (the default
+       grid `min-width: auto` otherwise prevents shrinking → right overflow). */
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .contact-form__card-top {
@@ -270,7 +276,12 @@
     font-family: var(--wp--preset--font-family--poppins);
     font-size: 16px;
     box-shadow: 0 10px 7.5px 0 rgba(0, 0, 0, 0.25);
-    white-space: nowrap;
+    /* Allow the label to wrap instead of being clipped at narrow widths
+       (was `nowrap`, which cut "View Store Locations" under ~430px). On
+       desktop the short label still fits on one line, so no visual change. */
+    white-space: normal;
+    max-width: 100%;
+    text-align: center;
     border: 1px solid var(--noyona-cta-primary-border);
     position: relative;
     overflow: hidden;
@@ -317,6 +328,11 @@
     gap: 1.2rem;
     height: auto;
     align-self: center;
+    /* Same containment as the card: padding stays inside the column and the
+       form can shrink within its grid track instead of overflowing right. */
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .contact-form__fields {
@@ -342,6 +358,11 @@
     font-size: var(--wp--preset--font-size--input);
     font-family: inherit;
     background: #fff;
+    /* Keep padding/border inside the field and never exceed the grid cell —
+       prevents inputs from forcing horizontal overflow at small widths. */
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .contact-form__field textarea {
@@ -697,5 +718,17 @@
 
     .contact-form__map-note {
         max-width: none;
+    }
+
+    /* Native fields fill the single column on small screens. */
+    .contact-form__field input,
+    .contact-form__field textarea {
+        width: 100%;
+    }
+
+    /* "View Store Locations" goes full-width and centered so its label is
+       never clipped (mirrors the submit button's full-width treatment). */
+    .contact-form__map-button {
+        width: 100%;
     }
 }

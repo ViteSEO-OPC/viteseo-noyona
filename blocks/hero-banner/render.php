@@ -134,6 +134,12 @@ $desktop_height = $desktop_height_raw !== '' ? $desktop_height_raw : '900px';
 
 $bg_color = $atts['backgroundColor'] ?: '#f7d0d8';
 $is_front_page = is_front_page();
+$page_template = function_exists( 'get_page_template_slug' ) ? get_page_template_slug() : '';
+$is_seo_landing_hero = is_front_page()
+    || is_page( array( 'about', 'about-us', 'blogs', 'lovial' ) )
+    || in_array( $page_template, array( 'page-about', 'page-blogs', 'page-lovial' ), true );
+$headline_plain = trim( wp_strip_all_tags( (string) $atts['titleLine'] ) );
+$has_decorative_title_markup = '' !== trim( (string) $atts['titleLine'] ) && (string) $atts['titleLine'] !== $headline_plain;
 $desktop_srcset = $bg_image_desktop_id
     ? wp_get_attachment_image_srcset( $bg_image_desktop_id, 'full' )
     : ( $bg_image_id ? wp_get_attachment_image_srcset( $bg_image_id, 'full' ) : '' );
@@ -223,24 +229,64 @@ if ( ! empty( $atts['searchEnabled'] ) ) {
     </picture>
     <div class="hero-banner__inner">
         <div class="hero-banner__content">
+            <?php if ( $is_seo_landing_hero && '' !== $headline_plain ) : ?>
+                <h1 class="visually-hidden"><?php echo esc_html( $headline_plain ); ?></h1>
+            <?php endif; ?>
+
             <?php if ( ! empty( $atts['eyebrow'] ) ) : ?>
                 <p class="hero-banner__eyebrow"><?php echo esc_html( $atts['eyebrow'] ); ?></p>
             <?php endif; ?>
 
-            <h1 class="hero-banner__title">
-                <span class="hero-banner__title-line">
-                    <?php
-                    echo wp_kses(
-                        $atts['titleLine'],
-                        array(
-                            'span' => array( 'class' => array() ),
-                            'em' => array(),
-                            'strong' => array(),
-                        )
-                    );
-                    ?>
-                </span>
-            </h1>
+            <?php if ( ! empty( $atts['titleLine'] ) ) : ?>
+                <?php if ( $is_seo_landing_hero ) : ?>
+                    <?php if ( $has_decorative_title_markup ) : ?>
+                        <p class="hero-banner__title" aria-hidden="true">
+                            <span class="hero-banner__title-line">
+                                <?php
+                                echo wp_kses(
+                                    $atts['titleLine'],
+                                    array(
+                                        'span' => array( 'class' => array() ),
+                                        'em' => array(),
+                                        'strong' => array(),
+                                    )
+                                );
+                                ?>
+                            </span>
+                        </p>
+                    <?php endif; ?>
+                <?php else : ?>
+                    <h1 class="hero-banner__title">
+                        <span class="hero-banner__title-line">
+                            <?php
+                            echo wp_kses(
+                                $atts['titleLine'],
+                                array(
+                                    'span' => array( 'class' => array() ),
+                                    'em' => array(),
+                                    'strong' => array(),
+                                )
+                            );
+                            ?>
+                        </span>
+                    </h1>
+                <?php endif; ?>
+            <?php elseif ( ! $is_seo_landing_hero ) : ?>
+                <h1 class="hero-banner__title">
+                    <span class="hero-banner__title-line">
+                        <?php
+                        echo wp_kses(
+                            $atts['titleLine'],
+                            array(
+                                'span' => array( 'class' => array() ),
+                                'em' => array(),
+                                'strong' => array(),
+                            )
+                        );
+                        ?>
+                    </span>
+                </h1>
+            <?php endif; ?>
 
             <p class="hero-banner__body"><?php echo esc_html( $atts['body'] ); ?></p>
 

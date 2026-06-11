@@ -49,23 +49,121 @@
     display: none;
 }
 
-.blog-list__filter-select {
-    border: 1px solid #dfb9bf;
-    background: #fff;
-    color: #333333;
-    padding: 0.55rem 1rem;
-    border-radius: 999px;
-    font-size: var(--wp--preset--font-size--body);
-    font-weight: 600;
-    font-family: var(--wp--preset--font-family--poppins);
-    min-width: min(420px, 100%);
+/* Custom category dropdown (mobile/tablet) — replaces the native <select>
+   so the open list matches the Noyona soft-pink card design. Closed surface
+   is a styled <summary>; open list is a custom <button> listbox panel. */
+.blog-list__filter-dropdown {
+    position: relative;
+    width: 100%;
+    max-width: min(420px, 100%);
 }
 
-.blog-list__filter-select:focus-visible {
+.blog-list__filter-summary {
+    list-style: none;
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.6rem 2.5rem 0.6rem 1rem;
+    border: 1px solid var(--noyona-color-pink-muted-rose);
+    border-radius: 16px;
+    background: #ffffff;
+    color: #333333;
+    font-family: var(--wp--preset--font-family--poppins);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.blog-list__filter-summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Custom pink chevron (flips when open). */
+.blog-list__filter-summary::after {
+    content: "";
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--noyona-color-pink-accent);
+    border-bottom: 2px solid var(--noyona-color-pink-accent);
+    transform: translateY(-65%) rotate(45deg);
+    transition: transform 0.2s ease;
+    pointer-events: none;
+}
+
+.blog-list__filter-dropdown[open] .blog-list__filter-summary::after {
+    transform: translateY(-35%) rotate(225deg);
+}
+
+.blog-list__filter-summary:hover,
+.blog-list__filter-dropdown[open] .blog-list__filter-summary {
+    border-color: var(--noyona-color-pink-accent);
+}
+
+.blog-list__filter-summary:focus-visible {
     outline: none;
-    box-shadow:
-        0 0 0 3px rgba(255, 255, 255, 0.9),
-        0 0 0 7px rgba(227, 11, 93, 0.25);
+    border-color: var(--noyona-color-pink-accent);
+    box-shadow: 0 0 0 3px rgba(217, 27, 97, 0.18);
+}
+
+/* Open list — white rounded card, soft shadow, aligned under the trigger. */
+.blog-list__filter-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: grid;
+    gap: 4px;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid var(--noyona-color-pink-light-blush);
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+    max-height: min(60vh, 320px);
+    overflow-y: auto;
+}
+
+.blog-list__filter-option {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem 0.85rem;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #333333;
+    font-family: var(--wp--preset--font-family--poppins);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.blog-list__filter-option:hover,
+.blog-list__filter-option:focus-visible {
+    outline: none;
+    background: var(--noyona-color-pink-light-blush);
+    color: var(--noyona-color-pink-accent);
+}
+
+.blog-list__filter-option.is-active {
+    background: var(--noyona-color-pink-light-blush);
+    color: var(--noyona-color-pink-accent);
+    font-weight: 700;
 }
 
 .blog-filter {
