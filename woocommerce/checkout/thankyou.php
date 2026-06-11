@@ -147,7 +147,6 @@ defined( 'ABSPATH' ) || exit;
 					var gateway = document.querySelector('.noyona-pay-card__gateway');
 					if (!gateway) return;
 
-					var timePattern = /\b\d{1,2}:\d{2}\b/;
 					var defaultExpirySeconds = 30 * 60; // Standard fallback expiry window: 30 minutes.
 					var activeTimers = [];
 
@@ -155,11 +154,15 @@ defined( 'ABSPATH' ) || exit;
 						if (!node || node.querySelector('.noyona-pay-expire-time')) {
 							return;
 						}
-						if (timePattern.test(String(node.textContent || ''))) {
-							return;
-						}
 
 						var totalSeconds = defaultExpirySeconds;
+						var expiryNode = node.querySelector('strong');
+						if (expiryNode) {
+							var expiryMs = Date.parse(String(expiryNode.textContent || '').trim());
+							if (!isNaN(expiryMs)) {
+								totalSeconds = Math.max(0, Math.floor((expiryMs - Date.now()) / 1000));
+							}
+						}
 						var timerNode = document.createElement('strong');
 						timerNode.className = 'noyona-pay-expire-time';
 						node.appendChild(document.createTextNode(' '));
@@ -187,7 +190,7 @@ defined( 'ABSPATH' ) || exit;
 							gateway.querySelectorAll('p, span, div, small, strong'),
 							function(node) {
 								var text = String(node.textContent || '').toLowerCase();
-								return text.indexOf('this qr code expires in') !== -1;
+								return text.indexOf('this qr code expires on') !== -1;
 							}
 						);
 						if (!expiryLabelNodes.length) return false;

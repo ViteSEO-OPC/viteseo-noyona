@@ -397,6 +397,20 @@ function noyona_qrph_cancel_timeout_seconds() {
  */
 add_action( 'woocommerce_order_status_on-hold', 'noyona_qrph_schedule_cancel', 10, 2 );
 add_action( 'woocommerce_order_status_pending', 'noyona_qrph_schedule_cancel', 10, 2 );
+add_action( 'woocommerce_checkout_order_processed', 'noyona_qrph_schedule_cancel_on_checkout_processed', 20, 3 );
+
+/**
+ * Schedule QR Ph cancel check after checkout (new orders skip status transition hooks).
+ *
+ * @param int      $order_id    Order ID.
+ * @param array    $posted_data Posted checkout data.
+ * @param WC_Order $order       Created order.
+ * @return void
+ */
+function noyona_qrph_schedule_cancel_on_checkout_processed( $order_id, $posted_data, $order ) {
+	noyona_qrph_schedule_cancel( $order_id, $order );
+}
+
 function noyona_qrph_schedule_cancel( $order_id, $order = null ) {
 	$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
 	if ( ! $order || ! noyona_order_is_qr_payment( $order ) || $order->is_paid() ) {
