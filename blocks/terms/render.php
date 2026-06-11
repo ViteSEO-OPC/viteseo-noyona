@@ -4,7 +4,7 @@
  */
 
 $defaults = array(
-    'heading'             => 'Terms & Policy',
+    'heading'             => '',
     'subheading'          => 'At Noyona Cosmetics and Skin Care Products OPC, we prioritize transparency and trust by providing clear guidelines on how we handle your orders, protect your rights, and ensure a seamless shopping experience.',
     'breadcrumbRootLabel' => 'Terms & Policy',
     'breadcrumbRootUrl'   => '/terms/',
