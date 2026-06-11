@@ -2060,7 +2060,25 @@
     if (!brands.length || panel.querySelector('.noyona-shop-filter-section-brands')) return;
 
     const params = new URLSearchParams(window.location.search);
-    const selectedBrand = String(params.get('product_brand') || '').toLowerCase();
+    const getSelectedBrandSlugs = () => {
+      const slugs = [];
+      params.getAll('product_brand').forEach((value) => slugs.push(value));
+      params.getAll('product_brand[]').forEach((value) => slugs.push(value));
+      params.forEach((value, key) => {
+        if (/^product_brand\[\d+\]$/.test(key)) {
+          slugs.push(value);
+        }
+      });
+      const combined = slugs.join(',');
+      return new Set(
+        combined
+          .split(',')
+          .map((value) => String(value).trim().toLowerCase())
+          .filter(Boolean)
+      );
+    };
+
+    const selectedBrands = getSelectedBrandSlugs();
     const section = document.createElement('section');
     section.className = 'noyona-shop-filter-section noyona-shop-filter-section-brands';
 
@@ -2074,12 +2092,16 @@
     const isPaginationKey = (key) =>
       key === 'paged' || key === 'product-page' || key === 'search_page' || /^query-\d+-page$/.test(key);
 
-    const navigate = (brandSlug) => {
+    const navigate = (checkedSlugs) => {
       const nextParams = new URLSearchParams(window.location.search);
-      if (brandSlug) {
-        nextParams.set('product_brand', brandSlug);
-      } else {
-        nextParams.delete('product_brand');
+      nextParams.delete('product_brand');
+      Array.from(nextParams.keys()).forEach((key) => {
+        if (key.startsWith('product_brand[')) {
+          nextParams.delete(key);
+        }
+      });
+      if (checkedSlugs.length) {
+        nextParams.set('product_brand', checkedSlugs.join(','));
       }
       Array.from(nextParams.keys()).forEach((key) => {
         if (isPaginationKey(key)) {
@@ -2091,36 +2113,19 @@
       window.location.assign(window.location.pathname + (query ? '?' + query : ''));
     };
 
-    const allLabel = document.createElement('label');
-    allLabel.className = 'noyona-shop-tag-radio' + (selectedBrand === '' ? ' is-active' : '');
-    const allInput = document.createElement('input');
-    allInput.type = 'radio';
-    allInput.name = 'noyona-product-brand';
-    allInput.value = '';
-    allInput.checked = selectedBrand === '';
-    allInput.addEventListener('change', () => {
-      if (!allInput.checked) return;
-      navigate('');
-    });
-    const allText = document.createElement('span');
-    allText.textContent = 'All';
-    allLabel.appendChild(allInput);
-    allLabel.appendChild(allText);
-    list.appendChild(allLabel);
-
     brands.forEach((brand) => {
       if (!brand || !brand.slug || !brand.name) return;
 
       const slug = String(brand.slug).toLowerCase();
       const isAvailable = Boolean(brand.hasProducts);
-      const isSelected = isAvailable && selectedBrand === slug;
+      const isSelected = isAvailable && selectedBrands.has(slug);
       const label = document.createElement('label');
       label.className = 'noyona-shop-tag-radio'
         + (isAvailable ? '' : ' is-disabled')
         + (isSelected ? ' is-active' : '');
 
       const input = document.createElement('input');
-      input.type = 'radio';
+      input.type = 'checkbox';
       input.name = 'noyona-product-brand';
       input.value = slug;
       input.checked = isSelected;
@@ -2134,8 +2139,11 @@
 
       if (isAvailable) {
         input.addEventListener('change', () => {
-          if (!input.checked) return;
-          navigate(slug);
+          label.classList.toggle('is-active', input.checked);
+          const checkedSlugs = Array.from(
+            list.querySelectorAll('input[type="checkbox"]:checked')
+          ).map((item) => String(item.value).toLowerCase());
+          navigate(checkedSlugs);
         });
       }
 

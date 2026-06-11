@@ -521,7 +521,7 @@ function noyona_render_shop_archive_product_cards( $block_content, $block ) {
     if ( '' !== $selected_tag && ! term_exists( $selected_tag, 'product_tag' ) ) {
         $selected_tag = '';
     }
-    $selected_brand = noyona_get_selected_product_brand_slug();
+    $selected_brand = noyona_get_selected_product_brand_slugs();
 
     $has_price_range = null !== $min_price || null !== $max_price;
     if ( '' !== $selected_tag ) {
