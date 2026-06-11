@@ -365,7 +365,7 @@ body.has-scrolled-header .site-logo-text {
   position: absolute;
   top: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(8px);
   background: #fff;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -374,7 +374,13 @@ body.has-scrolled-header .site-logo-text {
   min-width: 180px;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s ease;
+  pointer-events: none;
+  /* CLOSE: fade/slide for 0.24s, then snap visibility:hidden instantly AFTER
+     (visibility delayed by the full duration). This keeps the panel visible
+     through the entire fade-out so it never flashes/snaps mid-close. */
+  transition: opacity 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 0.24s;
   z-index: 100;
 }
 
@@ -382,7 +388,27 @@ body.has-scrolled-header .site-logo-text {
 .nav-item:focus-within .dropdown-menu {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(5px);
+  pointer-events: auto;
+  /* Settles flush against the nav item (translateY(0)) — no persistent gap,
+     so moving the mouse from item to panel never drops :hover. */
+  transform: translateX(-50%) translateY(0);
+  /* OPEN: visibility flips to visible immediately (0s, no delay) so opacity
+     and transform animate in from a fully-rendered panel. */
+  transition: opacity 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 0s;
+}
+
+/* Invisible hover bridge: spans the small gap above the panel so fast or
+   diagonal mouse moves from the trigger into the menu never drop :hover
+   (no flicker). Inert when closed because the panel is pointer-events:none. */
+.nav-item.has-dropdown .dropdown-menu::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
 }
 
 .dropdown-menu li a {
@@ -1854,6 +1880,10 @@ body:not(.logged-in) .header-account--logged-out {
     top: 0;
     right: 0;
     left: auto;
+    /* border-box so the 2rem L/R padding fits INSIDE the width instead of
+       being added outside it — without this the panel renders ~64px wider
+       than `width`, overflowing the viewport at 376–400px (e.g. 386px). */
+    box-sizing: border-box;
     width: min(360px, calc(100vw - 32px));
     max-width: calc(100vw - 32px);
     height: 100vh;
@@ -1961,6 +1991,7 @@ body:not(.logged-in) .header-account--logged-out {
   .nav-item.is-open .dropdown-menu {
     max-height: 520px;
     padding: 0.5rem 0;
+    pointer-events: auto;
   }
 
   .dropdown-menu li a {
@@ -2255,63 +2286,76 @@ body:has(.noyona-lovial-page) .header-brand-strip .noyona-brand-strip-fallback__
 }
 
 /* =========================================================
-   COMPACT MOBILE HEADER (<=375px) — two-row layout
-   Row 1: compact mobile logo (noyona-mobile-logo.webp), centered.
-   Row 2: controls on ONE horizontal row, in DOM/order:
-          search, wishlist, cart, location, hamburger.
-   This is the ONLY range that uses the compact mobile mark / stacked
-   layout. From 376px up the header is a single row with the Noyona
-   wordmark left-aligned (see the 376–767px and tablet blocks).
+   SMALL-SCREEN LOGO (<=400px) — use the compact mobile mark
+   At 400px and below the header swaps from the wordmark
+   (noyona-logo.webp, .site-logo-img--desktop) to the square mobile
+   mark (noyona-mobile-logo.webp, .site-logo-img--mobile). 401px and
+   up keep the existing wordmark behavior. Display is switched in CSS
+   only; header.js just normalizes each img's src (never its display),
+   so this does not affect the logo normalization logic. Lovial pages
+   are unaffected (their body:has() rules above are more specific).
 ========================================================= */
-@media (max-width: 375px) {
-  /* Compact mark swaps in here only. */
+@media (max-width: 400px) {
   .site-logo-img--desktop {
     display: none !important;
   }
   .site-logo-img--mobile {
     display: inline-block !important;
-    width: 50px;
-    height: 50px;
+    width: clamp(42px, 13vw, 50px);
+    height: auto;
   }
+}
 
-  /* Allow two rows; center both the logo row and the controls row. */
+/* =========================================================
+   COMPACT MOBILE HEADER (<=375px) — single row, responsive scaling
+   Keeps the logo left + the five controls (search, wishlist, cart,
+   location, hamburger) on ONE horizontal row down to 320px by scaling
+   the icon tap targets, gaps and padding with clamp() — instead of
+   wrapping the logo onto its own row. The logo ASSET is governed by
+   the <=400px block above (compact mobile mark). From 376px up the
+   row layout is unchanged.
+========================================================= */
+@media (max-width: 375px) {
+  /* One horizontal row: logo left, controls right. No wrap. */
   .site-header {
-    flex-wrap: wrap !important;
-    justify-content: center !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
     align-items: center;
-    column-gap: 0.4rem;
-    row-gap: 0.5rem;
+    gap: clamp(3px, 1.2vw, 8px);
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
   }
 
-  /* Row 1 — logo centered, full width so the controls drop below it. */
+  /* Logo can shrink but never forces a second row. */
   .site-logo {
-    order: 1;
-    flex: 0 0 100%;
-    display: flex !important;
-    justify-content: center;
+    flex: 0 1 auto;
+    min-width: 0;
     margin: 0;
   }
 
-  /* Row 2 — search, wishlist, cart, location (icons keep DOM order). */
+  /* Controls cluster stays tight on the same row (DOM order preserved). */
   .header-icons {
-    order: 2;
-    margin-left: 0 !important;
     flex: 0 0 auto;
-    column-gap: 0.4rem;
+    margin-left: auto !important;
+    column-gap: clamp(2px, 1.4vw, 8px);
     box-sizing: border-box;
   }
 
-  /* Row 2 — hamburger is last and stays on the same line (no wrap). */
   .main-nav {
-    order: 3;
     flex: 0 0 auto;
   }
 
-  /* Match the 48px icon targets so the row reads as one even strip. */
+  /* Scale the icon tap targets just enough to fit five controls + the
+     wordmark at 320px, staying a comfortable size (>=38px) — overrides
+     the flat 48px from the <=767px block above. */
+  .header-icon,
+  .header-mini-cart .wc-block-mini-cart__button,
   .mobile-menu-toggle {
-    width: 48px;
-    height: 48px;
-    flex: 0 0 48px;
+    width: clamp(38px, 12vw, 46px);
+    height: clamp(38px, 12vw, 46px);
+  }
+  .mobile-menu-toggle {
+    flex: 0 0 auto;
   }
 
   /* Drawer always opens from the right, inside the viewport — never

@@ -181,25 +181,52 @@ if ( ! empty( $category_counts ) ) {
                     <?php endforeach; ?> 
                 </div>
 
-                <label class="blog-list__filter-select-wrap" aria-label="Filter posts by category">
-                    <select class="blog-list__filter-select">
-                        <?php foreach ( $filter_options as $opt_index => $opt ) : ?>
-                            <?php
-                            $label = isset( $opt['label'] ) ? (string) $opt['label'] : '';
-                            $value = isset( $opt['value'] ) ? (string) $opt['value'] : '';
-                            $active = ( '' !== trim( $active_filter_value ) )
-                                ? ( $value === $active_filter_value )
-                                : ( 0 === $opt_index );
-                            if ( '' === trim( $label ) || '' === trim( $value ) ) {
-                                continue;
-                            }
-                            ?>
-                            <option value="<?php echo esc_attr( $value ); ?>"<?php echo $active ? ' selected' : ''; ?>>
-                                <?php echo esc_html( $label ); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </label>
+                <?php
+                // Resolve the label of the active option for the dropdown trigger.
+                // (JS re-syncs this on init via setActiveFilter, so this is just
+                // the initial server-rendered label.)
+                $blog_active_label = '';
+                foreach ( $filter_options as $opt_index => $opt ) {
+                    $opt_label = isset( $opt['label'] ) ? (string) $opt['label'] : '';
+                    $opt_value = isset( $opt['value'] ) ? (string) $opt['value'] : '';
+                    if ( '' === trim( $opt_label ) || '' === trim( $opt_value ) ) {
+                        continue;
+                    }
+                    $opt_is_active = ( '' !== trim( $active_filter_value ) )
+                        ? ( $opt_value === $active_filter_value )
+                        : ( '' === $blog_active_label );
+                    if ( $opt_is_active && '' === $blog_active_label ) {
+                        $blog_active_label = $opt_label;
+                    }
+                }
+                ?>
+                <div class="blog-list__filter-select-wrap">
+                    <details class="blog-list__filter-dropdown">
+                        <summary class="blog-list__filter-summary" aria-label="Filter posts by category" aria-haspopup="listbox">
+                            <span class="blog-list__filter-summary-label"><?php echo esc_html( $blog_active_label ); ?></span>
+                        </summary>
+                        <div class="blog-list__filter-panel" role="listbox" aria-label="Filter posts by category">
+                            <?php foreach ( $filter_options as $opt_index => $opt ) : ?>
+                                <?php
+                                $label = isset( $opt['label'] ) ? (string) $opt['label'] : '';
+                                $value = isset( $opt['value'] ) ? (string) $opt['value'] : '';
+                                $active = ( '' !== trim( $active_filter_value ) )
+                                    ? ( $value === $active_filter_value )
+                                    : ( 0 === $opt_index );
+                                if ( '' === trim( $label ) || '' === trim( $value ) ) {
+                                    continue;
+                                }
+                                ?>
+                                <button type="button" class="blog-list__filter-option<?php echo $active ? ' is-active' : ''; ?>"
+                                    role="option"
+                                    data-blog-filter="<?php echo esc_attr( $value ); ?>"
+                                    aria-selected="<?php echo $active ? 'true' : 'false'; ?>">
+                                    <?php echo esc_html( $label ); ?>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                    </details>
+                </div>
             <?php endif; ?>
 
             <!-- <div class="blog-list__sort">

@@ -77,6 +77,10 @@
 
 .faq-list__search-input {
   flex: 1;
+  /* Allow the input to shrink inside the non-wrapping flex row. Without this
+     its default `min-width: auto` keeps it at the intrinsic search-input
+     width (~170-200px), which + the button overflows the row under ~430px. */
+  min-width: 0;
   border: none;
   background: transparent;
   padding: 0.55rem 0.8rem;

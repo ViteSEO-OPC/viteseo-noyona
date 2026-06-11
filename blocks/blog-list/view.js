@@ -53,6 +53,9 @@
         const navButtons = root.querySelectorAll('.blog-list__nav');
         const filterButtons = Array.from(root.querySelectorAll('.blog-filter[data-blog-filter]'));
         const filterSelect = root.querySelector('.blog-list__filter-select');
+        const filterDropdown = root.querySelector('.blog-list__filter-dropdown');
+        const filterSummaryLabel = root.querySelector('.blog-list__filter-summary-label');
+        const filterOptions = Array.from(root.querySelectorAll('.blog-list__filter-option[data-blog-filter]'));
         const shareButtons = Array.from(root.querySelectorAll('.blog-card__save[data-share-url]'));
         const shareModal = root.querySelector('.blog-share-modal');
         const shareHint = shareModal ? shareModal.querySelector('.blog-share-modal__hint') : null;
@@ -183,6 +186,15 @@
             if (filterSelect && filterSelect.value !== filterValue) {
                 filterSelect.value = filterValue;
             }
+            // Sync the custom dropdown: selected option state + trigger label.
+            filterOptions.forEach((opt) => {
+                const isActive = opt.dataset.blogFilter === filterValue;
+                opt.classList.toggle('is-active', isActive);
+                opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                if (isActive && filterSummaryLabel) {
+                    filterSummaryLabel.textContent = opt.textContent.trim();
+                }
+            });
 
             activeFilterValue = filterValue;
             applyFilters();
@@ -206,6 +218,34 @@
         }
         if (filterSelect) {
             filterSelect.addEventListener('change', () => setActiveFilter(filterSelect.value || ''));
+        }
+        // Custom dropdown: selecting an option filters, then closes the panel.
+        if (filterOptions.length) {
+            filterOptions.forEach((opt) => {
+                opt.addEventListener('click', () => {
+                    setActiveFilter(opt.dataset.blogFilter || '');
+                    if (filterDropdown) {
+                        filterDropdown.removeAttribute('open');
+                    }
+                });
+            });
+        }
+        // Close the custom dropdown on outside click and Escape.
+        if (filterDropdown) {
+            document.addEventListener('click', (event) => {
+                if (filterDropdown.hasAttribute('open') && !filterDropdown.contains(event.target)) {
+                    filterDropdown.removeAttribute('open');
+                }
+            });
+            filterDropdown.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && filterDropdown.hasAttribute('open')) {
+                    filterDropdown.removeAttribute('open');
+                    const summary = filterDropdown.querySelector('summary');
+                    if (summary) {
+                        summary.focus();
+                    }
+                }
+            });
         }
 
         // Initialize with whatever is marked active in markup; fallback to first available filter.
