@@ -94,9 +94,9 @@ $allowed_heading = array(
 <section class="wp-block-noyona-contact-form contact-form alignwide">
     <div class="contact-form__header">
         <?php if (!empty($heading)): ?>
-            <h2 class="contact-form__title">
+            <h1 class="contact-form__title">
                 <?php echo wp_kses($heading, $allowed_heading); ?>
-            </h2>
+            </h1>
         <?php endif; ?>
         <?php if (!empty($subheading)): ?>
             <p class="contact-form__subtitle"><?php echo esc_html($subheading); ?></p>

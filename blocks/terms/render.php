@@ -4,7 +4,7 @@
  */
 
 $defaults = array(
-    'heading'             => 'Terms & Policy',
+    'heading'             => '',
     'subheading'          => 'At Noyona Cosmetics and Skin Care Products OPC, we prioritize transparency and trust by providing clear guidelines on how we handle your orders, protect your rights, and ensure a seamless shopping experience.',
     'breadcrumbRootLabel' => 'Terms & Policy',
     'breadcrumbRootUrl'   => '/terms/',
@@ -150,9 +150,9 @@ $toc_panel_id = uniqid( 'terms-toc-panel-' );
             </aside>
 
             <div class="terms__content">
-                <?php if ( ! empty( $atts['contentTitle'] ) ) : ?>
+                <!-- <?php if ( ! empty( $atts['contentTitle'] ) ) : ?>
                     <h2 class="terms__content-title"><?php echo esc_html( $atts['contentTitle'] ); ?></h2>
-                <?php endif; ?>
+                <?php endif; ?> -->
 
                 <?php if ( ! empty( $intro ) ) : ?>
                     <div class="terms__intro">
@@ -180,7 +180,7 @@ $toc_panel_id = uniqid( 'terms-toc-panel-' );
                             ?>
                             <section class="terms__section" id="<?php echo esc_attr( $section_id ); ?>">
                                 <?php if ( $section_title ) : ?>
-                                    <h3 class="terms__section-title"><?php echo esc_html( $section_title ); ?></h3>
+                                    <h2 class="terms__section-title"><?php echo esc_html( $section_title ); ?></h2>
                                 <?php endif; ?>
 
                                 <?php foreach ( $paragraphs as $paragraph ) : ?>

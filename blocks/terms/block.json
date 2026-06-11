@@ -13,7 +13,7 @@
   "attributes": {
     "heading": {
       "type": "string",
-      "default": "Terms & Policy"
+      "default": ""
     },
     "subheading": {
       "type": "string",
