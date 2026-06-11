@@ -256,6 +256,12 @@ function noyona_enforce_checkout_step_flow() {
             wp_safe_redirect( $cart_url );
             exit;
         }
+
+        if ( $order->has_status( array( 'cancelled', 'refunded' ) ) ) {
+            wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
+            exit;
+        }
+
         return;
     }
 

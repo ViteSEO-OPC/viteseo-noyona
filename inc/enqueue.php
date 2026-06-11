@@ -167,6 +167,9 @@ function woocom_ct_enqueue_assets() {
             }
         }
     }
+    if ( '' === $shop_price_category_slug && function_exists( 'noyona_get_shop_route_category_slug_from_path' ) ) {
+        $shop_price_category_slug = noyona_get_shop_route_category_slug_from_path();
+    }
 
     $request_post_type = get_query_var( 'post_type' );
     $request_post_type = is_array( $request_post_type ) ? reset( $request_post_type ) : $request_post_type;
@@ -176,9 +179,7 @@ function woocom_ct_enqueue_assets() {
             || ( isset( $_GET['post_type'] ) && 'product' === sanitize_key( wp_unslash( $_GET['post_type'] ) ) )
         );
 
-    $is_shop_archive = ( function_exists( 'is_shop' ) && is_shop() )
-        || is_tax( 'product_cat' )
-        || '' !== $shop_price_category_slug
+    $is_shop_archive = ( function_exists( 'noyona_is_shop_route_request' ) && noyona_is_shop_route_request() )
         || $is_product_search;
 
     if ( $is_shop_archive && class_exists( 'WooCommerce' ) ) {

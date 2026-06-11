@@ -211,39 +211,64 @@ function noyona_get_shop_category_page_slugs() {
  * Active product_cat slug for the current shop/search filter context.
  */
 function noyona_get_shop_filter_brand_slugs() {
-    return array( 'lovial', 'noyona' );
+    return array( 'noyona', 'lovial' );
 }
 
 /**
- * Active product_brand slug for shop/search filters, or '' for All.
+ * Selected product_brand slugs for shop/search filters, or empty when none.
+ *
+ * @return string[]
  */
-function noyona_get_selected_product_brand_slug() {
+function noyona_get_selected_product_brand_slugs() {
     if ( ! taxonomy_exists( 'product_brand' ) ) {
-        return '';
+        return array();
     }
 
-    $slug = isset( $_GET['product_brand'] ) ? sanitize_key( wp_unslash( $_GET['product_brand'] ) ) : '';
-    if ( '' === $slug ) {
-        return '';
+    $brand_param = isset( $_GET['product_brand'] ) ? wp_unslash( $_GET['product_brand'] ) : array();
+    if ( is_array( $brand_param ) ) {
+        $brand_values = $brand_param;
+    } else {
+        $brand_values = '' === trim( (string) $brand_param )
+            ? array()
+            : preg_split( '/\s*,\s*/', (string) $brand_param );
     }
 
-    if ( ! in_array( $slug, noyona_get_shop_filter_brand_slugs(), true ) ) {
-        return '';
+    $allowed  = noyona_get_shop_filter_brand_slugs();
+    $selected = array();
+
+    foreach ( $brand_values as $slug ) {
+        $slug = sanitize_key( (string) $slug );
+        if ( '' === $slug || ! in_array( $slug, $allowed, true ) ) {
+            continue;
+        }
+        if ( ! term_exists( $slug, 'product_brand' ) ) {
+            continue;
+        }
+        $selected[] = $slug;
     }
 
-    if ( ! term_exists( $slug, 'product_brand' ) ) {
-        return '';
-    }
-
-    return $slug;
+    return array_values( array_unique( $selected ) );
 }
 
 /**
- * Append a product_brand slug filter to WP_Query or wc_get_products args.
+ * Append product_brand slug filters to WP_Query or wc_get_products args.
+ *
+ * @param array        $args        Query args.
+ * @param string|array $brand_slugs One slug or list of slugs; empty applies no filter.
  */
-function noyona_apply_product_brand_to_query_args( $args, $brand_slug ) {
-    $brand_slug = sanitize_key( (string) $brand_slug );
-    if ( '' === $brand_slug || ! taxonomy_exists( 'product_brand' ) ) {
+function noyona_apply_product_brand_to_query_args( $args, $brand_slugs ) {
+    $brand_slugs = array_values(
+        array_filter(
+            array_map(
+                static function ( $slug ) {
+                    return sanitize_key( (string) $slug );
+                },
+                (array) $brand_slugs
+            )
+        )
+    );
+
+    if ( empty( $brand_slugs ) || ! taxonomy_exists( 'product_brand' ) ) {
         return $args;
     }
 
@@ -254,7 +279,8 @@ function noyona_apply_product_brand_to_query_args( $args, $brand_slug ) {
     $args['tax_query'][] = array(
         'taxonomy' => 'product_brand',
         'field'    => 'slug',
-        'terms'    => array( $brand_slug ),
+        'terms'    => $brand_slugs,
+        'operator' => 'IN',
     );
 
     if ( count( $args['tax_query'] ) > 1 ) {
@@ -262,6 +288,33 @@ function noyona_apply_product_brand_to_query_args( $args, $brand_slug ) {
     }
 
     return $args;
+}
+
+function noyona_get_shop_route_category_slug_from_path() {
+    $path = trim( (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ), '/' );
+    if ( ! preg_match( '#^shop/([^/]+)(?:/page/\d+)?/?$#', $path, $matches ) ) {
+        return '';
+    }
+
+    $candidate = sanitize_key( (string) $matches[1] );
+    if ( in_array( $candidate, noyona_get_shop_category_page_slugs(), true ) ) {
+        return $candidate;
+    }
+
+    return '';
+}
+
+function noyona_is_shop_route_request() {
+    if ( ( function_exists( 'is_shop' ) && is_shop() ) || is_tax( 'product_cat' ) ) {
+        return true;
+    }
+
+    $path = trim( (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ), '/' );
+    if ( 'shop' === $path ) {
+        return true;
+    }
+
+    return '' !== noyona_get_shop_route_category_slug_from_path();
 }
 
 function noyona_get_current_shop_filter_category_slug() {
@@ -289,7 +342,7 @@ function noyona_get_current_shop_filter_category_slug() {
         }
     }
 
-    return '';
+    return noyona_get_shop_route_category_slug_from_path();
 }
 
 /**
@@ -1180,7 +1233,7 @@ function noyona_render_product_search_page_shortcode() {
     $query_text     = trim( (string) $query_text );
     $selected_cat    = isset( $_GET['product_cat'] ) ? sanitize_key( wp_unslash( $_GET['product_cat'] ) ) : '';
     $selected_tag    = isset( $_GET['product_tag'] ) ? sanitize_key( wp_unslash( $_GET['product_tag'] ) ) : '';
-    $selected_brand  = noyona_get_selected_product_brand_slug();
+    $selected_brand  = noyona_get_selected_product_brand_slugs();
     $selected_order = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
     $min_price      = isset( $_GET['min_price'] ) && '' !== (string) $_GET['min_price'] ? floatval( wp_unslash( $_GET['min_price'] ) ) : null;
     $max_price      = isset( $_GET['max_price'] ) && '' !== (string) $_GET['max_price'] ? floatval( wp_unslash( $_GET['max_price'] ) ) : null;
@@ -1322,11 +1375,12 @@ function noyona_render_product_search_page_shortcode() {
             'terms'    => array( $selected_tag ),
         );
     }
-    if ( '' !== $selected_brand ) {
+    if ( ! empty( $selected_brand ) ) {
         $tax_query[] = array(
             'taxonomy' => 'product_brand',
             'field'    => 'slug',
-            'terms'    => array( $selected_brand ),
+            'terms'    => $selected_brand,
+            'operator' => 'IN',
         );
     }
     if ( ! empty( $tax_query ) ) {
@@ -1349,8 +1403,8 @@ function noyona_render_product_search_page_shortcode() {
     if ( '' !== $selected_tag ) {
         $base_params['product_tag'] = $selected_tag;
     }
-    if ( '' !== $selected_brand ) {
-        $base_params['product_brand'] = $selected_brand;
+    if ( ! empty( $selected_brand ) ) {
+        $base_params['product_brand'] = implode( ',', $selected_brand );
     }
     if ( 'menu_order' !== $selected_order ) {
         $base_params['orderby'] = $selected_order;
