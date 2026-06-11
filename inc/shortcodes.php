@@ -2441,7 +2441,7 @@ function noyona_render_account_page_shortcode() {
                                 $contact_url = home_url( '/contact/' );
                                 $is_to_pay_status = in_array( $status_key, array( 'pending', 'on-hold', 'failed', 'to-pay' ), true );
                                 $invoice_url      = '';
-                                if ( ! $is_to_pay_status ) {
+                                if ( 'completed' === $status_key ) {
                                     $invoice_url = wp_nonce_url(
                                         add_query_arg(
                                             array(
@@ -3916,9 +3916,8 @@ function noyona_download_einvoice_handler() {
         wp_die( esc_html__( 'You are not allowed to download this invoice.', 'noyona-childtheme' ), esc_html__( 'Unauthorized', 'noyona-childtheme' ), array( 'response' => 403 ) );
     }
 
-    $order_status = sanitize_key( (string) $order->get_status() );
-    if ( in_array( $order_status, array( 'pending', 'on-hold', 'failed', 'to-pay' ), true ) ) {
-        wp_die( esc_html__( 'E-invoices are available after payment is completed.', 'noyona-childtheme' ), esc_html__( 'Invoice unavailable', 'noyona-childtheme' ), array( 'response' => 403 ) );
+    if ( ! $order->has_status( 'completed' ) ) {
+        wp_die( esc_html__( 'E-invoices are available for completed orders only.', 'noyona-childtheme' ), esc_html__( 'Invoice unavailable', 'noyona-childtheme' ), array( 'response' => 403 ) );
     }
 
     // PDF generator (Dompdf) — loaded from the theme's Composer vendor dir.

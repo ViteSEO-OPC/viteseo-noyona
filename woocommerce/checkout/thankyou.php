@@ -406,6 +406,36 @@ defined( 'ABSPATH' ) || exit;
 						<span class="noyona-done-actions__label"><?php esc_html_e( 'Track Order', 'noyona' ); ?></span>
 					</a>
 				</div>
+			<?php elseif ( $order->has_status( 'cancelled' ) ) : ?>
+				<section class="noyona-pay-hero noyona-pay-hero--received">
+					<div class="noyona-pay-hero__icon" aria-hidden="true">
+						<i class="fa-solid fa-circle-xmark"></i>
+					</div>
+					<h1 class="noyona-pay-hero__title"><?php esc_html_e( 'Order Cancelled', 'noyona' ); ?></h1>
+					<p class="noyona-pay-hero__subtitle">
+						<?php esc_html_e( 'This order was cancelled because the payment was not completed in time.', 'noyona' ); ?>
+					</p>
+				</section>
+
+				<section class="noyona-pay-meta" aria-label="<?php esc_attr_e( 'Order summary', 'noyona' ); ?>">
+					<div class="noyona-pay-meta__item">
+						<span class="noyona-pay-meta__label"><?php esc_html_e( 'Order Number', 'noyona' ); ?></span>
+						<strong class="noyona-pay-meta__value"><?php echo esc_html( $order->get_order_number() ); ?></strong>
+					</div>
+					<div class="noyona-pay-meta__item">
+						<span class="noyona-pay-meta__label"><?php esc_html_e( 'Date', 'noyona' ); ?></span>
+						<strong class="noyona-pay-meta__value"><?php echo esc_html( date_i18n( 'M j, Y', $order_created ) ); ?></strong>
+					</div>
+				</section>
+
+				<div class="noyona-done-actions">
+					<a class="noyona-done-actions__btn noyona-done-actions__btn--primary" href="<?php echo esc_url( $shop_url ); ?>">
+						<span class="noyona-done-actions__label"><?php esc_html_e( 'Continue Shopping', 'noyona' ); ?></span>
+					</a>
+					<a class="noyona-done-actions__btn noyona-done-actions__btn--outline" href="<?php echo esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' ) ); ?>">
+						<span class="noyona-done-actions__label"><?php esc_html_e( 'My Account', 'noyona' ); ?></span>
+					</a>
+				</div>
 			<?php else : ?>
 				<section class="noyona-pay-hero noyona-pay-hero--received">
 					<div class="noyona-pay-hero__icon" aria-hidden="true">
