@@ -73,12 +73,13 @@ function woocom_ct_enqueue_assets() {
         file_exists( $header_css_path ) ? (string) filemtime( $header_css_path ) : wp_get_theme()->get( 'Version' )
     );
 
-    // Footer CSS (assets/css/footer.css)
+    // Footer CSS (assets/css/footer.css) — filemtime-versioned so edits bust browser cache.
+    $footer_css_path = get_stylesheet_directory() . '/assets/css/footer.css';
     wp_enqueue_style(
         'woocom-ct-footer',
         get_stylesheet_directory_uri() . '/assets/css/footer.css',
         array( 'woocom-ct-style' ),
-        wp_get_theme()->get( 'Version' )
+        file_exists( $footer_css_path ) ? (string) filemtime( $footer_css_path ) : wp_get_theme()->get( 'Version' )
     );
 
     // Register Product-gatherer assets and load only where needed.
