@@ -36,6 +36,12 @@ if (!$bg) {
     $bg = '#EFB5BE';
 }
 
+$page_template = function_exists('get_page_template_slug') ? get_page_template_slug() : '';
+$is_lovial_page = is_page('lovial') || 'page-lovial' === $page_template;
+$style_attr = $is_lovial_page
+    ? ''
+    : '--values-strip-bg: ' . esc_attr($bg) . ';';
+
 if (empty($items)) {
     if (is_admin()) {
         echo '<div class="values-strip-placeholder">Add values via the block attributes.</div>';
@@ -43,7 +49,7 @@ if (empty($items)) {
     return;
 }
 ?>
-<section class="wp-block-noyona-values-strip values-strip alignfull" style="--values-strip-bg: <?php echo esc_attr($bg); ?>;">
+<section class="wp-block-noyona-values-strip values-strip alignfull"<?php echo '' !== $style_attr ? ' style="' . esc_attr($style_attr) . '"' : ''; ?>>
     <div class="values-strip__inner">
         <?php foreach ($items as $item) : ?>
             <?php

@@ -776,7 +776,8 @@
 }
 
 body:has(.noyona-lovial-page) .noyona-footer {
-  background: #AEB89D;
+  background: #447048;
+  color: #FFFFFF;
 }
 
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__brand-logo:not(.noyona-footer__brand-logo--lovial) {
@@ -788,14 +789,18 @@ body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__brand-logo--lovial 
   width: clamp(160px, 22vw, 250px);
 }
 
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__copyright {
+  color: #FFFFFF;
+}
+
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:hover,
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:focus-visible {
-  color: #447048;
-  text-decoration-color: #447048;
+  color: #FFFFFF;
+  text-decoration-color: #FFFFFF;
 }
 
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:focus-visible {
-  outline-color: #447048;
+  outline-color: #FFFFFF;
 }
 
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__social-btn .noyona-footer__social-img--default {

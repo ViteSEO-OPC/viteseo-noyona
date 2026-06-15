@@ -4,6 +4,12 @@
   margin-bottom: 1.5rem;
 }
 
+body:has(.noyona-lovial-page) .values-strip {
+  --brand-bg-color: #9CBF7D;
+  --values-strip-bg: var(--brand-bg-color);
+  background: var(--values-strip-bg, var(--noyona-color-pink-soft));
+}
+
 .values-strip__inner {
   /* max-width: 96rem; */
   margin: 0 auto;
