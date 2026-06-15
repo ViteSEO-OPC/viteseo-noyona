@@ -793,6 +793,10 @@ body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__copyright {
   color: #FFFFFF;
 }
 
+body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__bottom-divider {
+  background: #FFFFFF;
+}
+
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:hover,
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:focus-visible {
   color: #FFFFFF;

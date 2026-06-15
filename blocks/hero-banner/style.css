@@ -341,3 +341,13 @@
     }
 }
 
+/* Lovial hero overlay — same gradient structure as default, Lovial accent #F0E9D7 */
+body:has(.noyona-lovial-page) .hero-banner::before {
+    background: linear-gradient(
+        135deg,
+        rgba(240, 233, 215, 0.25) 0%,
+        rgba(240, 233, 215, 0.18) 40%,
+        rgba(240, 233, 215, 0.10) 100%
+    );
+}
+
