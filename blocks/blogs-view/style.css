@@ -585,6 +585,10 @@
         font-weight: inherit;
     }
 
+    .blogs-view__content .wp-block-heading strong {
+        font-weight: inherit;
+    }
+
     .blogs-view__toc {
         position: static;
     }
