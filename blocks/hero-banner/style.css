@@ -95,7 +95,7 @@
     display: grid;
     gap: 0.35rem;
     font-size: var(--wp--preset--font-size--h-1);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     white-space: pre-line;
     font-family: var(--wp--preset--font-family--poppins);
     letter-spacing: var(--noyona-letter-spacing-bugfix);
@@ -105,7 +105,7 @@
 
 .hero-banner__title-line--accent {
     font-style: italic;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     
 }
 
@@ -113,7 +113,7 @@
 .hero-banner__title .hero-banner__accent {
     font-family: var(--wp--preset--font-family--poppins);
     font-style: italic;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
 }
 
 .hero-banner__title .hero-banner__accent-green {
@@ -122,7 +122,7 @@
     color: #97ab75;
     font-family: var(--wp--preset--font-family--poppins);
     font-style: italic;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
     padding-bottom: 0.24em;
 }
@@ -144,7 +144,7 @@
     color: #fff;
     font-family: var(--wp--preset--font-family--poppins);
     font-style: normal;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
 }
 
 .hero-banner__title .hero-banner__title-white .hero-banner__accent {
@@ -160,7 +160,7 @@
     line-height: normal;
     letter-spacing: var(--noyona-letter-spacing-bugfix);
     font-family: var(--wp--preset--font-family--poppins);
-    font-weight: 400;
+    font-weight: var(--noyona-font-weight-body);
 }
 
 .hero-banner__search {
@@ -232,7 +232,7 @@
     color: var(--noyona-cta-primary-text);
     border: 1px solid var(--noyona-cta-primary-border);
     border-radius: 16px !important;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-button);
     font-size: 16px;
     text-decoration: none;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);

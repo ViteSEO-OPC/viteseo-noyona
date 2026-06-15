@@ -79,6 +79,19 @@ Tags:
   /* === Minimum text size (designer floor; Phase 2 consumers opt in) === */
   --noyona-text-min: 16px;
 
+  /* === Font weight scale (Phase 2 consumers opt in per component) === */
+  --noyona-font-weight-regular: 400;
+  --noyona-font-weight-medium: 500;
+  --noyona-font-weight-semibold: 600;
+  --noyona-font-weight-bold: 700;
+
+  /* === Font weight roles (Phase 2+ consumers opt in per component) === */
+  --noyona-font-weight-body: var(--noyona-font-weight-regular);
+  --noyona-font-weight-button: var(--noyona-font-weight-bold);
+  --noyona-font-weight-nav: var(--noyona-font-weight-bold);
+  --noyona-font-weight-label: var(--noyona-font-weight-regular);
+  --noyona-font-weight-caption: var(--noyona-font-weight-regular);
+
   /* === Brand color shorthands aligned to the Color Palette Guide ===
      Interactive role mapping is pending. Do not swap colors site-wide in Phase 1. */
   --noyona-color-pink-soft: var(--wp--preset--color--brand-pink-soft, #EFB5BE);

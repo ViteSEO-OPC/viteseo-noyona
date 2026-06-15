@@ -26,7 +26,7 @@
 
 .brand-carousel__heading {
     font-size: var(--wp--preset--font-size--h-2);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: #000000;
     margin: 0;
 }
@@ -58,7 +58,7 @@
 /* Typography driven via CSS variables from block attributes */
 .brand-carousel__text {
     font-family: var(--wp--preset--font-family--poppins);
-    font-weight: 600;
+    font-weight: var(--noyona-font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--brand-font-color, #fff);
@@ -223,7 +223,7 @@
 }
 
 .review-card__author {
-    font-weight: 600;
+    font-weight: var(--noyona-font-weight-semibold);
     font-size: var(--wp--preset--font-size--body);
     font-family: var(--wp--preset--font-family--poppins);
     color: #2d2d2d;
