@@ -790,12 +790,12 @@ body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__brand-logo--lovial 
 
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:hover,
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:focus-visible {
-  color: #003B6E;
-  text-decoration-color: #003B6E;
+  color: #447048;
+  text-decoration-color: #447048;
 }
 
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__nav a:focus-visible {
-  outline-color: #003B6E;
+  outline-color: #447048;
 }
 
 body:has(.noyona-lovial-page) .noyona-footer .noyona-footer__social-btn .noyona-footer__social-img--default {

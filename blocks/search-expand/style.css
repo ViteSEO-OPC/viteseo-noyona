@@ -541,8 +541,8 @@ body:has(.noyona-lovial-page) .search-inline-input::placeholder {
 
 body:has(.noyona-lovial-page) .search-inline-input:focus,
 body:has(.noyona-lovial-page) .search-inline-input:focus-visible {
-    border-bottom-color: #003B6E;
-    outline: 2px solid #003B6E;
+    border-bottom-color: #447048;
+    outline: 2px solid #447048;
     outline-offset: 3px;
 }
 
@@ -569,24 +569,24 @@ body:has(.noyona-lovial-page) .search-expand-trigger:hover,
 body:has(.noyona-lovial-page) .search-expand-trigger:focus-visible,
 body:has(.noyona-lovial-page) .search-expand-close:hover,
 body:has(.noyona-lovial-page) .search-expand-close:focus-visible {
-    color: #003B6E;
+    color: #447048;
 }
 
 body:has(.noyona-lovial-page) .search-expand-trigger:hover,
 body:has(.noyona-lovial-page) .search-expand-trigger:focus-visible {
-    border-bottom-color: #003B6E;
+    border-bottom-color: #447048;
 }
 
 body:has(.noyona-lovial-page) .search-expand-trigger:focus-visible,
 body:has(.noyona-lovial-page) .search-expand-input:focus,
 body:has(.noyona-lovial-page) .search-expand-input:focus-visible,
 body:has(.noyona-lovial-page) .search-input-wrapper:focus-within {
-    outline: 2px solid #003B6E;
+    outline: 2px solid #447048;
     outline-offset: 3px;
 }
 
 body:has(.noyona-lovial-page) .search-input-wrapper:focus-within {
-    border-bottom-color: #003B6E;
+    border-bottom-color: #447048;
 }
 
 /* Header pushes down slightly when search is open */

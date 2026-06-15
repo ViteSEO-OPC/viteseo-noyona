@@ -2252,9 +2252,9 @@ body:has(.noyona-lovial-page) .site-logo-img--lovial {
 /* Lovial brand-strip colors */
 body:has(.noyona-lovial-page) .header-brand-strip .brand-carousel,
 body:has(.noyona-lovial-page) .header-brand-strip .noyona-brand-strip-fallback {
-  --brand-bg-color: #BAD8F2 !important;
+  --brand-bg-color: #9CBF7D !important ;
   --brand-font-color: #000000 !important;
-  background: #BAD8F2 !important;
+  background: #9CBF7D !important ;
   color: #000000 !important;
 }
 
@@ -2472,13 +2472,13 @@ body:has(.noyona-lovial-page) .dropdown-menu li a:hover,
 body:has(.noyona-lovial-page) .dropdown-menu li a.is-active,
 body:has(.noyona-lovial-page) .mobile-drawer-links a:hover,
 body:has(.noyona-lovial-page) .mobile-drawer-links a.is-active {
-  color: #003B6E;
+  color: #447048;
 }
 
 body:has(.noyona-lovial-page) .nav-link.is-active,
 body:has(.noyona-lovial-page) .nav-item.has-active-child > .nav-link-wrapper > .nav-link {
-  color: #003B6E;
-  border-bottom-color: #003B6E;
+  color: #447048;
+  border-bottom-color: #447048;
 }
 
 body:has(.noyona-lovial-page) .header-icons,
@@ -2500,7 +2500,7 @@ body:has(.noyona-lovial-page) .mobile-menu-toggle:hover,
 body:has(.noyona-lovial-page) .mobile-menu-toggle:focus-visible,
 body:has(.noyona-lovial-page) .submenu-toggle:hover,
 body:has(.noyona-lovial-page) .submenu-toggle:focus-visible {
-  color: #003B6E;
+  color: #447048;
 }
 
 body:has(.noyona-lovial-page) .header-icon:hover,

@@ -652,15 +652,15 @@
 
 /* === Lovial product card CTA colors (Lovial pages only) === */
 body:has(.noyona-lovial-page) .ps-card__actions .ps-btn-cart {
-  border-color: #003B6E;
-  color: #003B6E;
+  border-color: #447048;
+  color: #447048;
 }
 
 /* === Lovial cart button hover/focus (Lovial pages only) === */
 body:has(.noyona-lovial-page) .ps-card__actions .ps-btn-cart:hover,
 body:has(.noyona-lovial-page) .ps-card__actions .ps-btn-cart:focus-visible {
-  background: #003B6E !important;
-  border-color: #003B6E !important;
+  background: #447048 !important;
+  border-color: #447048 !important;
   color: #FFFFFF !important;
   box-shadow: 0 8px 18px rgb(8 57 108 / 11%);
 }

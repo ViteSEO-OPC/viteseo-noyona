@@ -315,7 +315,7 @@
 body:has(.noyona-lovial-page) .brand-carousel {
     /* --brand-bg-color: #BAD8F2; */
     --brand-font-color: #000000;
-    /* background: #BAD8F2 !important; */
+    /* background: #9CBF7D !important ; */
 }
 
 body:has(.noyona-lovial-page) .brand-carousel__heading,
@@ -325,5 +325,5 @@ body:has(.noyona-lovial-page) .brand-carousel__text {
 }
 
 body:has(.noyona-lovial-page) .review-card__quote-icon {
-    color: #003B6E;
+    color: #447048;
 }
