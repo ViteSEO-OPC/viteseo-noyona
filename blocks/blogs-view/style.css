@@ -578,6 +578,13 @@
         font-size: var(--wp--preset--font-size--h-3);
     }
 
+    .blogs-view__content h2 strong,
+    .blogs-view__content h3 strong,
+    .blogs-view__content h4 strong,
+    .blogs-view__content h5 strong {
+        font-weight: inherit;
+    }
+
     .blogs-view__toc {
         position: static;
     }
