@@ -652,8 +652,8 @@
 
 /* === Lovial product card CTA colors (Lovial pages only) === */
 body:has(.noyona-lovial-page) .ps-card__actions .ps-btn-cart {
-  border-color: #447048;
-  color: #447048;
+  border-color: #447048 !important;
+  color: #447048 !important;
 }
 
 /* === Lovial cart button hover/focus (Lovial pages only) === */
