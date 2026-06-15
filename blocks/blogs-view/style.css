@@ -198,13 +198,13 @@
 
 .blogs-view__content h2 {
     font-size: var(--wp--preset--font-size--h-2);
-    font-weight: 700;
+    font-weight: 600;
     line-height: normal;
 }
 
 .blogs-view__content h3 {
     font-size: var(--wp--preset--font-size--h-3);
-    font-weight: 700;
+    font-weight: 600;
     line-height: normal;
 }
 
