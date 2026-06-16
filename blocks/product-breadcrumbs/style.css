@@ -21,7 +21,7 @@
 
 .noyona-pdp-breadcrumbs__current {
   color: var(--noyona-color-pink-muted-rose);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
 }
 
 .noyona-pdp-breadcrumbs__sep {

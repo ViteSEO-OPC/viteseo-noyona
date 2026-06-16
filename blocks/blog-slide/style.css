@@ -17,7 +17,7 @@
 .blog-slide__title {
     margin: 0;
     font-size: var(--wp--preset--font-size--h-2);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: #000000;
     line-height: normal;
 }
@@ -84,7 +84,7 @@
     background: #fff;
     color: #2f2020;
     font-size: clamp(0.65rem, calc(0.65rem + 0.13vw), 15px);
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     padding: 0.2rem 0.75rem 0.2rem 0.3rem;
     border-radius: 999px;
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
@@ -100,7 +100,7 @@
     background: var(--bs-tag-bg);
     color: #fff;
     font-size: clamp(0.7rem, calc(0.7rem + 0.13vw), 0.8rem);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: 1;
     flex: 0 0 auto;
 }
@@ -122,14 +122,14 @@
     font-size: 20px;
     padding: 0.25rem 0.75rem;
     border-radius: 999px;
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     align-self: flex-start;
 }
 
 .blog-slide__card-title {
     margin: 0;
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: #000000;
 }
 
@@ -173,7 +173,7 @@
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: var(--noyona-radius-cta);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     font-size: 24px;
 }
 

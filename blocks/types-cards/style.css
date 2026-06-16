@@ -26,7 +26,7 @@
   text-align: center;
   color: #000000;
   font-size: var(--wp--preset--font-size--h-2);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 
@@ -87,7 +87,7 @@
   margin: 0 0 6px;
   color: #000000;
   font-size: var(--wp--preset--font-size--h-4);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   font-family: var(--wp--preset--font-family--poppins);
 }

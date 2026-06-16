@@ -76,7 +76,7 @@
 .mosaic-grid__heading {
     font-family: var(--wp--preset--font-family--poppins);
     font-size: var(--wp--preset--font-size--h-2);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: #000000;
     margin: 0;
 }
@@ -84,7 +84,7 @@
 .mosaic-grid__body {
     font-family: var(--wp--preset--font-family--poppins);
     font-size: var(--wp--preset--font-size--body);
-    font-weight: 400;
+    font-weight: var( --noyona-font-weight-regular);
     color: #666666;
     margin: 0;
 }

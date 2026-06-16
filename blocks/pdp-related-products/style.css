@@ -17,14 +17,14 @@
   margin: 0;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-2);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 
 .noyona-pdp-related__subtitle {
   margin: 0.35rem 0 0;
   font-size: var(--wp--preset--font-size--body);
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   color: #6f7785;
 }
 
@@ -86,7 +86,7 @@
   margin: 0 0 0.4rem;
   font-size: var(--wp--preset--font-size--h-5);
   line-height: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .noyona-pdp-related__item-title a {
@@ -108,7 +108,7 @@
   background: var(--noyona-color-pink-accent);
   color: #fff;
   font-size: 0.84rem;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   margin-bottom: 0.45rem;
 }
 
@@ -139,7 +139,7 @@
   background: var(--noyona-color-pink-accent);
   color: #fff;
   font-size: var(--wp--preset--font-size--caption);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 1.2;
   text-decoration: none;
 }
@@ -153,7 +153,7 @@
   margin: 0;
   color: #999;
   font-size: var(--wp--preset--font-size--caption);
-  font-weight: 500;
+  font-weight: var( --noyona-font-weight-regular);
   text-decoration: line-through;
   opacity: 1;
 }
@@ -173,7 +173,7 @@
   margin: 0;
   color: #111;
   font-size: clamp(1.05rem, 1.3vw, 1.45rem);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   text-decoration: none;
 }
 
@@ -186,7 +186,7 @@
 
 .noyona-pdp-related__price {
   font-size: clamp(1.05rem, 1.3vw, 1.45rem);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   color: #111;
 }
 

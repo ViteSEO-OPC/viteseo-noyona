@@ -62,7 +62,7 @@ change:
   color: var(--wp--preset--color--primary);
   text-align: left;
   font-size: var(--wp--preset--font-size--h-2);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 ```
@@ -139,7 +139,7 @@ Worked example. A component ships:
 ```css
 .phone-reviews__title {
   font-size: clamp(2rem, 3.4vw, 3.4375rem);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 ```
@@ -150,7 +150,7 @@ font-size only:
 ```css
 .phone-reviews__title {
   font-size: var(--wp--preset--font-size--h-2);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 ```

@@ -45,7 +45,7 @@
 
 .blogs-view__crumb-current {
     color: #D81B60;
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
 }
 
 .blogs-view__layout {
@@ -72,7 +72,7 @@
     border-radius: 999px;
     padding: 0.3rem 0.8rem;
     font-size: var(--wp--preset--font-size--caption);
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     margin-bottom: 0.7rem;
@@ -81,7 +81,7 @@
 .blogs-view__title {
     margin: 0 0 0.6rem;
     font-size: var(--wp--preset--font-size--h-1);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: var(--noyona-color-pink-muted-rose);
     line-height: normal;
     padding: 20px 0;
@@ -168,7 +168,7 @@
 }
 
 .blogs-view__author-name {
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     font-size: 24px;
     color:var(--noyona-color-pink-muted-rose);
     text-transform: capitalize;
@@ -198,13 +198,13 @@
 
 .blogs-view__content h2 {
     font-size: var(--wp--preset--font-size--h-2);
-    font-weight: 600;
+    font-weight: var(--noyona-font-weight-semibold);
     line-height: normal;
 }
 
 .blogs-view__content h3 {
     font-size: var(--wp--preset--font-size--h-3);
-    font-weight: 600;
+    font-weight: var(--noyona-font-weight-semibold);
     line-height: normal;
 }
 
@@ -258,7 +258,7 @@
     background: var(--noyona-color-pink-muted-rose);
     color: #fff;
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     text-transform: capitalize;
     letter-spacing: 0.04em;
 }
@@ -310,7 +310,7 @@
     color: #5a5a5a;
     font-size: 16px;
     font-family: var(--wp--preset--font-family--poppins);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     text-decoration-line: underline;
     text-decoration-color: currentColor;
     text-decoration-thickness: 1.5px;
@@ -354,7 +354,7 @@
     text-decoration: none;
     font-size: var(--wp--preset--font-size--nav-button);
     line-height: 1;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     min-height: 44px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -429,7 +429,7 @@
 .blogs-view .blog-share-modal__title {
     margin: 0 0 0.9rem;
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: #000000;
 }
 
@@ -449,7 +449,7 @@
     background: #fff;
     color: #2b2b2b;
     text-decoration: none;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     cursor: pointer;
 }
 

@@ -48,7 +48,7 @@
 .noyona-thank-you__title {
     margin: 0;
     font-size: var(--wp--preset--font-size--h-1);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
     letter-spacing: -0.02em;
     font-family: var(--wp--preset--font-family--poppins);
@@ -62,7 +62,7 @@
 .noyona-thank-you__copy {
     margin: 0;
     font-size: 20px;
-    font-weight: 500;
+    font-weight: var( --noyona-font-weight-regular);
     line-height: normal;
     color: #5b4b4b;
     max-width: 720px;
@@ -77,7 +77,7 @@
     background: var(--noyona-cta-primary-bg);
     color: var(--noyona-cta-primary-text);
     border: 1px solid var(--noyona-cta-primary-border);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     font-size: var(--wp--preset--font-size--nav-button);
     text-decoration: none;
     box-shadow: 0 10px 20px rgba(216, 27, 96, 0.25);

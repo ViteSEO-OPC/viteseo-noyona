@@ -14,7 +14,7 @@
   --noyona-notice-border-width: 1px;
   --noyona-notice-accent-width: 5px;
   --noyona-notice-font-size: var(--wp--preset--font-size--body, 16px);
-  --noyona-notice-font-weight: 600;
+  --noyona-notice-font-weight: var( --noyona-font-weight-bold);
   --noyona-notice-line-height: 1.45;
 
   --noyona-notice-error-bg: #fff0f0;
@@ -169,7 +169,7 @@ ul.woocommerce-error::before,
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 1;
 }
 
@@ -201,7 +201,7 @@ ul.woocommerce-message::before,
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 1;
 }
 
@@ -235,7 +235,7 @@ ul.woocommerce-info::before,
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-style: italic;
   line-height: 1;
 }
@@ -266,7 +266,7 @@ ul.woocommerce-info::before,
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 1;
 }
 
@@ -405,7 +405,7 @@ p.woocommerce-info:focus-visible {
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 1;
 }
 
@@ -430,7 +430,7 @@ p.woocommerce-info:focus-visible {
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 1;
 }
 
@@ -453,7 +453,7 @@ p.woocommerce-info:focus-visible {
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 1;
 }
 

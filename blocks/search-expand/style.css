@@ -94,7 +94,7 @@
     padding: 0.75rem 0.85rem;
     color: #8c6870;
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
 }
 
 .search-inline-suggestions__status:empty {
@@ -176,7 +176,7 @@
 .search-inline-suggestion__name {
     color: #2b2226;
     font-size: 0.86rem;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -186,13 +186,13 @@
 .search-inline-suggestion__price {
     color: var(--noyona-color-pink-muted-rose);
     font-size: var(--wp--preset--font-size--caption);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
 }
 
 .search-inline-suggestion__stock {
     color: #777;
     font-size: var(--wp--preset--font-size--caption);
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
 }
 
 .search-inline-suggestion__stock.is-in-stock {
@@ -212,7 +212,7 @@
     border-top: 1px solid var(--noyona-color-pink-light-blush);
     color: var(--noyona-color-pink-muted-rose);
     font-size: 0.82rem;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     text-decoration: none;
 }
 

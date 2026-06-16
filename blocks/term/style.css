@@ -21,14 +21,14 @@
 .term-overview__hero-title {
     margin: 0 0 0.6rem;
     font-size: var(--wp--preset--font-size--h-1);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: #ffffff;
 }
 
 .term-overview__hero-subtitle {
     margin: 0;
     font-size: var(--wp--preset--font-size--body);
-    font-weight: 400;
+    font-weight: var( --noyona-font-weight-regular);
     line-height: normal;
     color: rgba(255, 255, 255, 0.9);
     max-width: 760px;
@@ -44,7 +44,7 @@
     margin: 0 0 0.75rem;
     text-align: center;
     font-size: var(--wp--preset--font-size--h-2);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
 }
 
 .term-overview__section-title__accent {
@@ -128,7 +128,7 @@
     margin: 0;
     color: #fff;
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
 }
 
 .term-overview__card-content {
@@ -158,7 +158,7 @@
     font-size: 16px;
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     box-sizing: border-box;
     -webkit-appearance: none;
     appearance: none;

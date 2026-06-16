@@ -127,7 +127,7 @@
 .noyona-founder-section__title {
   margin: 0 0 1.25rem;
   font-size: var(--wp--preset--font-size--h-2);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 
@@ -136,7 +136,7 @@
   line-height: normal;
   font-size: clamp(16px, 1.5vw, 20px);
   font-family: var(--wp--preset--font-family--poppins);
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   text-align: left;
 }
 
@@ -154,7 +154,7 @@
   border-radius: 16px;
   text-decoration: none;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   background: var(--noyona-cta-primary-bg);
   color: var(--noyona-cta-primary-text);
   border: 1px solid var(--noyona-cta-primary-border);
@@ -270,11 +270,11 @@
 
 .noyona-founder-section__body .founder-accent {
   color: var(--noyona-color-pink-muted-rose);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .noyona-founder-section__body .founder-bold {
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .noyona-founder-section__title .founder-accent {

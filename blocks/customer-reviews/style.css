@@ -47,7 +47,7 @@
   color: #666;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: 18px;
-  font-weight: 500;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
 }
 
@@ -85,7 +85,7 @@
   background: #fff;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--nav-button);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -124,7 +124,7 @@
   cursor: pointer;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--nav-button);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .customer-reviews-grid__filter-photos.is-active {
@@ -147,7 +147,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-2);
   font-style: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 
@@ -167,7 +167,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--body);
   font-style: normal;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   line-height: 1;
   cursor: pointer;
   transition: background-color 0.12s ease, color 0.12s ease;
@@ -291,7 +291,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--body);
   font-style: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 
@@ -303,7 +303,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--caption);
   font-style: normal;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   line-height: 1;
 }
 
@@ -312,7 +312,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--caption);
   font-style: normal;
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
   white-space: nowrap;
 }
@@ -333,7 +333,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-5);
   font-style: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   letter-spacing: -0.03em;
 }
@@ -347,7 +347,7 @@
 }
 
 .customer-reviews-grid__product-label {
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
 }
 
 .customer-reviews-grid__product-link {
@@ -358,7 +358,7 @@
 
 .customer-reviews-grid__variant {
   color: #8a5561;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
 }
 
 .customer-reviews-grid__review-copy {
@@ -367,7 +367,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--body);
   font-style: normal;
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
 }
 
@@ -420,7 +420,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--caption);
   font-style: normal;
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
 }
 
@@ -457,7 +457,7 @@
 
 .customer-reviews-grid__helpful-btn.is-voted {
   color: var(--noyona-cta-tertiary-bg);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .customer-reviews-grid__helpful-btn.is-voted i::before {
@@ -491,7 +491,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--body);
   font-style: normal;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   line-height: normal;
 }
 
@@ -521,7 +521,7 @@
   color: #000000;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-4);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 
@@ -531,7 +531,7 @@
   color: #2c2c2c;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--label);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
 }
 
 .customer-reviews-grid__review-form-wrap input,
@@ -567,7 +567,7 @@
   padding: 0.6rem 1.2rem;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--nav-button);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   cursor: pointer;
 }
 
@@ -765,7 +765,7 @@
   color: #0f1728;
   font-size: 1.05rem;
   line-height: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .customer-reviews-grid__reviewer-email {
@@ -790,7 +790,7 @@
   margin-bottom: 0.5rem;
   color: #0f1728;
   font-size: var(--wp--preset--font-size--label);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .customer-reviews-grid__field .required {
@@ -799,7 +799,7 @@
 
 .customer-reviews-grid__optional {
   color: #727d96;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   font-size: 0.95em;
 }
 
@@ -923,7 +923,7 @@
   background: #cfd6df;
   color: var(--noyona-cta-primary-text);
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   letter-spacing: 0.01em;
 }
 
@@ -1016,7 +1016,7 @@
   color: #000000;
   font-size: var(--wp--preset--font-size--h-4);
   line-height: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .customer-reviews-grid__login-copy {
@@ -1036,7 +1036,7 @@
 .customer-reviews-grid__login-form label {
   color: #101828;
   font-size: 0.96rem;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .customer-reviews-grid__login-form input {
@@ -1062,7 +1062,7 @@
   background: var(--noyona-color-pink-muted-rose);
   color: #fff;
   font-size: 1.08rem;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   cursor: pointer;
 }
 
@@ -1096,7 +1096,7 @@
   width: 100%;
   text-decoration: none;
   box-sizing: border-box;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .customer-reviews-grid__login-google {

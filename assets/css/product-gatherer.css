@@ -18,7 +18,7 @@
 
 .pg-title {
     font-size: var(--wp--preset--font-size--h-2);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
     margin: 0 0 0.15rem;
 }
@@ -229,7 +229,7 @@
 
 .pg-product-title {
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
 }
 
@@ -269,7 +269,7 @@
 /* price block – no extra space from del/ins */
 
 .pg-price {
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     font-size: var(--wp--preset--font-size--caption);
 }
 
@@ -290,7 +290,7 @@
     padding: 12px 16px;
     border-radius: 16px;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: 1;
     border: 1px solid var(--noyona-cta-secondary-border);
     background: var(--noyona-cta-secondary-bg);

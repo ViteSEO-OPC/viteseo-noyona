@@ -18,7 +18,7 @@
 
 .ni-hero-title {
     font-size: var(--wp--preset--font-size--h-1);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     margin-bottom: 40px;
     color: #000;
 }
@@ -58,7 +58,7 @@
     border: none;
     padding: 12px 30px;
     border-radius: 50px;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     cursor: pointer;
     font-size: var(--wp--preset--font-size--nav-button);
 }
@@ -73,7 +73,7 @@
 .ni-section-title {
     text-align: center;
     font-size: var(--wp--preset--font-size--h-2);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     margin-bottom: 15px;
 }
 
@@ -133,7 +133,7 @@
 }
 
 .ni-arrow {
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
 }
 
 /* Accordions (Right) */
@@ -168,7 +168,7 @@
 }
 
 .ni-acc-title {
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     font-size: var(--wp--preset--font-size--h-4);
     color: #000000;
 }
@@ -177,7 +177,7 @@
     background: none;
     border: none;
     font-size: 24px;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     cursor: pointer;
     line-height: 1;
     color: #333;

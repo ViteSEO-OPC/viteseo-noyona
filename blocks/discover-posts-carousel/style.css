@@ -32,7 +32,7 @@
 
 .empty-state-inner h3 {
     font-size: var(--wp--preset--font-size--h-3);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
     color: #000000;
     margin-bottom: 10px;
@@ -50,7 +50,7 @@
     color: #fff;
     border: none;
     border-radius: 99px;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     cursor: pointer;
     transition: transform 0.2s;
 }
@@ -86,7 +86,7 @@
 .discover-carousel__title {
   margin: 0 0 0.5rem;
   font-size: var(--wp--preset--font-size--h-2);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   color: #000;
   line-height: normal;
   letter-spacing: -2.75px;
@@ -190,7 +190,7 @@
     text-transform: uppercase;
     color: #999;
     letter-spacing: 0.5px;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
 }
 
 /* Filter menu grid (desktop keeps stacked layout; mobile becomes 2 columns) */
@@ -368,7 +368,7 @@
     justify-content: space-between;
     font-size: var(--wp--preset--font-size--body);
     font-family: var(--wp--preset--font-family--poppins);
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     color: #444;
     margin-bottom: 8px;
 }
@@ -511,13 +511,13 @@
 
 .product-card__price {
   font-size: 36px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   color: #111827;
 }
 
 .product-card__price--old {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   color: #9ca3af;
   text-decoration: line-through;
 }
@@ -888,7 +888,7 @@
   border: 1px solid var(--noyona-cta-primary-border);
   background: var(--noyona-cta-primary-bg); /* Primary CTA (migrated from Frame 83) */
   color: var(--noyona-cta-primary-text);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-size: 16px;
   text-decoration: none;
   /* box-shadow: 0 10px 26px rgba(0,0,0,0.18); */

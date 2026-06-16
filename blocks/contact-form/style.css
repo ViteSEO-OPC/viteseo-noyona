@@ -14,7 +14,7 @@
 .contact-form__title {
     margin: 0 0 0.6rem;
     font-size: var(--wp--preset--font-size--h-1);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: #000000;
 }
 
@@ -26,7 +26,7 @@
     margin: 0px auto 70px;
     max-width: 680px;
     font-size: var(--wp--preset--font-size--body);
-    font-weight: 400;
+    font-weight: var( --noyona-font-weight-regular);
     color: #6c6c6c;
     line-height: normal;
 }
@@ -75,7 +75,7 @@
 .contact-form__card-title {
     margin: 0;
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: var(--noyona-color-pink-muted-rose);
 }
 
@@ -148,7 +148,7 @@
     color: #ffffff;
     font-size: var(--wp--preset--font-size--caption);
     line-height: 1;
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     padding: 7px 10px;
     border-radius: 7px;
     white-space: nowrap;
@@ -200,7 +200,7 @@
 .contact-form__info-title {
     margin: 0 0 0.5rem;
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: var(--noyona-color-pink-muted-rose);
 }
 
@@ -272,7 +272,7 @@
     background: var(--noyona-cta-primary-bg);
     color: var(--noyona-cta-primary-text);
     text-decoration: none;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     font-family: var(--wp--preset--font-family--poppins);
     font-size: 16px;
     box-shadow: 0 10px 7.5px 0 rgba(0, 0, 0, 0.25);
@@ -385,7 +385,7 @@
     background: var(--noyona-cta-primary-bg);
     color: var(--noyona-cta-primary-text);
     text-decoration: none;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     font-family: var(--wp--preset--font-family--poppins);
     font-size: 16px;
     box-shadow: 0 10px 7.5px 0 rgba(0, 0, 0, 0.25);

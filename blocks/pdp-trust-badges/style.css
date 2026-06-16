@@ -23,7 +23,7 @@
   border-radius: var(--noyona-radius-input);
   background: #fff;
   font-size: var(--wp--preset--font-size--caption);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   color: #333;
 }
 

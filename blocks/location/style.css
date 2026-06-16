@@ -20,7 +20,7 @@
     font-family: var(--wp--preset--font-family--poppins);
     font-size: var(--wp--preset--font-size--body);
     font-style: normal;
-    font-weight: 400;
+    font-weight: var( --noyona-font-weight-regular);
     line-height: normal;
     letter-spacing: -0.8px;
 }
@@ -31,14 +31,14 @@
     font-family: inherit;
     font-size: inherit;
     font-style: normal;
-    font-weight: 400;
+    font-weight: var( --noyona-font-weight-regular);
     line-height: normal;
     letter-spacing: -0.8px;
 }
 
 .nsl-v2-breadcrumbs__sep {
     color: #525252;
-    font-weight: 400;
+    font-weight: var( --noyona-font-weight-regular);
 }
 
 .nsl-v2-breadcrumbs__current {
@@ -46,7 +46,7 @@
     font-family: inherit;
     font-size: inherit;
     font-style: normal;
-    font-weight: 400;
+    font-weight: var( --noyona-font-weight-regular);
     line-height: normal;
     letter-spacing: -0.8px;
 }
@@ -282,7 +282,7 @@
 }
 
 .nsl-v2-suggestion-title {
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: #000000;
 }
 
@@ -362,7 +362,7 @@
     background: transparent;
     padding: 10px 8px 9px;
     color: #555;
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     cursor: pointer;
     border-bottom: 3px solid transparent;
     transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
@@ -433,7 +433,7 @@
 .nsl-v2-detail__title {
     margin: 0;
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
 }
 
@@ -463,7 +463,7 @@
     background: transparent;
     color: var(--noyona-color-pink-muted-rose);
     font-size: var(--wp--preset--font-size--nav-button);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     padding: 0;
     cursor: pointer;
     width: fit-content;
@@ -503,7 +503,7 @@
 .nsl-v2-detail__reviews h4 {
     margin: 0 0 8px;
     font-size: var(--wp--preset--font-size--h-4);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
 }
 
@@ -596,7 +596,7 @@
     font-size: 34px;
     line-height: 1;
     color: #222;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
 }
 
 .nsl-v2-review-summary__meta {
@@ -622,7 +622,7 @@
     background: var(--noyona-color-pink-light-blush);
     color: var(--noyona-color-pink-muted-rose);
     padding: 8px 10px;
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     cursor: pointer;
 }
 
@@ -692,7 +692,7 @@ body.nsl-v2-review-modal-open {
     background: var(--noyona-cta-primary-bg);
     color: var(--noyona-cta-primary-text);
     padding: 10px 12px;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
 }
@@ -709,7 +709,7 @@ body.nsl-v2-review-modal-open {
     background: #fff;
     padding: 9px 12px;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
 }
 
 .nsl-v2-directions {
@@ -721,7 +721,7 @@ body.nsl-v2-review-modal-open {
     background: var(--noyona-cta-primary-bg);
     color: var(--noyona-cta-primary-text);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
@@ -769,7 +769,7 @@ body.nsl-v2-review-modal-open {
 .nsl-v2-compact-filter span {
     color: #555;
     font-size: var(--wp--preset--font-size--label);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     letter-spacing: 0.02em;
     text-transform: uppercase;
 }
@@ -803,7 +803,7 @@ body.nsl-v2-review-modal-open {
 .nsl-v2-bottom-title {
     margin: 0 0 10px;
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
 }
 
@@ -852,7 +852,7 @@ body.nsl-v2-review-modal-open {
     border-bottom: 3px solid transparent;
     background: transparent;
     text-align: center;
-    font-weight: 500;
+    font-weight: var( --noyona-font-weight-regular);
     font-size: 18px;
     padding: 12px 10px 14px;
     color: #2f2f2f;
@@ -866,7 +866,7 @@ body.nsl-v2-review-modal-open {
     border-color: var(--noyona-color-pink-muted-rose);
     color: var(--noyona-color-pink-muted-rose);
     background: var(--noyona-color-pink-light-blush);
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
 }
 
 .nsl-v2-parent-filter-list .nsl-v2-filter-parent.is-active {
@@ -880,7 +880,7 @@ body.nsl-v2-review-modal-open {
     color: var(--noyona-color-pink-muted-rose);
     background: var(--noyona-color-pink-light-blush);
     transform: translateY(-1px);
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
 }
 
 .nsl-v2-parent-filter-list .nsl-v2-filter-parent:hover {
@@ -1033,7 +1033,7 @@ body.nsl-v2-review-modal-open {
 .nsl-v2-store-card__title {
     margin: 0;
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
 }
 
@@ -1050,7 +1050,7 @@ body.nsl-v2-review-modal-open {
     display: inline-flex;
     align-items: center;
     font-size: var(--wp--preset--font-size--caption);
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     border-radius: 999px;
     padding: 4px 8px;
 }

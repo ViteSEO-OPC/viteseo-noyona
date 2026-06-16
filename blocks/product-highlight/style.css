@@ -12,7 +12,7 @@
 
 .product-highlight__heading {
     font-size: var(--wp--preset--font-size--h-2);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     margin: 0 0 0.5rem;
     color: #000;
 }
@@ -76,7 +76,7 @@
     padding: 4px 12px;
     border-radius: 20px;
     font-size: var(--wp--preset--font-size--caption);
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     text-transform: uppercase;
 }
 
@@ -107,7 +107,7 @@
 
 .ph-card__title {
     font-size: var(--wp--preset--font-size--h-5);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     margin: 0 0 0.5rem;
     color: #000;
 }
@@ -132,7 +132,7 @@
 
 .ph-price {
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     color: #000;
 }
 
@@ -169,7 +169,7 @@
     text-decoration: none;
     padding: 12px 16px;
     border-radius: 16px;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     text-align: center;
     font-size: 16px;
     text-transform: uppercase;
