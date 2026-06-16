@@ -26,7 +26,7 @@
   margin: 0 0 1rem;
   color: #000000;
   font-size: var(--wp--preset--font-size--h-2);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 
@@ -35,7 +35,7 @@
   margin: 0;
   color: #333333;
   font-size: var(--wp--preset--font-size--body);
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
 }
 
@@ -56,7 +56,7 @@
   background: var(--noyona-cta-primary-bg);
   color: var(--noyona-cta-primary-text);
   font-size: var(--wp--preset--font-size--nav-button);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   text-decoration: none;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;

@@ -48,7 +48,7 @@
 .noyona-coming-soon__title {
     margin: 0;
     font-size: var(--wp--preset--font-size--h-1);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     line-height: normal;
     letter-spacing: -0.02em;
     font-family: var(--wp--preset--font-family--poppins);
@@ -62,7 +62,7 @@
 .noyona-coming-soon__copy {
     margin: 0;
     font-size: 20px;
-    font-weight: 500;
+    font-weight: var( --noyona-font-weight-regular);
     line-height: normal;
     color: #5b4b4b;
     max-width: 720px;
@@ -86,7 +86,7 @@
     background: transparent;
     padding: 10px 12px;
     font-size: var(--wp--preset--font-size--input);
-    font-weight: 500;
+    font-weight: var( --noyona-font-weight-regular);
     color: #4f4f4f;
     outline: none;
     min-width: 0;
@@ -103,7 +103,7 @@
     background: var(--noyona-cta-primary-bg);
     color: var(--noyona-cta-primary-text);
     font-size: var(--wp--preset--font-size--nav-button);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     cursor: pointer;
     box-shadow: 0 8px 16px rgba(216, 27, 96, 0.28);
     transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;

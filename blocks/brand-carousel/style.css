@@ -58,7 +58,7 @@
 /* Typography driven via CSS variables from block attributes */
 .brand-carousel__text {
     font-family: var(--wp--preset--font-family--poppins);
-    font-weight: var(--noyona-font-weight-semibold);
+    font-weight: var(--noyona-font-weight-regular);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--brand-font-color, #fff);

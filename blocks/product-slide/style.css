@@ -45,7 +45,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-2);
   font-style: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   letter-spacing: -2.75px;
   margin: 0 0 0.4rem;
@@ -61,7 +61,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: clamp(16px, 1.8vw, 20px);
   font-style: normal;
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
   letter-spacing: -1px;
   margin: 0;
@@ -154,7 +154,7 @@
   border-radius: 50px;
   font-size: var(--wp--preset--font-size--body);
   font-family: var(--wp--preset--font-family--poppins);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -248,7 +248,7 @@
   color: #525252;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--caption);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   line-height: normal;
 }
 
@@ -269,7 +269,7 @@
   cursor: pointer;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--caption);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   line-height: normal;
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
@@ -296,7 +296,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-5);
   font-style: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   letter-spacing: -1.2px;
   margin: 0;
@@ -306,7 +306,7 @@
   font-size: clamp(16px, 1.7vw, 20px);
   color: #525252;
   font-style: normal;
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
   letter-spacing: -1px;
   font-family: var(--wp--preset--font-family--poppins);
@@ -339,7 +339,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-3);
   font-style: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   min-width: 0;
 }
@@ -351,7 +351,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-5);
   font-style: normal;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   line-height: normal;
   letter-spacing: -1.2px;
   min-width: 0;
@@ -393,7 +393,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 16px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   text-align: center;
   box-sizing: border-box;
   font-family: var(--wp--preset--font-family--poppins);
@@ -514,6 +514,11 @@
   justify-content: center;
   gap: 10px;
   margin-top: 10px;
+}
+
+/* === Lovial dot colors === */
+body:has(.noyona-lovial-page) .ps-dot {
+  filter: brightness(0) saturate(100%) invert(39%) sepia(6%) saturate(2983%) hue-rotate(75deg) brightness(91%) contrast(79%);
 }
 
 .ps-dot {

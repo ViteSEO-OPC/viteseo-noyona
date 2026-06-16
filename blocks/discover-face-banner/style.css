@@ -58,7 +58,7 @@
   margin: 0;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-2);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   color: #ffffff;
 }
@@ -68,7 +68,7 @@
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-2);
   font-style: italic;
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
   color: var(--noyona-color-pink-muted-rose, #E199A4);
 }
@@ -79,7 +79,7 @@
   color: rgba(255, 255, 255, 0.93);
   font-family: var(--wp--preset--font-family--poppins);
   font-size: clamp(16px, 1.3vw, 20px);
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
 }
 
@@ -98,7 +98,7 @@
   color: var(--noyona-cta-secondary-text);
   font-family: var(--wp--preset--font-family--poppins);
   font-size: 16px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
   text-align: center;
   box-sizing: border-box;
@@ -182,7 +182,7 @@
   align-items: center;
   justify-content: center;
   font-size: 25px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-family: var(--wp--preset--font-family--poppins);
   background: #2e2e2e;
   color: #fff;
@@ -225,7 +225,7 @@
   margin: 0;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-4);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   color: #ffffff;
 }
@@ -234,7 +234,7 @@
   margin: 0.45rem 0 0;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: clamp(14px, 1.15vw, 18px);
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
   color: rgba(255, 255, 255, 0.94);
 }

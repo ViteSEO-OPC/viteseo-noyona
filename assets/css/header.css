@@ -43,7 +43,7 @@ body.search-expand-open header.wp-block-template-part {
 .noyona-brand-strip-fallback__item {
   font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
   font-size: var(--wp--preset--font-size--caption);
-  font-weight: 500;
+  font-weight: var( --noyona-font-weight-regular);
   color: #000;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -148,7 +148,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
 
 /* Logo */
 .site-logo {
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-size: 1.25rem;
   flex: 0 0 auto;
 }
@@ -205,7 +205,7 @@ header.wp-block-template-part.is-sticky .nav-link.is-active {
      stable size across all laptop/desktop widths instead of growing to 44px
      on wide screens — removes the Apple-vs-Windows size divergence. */
   font-size: clamp(20px, 2.25vw, 34px);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 1;
   color: var(--noyona-color-pink-muted-rose);
   white-space: nowrap;
@@ -297,7 +297,7 @@ body.has-scrolled-header .site-logo-text {
 .nav-link {
   font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
   font-size: var(--wp--preset--font-size--body);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   text-decoration: none;
   color: #000;
   padding: 0.5rem 0;
@@ -418,7 +418,7 @@ body.has-scrolled-header .site-logo-text {
   text-decoration: none;
   font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
   font-size: var(--wp--preset--font-size--body);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   letter-spacing: var(--noyona-letter-spacing-bugfix);
   transition: background 0.2s, color 0.2s;
 }
@@ -650,7 +650,7 @@ body:not(.logged-in) .header-account--logged-out {
   background: var(--noyona-color-pink-accent);
   color: #ffffff;
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 16px;
   text-align: center;
   pointer-events: none;
@@ -721,7 +721,7 @@ body:not(.logged-in) .header-account--logged-out {
   background: rgba(36, 31, 35, 0.92);
   color: #fff;
   font-size: 0.92rem;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 1;
   box-shadow: 0 14px 36px rgba(24, 18, 22, 0.22);
   opacity: 0;
@@ -762,7 +762,7 @@ body:not(.logged-in) .header-account--logged-out {
     padding: 12px 14px;
     border-radius: 18px;
     font-size: 0.86rem;
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     line-height: 1.35;
     text-align: center;
     transform: translateY(-10px) scale(0.98);
@@ -861,7 +861,7 @@ body:not(.logged-in) .header-account--logged-out {
   border: 0;
   background: transparent;
   color: var(--noyona-color-pink-muted-rose);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   font-size: var(--wp--preset--font-size--nav-button);
   display: inline-flex;
   align-items: center;
@@ -941,7 +941,7 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .wc-block-mini-cart__title,
 .wc-block-mini-cart__drawer .wc-block-mini-cart__title-items-counter-block,
 .wc-block-mini-cart__drawer .wc-block-mini-cart__title-label-block {
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .wc-block-mini-cart__drawer .wc-block-mini-cart__items {
@@ -962,7 +962,7 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wc-block-mini-cart__drawer .wc-block-components-totals-item__label,
 .wc-block-mini-cart__drawer .wc-block-components-totals-item__value {
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .wc-block-mini-cart__drawer .wc-block-components-button {
@@ -1021,7 +1021,7 @@ body:not(.logged-in) .header-account--logged-out {
   border: 0;
   background: transparent;
   color: var(--noyona-cta-tertiary-bg);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   font-size: 24px;
   display: inline-flex;
   align-items: center;
@@ -1042,7 +1042,7 @@ body:not(.logged-in) .header-account--logged-out {
   padding: 10px 16px;
   background: #dff2e8;
   color: #0a9d53;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   font-size: var(--wp--preset--font-size--helper);
 }
 
@@ -1050,7 +1050,7 @@ body:not(.logged-in) .header-account--logged-out {
   padding: 10px 16px 6px;
   color: var(--noyona-cta-tertiary-bg);
   font-size: var(--wp--preset--font-size--helper);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   background: var(--noyona-color-pink-light-blush);
 }
 
@@ -1114,7 +1114,7 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wc-block-mini-cart__drawer .wc-block-components-product-name {
   font-size: 24px !important;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   color: #253042;
   text-decoration: none;
   line-height: normal;
@@ -1127,7 +1127,7 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .wc-block-components-product-price,
 .wc-block-mini-cart__drawer .wc-block-components-product-details__value {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   color: var(--noyona-color-pink-muted-rose);
   margin: 0 !important;
 }
@@ -1169,7 +1169,7 @@ body:not(.logged-in) .header-account--logged-out {
   text-align: right;
   align-self: start;
   font-size: 24px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   color: var(--noyona-color-pink-muted-rose);
   line-height: normal;
 }
@@ -1177,7 +1177,7 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row .wc-block-components-product-price__value.is-discounted,
 .wc-block-mini-cart__drawer .noyona-mini-cart-title-price-row .wc-block-components-product-price__value {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   color: var(--noyona-color-pink-muted-rose);
   white-space: nowrap;
   display: inline-block;
@@ -1196,11 +1196,11 @@ body:not(.logged-in) .header-account--logged-out {
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-variation-meta__label {
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-variation-meta__value {
-  font-weight: 500;
+  font-weight: var( --noyona-font-weight-regular);
 }
 
 /* Sold-out badge overlaid on the product thumbnail in the mini-cart */
@@ -1212,7 +1212,7 @@ body:not(.logged-in) .header-account--logged-out {
   background: #c62828;
   color: #fff;
   font-size: 0.6rem;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 2px 8px;
@@ -1239,7 +1239,7 @@ body:not(.logged-in) .header-account--logged-out {
   color: #c62828;
   font-family: var(--wp--preset--font-family--poppins), system-ui, sans-serif;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   list-style: none;
   position: relative;
   flex-shrink: 0;
@@ -1399,7 +1399,7 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-summary-row strong {
   color: #3a3a3a;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-summary-row--total {
@@ -1411,7 +1411,7 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-summary-row--total strong {
   color: #2f2f2f;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
 }
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-terms {
@@ -1451,7 +1451,7 @@ body:not(.logged-in) .header-account--logged-out {
   min-height: 46px;
   padding: 12px 20px !important;
   font-size: 0;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1493,7 +1493,7 @@ body:not(.logged-in) .header-account--logged-out {
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button > span {
   font-size: 20px;
   line-height: 1;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
 }
 
 .wc-block-mini-cart__drawer .wp-block-woocommerce-mini-cart-checkout-button-block .wc-block-components-button .noyona-mini-cart-checkout-arrow {
@@ -1578,7 +1578,7 @@ body:not(.logged-in) .header-account--logged-out {
   color: #000000;
   font-size: var(--wp--preset--font-size--h-3);
   line-height: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
 }
 
@@ -1600,7 +1600,7 @@ body:not(.logged-in) .header-account--logged-out {
 .noyona-mini-cart-login-form label {
   color: #101828;
   font-size: 0.96rem;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
 }
 
@@ -1627,7 +1627,7 @@ body:not(.logged-in) .header-account--logged-out {
   background: var(--noyona-color-pink-soft);
   color: #333333;
   font-size: 1.08rem;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   cursor: pointer;
   font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
   transition: background 0.15s ease, color 0.15s ease;
@@ -1669,7 +1669,7 @@ body:not(.logged-in) .header-account--logged-out {
   width: 100%;
   text-decoration: none;
   box-sizing: border-box;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-family: var(--wp--preset--font-family--poppins), Arial, sans-serif;
 }
 
@@ -1731,7 +1731,7 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-select-text {
   font-size: var(--wp--preset--font-size--label);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   color: #7c4a57;
   line-height: 1;
 }
@@ -1758,7 +1758,7 @@ body:not(.logged-in) .header-account--logged-out {
   align-items: center;
   gap: 8px;
   font-size: var(--wp--preset--font-size--label);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   color: #253042;
   cursor: pointer;
   user-select: none;
@@ -1774,7 +1774,7 @@ body:not(.logged-in) .header-account--logged-out {
 
 .wc-block-mini-cart__drawer .noyona-mini-cart-message--warning {
   color: #c0392b;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
 }
 
 .wc-block-mini-cart__drawer .wc-block-components-button.is-loading {

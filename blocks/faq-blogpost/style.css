@@ -14,7 +14,7 @@
   margin: 0;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-2);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   color: #000000;
 }
@@ -70,7 +70,7 @@
 
 .faq-blogpost__question {
   font-size: var(--wp--preset--font-size--h-3);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   color: #101010;
 }
@@ -90,7 +90,7 @@
   place-items: center;
   font-size: 2rem;
   line-height: 1;
-  font-weight: 500;
+  font-weight: var( --noyona-font-weight-regular);
   color: #101010;
   transition: transform 0.24s ease, color 0.2s ease;
 }

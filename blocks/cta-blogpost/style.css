@@ -28,7 +28,7 @@
   border: 1px solid var(--noyona-cta-primary-border);
   font-family: var(--wp--preset--font-family--poppins);
   font-size: 16px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: 1;
   box-shadow: 0 8px 18px rgba(216, 27, 96, 0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;

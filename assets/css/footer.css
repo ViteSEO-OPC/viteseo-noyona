@@ -71,7 +71,7 @@
   color: #fff;
   border: none;
   border-radius: var(--noyona-radius-cta);
-  font-weight: var(--noyona-font-weight-button);
+  font-weight: var(--noyona-font-weight-bold);
   font-size: var(--wp--preset--font-size--body);
   font-family: var(--wp--preset--font-family--poppins);
   cursor: pointer;

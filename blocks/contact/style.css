@@ -41,7 +41,7 @@
 
 .nsl-title {
     font-size: var(--wp--preset--font-size--h-2);
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     margin: 0 0 10px 0;
     line-height: normal;
 }
@@ -85,7 +85,7 @@
     background: none;
     border: none;
     color: #D81B60;
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     font-size: var(--wp--preset--font-size--nav-button);
     display: flex;
     align-items: center;
@@ -110,7 +110,7 @@
     color: #666;
     cursor: pointer;
     position: relative;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
 }
 
 .nsl-tab.active {
@@ -179,7 +179,7 @@
 
 .nsl-store-name {
     font-size: 24px;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     margin: 0;
     line-height: normal;
     color: #000;
@@ -222,7 +222,7 @@
 }
 
 .nsl-status-badge {
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     padding: 2px 6px;
     border-radius: var(--noyona-radius-input);
     font-size: var(--wp--preset--font-size--caption);
@@ -251,7 +251,7 @@
     /* Light yellow */
     color: #f9a825;
     /* Gold/Orange */
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     padding: 2px 6px;
     border-radius: var(--noyona-radius-input);
     font-size: var(--wp--preset--font-size--caption);
@@ -267,13 +267,13 @@
 }
 
 .nsl-hours-text {
-    font-weight: 500;
+    font-weight: var( --noyona-font-weight-regular);
     color: #222;
 }
 
 .nsl-meta-sep {
     color: #bbb;
-    font-weight: 700;
+    font-weight: var(--noyona-font-weight-bold);
     font-size: var(--wp--preset--font-size--caption);
     line-height: 1;
 }
@@ -281,7 +281,7 @@
 .nsl-get-directions {
     color: #D81B60;
     /* Brand pink/red */
-    font-weight: 600;
+    font-weight: var( --noyona-font-weight-bold);
     text-decoration: none;
     font-size: 18px;
     display: inline-block;

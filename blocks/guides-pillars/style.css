@@ -24,7 +24,7 @@
 .guides-pillars__title {
   margin: 0 0 10px;
   font-size: var(--wp--preset--font-size--h-2, clamp(32px, 3.75vw, 48px));
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
 }
 
@@ -35,7 +35,7 @@
 .guides-pillars__subtitle {
   margin: 0;
   font-size: var(--wp--preset--font-size--body, 16px);
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   line-height: normal;
   opacity: 0.9;
 }
@@ -69,7 +69,7 @@
 .guides-pillars__item-title {
   margin: 0 0 10px;
   font-size: var(--wp--preset--font-size--h-4, clamp(24px, 2.5vw, 32px));
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   letter-spacing: 0.08em;
 }
 

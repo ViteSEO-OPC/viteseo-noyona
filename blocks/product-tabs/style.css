@@ -27,7 +27,7 @@
   background: transparent;
   font: inherit;
   font-size: var(--wp--preset--font-size--nav-button);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #888;

@@ -160,7 +160,7 @@
     line-height: normal;
     letter-spacing: var(--noyona-letter-spacing-bugfix);
     font-family: var(--wp--preset--font-family--poppins);
-    font-weight: var(--noyona-font-weight-body);
+    font-weight: var(--noyona-font-weight-regular);
 }
 
 .hero-banner__search {
@@ -232,7 +232,7 @@
     color: var(--noyona-cta-primary-text);
     border: 1px solid var(--noyona-cta-primary-border);
     border-radius: 16px !important;
-    font-weight: var(--noyona-font-weight-button);
+    font-weight: var(--noyona-font-weight-bold);
     font-size: 16px;
     text-decoration: none;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
@@ -343,11 +343,6 @@
 
 /* Lovial hero overlay — same gradient structure as default, Lovial accent #F0E9D7 */
 body:has(.noyona-lovial-page) .hero-banner::before {
-    background: linear-gradient(
-        135deg,
-        rgba(240, 233, 215, 0.25) 0%,
-        rgba(240, 233, 215, 0.18) 40%,
-        rgba(240, 233, 215, 0.10) 100%
-    );
+    background: transparent;
 }
 

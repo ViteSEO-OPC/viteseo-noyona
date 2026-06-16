@@ -18,7 +18,7 @@
 .faq-blogpost-editor__item-heading {
   margin: 0 0 10px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: #5f6368;

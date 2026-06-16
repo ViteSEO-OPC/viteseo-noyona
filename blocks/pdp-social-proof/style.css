@@ -11,5 +11,5 @@
   background: rgba(216, 27, 96, 0.08);
   color: var(--noyona-color-pink-muted-rose);
   font-size: var(--wp--preset--font-size--caption);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
 }

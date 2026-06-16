@@ -49,7 +49,7 @@
   font-size: var(--wp--preset--font-size--h-1);
   text-align: center;
   font-family: var(--wp--preset--font-family--poppins);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   color: #000000;
 }
 
@@ -101,7 +101,7 @@
   min-height: 44px;
   box-sizing: border-box;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   cursor: pointer;
   box-shadow: 0 8px 16px rgba(227, 11, 93, 0.25);
   -webkit-appearance: none;
@@ -182,7 +182,7 @@
   justify-content: space-between;
   gap: 0.6rem;
   font-size: var(--wp--preset--font-size--label);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   text-align: left;
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
@@ -190,7 +190,7 @@
 
 .faq-list__category-label {
   font-size: clamp(20px, 2vw, 24px);
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
 }
 
 .faq-list__category.is-active {
@@ -236,13 +236,13 @@
 .faq-list__disclaimer-title {
   margin: 0 0 0.35rem;
   font-size: var(--wp--preset--font-size--body);
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   color: #444;
 }
 
 .faq-list__disclaimer-body {
   font-size: clamp(16px, 2vw, 18px);
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   color: #666;
   line-height: normal;
 }
@@ -256,14 +256,14 @@
   text-align: center;
   font-family: var(--wp--preset--font-family--poppins);
   font-size: var(--wp--preset--font-size--h-2);
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   color: #000000;
 }
 
 .faq-list__subtitle {
   margin: 0.5rem 0 1.4rem;
   font-size: var(--wp--preset--font-size--body);
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   color: #666;
 }
 
@@ -295,7 +295,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  font-weight: 600;
+  font-weight: var( --noyona-font-weight-bold);
   color: #333;
   font-size: var(--wp--preset--font-size--h-5);
   transition: color 0.2s ease;
@@ -328,7 +328,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
-  font-weight: 400;
+  font-weight: var( --noyona-font-weight-regular);
   color: #333;
   transition: transform 0.3s ease, color 0.2s ease;
   line-height: 1;
@@ -479,7 +479,7 @@
   background: var(--noyona-cta-primary-bg);
   color: var(--noyona-cta-primary-text);
   text-decoration: none;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-size: 16px;
   line-height: 1;
   border: 1px solid var(--noyona-cta-primary-border);
@@ -506,7 +506,7 @@
 
 .faq-community__title {
   margin: 0 0 0.75rem;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-size: var(--wp--preset--font-size--h-2);
   color: #000000;
   line-height: normal;
@@ -534,7 +534,7 @@
   color: var(--noyona-cta-primary-text);
   border: 1px solid var(--noyona-cta-primary-border);
   text-decoration: none;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-size: 16px;
   box-shadow: 0 10px 7.5px 0 rgba(0, 0, 0, 0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease;

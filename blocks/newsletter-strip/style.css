@@ -27,7 +27,7 @@
   margin: 0;
   font-size: var(--wp--preset--font-size--h-2);
   line-height: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   display: flex;
   align-items: baseline;
   justify-content: center;
@@ -37,7 +37,7 @@
 
 .newsletter-strip__title em {
   font-style: normal;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   font-family: var(--wp--preset--font-family--poppins);
 }
 
@@ -84,7 +84,7 @@
   background: var(--newsletter-strip-cta-bg, var(--noyona-cta-primary-bg));
   padding: 12px 20px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: var(--noyona-font-weight-bold);
   cursor: pointer;
   line-height: 1;
   font-family: var(--wp--preset--font-family--poppins);
