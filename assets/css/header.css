@@ -68,6 +68,9 @@ body.search-expand-open header.wp-block-template-part {
   }
 }
 
+body:has(.noyona-lovial-page) .site-header {
+  box-shadow: 0 10px 20px -12px rgba(19, 19, 19, 0.25);
+}
 /* Header base */
 .site-header {
   display: flex;
