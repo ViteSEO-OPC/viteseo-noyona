@@ -2159,6 +2159,11 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
+/** Fix for product collection block */
+.wp-block-woocommerce-product-collection .wc-block-components-notices:not(:has(*)) + .wc-block-product-template {
+  height: fit-content !important;
+}
+
 @media (max-width: 1399px) {
   .noyona-shop-products-infinite .wc-block-product-template {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
