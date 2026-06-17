@@ -9,6 +9,11 @@
   padding-right: var(--page-gutter-right, 16px);
 }
 
+/** Fix for product collection block */
+.wp-block-woocommerce-product-collection .wc-block-components-notices:not(:has(*)) + .wc-block-product-template {
+  height: fit-content !important;
+}
+
 .different-cards__inner {
   max-width: 96rem;
   margin: 0 auto;
