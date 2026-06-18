@@ -1078,7 +1078,7 @@ function noyona_get_product_card_price_html( $product ) {
 /* ----- Render a single product card ----- */
 /**
  * Render a single product card with the unified layout:
- * image → title → meta → excerpt → footer (price only).
+ * image → title → meta → excerpt → footer (price + meta).
  */
 function noyona_render_product_card( $product ) {
     if ( ! $product instanceof WC_Product ) {
@@ -1103,14 +1103,20 @@ function noyona_render_product_card( $product ) {
     <div class="wc-block-product" data-product-id="<?php echo esc_attr( (string) $product->get_id() ); ?>">
         <a href="<?php echo esc_url( $link ); ?>" class="wc-block-components-product-image"><?php echo $image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
         <h3 class="wc-block-product-title wp-block-post-title"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $title ); ?></a></h3>
-        <?php if ( '' !== $meta_html ) : ?>
-            <?php echo $meta_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-        <?php endif; ?>
-        <?php if ( $excerpt ) : ?>
+        <!-- <?php if ( $excerpt ) : ?>
             <div class="wp-block-post-excerpt"><p><?php echo esc_html( $excerpt ); ?></p></div>
-        <?php endif; ?>
+        <?php endif; ?> -->
         <div class="noyona-product-card-footer">
-            <?php echo $price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <div class="noyona-product-card-footer__main">
+                <div class="noyona-product-card-footer__price-row">
+                    <?php echo $price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </div>
+                <?php if ( '' !== $meta_html ) : ?>
+                    <div class="noyona-product-card-footer__meta-row">
+                        <?php echo $meta_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
     <?php
