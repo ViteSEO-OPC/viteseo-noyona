@@ -160,6 +160,173 @@
     return openMiniCartDrawer(options);
   };
 
+  function getWcAjaxAddToCartUrl() {
+    if (
+      typeof window.wc_add_to_cart_params !== 'undefined' &&
+      window.wc_add_to_cart_params &&
+      window.wc_add_to_cart_params.wc_ajax_url
+    ) {
+      return String(window.wc_add_to_cart_params.wc_ajax_url).replace('%%endpoint%%', 'add_to_cart');
+    }
+    return '/?wc-ajax=add_to_cart';
+  }
+
+  function noyonaAjaxAddToCart(options) {
+    const settings = options || {};
+    const productId = parseInt(settings.productId, 10) || 0;
+    const quantity = Math.max(1, parseInt(settings.quantity, 10) || 1);
+    const sourceButton = settings.sourceButton || null;
+    const openDrawer = settings.openDrawer !== false;
+
+    if (productId < 1) {
+      return Promise.resolve({ ok: false, error: 'This product cannot be added to cart right now.' });
+    }
+
+    const payload = new URLSearchParams();
+    payload.set('product_id', String(productId));
+    payload.set('quantity', String(quantity));
+
+    return fetch(getWcAjaxAddToCartUrl(), {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+      body: payload.toString(),
+    })
+      .then((response) => response.text())
+      .then((raw) => {
+        let data = null;
+        if (raw) {
+          try {
+            data = JSON.parse(raw);
+          } catch (e) {
+            data = null;
+          }
+        }
+
+        if (data && data.error) {
+          const message =
+            String((data && data.message) || (data && data.data && data.data.message) || '').trim() ||
+            'This product cannot be added to cart right now.';
+          return { ok: false, error: message };
+        }
+
+        if (window.jQuery) {
+          window.jQuery(document.body).trigger('added_to_cart', [
+            data && data.fragments ? data.fragments : null,
+            data && data.cart_hash ? data.cart_hash : '',
+            sourceButton,
+          ]);
+          window.jQuery(document.body).trigger('wc_fragment_refresh');
+        }
+
+        document.body.dispatchEvent(
+          new CustomEvent('wc-blocks_added_to_cart', {
+            bubbles: true,
+            detail: { source: 'product-card', preserveCartData: false },
+          })
+        );
+        document.body.dispatchEvent(
+          new CustomEvent('noyona_cart_added', {
+            bubbles: true,
+            detail: { source: 'product-card' },
+          })
+        );
+
+        if (openDrawer && window.noyonaCartFx && typeof window.noyonaCartFx.openDrawer === 'function') {
+          window.noyonaCartFx.openDrawer({ delay: 120 });
+        }
+
+        return { ok: true, data: data || {} };
+      })
+      .catch(() => ({
+        ok: false,
+        error: 'This product cannot be added to cart right now.',
+      }));
+  }
+
+  function setProductCardCartBusy(button, busy) {
+    if (!button) return;
+    if (busy) {
+      button.classList.add('is-loading');
+      button.setAttribute('aria-busy', 'true');
+      button.setAttribute('aria-disabled', 'true');
+    } else {
+      button.classList.remove('is-loading');
+      button.removeAttribute('aria-busy');
+      if (button.getAttribute('data-cart-action') !== 'disabled') {
+        button.removeAttribute('aria-disabled');
+      }
+    }
+  }
+
+  function bindProductCardCartButton(button, card) {
+    if (!button || button.getAttribute('data-noyona-card-cart-bound') === '1') {
+      return;
+    }
+
+    const action = button.getAttribute('data-cart-action') || '';
+
+    if (action === 'disabled') {
+      return;
+    }
+
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (action === 'navigate') {
+        const cardLink = card && card.querySelector('.wp-block-post-title a, .wc-block-components-product-image a');
+        const url = button.getAttribute('data-product-url') || (cardLink && cardLink.href) || '';
+        if (url) {
+          window.location.assign(url);
+        }
+        return;
+      }
+
+      if (action !== 'ajax') {
+        return;
+      }
+
+      if (button.disabled || button.getAttribute('aria-disabled') === 'true' || button.classList.contains('is-loading')) {
+        return;
+      }
+
+      const productId = parseInt(button.getAttribute('data-product-id'), 10) || 0;
+      if (productId < 1) {
+        return;
+      }
+
+      setProductCardCartBusy(button, true);
+
+      noyonaAjaxAddToCart({
+        productId,
+        quantity: 1,
+        sourceButton: button,
+        openDrawer: true,
+      })
+        .then((result) => {
+          if (!result.ok && result.error && window.noyonaCartFx && typeof window.noyonaCartFx.toast === 'function') {
+            window.noyonaCartFx.toast(result.error, 'error');
+          }
+        })
+        .finally(() => {
+          setProductCardCartBusy(button, false);
+        });
+    });
+
+    button.setAttribute('data-noyona-card-cart-bound', '1');
+  }
+
+  function initProductCardCart() {
+    document
+      .querySelectorAll('.noyona-shop-products .wc-block-product .noyona-product-card-cart[data-noyona-card-cart="1"]')
+      .forEach((button) => {
+        const card = button.closest('.wc-block-product');
+        if (!card) return;
+        bindProductCardCartButton(button, card);
+      });
+  }
+
   function initMiniCartDynamicUi() {
     const CART_STORE_KEYS = ['wc/store/cart', 'wc/store/cart-data', 'wc/store'];
 
@@ -1127,6 +1294,7 @@
       '.ps-btn-cart',
       '.ph-btn-cart',
       '.noyona-pdp-related__cart-btn--ajax',
+      '.noyona-product-card-cart[data-cart-action="ajax"]',
       '[name="add-to-cart"]',
     ].join(',');
     const PRODUCT_SCOPE_SELECTOR = [
@@ -2500,6 +2668,7 @@
           nextProducts.setAttribute('data-shop-view', isListView ? 'list' : 'grid');
 
           initShopProductActions();
+          initProductCardCart();
           initShopArchiveInfiniteScroll();
         })
         .catch((error) => {
@@ -3046,6 +3215,9 @@
         card.querySelectorAll('[data-noyona-wishlist-bound]').forEach((button) => {
           button.removeAttribute('data-noyona-wishlist-bound');
         });
+        card.querySelectorAll('.noyona-product-card-cart[data-noyona-card-cart-bound="1"]').forEach((button) => {
+          button.removeAttribute('data-noyona-card-cart-bound');
+        });
         card.querySelectorAll('.noyona-shop-product-actions').forEach((actions) => actions.remove());
       });
 
@@ -3272,6 +3444,9 @@
           if (typeof initShopProductActions === 'function') {
             initShopProductActions();
           }
+          if (typeof initProductCardCart === 'function') {
+            initProductCardCart();
+          }
 
           updateResultCount();
           scrollToNewCardsStart(firstNewCard);
@@ -3361,6 +3536,7 @@
 
     if (restoredState) {
       initShopProductActions();
+      initProductCardCart();
       updateResultCount();
       scrollToRestoredProduct();
     }
@@ -3771,6 +3947,7 @@
     initShopCategoryActiveByPath();
     initShopPriceFilter();
     initShopProductActions();
+    initProductCardCart();
     initShopArchiveInfiniteScroll();
     initScrollTopButton();
     initShopFilterModal();
