@@ -2311,7 +2311,7 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
 
 /* Product title */
 .noyona-shop-products .wc-block-product .wp-block-post-title {
-  font-size: var(--wp--preset--font-size--body);
+  font-size: var(--wp--preset--font-size--h-4);
   font-weight: var(--noyona-font-weight-bold);
   color: #000000;
   margin: 0 0 4px;
@@ -2325,14 +2325,14 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   text-decoration: none;
 }
 
-.noyona-shop-products .wc-block-product .wp-block-post-title a:hover,
+/* .noyona-shop-products .wc-block-product .wp-block-post-title a:hover,
 .noyona-shop-products .wc-block-product .wp-block-post-title a:focus-visible,
 .noyona-shop-products .wc-block-product-title a:hover,
 .noyona-shop-products .wc-block-product-title a:focus-visible {
   color: var(--noyona-color-pink-accent);
   text-decoration: underline;
   text-underline-offset: 0.1em;
-}
+} */
 
 /* Product excerpt */
 .noyona-shop-products .wc-block-product .wp-block-post-excerpt {
@@ -7407,4 +7407,55 @@ body.page-login .noyona-login-register-link {
 
 .noyona-cta-tertiary:hover {
   color: var(--noyona-color-pink-muted-rose) !important;
+}
+
+/** Card Category  Update Style */
+.noyona-shop-products .wc-block-components-product-image {
+  position: relative;
+}
+
+.noyona-shop-products .wc-block-components-product-image .noyona-product-card-meta__category {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  z-index: 2;
+
+  margin: 0;
+  padding: 0;
+
+  background: transparent;
+  border: 0;
+
+  color: #fff;
+
+  font-size: var(--wp--preset--font-size--medium);
+  font-weight: var(--noyona-font-weight-bold);
+  line-height: 1;
+
+  text-transform: none;
+}
+
+.noyona-product-card-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.noyona-product-card-price__badge {
+  margin-left: auto;
+}
+
+.noyona-shop-products .noyona-product-card-price__old, 
+.noyona-shop-products .noyona-product-card-price del  {
+  font-size: var(--wp--preset--font-size--medium);
+}
+.noyona-shop-products .noyona-product-card-price__current,
+.noyona-shop-products .noyona-product-card-price ins  {
+  font-size: var(--wp--preset--font-size--h-4);
+  font-weight: var(--noyona-font-weight-regular);
+}
+
+.noyona-shop-products .wc-block-components-product-price .woocommerce-Price-amount {
+  font-size: var(--wp--preset--font-size--h-4);
+  font-weight: var(--noyona-font-weight-regular);
 }

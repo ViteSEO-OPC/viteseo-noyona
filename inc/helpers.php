@@ -1015,6 +1015,16 @@ function noyona_get_product_card_meta_html( $product ) {
     return '<div class="noyona-product-card-meta">' . implode( '', $parts ) . '</div>';
 }
 
+function noyona_get_product_card_category_html( $product ) {
+    $category = noyona_get_product_card_category_name( $product );
+
+    if ( '' === $category ) {
+        return '';
+    }
+
+    return '<span class="noyona-product-card-meta__category">' . esc_html( $category ) . '</span>';
+}
+
 /**
  * Price block with optional discount badge and smaller struck-through regular price.
  *
@@ -1064,9 +1074,9 @@ function noyona_get_product_card_price_html( $product ) {
     ?>
     <div class="noyona-product-card-price wc-block-components-product-price">
         <?php if ( $discount_pct > 0 ) : ?>
-            <span class="noyona-product-card-price__badge">-<?php echo esc_html( (string) $discount_pct ); ?>%</span>
-            <del class="noyona-product-card-price__old"><?php echo wp_kses_post( wc_price( $regular ) ); ?></del>
             <ins class="noyona-product-card-price__current"><?php echo wp_kses_post( wc_price( $sale ) ); ?></ins>
+            <del class="noyona-product-card-price__old"><?php echo wp_kses_post( wc_price( $regular ) ); ?></del>
+            <span class="noyona-product-card-price__badge">-<?php echo esc_html( (string) $discount_pct ); ?>%</span>
         <?php else : ?>
             <span class="noyona-product-card-price__current"><?php echo wp_kses_post( wc_price( $sale ) ); ?></span>
         <?php endif; ?>
@@ -1094,6 +1104,7 @@ function noyona_render_product_card( $product ) {
     $excerpt       = has_excerpt( $product->get_id() ) ? get_the_excerpt( $product->get_id() ) : '';
     $meta_html     = noyona_get_product_card_meta_html( $product );
     $price_html    = noyona_get_product_card_price_html( $product );
+    $category_html = noyona_get_product_card_category_html( $product );
     if ( $excerpt ) {
         $excerpt = wp_trim_words( $excerpt, 22 );
     }
@@ -1101,14 +1112,20 @@ function noyona_render_product_card( $product ) {
     ob_start();
     ?>
     <div class="wc-block-product" data-product-id="<?php echo esc_attr( (string) $product->get_id() ); ?>">
-        <a href="<?php echo esc_url( $link ); ?>" class="wc-block-components-product-image"><?php echo $image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+        <a href="<?php echo esc_url( $link ); ?>" class="wc-block-components-product-image">
+        <?php echo $image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+
+            <?php if ( '' !== $category_html ) : ?>
+                <?php echo $category_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <?php endif; ?>
+            </a>
         <h3 class="wc-block-product-title wp-block-post-title"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $title ); ?></a></h3>
-        <?php if ( '' !== $meta_html ) : ?>
+        <!-- <?php if ( '' !== $meta_html ) : ?>
             <?php echo $meta_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-        <?php endif; ?>
-        <?php if ( $excerpt ) : ?>
+        <?php endif; ?> -->
+        <!-- <?php if ( $excerpt ) : ?>
             <div class="wp-block-post-excerpt"><p><?php echo esc_html( $excerpt ); ?></p></div>
-        <?php endif; ?>
+        <?php endif; ?> -->
         <div class="noyona-product-card-footer">
             <?php echo $price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         </div>
