@@ -2365,13 +2365,6 @@
     document.querySelectorAll('[data-noyona-pdp-wishlist]').forEach(bindPdpWishlistButton);
   }
 
-  function maybeOpenMiniCartDrawer() {
-    var miniCartBtn = document.querySelector('.wc-block-mini-cart__button');
-    if (miniCartBtn) {
-      miniCartBtn.click();
-    }
-  }
-
   function getGlobalCheckoutLoginModal() {
     return document.querySelector('[data-mini-cart-login-modal-global]');
   }
@@ -2773,7 +2766,9 @@
           clearLegacyAddToCartState();
 
           // Open the mini-cart drawer so user sees updated cart, not cart page link.
-          setTimeout(maybeOpenMiniCartDrawer, 120);
+          if (window.noyonaCartFx && typeof window.noyonaCartFx.openDrawer === 'function') {
+            window.noyonaCartFx.openDrawer({ delay: 120 });
+          }
         })
         .catch(function () {
           // Do not fallback-submit the form: this causes reload + duplicate cart lines.

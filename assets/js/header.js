@@ -112,6 +112,54 @@
     });
   }
 
+  /**
+   * Shared mini-cart drawer open (ADR-004). Single implementation for PDP,
+   * #open-cart, ?open-cart=1, and future product-card adds.
+   */
+  function getMiniCartButton() {
+    return (
+      document.querySelector('.header-mini-cart .wc-block-mini-cart__button') ||
+      document.querySelector('.wc-block-mini-cart__button')
+    );
+  }
+
+  function openMiniCartDrawer(options) {
+    const settings = options || {};
+    const delay = Math.max(0, parseInt(settings.delay, 10) || 0);
+    const retries = Math.max(0, parseInt(settings.retries, 10) || 0);
+    const retryInterval = Math.max(0, parseInt(settings.retryInterval, 10) || 250);
+
+    const clickMiniCartButton = () => {
+      const btn = getMiniCartButton();
+      if (!btn) return false;
+      btn.click();
+      return true;
+    };
+
+    const tryOpen = (attemptsLeft) => {
+      if (clickMiniCartButton()) return true;
+      if (attemptsLeft <= 0) return false;
+      setTimeout(() => {
+        tryOpen(attemptsLeft - 1);
+      }, retryInterval);
+      return false;
+    };
+
+    const start = () => tryOpen(retries);
+
+    if (delay > 0) {
+      setTimeout(start, delay);
+      return false;
+    }
+
+    return start();
+  }
+
+  window.noyonaCartFx = window.noyonaCartFx || {};
+  window.noyonaCartFx.openDrawer = function (options) {
+    return openMiniCartDrawer(options);
+  };
+
   function initMiniCartDynamicUi() {
     const CART_STORE_KEYS = ['wc/store/cart', 'wc/store/cart-data', 'wc/store'];
 
@@ -1310,6 +1358,12 @@
     // Reusable trigger so non-PDP surfaces (e.g. the account wishlist) can run
     // the exact same fly-to-cart animation, but start it from their own source
     // element (the wishlist row image) rather than a PDP product form.
+    const openDrawerFn =
+      (window.noyonaCartFx && typeof window.noyonaCartFx.openDrawer === 'function' && window.noyonaCartFx.openDrawer) ||
+      function (options) {
+        return openMiniCartDrawer(options);
+      };
+
     window.noyonaCartFx = {
       flyFrom: function (sourceEl, options) {
         runFlyAnimation(sourceEl || null, Object.assign({ force: true }, options || {}));
@@ -1321,6 +1375,7 @@
         showSuccessToast(message, type);
       },
       pulse: pulseCartIcon,
+      openDrawer: openDrawerFn,
     };
 
     // Auto-binding for every add-to-cart surface (PDP form, shop/related cards,
@@ -1583,15 +1638,6 @@
    *  – when any link with href="#open-cart" is clicked
    */
   function initMiniCartAutoOpen() {
-    const openMiniCart = () => {
-      const btn = document.querySelector('.wc-block-mini-cart__button');
-      if (btn) {
-        btn.click();
-        return true;
-      }
-      return false;
-    };
-
     // Auto-open after /cart → /?open-cart=1 redirect.
     const params = new URLSearchParams(window.location.search);
     if (params.has('open-cart')) {
@@ -1599,12 +1645,8 @@
       const clean = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
       window.history.replaceState({}, '', clean);
 
-      const tryOpen = (attempts) => {
-        if (openMiniCart() || attempts <= 0) return;
-        setTimeout(() => tryOpen(attempts - 1), 250);
-      };
-      // Give WC blocks time to mount.
-      setTimeout(() => tryOpen(12), 400);
+      // Give WC blocks time to mount, then retry if the mini-cart button is late.
+      openMiniCartDrawer({ delay: 400, retries: 12, retryInterval: 250 });
     }
 
     // Handle #open-cart links anywhere on the page.
@@ -1612,7 +1654,7 @@
       const link = e.target.closest('a[href="#open-cart"]');
       if (!link) return;
       e.preventDefault();
-      openMiniCart();
+      openMiniCartDrawer();
     });
   }
 
