@@ -1085,10 +1085,99 @@ function noyona_get_product_card_price_html( $product ) {
     return trim( (string) ob_get_clean() );
 }
 
+/**
+ * Cart control markup for unified product cards.
+ *
+ * @param WC_Product $product Product instance.
+ * @return string Cart button HTML.
+ */
+function noyona_get_product_card_cart_control_html( $product ) {
+    if ( ! $product instanceof WC_Product ) {
+        return '';
+    }
+
+    $product_id   = $product->get_id();
+    $product_type = $product->get_type();
+    $product_name = $product->get_name();
+    $permalink    = $product->get_permalink();
+
+    $cart_action = 'navigate';
+    $product_url = $permalink;
+    $aria_label  = '';
+    $is_disabled = false;
+
+    if ( $product->is_type( 'simple' ) ) {
+        if ( $product->is_purchasable() && $product->is_in_stock() ) {
+            $cart_action = 'ajax';
+            $aria_label  = sprintf(
+                /* translators: %s: product name */
+                __( 'Add %s to cart', 'noyona-childtheme' ),
+                $product_name
+            );
+        } else {
+            $cart_action = 'disabled';
+            $is_disabled = true;
+            $aria_label  = sprintf(
+                /* translators: %s: product name */
+                __( '%s is out of stock', 'noyona-childtheme' ),
+                $product_name
+            );
+        }
+    } elseif ( $product->is_type( 'variable' ) || $product->is_type( 'grouped' ) ) {
+        $aria_label = sprintf(
+            /* translators: %s: product name */
+            __( 'Select options for %s', 'noyona-childtheme' ),
+            $product_name
+        );
+    } elseif ( $product->is_type( 'external' ) ) {
+        $external_url = $product->get_product_url();
+        $product_url  = $external_url ? $external_url : $permalink;
+        $aria_label   = sprintf(
+            /* translators: %s: product name */
+            __( 'View %s', 'noyona-childtheme' ),
+            $product_name
+        );
+    } else {
+        $aria_label = sprintf(
+            /* translators: %s: product name */
+            __( 'View %s', 'noyona-childtheme' ),
+            $product_name
+        );
+    }
+
+    $classes = array( 'noyona-product-card-cart' );
+    if ( $is_disabled ) {
+        $classes[] = 'is-disabled';
+    }
+
+    ob_start();
+    ?>
+    <button
+        type="button"
+        class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>"
+        data-noyona-card-cart="1"
+        data-product-id="<?php echo esc_attr( (string) $product_id ); ?>"
+        data-product-type="<?php echo esc_attr( $product_type ); ?>"
+        data-cart-action="<?php echo esc_attr( $cart_action ); ?>"
+        <?php if ( 'navigate' === $cart_action ) : ?>
+            data-product-url="<?php echo esc_url( $product_url ); ?>"
+        <?php endif; ?>
+        aria-label="<?php echo esc_attr( $aria_label ); ?>"
+        <?php if ( $is_disabled ) : ?>
+            disabled
+            aria-disabled="true"
+        <?php endif; ?>
+    >
+        <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+    </button>
+    <?php
+    return trim( (string) ob_get_clean() );
+}
+
 /* ----- Render a single product card ----- */
 /**
  * Render a single product card with the unified layout:
- * image → title → meta → excerpt → footer (price only).
+ * image → title → meta → excerpt → footer (price + cart).
  */
 function noyona_render_product_card( $product ) {
     if ( ! $product instanceof WC_Product ) {
@@ -1139,7 +1228,9 @@ function noyona_render_product_card( $product ) {
             <div class="wp-block-post-excerpt"><p><?php echo esc_html( $excerpt ); ?></p></div>
         <?php endif; ?> -->
         <div class="noyona-product-card-footer">
-            <?php echo $price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+        <div class="noyona-product-card-footer__copy">
+
+            <?php echo $price_html; ?>
 
             <div class="noyona-product-card-footer-meta">
                 <span class="noyona-product-card-footer-meta__rating">
@@ -1151,8 +1242,12 @@ function noyona_render_product_card( $product ) {
                 <span class="noyona-product-card-footer-meta__sold">
                     <?php echo esc_html( $sold_text ); ?>
                 </span>
+
+                <?php echo noyona_get_product_card_cart_control_html( $product ); ?>
             </div>
+
         </div>
+</div>
     </div>
     <?php
     $html = ob_get_clean();
