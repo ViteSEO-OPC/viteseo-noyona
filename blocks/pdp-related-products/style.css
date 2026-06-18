@@ -58,7 +58,8 @@
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  padding: 0px 16px;
+  /* 16px bottom keeps the rating off the card edge and matches the L/R gutter. */
+  padding: 0 16px 16px;
 }
 
 .noyona-pdp-related__image-wrap {
@@ -126,6 +127,11 @@
   align-items: baseline;
   gap: 4px 8px;
   margin: auto 0 0;
+  /* Baseline price typography so the "–" range separator and any bare
+     amounts match the standard current-price look (700 / consistent size). */
+  font-size: clamp(1.05rem, 1.3vw, 1.45rem);
+  font-weight: var(--noyona-font-weight-bold);
+  color: #111;
 }
 
 .noyona-pdp-related .noyona-product-card-price__badge {
@@ -184,6 +190,17 @@
   color: inherit;
 }
 
+/* Variable-product price ranges (e.g. ₱209.00 – ₱366.00) render as bare
+   <span class="woocommerce-Price-amount"> siblings with no __current / ins
+   wrapper. The direct-child combinator targets ONLY those range amounts
+   (discount/single-price amounts are nested in del/ins and never matched),
+   inheriting the bold/sized container styling above. */
+.noyona-pdp-related .noyona-product-card-price > .woocommerce-Price-amount {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
 .noyona-pdp-related__price {
   font-size: clamp(1.05rem, 1.3vw, 1.45rem);
   font-weight: var(--noyona-font-weight-bold);
@@ -192,8 +209,10 @@
 
 .noyona-pdp-related__rating {
   margin-top: 0;
-  padding-top: 0.45rem;
-  padding-bottom: 0.45rem;
+  /* Tightened gap to the price above; bottom spacing now comes from the
+     body's 16px padding-bottom so the card bottom stays consistent. */
+  padding-top: 0.35rem;
+  padding-bottom: 0;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -251,7 +270,9 @@
 .noyona-pdp-related .ps-btn-cart {
   position: absolute;
   right: 0.72rem;
-  bottom: 0.66rem;
+  /* Raised to sit with the (now slightly lifted) price/rating area, while
+     keeping comfortable breathing room from the card's bottom edge. */
+  bottom: 0.95rem;
   width: var(--noyona-pdp-related-cta-h);
   height: var(--noyona-pdp-related-cta-h);
   flex: 0 0 var(--noyona-pdp-related-cta-h);
