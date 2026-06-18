@@ -1102,9 +1102,21 @@ function noyona_render_product_card( $product ) {
     $title         = $product->get_name();
     $link          = $product->get_permalink();
     $excerpt       = has_excerpt( $product->get_id() ) ? get_the_excerpt( $product->get_id() ) : '';
-    $meta_html     = noyona_get_product_card_meta_html( $product );
+
     $price_html    = noyona_get_product_card_price_html( $product );
     $category_html = noyona_get_product_card_category_html( $product );
+
+    /** Card Rating and Sold Count */
+    $rating = (float) $product->get_average_rating();
+    $review_count = (int) $product->get_rating_count();
+
+    $rating_text = ( $review_count > 0 && $rating > 0 )
+        ? number_format( $rating, 1 ) . ' ★'
+        : 'No reviews yet';
+
+    $sold = max( 0, (int) $product->get_total_sales() );
+    $sold_text = $sold . ' sold';
+
     if ( $excerpt ) {
         $excerpt = wp_trim_words( $excerpt, 22 );
     }
@@ -1128,6 +1140,18 @@ function noyona_render_product_card( $product ) {
         <?php endif; ?> -->
         <div class="noyona-product-card-footer">
             <?php echo $price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+
+            <div class="noyona-product-card-footer-meta">
+                <span class="noyona-product-card-footer-meta__rating">
+                    <?php echo esc_html( $rating_text ); ?>
+                </span>
+
+                <span class="noyona-product-card-footer-meta__separator">|</span>
+
+                <span class="noyona-product-card-footer-meta__sold">
+                    <?php echo esc_html( $sold_text ); ?>
+                </span>
+            </div>
         </div>
     </div>
     <?php
