@@ -2093,3 +2093,47 @@ html.noyona-pdp-buysheet-open body {
   flex: 1 1 100%;
   width: 100%;
 }
+
+
+/* ==========================================================
+ * SHOP LISTING BUY SHEET
+ * Desktop / Tablet Center Modal
+ * Mobile remains bottom sheet
+ * ========================================================== */
+
+ @media (min-width: 768px) {
+
+  body.post-type-archive-product
+  .noyona-pdp-buysheet[data-noyona-buysheet-context="listing"].is-open  {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  body.post-type-archive-product
+  .noyona-pdp-buysheet[data-noyona-buysheet-context="listing"].is-open
+  .noyona-pdp-buysheet__panel {
+    position: relative;
+
+    left: auto;
+    right: auto;
+    bottom: auto;
+
+    width: min(760px, calc(100vw - 48px));
+
+    box-shadow:
+      0 24px 80px rgba(0,0,0,.18),
+      0 8px 24px rgba(0,0,0,.08);
+
+    max-height: 90vh;
+    max-height: 90dvh;
+
+    margin: 0;
+
+    border-radius: 24px;
+
+    overflow-y: auto;
+
+    animation: none;
+  }
+}

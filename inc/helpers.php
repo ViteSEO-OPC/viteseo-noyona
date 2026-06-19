@@ -1252,9 +1252,14 @@ function noyona_render_product_card( $product ) {
             <?php echo $price_html; ?>
 
             <div class="noyona-product-card-footer-meta">
-                <span class="noyona-product-card-footer-meta__rating">
-                    <?php echo esc_html( $rating_text ); ?>
-                </span>
+            <span class="noyona-product-card-footer-meta__rating">
+                <?php if ( $review_count > 0 && $rating > 0 ) : ?>
+                    <?php echo esc_html( number_format( $rating, 1 ) ); ?>
+                    <i class="fa-solid fa-star" aria-hidden="true"></i>
+                <?php else : ?>
+                    No reviews yet
+                <?php endif; ?>
+            </span>
 
                 <span class="noyona-product-card-footer-meta__separator">|</span>
 
