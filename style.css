@@ -7615,10 +7615,26 @@ body.page-login .noyona-login-register-link {
   
   * List View
   * ---------------------------------------------------------- */
-  
+
+  .noyona-shop-products .noyona-product-card-cart__label {
+  display: none;
+  }
+
   body.noyona-shop-view-list .noyona-shop-products .noyona-product-card-cart {
-  width: 42px;
+  width: auto;
+  min-width: 156px;
   height: 42px;
+  padding: 0 20px;
+  gap: 8px;
+  border-radius: var(--noyona-radius-cta);
+  font-size: var(--wp--preset--font-size--nav-button);
+  font-weight: var(--noyona-font-weight-bold);
+  white-space: nowrap;
+  }
+
+  body.noyona-shop-view-list .noyona-shop-products .noyona-product-card-cart__label {
+  display: inline;
+  line-height: 1;
   }
   
   /** ----------------------------------------------------------
@@ -7646,6 +7662,13 @@ body.page-login .noyona-login-register-link {
   .noyona-product-card-cart {
   width: 40px;
   height: 40px;
+  }
+
+  body.noyona-shop-view-list .noyona-shop-products .noyona-product-card-cart {
+  width: auto;
+  min-width: 148px;
+  height: 42px;
+  padding: 0 16px;
   }
   
   .noyona-product-card-cart i {

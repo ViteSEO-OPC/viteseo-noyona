@@ -1188,6 +1188,7 @@ function noyona_get_product_card_cart_control_html( $product ) {
         <?php endif; ?>
     >
         <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+        <span class="noyona-product-card-cart__label" aria-hidden="true"><?php echo esc_html( __( 'Add to cart', 'noyona-childtheme' ) ); ?></span>
     </button>
     <?php
     return trim( (string) ob_get_clean() );
@@ -1243,13 +1244,18 @@ function noyona_render_product_card( $product ) {
         <!-- <?php if ( '' !== $meta_html ) : ?>
             <?php echo $meta_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php endif; ?> -->
-        <?php if ( $excerpt ) : ?>
-            <div class="wp-block-post-excerpt"><p><?php echo esc_html( $excerpt ); ?></p></div>
-        <?php endif; ?> 
+      
         <div class="noyona-product-card-footer">
         <div class="noyona-product-card-footer__copy">
 
-            <?php echo $price_html; ?>
+            
+        <?php echo $price_html; ?>
+
+        <?php if ( $excerpt ) : ?>
+            <div class="wp-block-post-excerpt">
+                <p><?php echo esc_html( $excerpt ); ?></p>
+            </div>
+        <?php endif; ?>
 
             <div class="noyona-product-card-footer-meta">
             <span class="noyona-product-card-footer-meta__rating">
