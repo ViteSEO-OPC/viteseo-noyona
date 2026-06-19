@@ -1205,111 +1205,14 @@ function noyona_pdp_enqueue_assets() {
 		return;
 	}
 
-	// Required by Woo's variation templates (wp.template / _.template runtime).
-	// Some optimization stacks defer these unexpectedly, so enforce them here.
-	$variation_runtime_handles = array(
-		'underscore',
-		'wp-util',
-		'wc-add-to-cart-variation',
-	);
-	foreach ( $variation_runtime_handles as $handle ) {
-		if ( wp_script_is( $handle, 'registered' ) && ! wp_script_is( $handle, 'enqueued' ) ) {
-			wp_enqueue_script( $handle );
-		}
+	if ( ! function_exists( 'noyona_buy_sheet_enqueue_single_product_assets' ) ) {
+		return;
 	}
 
-	// Belt-and-suspenders: explicitly enqueue the WC gallery scripts. They are
-	// registered by WC_Frontend_Scripts on every front-end load and *should*
-	// auto-enqueue on PDPs, but block-theme detection plus production perf
-	// plugins can race that. Calling enqueue is idempotent — only the
-	// `is_registered && ! is_enqueued` branch ships extra work.
-	$gallery_handles = array(
-		'flexslider',
-		'photoswipe',
-		'photoswipe-ui-default',
-		'zoom',
-		'wc-single-product',
-		'wc-add-to-cart-variation',
-	);
-	foreach ( $gallery_handles as $handle ) {
-		if ( wp_script_is( $handle, 'registered' ) && ! wp_script_is( $handle, 'enqueued' ) ) {
-			wp_enqueue_script( $handle );
-		}
-	}
-	// PhotoSwipe stylesheet (lightbox) is registered alongside the JS.
-	if ( wp_style_is( 'photoswipe-default-skin', 'registered' ) && ! wp_style_is( 'photoswipe-default-skin', 'enqueued' ) ) {
-		wp_enqueue_style( 'photoswipe-default-skin' );
-	}
-
-	$theme_ver  = wp_get_theme()->get( 'Version' );
-	$style_path = get_stylesheet_directory() . '/assets/css/single-product.css';
-	$script_path = get_stylesheet_directory() . '/assets/js/single-product.js';
-	$style_ver = file_exists( $style_path ) ? (string) filemtime( $style_path ) : $theme_ver;
-	$script_ver = file_exists( $script_path ) ? (string) filemtime( $script_path ) : $theme_ver;
-
-	wp_enqueue_style(
-		'noyona-single-product',
-		get_stylesheet_directory_uri() . '/assets/css/single-product.css',
-		array( 'woocom-ct-style' ),
-		$style_ver
-	);
-
-	// in_footer + strategy=defer is required: this script declares
-	// wc-add-to-cart-variation as a dep, which WC registers with
-	// strategy=defer. If we leave this script as blocking, WP 6.3+
-	// propagates the blocking strategy upward and downgrades
-	// wc-add-to-cart-variation -> woocommerce -> wc-cart-fragments, leaving
-	// woocommerce.min.js without a real `defer` attribute. It then executes
-	// before deferred jQuery and throws `ReferenceError: jQuery is not
-	// defined`. single-product.js is IIFE-wrapped and all its jQuery
-	// touches are inside event handlers behind typeof guards, so deferring
-	// it is safe.
-	wp_enqueue_script(
-		'noyona-single-product',
-		get_stylesheet_directory_uri() . '/assets/js/single-product.js',
-		array( 'jquery', 'wp-util', 'underscore', 'wc-add-to-cart-variation' ),
-		$script_ver,
+	noyona_buy_sheet_enqueue_single_product_assets(
 		array(
-			'in_footer' => true,
-			'strategy'  => 'defer',
-		)
-	);
-
-	wp_localize_script(
-		'noyona-single-product',
-		'noyonaPdp',
-		array(
-			'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
-			'checkoutUrl' => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '',
-			'wishlist'    => array(
-				'nonce'    => wp_create_nonce( 'noyona_product_wishlist' ),
-				'loginUrl' => function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/my-account/' ),
-			),
-			'i18n'        => array(
-				'selectOptions'         => __( 'Please select all product options before continuing.', 'viteseo-noyona-childtheme' ),
-				'buyNow'                => __( 'Buy now', 'viteseo-noyona-childtheme' ),
-				'addToCart'             => __( 'Add to cart', 'viteseo-noyona-childtheme' ),
-				'inStock'               => __( 'In stock', 'viteseo-noyona-childtheme' ),
-				'inStockLeft'           => __( 'In stock (%d left)', 'viteseo-noyona-childtheme' ),
-				'outOfStock'            => __( 'Out of stock', 'viteseo-noyona-childtheme' ),
-				'outOfStockLeft'        => __( 'Out of stock (%d left)', 'viteseo-noyona-childtheme' ),
-				'outOfStockCartError'   => __( 'This product is out of stock.', 'viteseo-noyona-childtheme' ),
-				'cartError'             => __( 'This product cannot be added to cart right now.', 'viteseo-noyona-childtheme' ),
-				/* translators: %d: available stock quantity. */
-				'maxInCart'             => __( 'You already have all available stock (%d) of this item in your cart.', 'viteseo-noyona-childtheme' ),
-				/* translators: %1$d: available stock quantity; %2$d: quantity already in cart. */
-				'notEnoughStock'        => __( 'Only %1$d left in stock, and you already have %2$d in your cart.', 'viteseo-noyona-childtheme' ),
-				'selectOptionsAvailability' => __( 'Select options to see availability', 'viteseo-noyona-childtheme' ),
-				'selectShade'           => __( 'Select shade', 'viteseo-noyona-childtheme' ),
-				'wishlistAdd'           => __( 'Add to wishlist', 'viteseo-noyona-childtheme' ),
-				'wishlistRemove'        => __( 'Remove from wishlist', 'viteseo-noyona-childtheme' ),
-				'wishlistSaved'         => __( 'Saved to your wishlist.', 'viteseo-noyona-childtheme' ),
-				'wishlistRemoved'       => __( 'Removed from your wishlist.', 'viteseo-noyona-childtheme' ),
-				'wishlistSelectOptions' => __( 'Please select a shade before saving this product.', 'viteseo-noyona-childtheme' ),
-				'wishlistLoginTitle'    => __( 'Log in to save your wishlist', 'viteseo-noyona-childtheme' ),
-				'wishlistLoginCopy'     => __( 'Please log in to save products and view them from My Account.', 'viteseo-noyona-childtheme' ),
-				'wishlistError'         => __( 'Wishlist could not be updated. Please try again.', 'viteseo-noyona-childtheme' ),
-			),
+			'include_gallery' => true,
+			'listing_context' => false,
 		)
 	);
 }
@@ -1494,20 +1397,9 @@ function noyona_pdp_render_buy_bar_and_sheet() {
 		return;
 	}
 
-	$add_label   = esc_html__( 'Add to cart', 'viteseo-noyona-childtheme' );
-	$buy_label   = esc_html__( 'Buy now', 'viteseo-noyona-childtheme' );
-	$close_label = esc_attr__( 'Close', 'viteseo-noyona-childtheme' );
-	$sheet_label = esc_attr__( 'Add to cart options', 'viteseo-noyona-childtheme' );
+	$add_label    = esc_html__( 'Add to cart', 'viteseo-noyona-childtheme' );
+	$buy_label    = esc_html__( 'Buy now', 'viteseo-noyona-childtheme' );
 	$region_label = esc_attr__( 'Purchase options', 'viteseo-noyona-childtheme' );
-
-	$thumb_html = $product->get_image(
-		'woocommerce_thumbnail',
-		array(
-			'class'   => 'noyona-pdp-buysheet__thumb-img',
-			'loading' => 'lazy',
-		)
-	);
-	$title = esc_html( $product->get_name() );
 	?>
 	<div class="noyona-pdp-buybar" data-noyona-buybar role="region" aria-label="<?php echo $region_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
 		<button type="button" class="noyona-pdp-buybar__btn noyona-pdp-buybar__btn--cart" data-noyona-buybar-add>
@@ -1517,24 +1409,15 @@ function noyona_pdp_render_buy_bar_and_sheet() {
 			<?php echo $buy_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</button>
 	</div>
-
-	<div class="noyona-pdp-buysheet" data-noyona-buysheet hidden>
-		<div class="noyona-pdp-buysheet__backdrop" data-noyona-buysheet-backdrop></div>
-		<div class="noyona-pdp-buysheet__panel" role="dialog" aria-modal="true" aria-label="<?php echo $sheet_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
-			<button type="button" class="noyona-pdp-buysheet__close" data-noyona-buysheet-close aria-label="<?php echo $close_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>">
-				<i class="fa-solid fa-xmark" aria-hidden="true"></i>
-			</button>
-			<div class="noyona-pdp-buysheet__header">
-				<div class="noyona-pdp-buysheet__thumb"><?php echo $thumb_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-				<div class="noyona-pdp-buysheet__meta">
-					<div class="noyona-pdp-buysheet__title"><?php echo $title; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-					<div class="noyona-pdp-buysheet__price" data-noyona-buysheet-price></div>
-					<div class="noyona-pdp-buysheet__variant" data-noyona-buysheet-variant></div>
-					<div class="noyona-pdp-buysheet__stock noyona-pdp-stock-shipping__stock" data-noyona-buysheet-stock aria-live="polite" hidden></div>
-				</div>
-			</div>
-			<div class="noyona-pdp-buysheet__body" data-noyona-buysheet-form-slot></div>
-		</div>
-	</div>
 	<?php
+
+	if ( function_exists( 'noyona_render_buy_sheet_shell' ) ) {
+		noyona_render_buy_sheet_shell(
+			array(
+				'product'  => $product,
+				'context'  => 'pdp',
+				'show_bar' => true,
+			)
+		);
+	}
 }

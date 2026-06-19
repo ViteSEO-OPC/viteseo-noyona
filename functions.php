@@ -32,6 +32,7 @@ $theme_inc_files = array(
     'woocommerce-cart.php',
     'woocommerce-checkout.php',
     'woocommerce-pdp.php',
+    'woocommerce-buy-sheet.php',
     'woocommerce-shipping.php',
     'store-locator-reviews.php',
     'review-duplicates-temporary.php', // TEMP: remove after SEO rating data entry is done.

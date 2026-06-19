@@ -1123,7 +1123,26 @@ function noyona_get_product_card_cart_control_html( $product ) {
                 $product_name
             );
         }
-    } elseif ( $product->is_type( 'variable' ) || $product->is_type( 'grouped' ) ) {
+    } elseif ( $product->is_type( 'variable' ) ) {
+        if ( $product->is_purchasable() && $product->is_in_stock() ) {
+            $cart_action = function_exists( 'noyona_buy_sheet_listing_enabled' ) && noyona_buy_sheet_listing_enabled()
+                ? 'buysheet'
+                : 'navigate';
+            $aria_label  = sprintf(
+                /* translators: %s: product name */
+                __( 'Select options for %s', 'noyona-childtheme' ),
+                $product_name
+            );
+        } else {
+            $cart_action = 'disabled';
+            $is_disabled = true;
+            $aria_label  = sprintf(
+                /* translators: %s: product name */
+                __( '%s is out of stock', 'noyona-childtheme' ),
+                $product_name
+            );
+        }
+    } elseif ( $product->is_type( 'grouped' ) ) {
         $aria_label = sprintf(
             /* translators: %s: product name */
             __( 'Select options for %s', 'noyona-childtheme' ),
@@ -1159,7 +1178,7 @@ function noyona_get_product_card_cart_control_html( $product ) {
         data-product-id="<?php echo esc_attr( (string) $product_id ); ?>"
         data-product-type="<?php echo esc_attr( $product_type ); ?>"
         data-cart-action="<?php echo esc_attr( $cart_action ); ?>"
-        <?php if ( 'navigate' === $cart_action ) : ?>
+        <?php if ( in_array( $cart_action, array( 'navigate', 'buysheet' ), true ) ) : ?>
             data-product-url="<?php echo esc_url( $product_url ); ?>"
         <?php endif; ?>
         aria-label="<?php echo esc_attr( $aria_label ); ?>"

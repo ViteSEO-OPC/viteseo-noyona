@@ -2750,6 +2750,8 @@
             return;
           }
 
+          var isBuySheetAdd = !!(form.closest && form.closest('[data-noyona-buysheet]'));
+
           if (typeof window.jQuery !== 'undefined') {
             window.jQuery(document.body).trigger('added_to_cart', [
               data && data.fragments ? data.fragments : null,
@@ -2765,8 +2767,13 @@
           });
           clearLegacyAddToCartState();
 
-          // Open the mini-cart drawer so user sees updated cart, not cart page link.
-          if (window.noyonaCartFx && typeof window.noyonaCartFx.openDrawer === 'function') {
+          // Buy-sheet adds (PDP mobile + listing): sheet closes + toast only — no drawer.
+          // Capture isBuySheetAdd before added_to_cart teardown removes listing form nodes.
+          if (
+            !isBuySheetAdd &&
+            window.noyonaCartFx &&
+            typeof window.noyonaCartFx.openDrawer === 'function'
+          ) {
             window.noyonaCartFx.openDrawer({ delay: 120 });
           }
         })
@@ -3098,17 +3105,275 @@
   var NOYONA_BUYSHEET_MQ = '(max-width: 767px)';
   var noyonaBuySheetLastFocus = null;
   var noyonaBuySheetKeyHandler = null;
+  var noyonaArchiveBuySheetInFlight = false;
 
   function noyonaIsMobileViewport() {
     return typeof window.matchMedia === 'function' && window.matchMedia(NOYONA_BUYSHEET_MQ).matches;
   }
 
-  function getNoyonaBuyBar() {
-    return document.querySelector('[data-noyona-buybar]');
-  }
-
   function getNoyonaBuySheet() {
     return document.querySelector('[data-noyona-buysheet]');
+  }
+
+  function noyonaIsListingBuySheet(sheet) {
+    sheet = sheet || getNoyonaBuySheet();
+    return !!(sheet && sheet.getAttribute('data-noyona-buysheet-context') === 'listing');
+  }
+
+  function getNoyonaBuySheetFormSlot() {
+    var sheet = getNoyonaBuySheet();
+    return sheet ? sheet.querySelector('[data-noyona-buysheet-form-slot]') : null;
+  }
+
+  function getNoyonaBuySheetLoadingNode() {
+    var sheet = getNoyonaBuySheet();
+    return sheet ? sheet.querySelector('[data-noyona-buysheet-loading]') : null;
+  }
+
+  function setNoyonaBuySheetLoading(isLoading) {
+    var loading = getNoyonaBuySheetLoadingNode();
+    if (!loading) {
+      return;
+    }
+    if (isLoading) {
+      loading.removeAttribute('hidden');
+    } else {
+      loading.setAttribute('hidden', '');
+    }
+  }
+
+  function getNoyonaBuySheetConfig() {
+    if (typeof window.noyonaPdp !== 'undefined' && window.noyonaPdp.buySheet) {
+      return window.noyonaPdp.buySheet;
+    }
+    return null;
+  }
+
+  function populateBuySheetHeaderFromMeta(meta) {
+    var sheet = getNoyonaBuySheet();
+    if (!sheet || !meta) {
+      return;
+    }
+
+    sheet._noyonaArchiveHeaderMeta = meta;
+    sheet.setAttribute('data-noyona-active-product-id', meta.productId ? String(meta.productId) : '');
+
+    var titleTarget = sheet.querySelector('[data-noyona-buysheet-title]');
+    if (titleTarget && meta.title) {
+      titleTarget.textContent = meta.title;
+    }
+
+    var thumbTarget = sheet.querySelector('[data-noyona-buysheet-thumb]');
+    if (thumbTarget && meta.thumbHtml) {
+      thumbTarget.innerHTML = meta.thumbHtml;
+    }
+
+    var priceTarget = sheet.querySelector('[data-noyona-buysheet-price]');
+    if (priceTarget && meta.priceHtml) {
+      priceTarget.innerHTML = meta.priceHtml;
+    }
+
+    var stockTarget = sheet.querySelector('[data-noyona-buysheet-stock]');
+    if (stockTarget) {
+      var stockText = meta.stockHtml || '';
+      stockTarget.textContent = stockText;
+      stockTarget.hidden = !stockText;
+      if (meta.stockClass) {
+        stockTarget.className = 'noyona-pdp-buysheet__stock ' + meta.stockClass;
+      }
+    }
+  }
+
+  function destroyArchiveBuySheetForm(form) {
+    if (!form) {
+      return;
+    }
+
+    if (typeof window.jQuery !== 'undefined') {
+      var $form = window.jQuery(form);
+      $form.off('.noyonaBuySheet .noyonaBuyGuard');
+      try {
+        if ($form.data('wc_variation_form') && $form.wc_variation_form) {
+          $form.wc_variation_form('destroy');
+        }
+      } catch (e) {
+        /* WC destroy unsupported or already torn down */
+      }
+    }
+
+    form.removeAttribute('data-noyona-ajax-cart-bound');
+    delete form.__noyonaRunAjaxAddToCart;
+    delete form._noyonaInteractionBound;
+    delete form._noyonaVariationSyncBound;
+    delete form._noyonaUserSelectedVariation;
+    delete form.__noyonaCurrentVariation;
+  }
+
+  function teardownArchiveBuySheet() {
+    var sheet = getNoyonaBuySheet();
+    if (!sheet || !noyonaIsListingBuySheet(sheet)) {
+      return;
+    }
+
+    var slot = getNoyonaBuySheetFormSlot();
+    if (!slot) {
+      return;
+    }
+
+    var form = slot.querySelector('form.cart');
+    if (form) {
+      destroyArchiveBuySheetForm(form);
+    }
+
+    slot.querySelectorAll('.wp-block-add-to-cart-form, form.cart').forEach(function (node) {
+      node.remove();
+    });
+
+    setNoyonaBuySheetLoading(false);
+    delete sheet._noyonaArchiveHeaderMeta;
+    sheet.removeAttribute('data-noyona-active-product-id');
+
+    var variantTarget = sheet.querySelector('[data-noyona-buysheet-variant]');
+    if (variantTarget) {
+      variantTarget.textContent = '';
+    }
+
+    var stockTarget = sheet.querySelector('[data-noyona-buysheet-stock]');
+    if (stockTarget) {
+      stockTarget.textContent = '';
+      stockTarget.hidden = true;
+    }
+  }
+
+  function openListingBuySheetUi() {
+    var sheet = getNoyonaBuySheet();
+    if (!sheet) {
+      return;
+    }
+
+    noyonaBuySheetLastFocus = document.activeElement;
+    sheet.removeAttribute('hidden');
+    sheet.classList.add('is-open');
+    document.documentElement.classList.add('noyona-pdp-buysheet-open');
+    document.body.classList.add('noyona-pdp-buysheet-open');
+
+    refreshNoyonaBuySheetHeader();
+
+    var closeBtn = sheet.querySelector('[data-noyona-buysheet-close]');
+    window.setTimeout(function () {
+      if (closeBtn) {
+        closeBtn.focus();
+      }
+    }, 0);
+
+    if (!noyonaBuySheetKeyHandler) {
+      noyonaBuySheetKeyHandler = function (event) {
+        if (event.key === 'Escape' || event.key === 'Esc') {
+          closeNoyonaBuySheet();
+        }
+      };
+      document.addEventListener('keydown', noyonaBuySheetKeyHandler);
+    }
+  }
+
+  function openArchiveBuySheet(productId, sourceButton) {
+    var sheet = getNoyonaBuySheet();
+    var config = getNoyonaBuySheetConfig();
+
+    if (!sheet || !noyonaIsListingBuySheet(sheet) || !config || !config.enabled) {
+      return Promise.reject({ error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.') });
+    }
+
+    if (noyonaArchiveBuySheetInFlight) {
+      return Promise.reject({ error: getPdpText('cartError', 'This product cannot be added to cart right now.') });
+    }
+
+    productId = parseInt(productId, 10) || 0;
+    if (productId < 1) {
+      return Promise.reject({ error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.') });
+    }
+
+    if (sourceButton && typeof sourceButton.focus === 'function') {
+      noyonaBuySheetLastFocus = sourceButton;
+    }
+
+    noyonaArchiveBuySheetInFlight = true;
+    teardownArchiveBuySheet();
+    setNoyonaBuySheetLoading(true);
+
+    var payload = new URLSearchParams();
+    payload.append('action', config.action || 'noyona_buy_sheet_variable_form');
+    payload.append('nonce', config.nonce || '');
+    payload.append('product_id', String(productId));
+
+    return fetch(config.ajaxUrl || getPdpWishlistAjaxUrl(), {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      },
+      body: payload.toString(),
+    })
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (json) {
+        if (!json || !json.success || !json.data || !json.data.formHtml) {
+          var message =
+            (json && json.data && json.data.message) ||
+            getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.');
+          throw { error: message };
+        }
+
+        var slot = getNoyonaBuySheetFormSlot();
+        if (!slot) {
+          throw { error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.') };
+        }
+
+        var wrapper = document.createElement('div');
+        wrapper.innerHTML = json.data.formHtml;
+        var form = wrapper.querySelector('form.variations_form, form.cart');
+        if (!form) {
+          throw { error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.') };
+        }
+
+        var blockWrapper = document.createElement('div');
+        blockWrapper.className = 'wp-block-add-to-cart-form wc-block-add-to-cart-form';
+        blockWrapper.appendChild(form);
+        slot.appendChild(blockWrapper);
+
+        if (typeof window.jQuery !== 'undefined' && window.jQuery.fn.wc_variation_form) {
+          window.jQuery(form).wc_variation_form();
+        }
+
+        initPdp();
+
+        if (json.data.header) {
+          json.data.header.productId = json.data.productId || productId;
+          populateBuySheetHeaderFromMeta(json.data.header);
+        }
+
+        setNoyonaBuySheetLoading(false);
+        openListingBuySheetUi();
+        return json.data;
+      })
+      .catch(function (error) {
+        setNoyonaBuySheetLoading(false);
+        teardownArchiveBuySheet();
+        if (error && error.error) {
+          throw error;
+        }
+        throw {
+          error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.'),
+        };
+      })
+      .finally(function () {
+        noyonaArchiveBuySheetInFlight = false;
+      });
+  }
+
+  function getNoyonaBuyBar() {
+    return document.querySelector('[data-noyona-buybar]');
   }
 
   function getNoyonaPdpCartForm() {
@@ -3138,6 +3403,10 @@
    * restoration is exact even if sibling nodes change.
    */
   function relocateNoyonaFormForViewport() {
+    if (noyonaIsListingBuySheet()) {
+      return;
+    }
+
     var form = getNoyonaPdpCartSheetTarget();
     var sheet = getNoyonaBuySheet();
     if (!form || !sheet) {
@@ -3187,16 +3456,29 @@
       return;
     }
 
+    var isListing = noyonaIsListingBuySheet(sheet);
+    var slot = getNoyonaBuySheetFormSlot();
+    var form = slot ? slot.querySelector('form.variations_form, form.cart') : null;
+
     var priceTarget = sheet.querySelector('[data-noyona-buysheet-price]');
-    var mainPrice = getNoyonaMainPriceNode();
-    if (priceTarget && mainPrice) {
-      priceTarget.innerHTML = mainPrice.innerHTML;
+    if (priceTarget) {
+      if (!isListing) {
+        var mainPrice = getNoyonaMainPriceNode();
+        if (mainPrice) {
+          priceTarget.innerHTML = mainPrice.innerHTML;
+        }
+      } else if (form && form.__noyonaCurrentVariation && form.__noyonaCurrentVariation.price_html) {
+        priceTarget.innerHTML = form.__noyonaCurrentVariation.price_html;
+      } else if (sheet._noyonaArchiveHeaderMeta && sheet._noyonaArchiveHeaderMeta.priceHtml) {
+        priceTarget.innerHTML = sheet._noyonaArchiveHeaderMeta.priceHtml;
+      }
     }
 
     var variantTarget = sheet.querySelector('[data-noyona-buysheet-variant]');
     if (variantTarget) {
       var parts = [];
-      document
+      var variantScope = isListing && slot ? slot : document;
+      variantScope
         .querySelectorAll('.noyona-pdp-variation__shade-current, .noyona-pdp-variation__field-current')
         .forEach(function (node) {
           var txt = (node.textContent || '').trim();
@@ -3208,6 +3490,26 @@
     }
 
     var stockTarget = sheet.querySelector('[data-noyona-buysheet-stock]');
+    if (isListing && stockTarget && form && form.__noyonaCurrentVariation) {
+      var listingVariation = form.__noyonaCurrentVariation;
+      if (typeof listingVariation.is_in_stock !== 'undefined') {
+        var listingInStock = !!listingVariation.is_in_stock;
+        var listingStockCount = listingVariation.noyona_stock_quantity;
+        if (listingStockCount === null || typeof listingStockCount === 'undefined' || listingStockCount === '') {
+          listingStockCount = listingVariation.max_qty;
+        }
+        stockTarget.textContent = listingInStock
+          ? (listingStockCount
+              ? getPdpText('inStockLeft', 'In stock (%d left)').replace('%d', String(listingStockCount))
+              : getPdpText('inStock', 'In stock'))
+          : getPdpText('outOfStock', 'Out of stock');
+        stockTarget.hidden = false;
+        stockTarget.classList.toggle('noyona-pdp-stock-shipping__stock--in', listingInStock);
+        stockTarget.classList.toggle('noyona-pdp-stock-shipping__stock--out', !listingInStock);
+        return;
+      }
+    }
+
     var stockSource = getPdpStockBadge();
     if (stockTarget && stockSource) {
       var stockText = (stockSource.textContent || '').trim();
@@ -3216,6 +3518,13 @@
       stockTarget.className = 'noyona-pdp-buysheet__stock ' + stockSource.className;
       stockTarget.setAttribute('data-noyona-in-stock', stockSource.getAttribute('data-noyona-in-stock') || '');
       stockTarget.setAttribute('data-noyona-stock-count', stockSource.getAttribute('data-noyona-stock-count') || '');
+    } else if (stockTarget && isListing) {
+      var fallbackStock =
+        sheet._noyonaArchiveHeaderMeta && sheet._noyonaArchiveHeaderMeta.stockHtml
+          ? sheet._noyonaArchiveHeaderMeta.stockHtml
+          : '';
+      stockTarget.textContent = fallbackStock;
+      stockTarget.hidden = !fallbackStock;
     } else if (stockTarget) {
       stockTarget.textContent = '';
       stockTarget.hidden = true;
@@ -3264,6 +3573,7 @@
     }
 
     var wasOpen = sheet.classList.contains('is-open');
+    var isListing = noyonaIsListingBuySheet(sheet);
     sheet.classList.remove('is-open');
     sheet.setAttribute('hidden', '');
     document.documentElement.classList.remove('noyona-pdp-buysheet-open');
@@ -3272,6 +3582,10 @@
     if (noyonaBuySheetKeyHandler) {
       document.removeEventListener('keydown', noyonaBuySheetKeyHandler);
       noyonaBuySheetKeyHandler = null;
+    }
+
+    if (isListing && wasOpen) {
+      teardownArchiveBuySheet();
     }
 
     if (!skipFocusReturn && wasOpen && noyonaBuySheetLastFocus && typeof noyonaBuySheetLastFocus.focus === 'function') {
@@ -3503,24 +3817,33 @@
   function initNoyonaBuySheet() {
     var bar = getNoyonaBuyBar();
     var sheet = getNoyonaBuySheet();
-    if (!bar || !sheet) {
-      return; // Shell not present (not a PDP) — nothing to wire.
+    if (!sheet) {
+      return;
     }
 
-    bindNoyonaBuyBar();
-    bindNoyonaBuySheet();
-    relocateNoyonaFormForViewport();
+    if (!bar && !noyonaIsListingBuySheet(sheet)) {
+      return;
+    }
 
-    if (!window.__noyonaBuySheetMqlBound) {
-      window.__noyonaBuySheetMqlBound = true;
-      var mql = window.matchMedia(NOYONA_BUYSHEET_MQ);
-      var onChange = function () {
-        relocateNoyonaFormForViewport();
-      };
-      if (typeof mql.addEventListener === 'function') {
-        mql.addEventListener('change', onChange);
-      } else if (typeof mql.addListener === 'function') {
-        mql.addListener(onChange);
+    if (bar) {
+      bindNoyonaBuyBar();
+    }
+    bindNoyonaBuySheet();
+
+    if (!noyonaIsListingBuySheet(sheet)) {
+      relocateNoyonaFormForViewport();
+
+      if (!window.__noyonaBuySheetMqlBound) {
+        window.__noyonaBuySheetMqlBound = true;
+        var mql = window.matchMedia(NOYONA_BUYSHEET_MQ);
+        var onChange = function () {
+          relocateNoyonaFormForViewport();
+        };
+        if (typeof mql.addEventListener === 'function') {
+          mql.addEventListener('change', onChange);
+        } else if (typeof mql.addListener === 'function') {
+          mql.addListener(onChange);
+        }
       }
     }
   }
@@ -3888,6 +4211,14 @@
   }
 
   bindWooCommercePdpHooks();
+
+  window.noyonaBuySheet = window.noyonaBuySheet || {};
+  window.noyonaBuySheet.open = function (productId, sourceButton) {
+    return openArchiveBuySheet(productId, sourceButton);
+  };
+  window.noyonaBuySheet.close = function (skipFocusReturn) {
+    closeNoyonaBuySheet(!!skipFocusReturn);
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPdp);

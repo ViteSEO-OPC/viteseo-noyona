@@ -283,6 +283,44 @@
         return;
       }
 
+      if (action === 'buysheet') {
+        if (button.disabled || button.getAttribute('aria-disabled') === 'true' || button.classList.contains('is-loading')) {
+          return;
+        }
+
+        const productId = parseInt(button.getAttribute('data-product-id'), 10) || 0;
+        if (productId < 1) {
+          return;
+        }
+
+        if (!window.noyonaBuySheet || typeof window.noyonaBuySheet.open !== 'function') {
+          const fallbackUrl = button.getAttribute('data-product-url') || '';
+          if (fallbackUrl) {
+            window.location.assign(fallbackUrl);
+          }
+          return;
+        }
+
+        setProductCardCartBusy(button, true);
+        window.noyonaBuySheet
+          .open(productId, button)
+          .catch((result) => {
+            const message =
+              (result && result.error) ||
+              (window.noyonaPdp &&
+                window.noyonaPdp.i18n &&
+                window.noyonaPdp.i18n.buySheetLoadError) ||
+              'Unable to load product options. Please try again.';
+            if (window.noyonaCartFx && typeof window.noyonaCartFx.toast === 'function') {
+              window.noyonaCartFx.toast(message, 'error');
+            }
+          })
+          .finally(() => {
+            setProductCardCartBusy(button, false);
+          });
+        return;
+      }
+
       if (action !== 'ajax') {
         return;
       }
@@ -302,7 +340,7 @@
         productId,
         quantity: 1,
         sourceButton: button,
-        openDrawer: true,
+        openDrawer: false,
       })
         .then((result) => {
           if (!result.ok && result.error && window.noyonaCartFx && typeof window.noyonaCartFx.toast === 'function') {
