@@ -7677,3 +7677,69 @@ body.page-login .noyona-login-register-link {
   
   }
   
+/* Grid view: reveal existing JS wishlist overlay (initShopProductActions in header.js) */
+body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-product-actions {
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-wishlist-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  color: #fff;
+
+  pointer-events: auto;
+  cursor: pointer;
+  outline: none;
+
+  transition:
+    transform .2s ease,
+    opacity .2s ease;
+}
+
+body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-wishlist-btn svg {
+  width: 34px;
+  height: 34px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-wishlist-btn:hover,
+body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-wishlist-btn:focus-visible {
+  color: #fff;
+  opacity: .85;
+  transform: translateY(-1px);
+}
+
+body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-wishlist-btn[aria-pressed="true"],
+body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-wishlist-btn.is-active {
+  color: #fff;
+}
+
+body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-wishlist-btn[aria-pressed="true"] svg,
+body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-wishlist-btn.is-active svg {
+  fill: currentColor;
+}
+
+body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-card-footer-actions {
+  display: none;
+}
