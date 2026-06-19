@@ -1243,9 +1243,9 @@ function noyona_render_product_card( $product ) {
         <!-- <?php if ( '' !== $meta_html ) : ?>
             <?php echo $meta_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
         <?php endif; ?> -->
-        <!-- <?php if ( $excerpt ) : ?>
+        <?php if ( $excerpt ) : ?>
             <div class="wp-block-post-excerpt"><p><?php echo esc_html( $excerpt ); ?></p></div>
-        <?php endif; ?> -->
+        <?php endif; ?> 
         <div class="noyona-product-card-footer">
         <div class="noyona-product-card-footer__copy">
 

@@ -7743,3 +7743,20 @@ body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-
 body.noyona-shop-view-grid .noyona-shop-products .wc-block-product .noyona-shop-card-footer-actions {
   display: none;
 }
+
+/** ==========================================================
+
+* List View
+* ========================================================== */
+
+/* hidden by default */
+.noyona-shop-products .wp-block-post-excerpt {
+  display: none;
+}
+
+/* show only in list view */
+body.noyona-shop-view-list
+.noyona-shop-products
+.wp-block-post-excerpt {
+  display: block;
+}
