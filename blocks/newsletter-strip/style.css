@@ -4,6 +4,7 @@
   z-index: 3;
   pointer-events: none;
   border: 0px;
+  z-index: 0;
 }
 
 .newsletter-strip__inner {
