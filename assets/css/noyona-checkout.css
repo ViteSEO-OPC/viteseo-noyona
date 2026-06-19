@@ -903,6 +903,19 @@ body.woocommerce-checkout .select2-container--default .select2-results__option[d
   transform-origin: center;
 }
 
+@media (max-width: 375px) {
+  .noyona-checkout-form .wc_payment_method > label {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-left: 16px !important;
+  }
+
+  .noyona-checkout-form .wc_payment_method > label img {
+    margin-left: 0;
+  }
+}
+
 /* Hide every payment box by default, but reveal the box of the currently
    selected method so card number/expiry/CVC fields can be entered. Hiding all
    boxes unconditionally previously made card payments impossible (no fields ->

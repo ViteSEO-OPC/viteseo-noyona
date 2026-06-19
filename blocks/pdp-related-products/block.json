@@ -29,7 +29,7 @@
     },
     "limit": {
       "type": "number",
-      "default": 4
+      "default": 5
     }
   },
   "style": "file:./style.css",

@@ -18,7 +18,7 @@ $defaults = array(
 	'subheading' => __( 'Complete your look with these favorites', 'viteseo-noyona-childtheme' ),
 	'viewAllText'=> __( 'View All', 'viteseo-noyona-childtheme' ),
 	'viewAllUrl' => '/shop/',
-	'limit'      => 4,
+	'limit'      => 5,
 );
 
 $atts      = wp_parse_args( is_array( $attributes ) ? $attributes : array(), $defaults );
@@ -139,49 +139,53 @@ if ( empty( $related_ids ) ) {
 						<p class="noyona-pdp-related__desc"><?php echo esc_html( $short ); ?></p>
 					<?php endif; ?>
 
-					<?php if ( '' !== $price_html ) : ?>
-						<?php echo $price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					<?php endif; ?>
-
-					<div class="noyona-pdp-related__rating">
-						<?php if ( $rating_html ) : ?>
-							<div class="noyona-pdp-related__stars">
-								<?php echo $rating_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							</div>
-						<?php endif; ?>
-						<span class="noyona-pdp-related__rating-text">
-							<?php echo esc_html( $rating_label ); ?>/5
-							<?php if ( $rating_count > 0 ) : ?>
-								<?php echo esc_html( sprintf( __( '(%d reviews)', 'viteseo-noyona-childtheme' ), $rating_count ) ); ?>
-							<?php else : ?>
-								<?php esc_html_e( '(No reviews yet)', 'viteseo-noyona-childtheme' ); ?>
+					<div class="noyona-pdp-related__footer">
+						<div class="noyona-pdp-related__meta">
+							<?php if ( '' !== $price_html ) : ?>
+								<?php echo $price_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<?php endif; ?>
-						</span>
+
+							<div class="noyona-pdp-related__rating">
+								<?php if ( $rating_html ) : ?>
+									<div class="noyona-pdp-related__stars">
+										<?php echo $rating_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									</div>
+								<?php endif; ?>
+								<span class="noyona-pdp-related__rating-text">
+									<?php echo esc_html( $rating_label ); ?>/5
+									<?php if ( $rating_count > 0 ) : ?>
+										<?php echo esc_html( sprintf( __( '(%d reviews)', 'viteseo-noyona-childtheme' ), $rating_count ) ); ?>
+									<?php else : ?>
+										<?php esc_html_e( '(No reviews yet)', 'viteseo-noyona-childtheme' ); ?>
+									<?php endif; ?>
+								</span>
+							</div>
+						</div>
+
+						<?php if ( $can_ajax ) : ?>
+							<a
+								href="<?php echo esc_url( $cart_url ); ?>"
+								class="<?php echo esc_attr( $cart_classes ); ?>"
+								data-product_id="<?php echo esc_attr( $related->get_id() ); ?>"
+								data-product_sku="<?php echo esc_attr( $related->get_sku() ); ?>"
+								data-quantity="1"
+								data-cart-url="<?php echo esc_url( $cart_url ); ?>"
+								aria-label="<?php echo esc_attr( sprintf( __( 'Add %s to cart', 'viteseo-noyona-childtheme' ), $title ) ); ?>"
+								rel="nofollow"
+							>
+								<i class="fa-solid fa-cart-shopping"></i>
+							</a>
+						<?php else : ?>
+							<a
+								href="<?php echo esc_url( $item_link ); ?>"
+								class="<?php echo esc_attr( $cart_classes ); ?>"
+								aria-label="<?php echo esc_attr( sprintf( __( 'View %s', 'viteseo-noyona-childtheme' ), $title ) ); ?>"
+							>
+								<i class="fa-solid fa-cart-shopping"></i>
+							</a>
+						<?php endif; ?>
 					</div>
 				</div>
-
-				<?php if ( $can_ajax ) : ?>
-					<a
-						href="<?php echo esc_url( $cart_url ); ?>"
-						class="<?php echo esc_attr( $cart_classes ); ?>"
-						data-product_id="<?php echo esc_attr( $related->get_id() ); ?>"
-						data-product_sku="<?php echo esc_attr( $related->get_sku() ); ?>"
-						data-quantity="1"
-						data-cart-url="<?php echo esc_url( $cart_url ); ?>"
-						aria-label="<?php echo esc_attr( sprintf( __( 'Add %s to cart', 'viteseo-noyona-childtheme' ), $title ) ); ?>"
-						rel="nofollow"
-					>
-						<i class="fa-solid fa-cart-shopping"></i>
-					</a>
-				<?php else : ?>
-					<a
-						href="<?php echo esc_url( $item_link ); ?>"
-						class="<?php echo esc_attr( $cart_classes ); ?>"
-						aria-label="<?php echo esc_attr( sprintf( __( 'View %s', 'viteseo-noyona-childtheme' ), $title ) ); ?>"
-					>
-						<i class="fa-solid fa-cart-shopping"></i>
-					</a>
-				<?php endif; ?>
 			</article>
 		<?php endforeach; ?>
 	</div>
