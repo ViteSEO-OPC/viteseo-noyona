@@ -2869,6 +2869,10 @@
   }
 
   function addBuyNow(form) {
+    if (noyonaIsListingBuySheet(form && form.closest('[data-noyona-buysheet]'))) {
+      return;
+    }
+
     var addBtn = form.querySelector('.single_add_to_cart_button');
     if (!addBtn || form.querySelector('.noyona-pdp-buy-now')) {
       return;
@@ -3106,6 +3110,7 @@
   var noyonaBuySheetLastFocus = null;
   var noyonaBuySheetKeyHandler = null;
   var noyonaArchiveBuySheetInFlight = false;
+  var noyonaArchiveBuySheetAbortController = null;
 
   function noyonaIsMobileViewport() {
     return typeof window.matchMedia === 'function' && window.matchMedia(NOYONA_BUYSHEET_MQ).matches;
@@ -3300,24 +3305,37 @@
     noyonaArchiveBuySheetInFlight = true;
     teardownArchiveBuySheet();
     setNoyonaBuySheetLoading(true);
+    openListingBuySheetUi();
+
+    var abortController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    noyonaArchiveBuySheetAbortController = abortController;
 
     var payload = new URLSearchParams();
     payload.append('action', config.action || 'noyona_buy_sheet_variable_form');
     payload.append('nonce', config.nonce || '');
     payload.append('product_id', String(productId));
 
-    return fetch(config.ajaxUrl || getPdpWishlistAjaxUrl(), {
+    var fetchOptions = {
       method: 'POST',
       credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       },
       body: payload.toString(),
-    })
+    };
+    if (abortController) {
+      fetchOptions.signal = abortController.signal;
+    }
+
+    return fetch(config.ajaxUrl || getPdpWishlistAjaxUrl(), fetchOptions)
       .then(function (response) {
         return response.json();
       })
       .then(function (json) {
+        if (!sheet.classList.contains('is-open')) {
+          return;
+        }
+
         if (!json || !json.success || !json.data || !json.data.formHtml) {
           var message =
             (json && json.data && json.data.message) ||
@@ -3353,13 +3371,21 @@
           populateBuySheetHeaderFromMeta(json.data.header);
         }
 
+        refreshNoyonaBuySheetHeader();
         setNoyonaBuySheetLoading(false);
-        openListingBuySheetUi();
         return json.data;
       })
       .catch(function (error) {
-        setNoyonaBuySheetLoading(false);
-        teardownArchiveBuySheet();
+        if (error && error.name === 'AbortError') {
+          return;
+        }
+
+        if (sheet.classList.contains('is-open')) {
+          closeNoyonaBuySheet(true);
+        } else {
+          setNoyonaBuySheetLoading(false);
+        }
+
         if (error && error.error) {
           throw error;
         }
@@ -3369,6 +3395,7 @@
       })
       .finally(function () {
         noyonaArchiveBuySheetInFlight = false;
+        noyonaArchiveBuySheetAbortController = null;
       });
   }
 
@@ -3585,6 +3612,10 @@
     }
 
     if (isListing && wasOpen) {
+      if (noyonaArchiveBuySheetAbortController) {
+        noyonaArchiveBuySheetAbortController.abort();
+        noyonaArchiveBuySheetAbortController = null;
+      }
       teardownArchiveBuySheet();
     }
 
