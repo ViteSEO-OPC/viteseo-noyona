@@ -7940,11 +7940,11 @@ body.noyona-shop-view-list
 
 /** List View Image Top Anchor — desktop only */
 
-@media (min-width: 1024px) {
+/* @media (min-width: 1024px) {
   body.noyona-shop-view-list .noyona-shop-products .wc-block-product > .wc-block-components-product-image img {
     object-position: top center;
   }
-}
+} */
 
 /** List View Image Panel Flush — desktop only */
 
