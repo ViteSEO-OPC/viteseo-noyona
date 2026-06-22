@@ -3112,6 +3112,179 @@
   var noyonaArchiveBuySheetInFlight = false;
   var noyonaArchiveBuySheetAbortController = null;
 
+  /* Listing Buy Sheet Cache — shop/listing variable-form payload cache (Phase 1). */
+  var NOYONA_LISTING_BUYSHEET_CACHE_TTL_MS = 5 * 60 * 1000;
+  var NOYONA_LISTING_BUYSHEET_CACHE_MAX = 25;
+  var noyonaListingBuySheetFormCache = new Map();
+  var noyonaListingBuySheetFetchPromises = new Map();
+
+  function getListingBuySheetCachedPayload(productId) {
+    productId = parseInt(productId, 10) || 0;
+    if (productId < 1 || !noyonaListingBuySheetFormCache.has(productId)) {
+      return null;
+    }
+
+    var entry = noyonaListingBuySheetFormCache.get(productId);
+    if (!entry || Date.now() - entry.fetchedAt > NOYONA_LISTING_BUYSHEET_CACHE_TTL_MS) {
+      noyonaListingBuySheetFormCache.delete(productId);
+      return null;
+    }
+
+    // Touch entry for LRU ordering.
+    noyonaListingBuySheetFormCache.delete(productId);
+    noyonaListingBuySheetFormCache.set(productId, entry);
+    return entry;
+  }
+
+  function storeListingBuySheetCache(productId, payload) {
+    productId = parseInt(productId, 10) || 0;
+    if (productId < 1 || !payload || !payload.formHtml) {
+      return;
+    }
+
+    var entry = {
+      productId: productId,
+      formHtml: payload.formHtml,
+      header: payload.header ? Object.assign({}, payload.header) : null,
+      fetchedAt: Date.now(),
+    };
+
+    if (noyonaListingBuySheetFormCache.has(productId)) {
+      noyonaListingBuySheetFormCache.delete(productId);
+    }
+    noyonaListingBuySheetFormCache.set(productId, entry);
+
+    while (noyonaListingBuySheetFormCache.size > NOYONA_LISTING_BUYSHEET_CACHE_MAX) {
+      var oldestKey = noyonaListingBuySheetFormCache.keys().next().value;
+      noyonaListingBuySheetFormCache.delete(oldestKey);
+    }
+  }
+
+  function normalizeListingBuySheetPayload(json, productId) {
+    if (!json || !json.success || !json.data || !json.data.formHtml) {
+      var message =
+        (json && json.data && json.data.message) ||
+        getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.');
+      throw { error: message };
+    }
+
+    return {
+      productId: json.data.productId || productId,
+      formHtml: json.data.formHtml,
+      header: json.data.header ? Object.assign({}, json.data.header) : null,
+      fetchedAt: Date.now(),
+    };
+  }
+
+  function injectListingBuySheetPayload(productId, payload) {
+    var sheet = getNoyonaBuySheet();
+    var slot = getNoyonaBuySheetFormSlot();
+    if (!sheet || !slot || !payload || !payload.formHtml) {
+      throw { error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.') };
+    }
+
+    var wrapper = document.createElement('div');
+    wrapper.innerHTML = payload.formHtml;
+    var form = wrapper.querySelector('form.variations_form, form.cart');
+    if (!form) {
+      throw { error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.') };
+    }
+
+    var blockWrapper = document.createElement('div');
+    blockWrapper.className = 'wp-block-add-to-cart-form wc-block-add-to-cart-form';
+    blockWrapper.appendChild(form);
+    slot.appendChild(blockWrapper);
+
+    if (typeof window.jQuery !== 'undefined' && window.jQuery.fn.wc_variation_form) {
+      window.jQuery(form).wc_variation_form();
+    }
+
+    initPdp();
+
+    if (payload.header) {
+      var header = Object.assign({}, payload.header);
+      header.productId = payload.productId || productId;
+      populateBuySheetHeaderFromMeta(header);
+    }
+
+    refreshNoyonaBuySheetHeader();
+  }
+
+  function fetchListingBuySheetPayload(productId, options) {
+    options = options || {};
+    productId = parseInt(productId, 10) || 0;
+    if (productId < 1) {
+      return Promise.reject({ error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.') });
+    }
+
+    var cached = getListingBuySheetCachedPayload(productId);
+    if (cached) {
+      return Promise.resolve(cached);
+    }
+
+    if (noyonaListingBuySheetFetchPromises.has(productId)) {
+      return noyonaListingBuySheetFetchPromises.get(productId);
+    }
+
+    var config = getNoyonaBuySheetConfig();
+    if (!config || !config.enabled) {
+      return Promise.reject({ error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.') });
+    }
+
+    var payload = new URLSearchParams();
+    payload.append('action', config.action || 'noyona_buy_sheet_variable_form');
+    payload.append('nonce', config.nonce || '');
+    payload.append('product_id', String(productId));
+
+    var fetchOptions = {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      },
+      body: payload.toString(),
+    };
+    if (options.signal) {
+      fetchOptions.signal = options.signal;
+    }
+
+    var requestPromise = fetch(config.ajaxUrl || getPdpWishlistAjaxUrl(), fetchOptions)
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (json) {
+        var normalized = normalizeListingBuySheetPayload(json, productId);
+        storeListingBuySheetCache(productId, normalized);
+        return getListingBuySheetCachedPayload(productId) || normalized;
+      })
+      .finally(function () {
+        noyonaListingBuySheetFetchPromises.delete(productId);
+      });
+
+    noyonaListingBuySheetFetchPromises.set(productId, requestPromise);
+    return requestPromise;
+  }
+
+  function prefetchListingBuySheetForm(productId) {
+    var sheet = getNoyonaBuySheet();
+    if (!sheet || !noyonaIsListingBuySheet(sheet)) {
+      return Promise.resolve(null);
+    }
+
+    productId = parseInt(productId, 10) || 0;
+    if (productId < 1) {
+      return Promise.resolve(null);
+    }
+
+    if (getListingBuySheetCachedPayload(productId)) {
+      return Promise.resolve(null);
+    }
+
+    return fetchListingBuySheetPayload(productId).catch(function () {
+      return null;
+    });
+  }
+
   function noyonaIsMobileViewport() {
     return typeof window.matchMedia === 'function' && window.matchMedia(NOYONA_BUYSHEET_MQ).matches;
   }
@@ -3310,70 +3483,17 @@
     var abortController = typeof AbortController !== 'undefined' ? new AbortController() : null;
     noyonaArchiveBuySheetAbortController = abortController;
 
-    var payload = new URLSearchParams();
-    payload.append('action', config.action || 'noyona_buy_sheet_variable_form');
-    payload.append('nonce', config.nonce || '');
-    payload.append('product_id', String(productId));
-
-    var fetchOptions = {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      },
-      body: payload.toString(),
-    };
-    if (abortController) {
-      fetchOptions.signal = abortController.signal;
-    }
-
-    return fetch(config.ajaxUrl || getPdpWishlistAjaxUrl(), fetchOptions)
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (json) {
+    return fetchListingBuySheetPayload(productId, {
+      signal: abortController ? abortController.signal : null,
+    })
+      .then(function (payload) {
         if (!sheet.classList.contains('is-open')) {
           return;
         }
 
-        if (!json || !json.success || !json.data || !json.data.formHtml) {
-          var message =
-            (json && json.data && json.data.message) ||
-            getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.');
-          throw { error: message };
-        }
-
-        var slot = getNoyonaBuySheetFormSlot();
-        if (!slot) {
-          throw { error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.') };
-        }
-
-        var wrapper = document.createElement('div');
-        wrapper.innerHTML = json.data.formHtml;
-        var form = wrapper.querySelector('form.variations_form, form.cart');
-        if (!form) {
-          throw { error: getPdpText('buySheetLoadError', 'Unable to load product options. Please try again.') };
-        }
-
-        var blockWrapper = document.createElement('div');
-        blockWrapper.className = 'wp-block-add-to-cart-form wc-block-add-to-cart-form';
-        blockWrapper.appendChild(form);
-        slot.appendChild(blockWrapper);
-
-        if (typeof window.jQuery !== 'undefined' && window.jQuery.fn.wc_variation_form) {
-          window.jQuery(form).wc_variation_form();
-        }
-
-        initPdp();
-
-        if (json.data.header) {
-          json.data.header.productId = json.data.productId || productId;
-          populateBuySheetHeaderFromMeta(json.data.header);
-        }
-
-        refreshNoyonaBuySheetHeader();
+        injectListingBuySheetPayload(productId, payload);
         setNoyonaBuySheetLoading(false);
-        return json.data;
+        return payload;
       })
       .catch(function (error) {
         if (error && error.name === 'AbortError') {
@@ -4249,6 +4369,10 @@
   };
   window.noyonaBuySheet.close = function (skipFocusReturn) {
     closeNoyonaBuySheet(!!skipFocusReturn);
+  };
+  /* Listing Buy Sheet Cache — silent background prefetch API (Phase 2). */
+  window.noyonaBuySheet.prefetch = function (productId) {
+    return prefetchListingBuySheetForm(productId);
   };
 
   if (document.readyState === 'loading') {

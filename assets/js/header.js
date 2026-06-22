@@ -259,6 +259,44 @@
     }
   }
 
+  /* Listing Buy Sheet Cache — desktop hover/focus prefetch (Phase 2). */
+  const LISTING_BUYSHEET_PREFETCH_DELAY_MS = 250;
+  const LISTING_BUYSHEET_PREFETCH_MQ = window.matchMedia('(min-width: 768px)');
+
+  function scheduleListingBuySheetPrefetch(button) {
+    if (!button || button.getAttribute('data-cart-action') !== 'buysheet') {
+      return;
+    }
+    if (!LISTING_BUYSHEET_PREFETCH_MQ.matches) {
+      return;
+    }
+    if (!window.noyonaBuySheet || typeof window.noyonaBuySheet.prefetch !== 'function') {
+      return;
+    }
+
+    const productId = parseInt(button.getAttribute('data-product-id'), 10) || 0;
+    if (productId < 1) {
+      return;
+    }
+
+    if (button._noyonaBuySheetPrefetchTimer) {
+      window.clearTimeout(button._noyonaBuySheetPrefetchTimer);
+    }
+
+    button._noyonaBuySheetPrefetchTimer = window.setTimeout(() => {
+      button._noyonaBuySheetPrefetchTimer = null;
+      window.noyonaBuySheet.prefetch(productId);
+    }, LISTING_BUYSHEET_PREFETCH_DELAY_MS);
+  }
+
+  function cancelListingBuySheetPrefetch(button) {
+    if (!button || !button._noyonaBuySheetPrefetchTimer) {
+      return;
+    }
+    window.clearTimeout(button._noyonaBuySheetPrefetchTimer);
+    button._noyonaBuySheetPrefetchTimer = null;
+  }
+
   function bindProductCardCartButton(button, card) {
     if (!button || button.getAttribute('data-noyona-card-cart-bound') === '1') {
       return;
@@ -351,6 +389,13 @@
           setProductCardCartBusy(button, false);
         });
     });
+
+    if (action === 'buysheet') {
+      button.addEventListener('mouseenter', () => scheduleListingBuySheetPrefetch(button));
+      button.addEventListener('focusin', () => scheduleListingBuySheetPrefetch(button));
+      button.addEventListener('mouseleave', () => cancelListingBuySheetPrefetch(button));
+      button.addEventListener('focusout', () => cancelListingBuySheetPrefetch(button));
+    }
 
     button.setAttribute('data-noyona-card-cart-bound', '1');
   }
