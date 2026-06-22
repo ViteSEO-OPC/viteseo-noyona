@@ -2101,16 +2101,14 @@ html.noyona-pdp-buysheet-open body {
  * Mobile remains bottom sheet
  * ========================================================== */
 
- @media (min-width: 768px) {
+@media (min-width: 768px) {
 
-  body.post-type-archive-product
-  .noyona-pdp-buysheet[data-noyona-buysheet-context="listing"].is-open  {
-    display:flex;
-    align-items:center;
-    justify-content:center;
+  .noyona-pdp-buysheet[data-noyona-buysheet-context="listing"].is-open {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  body.post-type-archive-product
   .noyona-pdp-buysheet[data-noyona-buysheet-context="listing"].is-open
   .noyona-pdp-buysheet__panel {
     position: relative;

@@ -7935,3 +7935,18 @@ body.noyona-shop-view-list
     margin-right: 14px;
   }
 }
+
+/* ==========================================================
+ * Product Card Loading State Override
+ * ========================================================== */
+
+/* Shop listing cards only: busy/loading must not reuse the
+ * disabled faded look. Double-clicks remain blocked via
+ * pointer-events: none + existing JS is-loading guards. */
+.noyona-shop-products .noyona-product-card-cart.is-loading:not(.is-disabled):not(:disabled) {
+  opacity: 1;
+  pointer-events: none;
+  cursor: wait;
+  transform: none;
+  box-shadow: none;
+}
