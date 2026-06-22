@@ -7972,3 +7972,13 @@ body.noyona-shop-view-list
   transform: none;
   box-shadow: none;
 }
+
+/** List View CTA Action Column — tablet/mobile (<1024px) */
+@media (max-width: 1023px) {
+  body.noyona-shop-view-list
+  .noyona-shop-products
+  .noyona-product-card-footer-meta
+  .noyona-product-card-cart {
+    margin-right: 16px;
+  }
+}
