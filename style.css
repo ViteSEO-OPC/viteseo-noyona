@@ -7562,13 +7562,6 @@ body.page-login .noyona-login-register-link {
       font-size: var(--noyona-text-min-mobile);
     }
   }
-
-  @media (max-width: 435px) {
-    .noyona-product-card-footer-meta__rating,
-    .noyona-product-card-footer-meta__sold {
-      white-space: no-wrap;
-    }
-  }
   
   /** Rating Star */
   
