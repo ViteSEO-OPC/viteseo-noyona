@@ -78,6 +78,7 @@ Tags:
 
   /* === Minimum text size (designer floor; Phase 2 consumers opt in) === */
   --noyona-text-min: 16px;
+  --noyona-text-min-mobile: 0.76rem; /* 12.16px */
 
   /* === Font weight scale (Phase 2 consumers opt in per component) === */
   --noyona-font-weight-regular: 400;
@@ -7470,6 +7471,13 @@ body.page-login .noyona-login-register-link {
   font-size: var(--wp--preset--font-size--body);
   font-weight: var(--noyona-font-weight-bold);
   }
+
+  @media (max-width: 767px) {
+    .noyona-shop-products .noyona-product-card-price__badge {
+      font-size: var(--noyona-text-min-mobile) !important;
+      margin-left: unset !important;
+    }
+  }
   
 /* Old Price */
 .noyona-shop-products .noyona-product-card-price__old,
@@ -7491,7 +7499,7 @@ body.page-login .noyona-login-register-link {
   .noyona-shop-products .noyona-product-card-price del,
   .noyona-shop-products .noyona-product-card-price__old .woocommerce-Price-amount,
   .noyona-shop-products .noyona-product-card-price del .woocommerce-Price-amount {
-    font-size: 0.75rem !important; /* 12px */
+    font-size: var(--noyona-text-min-mobile) !important; /* 12px */
   }
 }
   
@@ -7546,6 +7554,20 @@ body.page-login .noyona-login-register-link {
   .noyona-product-card-footer-meta__sold {
   font-size: var(--wp--preset--font-size--body);
   white-space: nowrap;
+  }
+
+  @media (max-width: 767px) {
+    .noyona-product-card-footer-meta__rating,
+    .noyona-product-card-footer-meta__sold {
+      font-size: var(--noyona-text-min-mobile);
+    }
+  }
+
+  @media (max-width: 435px) {
+    .noyona-product-card-footer-meta__rating,
+    .noyona-product-card-footer-meta__sold {
+      white-space: no-wrap;
+    }
   }
   
   /** Rating Star */
@@ -7695,7 +7717,7 @@ body.page-login .noyona-login-register-link {
   @media (max-width: 600px) {
   
   .noyona-shop-products .wc-block-components-product-price .woocommerce-Price-amount {
-  font-size: 0.86rem;
+  font-size: inherit;
   }
   
   }
@@ -7864,7 +7886,7 @@ body.noyona-shop-view-list
 
 @media (min-width: 1024px) {
   body.noyona-shop-view-list .noyona-shop-products .noyona-product-card-price__badge {
-    margin-left: 0;
+    margin-left: 0 !important;
   }
 
   body.noyona-shop-view-list .noyona-shop-products .noyona-product-card-price {
@@ -7903,6 +7925,13 @@ body.noyona-shop-view-list
     width: 100%;
     max-width: 100%;
     min-width: 0;
+  }
+}
+
+
+@media (max-width: 1024px) {
+  body.noyona-shop-view-list .noyona-shop-products .noyona-product-card-price__badge {
+    margin-left: 0 !important;
   }
 }
 
