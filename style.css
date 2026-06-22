@@ -4568,7 +4568,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   }
 
   .noyona-shop-products .noyona-product-card-price {
-    gap: 3px 6px;
+    gap: 4px;
   }
 
   .noyona-shop-products .noyona-product-card-price__badge {
@@ -4608,7 +4608,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   .noyona-shop-products .noyona-product-card-price del,
   body.noyona-shop-view-list .noyona-shop-products .noyona-product-card-footer .noyona-product-card-price__old,
   body.noyona-shop-view-list .noyona-shop-products .noyona-product-card-footer .noyona-product-card-price del {
-    font-size: 0.72rem !important;
+    /* font-size: 0.72rem !important; */
     line-height: 1.15;
   }
 
@@ -7472,12 +7472,18 @@ body:not(.single-product) .noyona-shop-products .noyona-product-card-price__badg
   font-weight: var(--noyona-font-weight-bold);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 425px) {
+  body:not(.single-product) .noyona-shop-products .noyona-product-card-price {
+    gap: 4px !important;
+  }
+}
+
+/* @media (max-width: 767px) {
   .noyona-shop-products .noyona-product-card-price__badge {
     font-size: var(--noyona-text-min-mobile) !important;
     margin-left: unset !important;
   }
-}
+} */
   
 /* Old Price */
 .noyona-shop-products .noyona-product-card-price__old,
@@ -7709,6 +7715,14 @@ body:not(.single-product) .noyona-shop-products .noyona-product-card-price__badg
     font-size: inherit;
   }
   
+  }
+
+  @media (max-width: 427px) {
+  
+  .noyona-shop-products .noyona-product-card-price__badge {
+    font-size: 12px !important;
+  }
+    
   }
   
 /* Grid view: reveal existing JS wishlist overlay (initShopProductActions in header.js) */
