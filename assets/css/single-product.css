@@ -2011,6 +2011,34 @@ html.noyona-pdp-buysheet-open body {
   opacity: 0.55;
 }
 
+/* Sale-first order: the JS injects <del>(regular) then <ins>(sale) as plain
+   inline children of this container, so without a flex context they render in
+   DOM order (regular -> sale). Give the container a flex context here so the
+   order properties below take effect. gap preserves the spacing that flex
+   collapses between the two amounts. Scoped to the panel; WooCommerce markup,
+   main PDP price, PHP and JS are untouched. */
+.noyona-pdp-buysheet__panel .noyona-pdp-buysheet__price {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+/* Price typography hierarchy: sale price (<ins>) is visually dominant and first;
+   regular price (<del>) is secondary and second. Tokens only; the existing del
+   opacity (0.55) is preserved. */
+.noyona-pdp-buysheet__panel .noyona-pdp-buysheet__price ins {
+  order: 1; /* sale price first */
+  font-size: var(--wp--preset--font-size--h-5);
+  font-weight: var(--noyona-font-weight-bold);
+  line-height: 1.1;
+}
+
+.noyona-pdp-buysheet__panel .noyona-pdp-buysheet__price del {
+  order: 2; /* regular price second */
+  font-size: var(--wp--preset--font-size--body);
+  font-weight: var(--noyona-font-weight-regular);
+}
+
 .noyona-pdp-buysheet__variant {
   font-size: 13px;
   color: var(--noyona-color-pink-muted-rose);
