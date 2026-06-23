@@ -2602,7 +2602,6 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .wp-block-pos
   font-size: var(--wp--preset--font-size--h-5);
   font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
-  font-size: clamp(18px, 1.35vw, 24px);
   line-height: normal;
   max-width: none;
   min-width: 0;
