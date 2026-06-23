@@ -2599,7 +2599,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .wp-block-pos
   grid-column: 2;
   grid-row: 1;
   margin: 4px 0 6px;
-  font-size: var(--wp--preset--font-size--h-5);
+  font-size: var(--wp--preset--font-size--h-4);
   font-weight: var(--noyona-font-weight-bold);
   line-height: normal;
   line-height: normal;
@@ -4646,6 +4646,7 @@ body.noyona-shop-view-list .noyona-shop-products .wc-block-product .noyona-shop-
   body.noyona-shop-view-list .noyona-shop-products .wc-block-product .wp-block-post-title,
   body.noyona-shop-view-list .noyona-shop-products .wc-block-product .wp-block-post-excerpt {
     max-width: 100%;
+    font-size: var(--wp--preset--font-size--body);
   }
 
   .noyona-product-card-footer .noyona-buy-now-btn {
