@@ -563,6 +563,47 @@ body:has(.noyona-lovial-page) .ps-dot {
   color: #777;
 }
 
+/* =========================================================
+   Phones (<=780px): replace the JS transform navigation with native horizontal
+   scrolling + swipe. This block contains NO sizing — card width/height/spacing
+   come entirely from the original JS (view.js still sets the exact original
+   slidePct widths), so the visual layout is identical to the original. Only the
+   navigation mechanism changes: the track-wrap scrolls natively and the cards
+   snap, instead of the track being translated. Desktop/tablet (>=781px) keep
+   the JS transform carousel untouched.
+========================================================= */
+@media (max-width: 780px) {
+  .product-slide__track-wrap {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+
+    /* Hide the scrollbar but keep swipe scrolling. */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge legacy */
+  }
+
+  .product-slide__track-wrap::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/iOS */
+    width: 0;
+    height: 0;
+  }
+
+  .product-slide__track {
+    /* Drop the transform transition so native scrolling drives position.
+       view.js clears the inline transform on phones; this is a defensive
+       backstop for the brief window before the debounced resize handler runs. */
+    transform: none !important;
+    transition: none;
+  }
+
+  .product-slide__card {
+    /* Snap only — no sizing here. */
+    scroll-snap-align: start;
+  }
+}
+
 @media (max-width: 720px) {
   .product-slide {
     padding-inline: 1rem;

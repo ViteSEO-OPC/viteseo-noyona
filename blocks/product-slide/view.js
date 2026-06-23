@@ -23,6 +23,16 @@
     return 1;
   }
 
+  // Phones (<=780px) navigate via native horizontal scroll + snap instead of
+  // the JS transform engine; card sizing stays identical (set by updateWidths).
+  // This breakpoint matches the scroll-snap rules in style.css. Above 780px
+  // (tablet/desktop) the transform carousel is unchanged.
+  function isMobileScroll() {
+    return window.matchMedia
+      ? window.matchMedia("(max-width: 780px)").matches
+      : window.innerWidth <= 780;
+  }
+
   function getAddToCartEndpoint() {
     if (window.wc_add_to_cart_params && window.wc_add_to_cart_params.wc_ajax_url) {
       return String(window.wc_add_to_cart_params.wc_ajax_url).replace(
@@ -622,6 +632,9 @@
     const prevBtn = root.querySelector(".ps-prev");
     const nextBtn = root.querySelector(".ps-next");
     const dotsContainer = root.querySelector(".product-slide__dots");
+    // Native scroll viewport on phones; the mobile pager reads its scroll
+    // position and dot clicks scroll it. (Desktop: overflow:hidden, never scrolls.)
+    const scroller = root.querySelector(".product-slide__track-wrap");
 
     if (!track || cards.length === 0 || !prevBtn || !nextBtn || !dotsContainer)
       return;
@@ -641,12 +654,26 @@
         const dot = document.createElement("button");
         dot.className = "ps-dot" + (i === currentIndex ? " active" : "");
         dot.setAttribute("aria-label", "Go to slide " + (i + 1));
-        dot.addEventListener("click", () => goTo(i));
+        dot.addEventListener("click", () => {
+          if (isMobileScroll()) {
+            // Native scroll: move to the same position index a desktop dot would
+            // (the start of the i-th slide group), then reflect it immediately.
+            scrollToPosition(i);
+            setActiveDot(i);
+          } else {
+            goTo(i);
+          }
+        });
         dotsContainer.appendChild(dot);
       }
     }
 
     function updateWidths() {
+      // Runs identically on every width: it computes the original per-breakpoint
+      // slot widths (slidePct) and writes them to the cards, so mobile card
+      // dimensions are exactly the original. The only mobile difference is in
+      // update() below, which skips the transform so native scroll positions the
+      // track instead.
       view = perView(maxCards);
       maxIndex = Math.max(0, cards.length - view);
       totalPositions = Math.max(1, maxIndex + 1);
@@ -675,6 +702,14 @@
     }
 
     function update() {
+      if (isMobileScroll()) {
+        // Phones scroll natively; never apply a transform offset here. Keep the
+        // pager (built by buildDots with the desktop totalPositions count) in
+        // sync with the native scroll position instead.
+        track.style.transform = "";
+        syncMobileDots();
+        return;
+      }
       // Center the active slide group in the viewport. On touch layouts the
       // slide is narrower than the viewport (peek), so this inset reveals a
       // partial PREVIOUS card on the left and a partial NEXT card on the right
@@ -703,6 +738,63 @@
       update();
     }
 
+    // ---- Mobile (<=780px) pager ---------------------------------------------
+    // Reuses the dots built by buildDots() (count = totalPositions, the desktop
+    // pagination logic). These helpers only run on phones; desktop dots keep
+    // using goTo()/update() unchanged.
+    let mobileDotsRaf = null;
+
+    function setActiveDot(index) {
+      Array.from(dotsContainer.children).forEach((dot, dotIndex) => {
+        dot.classList.toggle("active", dotIndex === index);
+      });
+    }
+
+    // The active position = the leading card sitting at the scroll viewport's
+    // left edge, clamped to maxIndex (the final slide group). rect math is used
+    // so it's correct regardless of the card's offsetParent.
+    function mobileActivePosition() {
+      if (!scroller) return 0;
+      const reference = scroller.getBoundingClientRect().left;
+      let bestIndex = 0;
+      let bestDistance = Infinity;
+      cards.forEach((card, index) => {
+        const distance = Math.abs(card.getBoundingClientRect().left - reference);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestIndex = index;
+        }
+      });
+      return Math.min(bestIndex, maxIndex);
+    }
+
+    // Scroll so the i-th slide group's leading card aligns to the left edge —
+    // the native equivalent of the desktop goTo(i). The browser clamps to the
+    // max scroll for the last position(s).
+    function scrollToPosition(index) {
+      if (!scroller || !cards[index]) return;
+      const delta =
+        cards[index].getBoundingClientRect().left -
+        scroller.getBoundingClientRect().left;
+      scroller.scrollTo({ left: scroller.scrollLeft + delta, behavior: "smooth" });
+    }
+
+    function syncMobileDots() {
+      if (!isMobileScroll()) return;
+      // Show the pager on phones (CSS hides it <=1023px); hide it when there is
+      // only a single position. Inline style keeps this out of the stylesheet.
+      dotsContainer.style.display = maxIndex > 0 ? "flex" : "none";
+      setActiveDot(mobileActivePosition());
+    }
+
+    function onScrollerScroll() {
+      if (mobileDotsRaf) return;
+      mobileDotsRaf = requestAnimationFrame(() => {
+        mobileDotsRaf = null;
+        if (isMobileScroll()) setActiveDot(mobileActivePosition());
+      });
+    }
+
     prevBtn.addEventListener("click", () => goTo(currentIndex - 1));
     nextBtn.addEventListener("click", () => goTo(currentIndex + 1));
 
@@ -715,6 +807,9 @@
     track.addEventListener(
       "touchstart",
       function (event) {
+        // <=780px: native scroll-snap handles swiping; don't engage the
+        // transform-based swipe (it would fight the browser's own scroll).
+        if (isMobileScroll()) return;
         if (!event.touches || event.touches.length !== 1) return;
         swipeActive = true;
         swipeStartX = event.touches[0].clientX;
@@ -725,6 +820,7 @@
     track.addEventListener(
       "touchend",
       function (event) {
+        if (isMobileScroll()) return;
         if (!swipeActive) return;
         swipeActive = false;
         const touch = event.changedTouches && event.changedTouches[0];
@@ -878,6 +974,12 @@
 
     const onResize = debounce(updateWidths, 150);
     window.addEventListener("resize", onResize);
+
+    // Mobile pager: track the native scroll position to highlight the active
+    // dot. On desktop the track-wrap never scrolls, so this never fires.
+    if (scroller) {
+      scroller.addEventListener("scroll", onScrollerScroll, { passive: true });
+    }
 
     updateWidths();
   }
