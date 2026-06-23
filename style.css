@@ -8034,3 +8034,11 @@ body.noyona-shop-view-list
   padding-left: 0;
   padding-right: 0;
 }
+
+
+body.noyona-shop-view-list .noyona-shop-products .wc-block-product:hover > .wc-block-components-product-image {
+  border-top-left-radius: 12.75px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
