@@ -7568,7 +7568,20 @@ body:not(.single-product) .noyona-shop-products .noyona-product-card-price__badg
       font-size: var(--noyona-text-min-mobile);
     }
   }
-  
+
+  /* Shop page, mobile only: when a product has no reviews, hide the
+     "No reviews yet" label and its trailing separator to cut visual noise.
+     Scoped to body.woocommerce-shop so category/taxonomy archives and the PDP
+     (different markup, body:not(.single-product) above) are unaffected. The
+     --no-reviews modifier is only present when no rating exists, so cards WITH
+     reviews are never touched, and desktop is unaffected (mobile media query). */
+  @media (max-width: 767px) {
+    body.woocommerce-shop .noyona-product-card-footer-meta--no-reviews .noyona-product-card-footer-meta__rating,
+    body.woocommerce-shop .noyona-product-card-footer-meta--no-reviews .noyona-product-card-footer-meta__separator {
+      display: none;
+    }
+  }
+
   /** Rating Star */
   
   .noyona-product-card-footer-meta__rating .fa-star {

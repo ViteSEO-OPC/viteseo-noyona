@@ -1257,7 +1257,7 @@ function noyona_render_product_card( $product ) {
             </div>
         <?php endif; ?>
 
-            <div class="noyona-product-card-footer-meta">
+            <div class="noyona-product-card-footer-meta<?php echo ( $review_count > 0 && $rating > 0 ) ? '' : ' noyona-product-card-footer-meta--no-reviews'; ?>">
             <span class="noyona-product-card-footer-meta__rating">
                 <?php if ( $review_count > 0 && $rating > 0 ) : ?>
                     <?php echo esc_html( number_format( $rating, 1 ) ); ?>
