@@ -655,14 +655,11 @@
         dot.className = "ps-dot" + (i === currentIndex ? " active" : "");
         dot.setAttribute("aria-label", "Go to slide " + (i + 1));
         dot.addEventListener("click", () => {
-          if (isMobileScroll()) {
-            // Native scroll: move to the same position index a desktop dot would
-            // (the start of the i-th slide group), then reflect it immediately.
-            scrollToPosition(i);
-            setActiveDot(i);
-          } else {
-            goTo(i);
-          }
+          // Mobile (<=780px): dots are indicators only — users navigate by
+          // swipe / native scroll, and the active dot is kept in sync by the
+          // scroll listener. Desktop/tablet keep click-to-navigate.
+          if (isMobileScroll()) return;
+          goTo(i);
         });
         dotsContainer.appendChild(dot);
       }
@@ -766,17 +763,6 @@
         }
       });
       return Math.min(bestIndex, maxIndex);
-    }
-
-    // Scroll so the i-th slide group's leading card aligns to the left edge —
-    // the native equivalent of the desktop goTo(i). The browser clamps to the
-    // max scroll for the last position(s).
-    function scrollToPosition(index) {
-      if (!scroller || !cards[index]) return;
-      const delta =
-        cards[index].getBoundingClientRect().left -
-        scroller.getBoundingClientRect().left;
-      scroller.scrollTo({ left: scroller.scrollLeft + delta, behavior: "smooth" });
     }
 
     function syncMobileDots() {

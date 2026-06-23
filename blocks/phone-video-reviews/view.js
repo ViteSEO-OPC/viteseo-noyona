@@ -217,6 +217,11 @@
         dot.type = 'button';
         dot.setAttribute('aria-label', 'Go to video review ' + (index + 1));
         dot.addEventListener('click', () => {
+          // Mobile (<=780px): dots are indicators only; users navigate by swipe /
+          // native scroll and the scroll listener keeps the active dot in sync.
+          // Tablet/desktop (>780px; dots show up to 1240px) keep click-to-navigate,
+          // so this uses a dedicated 780px check rather than the 1240px carouselMq.
+          if (window.matchMedia && window.matchMedia('(max-width: 780px)').matches) return;
           grid.scrollTo({ left: Math.max(0, scrollLeftForCard(card)), behavior: 'smooth' });
           setActiveDot(index);
         });

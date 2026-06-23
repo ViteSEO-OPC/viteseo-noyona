@@ -197,6 +197,11 @@ if ( ! function_exists( 'noyona_collection_grid_print_view_script' ) ) {
                     dot.type = 'button';
                     dot.setAttribute('aria-label', 'Go to collection ' + (index + 1));
                     dot.addEventListener('click', function () {
+                        // Mobile (<=780px): dots are indicators only; users navigate
+                        // by swipe / native scroll and the scroll listener keeps the
+                        // active dot in sync. Dots only render at <=780px, so this
+                        // fully disables click navigation where they are shown.
+                        if (mq && mq.matches) return;
                         track.scrollTo({ left: Math.max(0, scrollLeftForCard(card)), behavior: 'smooth' });
                         setActiveDot(index);
                     });
