@@ -52,6 +52,23 @@
   max-width: 250px;
 }
 
+/* Desktop: move award-6 into the centre slot of the single row (1,2,3,[6],4,5,7). */
+.awards-strip__item--1,
+.awards-strip__item--2,
+.awards-strip__item--3 {
+  order: 1;
+}
+.awards-strip__item--6 {
+  order: 2;
+}
+.awards-strip__item--4,
+.awards-strip__item--5 {
+  order: 3;
+}
+.awards-strip__item--7 {
+  order: 4;
+}
+
 .awards-strip__title {
   display: block;
   margin-top: 0.5rem;
@@ -61,10 +78,15 @@
   line-height: normal;
 }
 
-/* Tablet: 3 per row -> 3 / 3 / 1, lone last item centered by justify-content. */
+/* Tablet & below: 3 per row -> 3 / 3 / 1, lone last item centered by justify-content.
+   Reset the desktop ordering and push award-6 to last so it becomes that centered item. */
 @media (max-width: 900px) {
   .awards-strip__item {
     flex: 0 1 calc((100% - 2 * var(--awards-gap)) / 3);
+    order: 0;
+  }
+  .awards-strip__item--6 {
+    order: 1;
   }
 }
 
