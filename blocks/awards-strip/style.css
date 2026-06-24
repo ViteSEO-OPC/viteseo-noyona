@@ -1,0 +1,76 @@
+.awards-strip {
+  background: var(--awards-strip-bg, var(--values-strip-bg, var(--noyona-color-pink-soft)));
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.awards-strip__inner {
+  --awards-gap: clamp(1rem, 2vw, 2rem);
+  margin: 0 auto;
+  padding: 2rem var(--page-gutter-right, 1rem) 2rem var(--page-gutter-left, 1rem);
+  text-align: center;
+}
+
+.awards-strip__heading {
+  margin: 0 0 .35rem;
+  font-size: var(--wp--preset--font-size--h-2);
+  font-weight: var(--noyona-font-weight-bold);
+  line-height: normal;
+  color: #000;
+}
+
+.awards-strip__grid {
+  /* Flex wrap + center keeps every trailing/odd row centered (3-3-1, 2-2-2-1). */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--awards-gap);
+}
+
+.awards-strip__item {
+  /* Desktop: all logos on a single row. */
+  flex: 0 1 calc((100% - 6 * var(--awards-gap)) / 7);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.awards-strip__item img {
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* The 6th logo (award-6) reads smaller, so bump it up. */
+.awards-strip__item--6 img {
+  max-width: 250px;
+}
+
+.awards-strip__title {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: var(--wp--preset--font-size--body);
+  font-weight: var(--noyona-font-weight-bold);
+  color: #000000;
+  line-height: normal;
+}
+
+/* Tablet: 3 per row -> 3 / 3 / 1, lone last item centered by justify-content. */
+@media (max-width: 900px) {
+  .awards-strip__item {
+    flex: 0 1 calc((100% - 2 * var(--awards-gap)) / 3);
+  }
+}
+
+/* Mobile: 2 per row -> 2 / 2 / 2 / 1, lone last item centered by justify-content. */
+@media (max-width: 520px) {
+  .awards-strip__item {
+    flex: 0 1 calc((100% - 1 * var(--awards-gap)) / 2);
+  }
+}

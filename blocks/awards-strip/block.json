@@ -1,0 +1,29 @@
+{
+  "apiVersion": 3,
+  "name": "noyona/awards-strip",
+  "version": "1.0.0",
+  "title": "Awards Strip",
+  "category": "design",
+  "icon": "awards",
+  "description": "Reusable awards strip displaying a centered grid of award/badge logos.",
+  "supports": {
+    "align": ["full", "wide"],
+    "html": false
+  },
+  "attributes": {
+    "backgroundColor": {
+      "type": "string",
+      "default": ""
+    },
+    "items": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "style": "file:./style.css",
+  "render": "file:./render.php",
+  "textdomain": "noyona-childtheme"
+}

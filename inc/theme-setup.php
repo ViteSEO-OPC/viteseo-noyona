@@ -802,6 +802,7 @@ function woocom_ct_register_blocks() {
     register_block_type( get_stylesheet_directory() . '/blocks/types-cards' );
     register_block_type( get_stylesheet_directory() . '/blocks/benefits-strip' );
     register_block_type( get_stylesheet_directory() . '/blocks/values-strip' );
+    register_block_type( get_stylesheet_directory() . '/blocks/awards-strip' );
     register_block_type( get_stylesheet_directory() . '/blocks/store-locator-section' );
     register_block_type( get_stylesheet_directory() . '/blocks/newsletter-strip' );
     register_block_type( get_stylesheet_directory() . '/blocks/faq' );
