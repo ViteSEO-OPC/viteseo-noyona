@@ -45,6 +45,23 @@
   object-fit: contain;
   display: block;
   margin: 0 auto;
+
+  /* Die-cut sticker outline: drop-shadow follows the logo's alpha silhouette,
+     not the rectangular box. Eight compounded shadows (4 cardinal + 4 diagonal)
+     at 0 blur build a uniform white cut-line that hugs the contour.
+     --award-outline is tunable within the 4px-6px range. */
+  --award-outline: 3px;
+  --award-outline-color: #fff;
+  --award-outline-d: calc(var(--award-outline) * 0.7); /* diagonal offset keeps corners even */
+  filter:
+    drop-shadow(var(--award-outline) 0 0 var(--award-outline-color))
+    drop-shadow(calc(-1 * var(--award-outline)) 0 0 var(--award-outline-color))
+    drop-shadow(0 var(--award-outline) 0 var(--award-outline-color))
+    drop-shadow(0 calc(-1 * var(--award-outline)) 0 var(--award-outline-color))
+    drop-shadow(var(--award-outline-d) var(--award-outline-d) 0 var(--award-outline-color))
+    drop-shadow(calc(-1 * var(--award-outline-d)) calc(-1 * var(--award-outline-d)) 0 var(--award-outline-color))
+    drop-shadow(var(--award-outline-d) calc(-1 * var(--award-outline-d)) 0 var(--award-outline-color))
+    drop-shadow(calc(-1 * var(--award-outline-d)) var(--award-outline-d) 0 var(--award-outline-color));
 }
 
 /* The 6th logo (award-6) reads smaller, so bump it up. */
