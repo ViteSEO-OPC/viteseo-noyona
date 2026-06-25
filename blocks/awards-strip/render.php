@@ -8,7 +8,7 @@
  * - Mobile: 2 per row (e.g. 2 / 2 / 2 / 1), trailing odd item centered.
  */
 
-$image_base = trailingslashit(get_stylesheet_directory_uri()) . 'assets/images/';
+$image_base = trailingslashit(get_stylesheet_directory_uri()) . 'assets/images/logo-awards/';
 
 // Default award logos, used when no `items` are supplied via block attributes.
 // Note: block.json declares `items` with a default of [], which WordPress injects
