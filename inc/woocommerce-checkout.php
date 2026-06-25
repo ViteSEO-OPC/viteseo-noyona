@@ -1181,6 +1181,24 @@ add_action( 'woocommerce_checkout_update_order_meta', 'noyona_save_custom_checko
 function noyona_save_custom_checkout_fields( $order_id ) {
 	if ( ! empty( $_POST['noyona_newsletter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		update_post_meta( $order_id, '_noyona_newsletter_optin', 'yes' );
+
+		// Push the opted-in customer to the Brevo newsletter list (best-effort:
+		// a Brevo failure must never block order completion).
+		if ( function_exists( 'noyona_brevo_is_configured' ) && noyona_brevo_is_configured() ) {
+			$order = wc_get_order( $order_id );
+			if ( $order ) {
+				$email = $order->get_billing_email();
+				if ( $email && is_email( $email ) ) {
+					noyona_brevo_add_contact(
+						$email,
+						array(
+							'FIRSTNAME' => $order->get_billing_first_name(),
+							'LASTNAME'  => $order->get_billing_last_name(),
+						)
+					);
+				}
+			}
+		}
 	}
 }
 

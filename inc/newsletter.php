@@ -133,6 +133,17 @@ function noyona_process_newsletter_subscribe() {
 		return new WP_Error( 'invalid_email' );
 	}
 
+	// Primary path: add the subscriber to the Brevo list when configured.
+	if ( function_exists( 'noyona_brevo_is_configured' ) && noyona_brevo_is_configured() ) {
+		$added = noyona_brevo_add_contact( $email );
+		if ( is_wp_error( $added ) ) {
+			return new WP_Error( 'mail_failed' );
+		}
+
+		return noyona_newsletter_success_notice();
+	}
+
+	// Fallback (Brevo not configured yet): notify the admin so signups aren't lost.
 	$sent = wp_mail(
 		get_option( 'admin_email' ),
 		'Newsletter Signup',

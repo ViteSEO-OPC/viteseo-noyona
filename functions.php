@@ -23,6 +23,7 @@ $theme_inc_files = array(
     'shortcodes.php',
     'ajax.php',
     'admin.php',
+    'brevo.php',
     'newsletter.php',
     'contact-form.php',
     'seo.php',
