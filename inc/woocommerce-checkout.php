@@ -2528,6 +2528,41 @@ function noyona_checkout_inline_js() {
 			body.classList.remove('noyona-details-step');
 			ensureCheckoutStepper();
 
+			/* PayMongo formats the card inputs (Cleave) from its initializeCcFields
+			   handler, which only runs on the `payment_method_selected` /
+			   `updated_checkout` events. Those are emitted by wc-checkout.js bound to
+			   `.woocommerce-checkout`; the order-pay form (#order_review) isn't that
+			   class, so the card fields never get formatted here even though tokenizing
+			   works. Re-fire `payment_method_selected` ourselves — on load (covers a
+			   pre-selected card) and whenever the method changes — so PayMongo's own
+			   initCleave() runs. jQuery is deferred on this site, so wait for it. */
+			(function noyonaOrderPayCardFormatting() {
+				function fireMethodSelected() {
+					if (window.jQuery) {
+						window.jQuery(document.body).trigger('payment_method_selected');
+					}
+				}
+				function start($) {
+					$(document).on('change', 'form#order_review input[name="payment_method"]', fireMethodSelected);
+					// Give PayMongo's CCForm time to bind before the first fire.
+					setTimeout(fireMethodSelected, 400);
+					setTimeout(fireMethodSelected, 1200);
+				}
+				if (window.jQuery) {
+					start(window.jQuery);
+				} else {
+					var jqTries = 0;
+					var jqPoll = setInterval(function () {
+						if (window.jQuery) {
+							clearInterval(jqPoll);
+							start(window.jQuery);
+						} else if (++jqTries > 60) {
+							clearInterval(jqPoll);
+						}
+					}, 100);
+				}
+			})();
+
 			var orderPayStepItems = document.querySelectorAll('.noyona-checkout-steps li');
 			if (orderPayStepItems.length >= 4) {
 				// In the payment step the order already exists, so earlier steps must
