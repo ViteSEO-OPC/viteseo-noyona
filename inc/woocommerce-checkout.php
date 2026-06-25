@@ -961,9 +961,11 @@ function noyona_checkout_force_styles_late() {
 
 add_filter( 'woocommerce_checkout_fields', 'noyona_customise_checkout_fields' );
 function noyona_customise_checkout_fields( $fields ) {
-	// Phone placeholder — Philippine format
+	// Phone placeholder — Philippine format. Force required so the frontend shows the
+	// required asterisk (matching backend validation) instead of the "(optional)" label.
 	if ( isset( $fields['billing']['billing_phone'] ) ) {
 		$fields['billing']['billing_phone']['placeholder'] = '+63 ___ ___-____';
+		$fields['billing']['billing_phone']['required']    = true;
 	}
 
 	// Order notes placeholder
@@ -1001,6 +1003,7 @@ function noyona_customise_checkout_fields( $fields ) {
 		'shipping_company',
 		'shipping_country',
 		'shipping_address_2',
+		'shipping_phone',
 	);
 	foreach ( $shipping_remove as $field_key ) {
 		unset( $fields['shipping'][ $field_key ] );
