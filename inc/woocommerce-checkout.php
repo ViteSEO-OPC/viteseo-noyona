@@ -372,6 +372,80 @@ function noyona_order_is_qr_payment( $order ) {
 }
 
 /**
+ * Whether an unpaid order should be auto-expired after the payment window.
+ *
+ * Generalises the original QR-Ph-only auto-cancel to every online payment
+ * method (GCash, Maya, card, QR Ph, etc.): an order that is abandoned at the
+ * gateway redirect otherwise lingers forever under "Orders to pay". Offline /
+ * manual methods are deliberately excluded — those settle outside the site and
+ * legitimately stay unpaid for a while (bank transfer) or are already moved to
+ * processing (cash on delivery).
+ *
+ * @param WC_Order|mixed $order Order instance.
+ * @return bool
+ */
+function noyona_order_auto_expire_eligible( $order ) {
+	if ( ! $order instanceof WC_Order || $order->is_paid() ) {
+		return false;
+	}
+
+	// Manual / offline gateways must never be auto-cancelled on a timer.
+	$offline_methods = apply_filters(
+		'noyona_auto_expire_offline_methods',
+		array( 'cod', 'bacs', 'cheque' )
+	);
+
+	$method = (string) $order->get_payment_method();
+
+	return ! in_array( $method, (array) $offline_methods, true );
+}
+
+/**
+ * Pre-select the order's original gateway on the order-pay page.
+ *
+ * WooCommerce's order-pay endpoint otherwise pre-checks whichever gateway sorts
+ * first, forcing the customer to re-pick a method they already chose. Moving the
+ * order's payment method to the front of the available list makes WooCommerce
+ * mark it as the current/chosen gateway, so the page becomes a one-click
+ * "Pay now" while still allowing a switch.
+ *
+ * @param array $gateways Available payment gateways.
+ * @return array
+ */
+add_filter( 'woocommerce_available_payment_gateways', 'noyona_order_pay_preselect_gateway', 20 );
+function noyona_order_pay_preselect_gateway( $gateways ) {
+	if ( is_admin() || ! is_array( $gateways ) || empty( $gateways ) ) {
+		return $gateways;
+	}
+
+	if ( ! function_exists( 'is_wc_endpoint_url' ) || ! is_wc_endpoint_url( 'order-pay' ) ) {
+		return $gateways;
+	}
+
+	global $wp;
+	$order_id = isset( $wp->query_vars['order-pay'] ) ? absint( $wp->query_vars['order-pay'] ) : 0;
+	if ( ! $order_id ) {
+		return $gateways;
+	}
+
+	$order = wc_get_order( $order_id );
+	if ( ! $order ) {
+		return $gateways;
+	}
+
+	$method = (string) $order->get_payment_method();
+	if ( '' === $method || ! isset( $gateways[ $method ] ) ) {
+		return $gateways;
+	}
+
+	// Re-order so the original method is first; WooCommerce selects current().
+	$chosen = $gateways[ $method ];
+	unset( $gateways[ $method ] );
+
+	return array( $method => $chosen ) + $gateways;
+}
+
+/**
  * Payment window, in seconds, for QR Ph orders before they auto-cancel.
  *
  * Defaults to 30 minutes to match the countdown shown on the order-received
@@ -413,7 +487,7 @@ function noyona_qrph_schedule_cancel_on_checkout_processed( $order_id, $posted_d
 
 function noyona_qrph_schedule_cancel( $order_id, $order = null ) {
 	$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
-	if ( ! $order || ! noyona_order_is_qr_payment( $order ) || $order->is_paid() ) {
+	if ( ! $order || ! noyona_order_auto_expire_eligible( $order ) ) {
 		return;
 	}
 
@@ -460,7 +534,7 @@ function noyona_qrph_unschedule_cancel( $order_id ) {
 add_action( 'noyona_qrph_maybe_cancel_order', 'noyona_qrph_maybe_cancel_order' );
 function noyona_qrph_maybe_cancel_order( $order_id ) {
 	$order = wc_get_order( $order_id );
-	if ( ! $order || ! noyona_order_is_qr_payment( $order ) ) {
+	if ( ! $order || ! noyona_order_auto_expire_eligible( $order ) ) {
 		return;
 	}
 
@@ -475,7 +549,7 @@ function noyona_qrph_maybe_cancel_order( $order_id ) {
 		'cancelled',
 		sprintf(
 			/* translators: %d: payment window in minutes. */
-			__( 'QR Ph payment window (%d minutes) elapsed without a confirmed payment. Order auto-cancelled.', 'noyona-childtheme' ),
+			__( 'Payment window (%d minutes) elapsed without a confirmed payment. Order auto-cancelled.', 'noyona-childtheme' ),
 			$minutes
 		)
 	);
@@ -623,6 +697,7 @@ function noyona_force_checkout_templates( $template, $template_name, $template_p
 	$template_name_lc = strtolower( (string) $template_name );
 	$is_target        = (
 		'checkout/form-checkout.php' === $template_name_lc
+		|| 'checkout/form-pay.php' === $template_name_lc
 		|| 'checkout/thankyou.php' === $template_name_lc
 		|| ( false !== strpos( $template_name_lc, 'checkout/' ) && false !== strpos( $template_name_lc, 'thankyou.php' ) )
 	);
@@ -631,13 +706,29 @@ function noyona_force_checkout_templates( $template, $template_name, $template_p
 		return $template;
 	}
 
-	$relative = false !== strpos( $template_name_lc, 'form-checkout.php' ) ? 'checkout/form-checkout.php' : 'checkout/thankyou.php';
+	$relative = noyona_forced_checkout_template_relative( $template_name_lc );
 	$forced   = trailingslashit( get_stylesheet_directory() ) . 'woocommerce/' . $relative;
 	if ( is_readable( $forced ) ) {
 		return $forced;
 	}
 
 	return $template;
+}
+
+/**
+ * Map a located checkout template name to its child-theme override path.
+ *
+ * @param string $template_name_lc Lowercased template name.
+ * @return string Relative override path under the theme's woocommerce/ folder.
+ */
+function noyona_forced_checkout_template_relative( $template_name_lc ) {
+	if ( false !== strpos( $template_name_lc, 'form-checkout.php' ) ) {
+		return 'checkout/form-checkout.php';
+	}
+	if ( false !== strpos( $template_name_lc, 'form-pay.php' ) ) {
+		return 'checkout/form-pay.php';
+	}
+	return 'checkout/thankyou.php';
 }
 
 /**
@@ -656,6 +747,7 @@ function noyona_force_wc_get_checkout_templates( $located, $template_name, $args
 	$template_name_lc = strtolower( (string) $template_name );
 	$is_target        = (
 		'checkout/form-checkout.php' === $template_name_lc
+		|| 'checkout/form-pay.php' === $template_name_lc
 		|| 'checkout/thankyou.php' === $template_name_lc
 		|| ( false !== strpos( $template_name_lc, 'checkout/' ) && false !== strpos( $template_name_lc, 'thankyou.php' ) )
 	);
@@ -664,7 +756,7 @@ function noyona_force_wc_get_checkout_templates( $located, $template_name, $args
 		return $located;
 	}
 
-	$relative = false !== strpos( $template_name_lc, 'form-checkout.php' ) ? 'checkout/form-checkout.php' : 'checkout/thankyou.php';
+	$relative = noyona_forced_checkout_template_relative( $template_name_lc );
 	$forced   = trailingslashit( get_stylesheet_directory() ) . 'woocommerce/' . $relative;
 	if ( is_readable( $forced ) ) {
 		return $forced;

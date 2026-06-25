@@ -1,27 +1,78 @@
-# Transactional Email Setup Guide (Google Workspace)
+# Transactional Email — How It Works & Your Options
 
-This guide makes the website's **automatic emails** — order confirmations, "your order shipped," password resets, account emails — arrive reliably in customers' inboxes instead of the spam folder.
+This guide is about the website's **automatic emails** — order confirmations, "your order shipped," password resets, and account emails. These are the emails the website sends **by itself**, one at a time, whenever a customer does something.
 
-It's written in plain English, step by step. A few steps need help from your **developer** or your **Google Workspace admin** — those are clearly labelled with a 🔑, and we give you a ready-to-send message to forward to them. You won't have to do anything technical yourself.
+**The good news: these emails already work right now.** When a customer places an order, the receipt does go out. So nothing is broken, and you don't *have* to change anything today.
+
+**But there's a recommended upgrade**, and **the choice is yours**. This guide lays out both options in plain English — what you have now, what you could move to, and the honest pros and cons of each — so you (the owner/admin) can decide. A few steps need help from your **developer** or **Google Workspace admin**; those are clearly marked with a 🔑 and come with a ready-to-send message you can just forward. You won't have to do anything technical yourself.
 
 > 🧭 **How this fits with the other guides:**
-> - **Newsletters** (the "20% off!" type emails) → sent through **Brevo** → see `BREVO-COMPLETE-SETUP-GUIDE.md`
-> - **Automatic emails** (order receipts, etc.) → sent through **Google Workspace** → *this guide*
+> - **Newsletters** (the "20% off!" type emails sent to many people at once) → sent through **Brevo** → see `BREVO-COMPLETE-SETUP-GUIDE.md`
+> - **Automatic emails** (order receipts, password resets, etc.) → *this guide*
 
 ---
 
-## First, the simple idea behind this
+## The short version — your two options
 
-The website sends two very different kinds of email, and we use a different service for each — like using a **delivery van** for one job and a **motorbike** for another:
-
-| Kind of email | Example | We send it with |
+| | **Option A — Keep what you have now** | **Option B — Google Workspace (recommended)** |
 | --- | --- | --- |
-| **Newsletters** (lots at once) | "Weekend sale — 20% off" | **Brevo** |
-| **Automatic emails** (a few at a time) | "Thanks for your order!" | **Google Workspace** |
+| **What it is** | The website's own server sends the emails (the default setup) | The website hands emails to Google to send for you |
+| **Setup needed** | ✅ None — it's already on | A one-time setup (this guide walks you through it) |
+| **Cost** | Free | Free *if you already pay for Google Workspace*; otherwise it's the Workspace subscription you may already have |
+| **Reliability** | ⚠️ Works, but a higher chance of landing in **spam** | ✅ Strong, lands in the **inbox** reliably |
+| **Looks professional** | ⚠️ Sometimes shows an odd "from" address | ✅ Comes cleanly from your own domain |
+| **Record of what was sent** | ❌ No easy log | ✅ Full log of every email |
+| **Best for** | Just launching, low order volume, or you want zero setup today | A real, growing store that depends on customers getting their receipts |
 
-**Why split them?** Brevo's free plan only allows **300 emails a day**. If newsletters and order receipts shared that limit, one big newsletter could "use up" the day's allowance and a customer's order receipt might silently fail to send. We never want a customer to miss their receipt — so receipts go through Google Workspace (which allows about **2,000 a day** and is built exactly for this).
+**You don't have to decide this minute.** You can keep Option A and switch to Option B later at any time. Read the next two sections, then pick.
 
-> ⚠️ **Important:** Don't try to send newsletters through Google Workspace. Google only allows *automatic/personal* email there, not bulk marketing. Newsletters = Brevo. Receipts = Workspace. Keep them in their own lanes and everything stays happy.
+---
+
+## Option A — Keep your current setup (what "it already works" really means)
+
+Right now, the website sends its automatic emails using the **website server's own built-in email**. There's nothing to install and nothing to pay for — it's simply on by default.
+
+**What's good about it:**
+- ✅ It already works — receipts and password resets do go out.
+- ✅ Zero setup, zero cost.
+- ✅ Perfectly fine for testing, a soft launch, or a store with only a few orders.
+
+**The limitations — what to honestly expect if you stay on this:**
+- ⚠️ **Spam risk.** Because these emails aren't "verified" the way big providers like Gmail and Outlook prefer, they have a **higher chance of landing in the customer's spam/junk folder** — or occasionally not arriving at all. The customer may think you never sent a receipt.
+- ⚠️ **No "proof of identity."** Professional email uses three invisible stamps (called SPF, DKIM, and DMARC) that tell Gmail "this really is from this store." The current setup usually **can't provide all three**, so some inboxes treat the email with suspicion.
+- ⚠️ **The "from" address can look off.** Emails may appear to come from something like `wordpress@yourserver` instead of a clean `orders@yourdomain.com`, which looks less trustworthy to customers.
+- ⚠️ **The hosting company may limit it.** Many web hosts quietly cap how many emails a site can send per hour or day, and may **silently drop** extras during busy periods (like a sale). You wouldn't get a warning.
+- ⚠️ **No record.** There's no easy log, so if a customer says "I never got my receipt," it's hard to check whether it actually went out.
+- ⚠️ **It can break quietly.** If the host changes servers or tightens its email rules, sending can stop working without any obvious sign.
+
+**Bottom line:** Option A is genuinely fine for getting started or for low volume. But for a store that relies on customers reliably receiving receipts and reset links, the spam risk is the main thing to weigh.
+
+> ✅ **If you choose to stay on Option A**, you don't need to do anything — just skim the short **"If you stay on your current setup"** section near the bottom for a couple of things to keep an eye on.
+
+---
+
+## Option B — Google Workspace (our recommendation)
+
+If you want customers to **reliably get their emails in the inbox**, we recommend sending the automatic emails through **Google Workspace** (the paid Google email service many businesses already use for their `@yourdomain.com` addresses).
+
+**Why it's better:**
+- ✅ **Lands in the inbox.** Google is one of the most trusted senders in the world, so its emails rarely get flagged as spam.
+- ✅ **Properly verified.** It provides all three "identity stamps" (SPF, DKIM, DMARC), so other inboxes trust it.
+- ✅ **Clean, professional "from" address** like `orders@yourdomain.com`.
+- ✅ **Plenty of room.** Google Workspace allows about **2,000 emails a day** — far more than a normal store's receipts will ever need.
+- ✅ **A full record.** You get a log of every email, so you can always check whether a receipt was sent.
+
+> 💡 **Do you already pay for Google Workspace?** Many businesses already use it for staff email (`name@yourdomain.com`). If so, using it for the website's automatic emails costs **nothing extra**. If you don't have Workspace, you'd need a subscription — that's part of what you're deciding.
+
+**The rest of this guide (Parts 1–5) is the step-by-step setup for Option B.** Only follow it if you decide to switch. If you're staying on Option A for now, you can stop reading here and come back whenever you're ready.
+
+> ⚠️ **One rule for either option:** Don't send *newsletters* through Google Workspace. Google only allows *automatic/personal* email there, not bulk marketing. Newsletters = Brevo. Receipts = your chosen option here. Keep them in their own lanes and everything stays happy.
+
+---
+
+# ⬇️ The steps below are ONLY for Option B (switching to Google Workspace)
+
+*If you're keeping your current setup (Option A), you can skip everything below.*
 
 ---
 
@@ -35,7 +86,7 @@ The website sends two very different kinds of email, and we use a different serv
 | Set the "from" address in the store settings | ✅ **You** (Part 4) |
 | Test it | ✅ **You** (Part 5) |
 
-> Don't have Google Workspace admin access yet? You can't finish this guide until you do — request it first. In the meantime, leave the automatic emails as they are, and **don't** turn on Brevo's transactional option.
+> Don't have Google Workspace admin access yet? You can't finish Option B until you do — request it first. In the meantime, your current setup (Option A) keeps running exactly as it is, so nothing stops working while you wait.
 
 ---
 
@@ -78,7 +129,7 @@ This is the one genuinely technical step — connecting the plugin to your Googl
 > "Hi! I've installed the **FluentSMTP** plugin on the site and we have a Google Workspace alias `orders@ourdomain.com` ready. Could you connect FluentSMTP to send our WooCommerce/WordPress transactional emails through Google Workspace?
 >
 > - Preferred: the **Google OAuth (Gmail API)** connection method for reliability.
-> - Or, if simpler: **App Password** over SMTP (`smtp.gmail.com`, port 465, SSL), authenticating as our real Workspace user and sending 'as' the `orders@` alias.
+> - Or, if simpler: **App Password** over SMTP (`smtp.gmail.com`, port 465, SSL), authenticating as our real Workspace user and sending 'as' the `orders@` alias. *(Note: an App Password requires 2-Step Verification to be turned on for that Google account first.)*
 > - Set the **From** address to `orders@ourdomain.com` and **From name** to our store name.
 > - Please also make sure **Workspace DKIM** is turned on in the Google Admin console so our mail is authenticated.
 >
@@ -134,16 +185,27 @@ Let's make sure receipts actually arrive.
 
 ---
 
-# Good to know (limits & rules)
+# Good to know (limits & rules for Option B)
 
 - **Google Workspace allows about 2,000 emails a day** — far more than a normal store's receipts will ever need.
 - **Keep newsletters out of here.** Workspace is for automatic emails only; sending bulk marketing through it breaks Google's rules.
-- **Brevo's 300/day stays fully free for newsletters** now — the two systems never compete.
+- **Newsletters stay on Brevo.** The two systems never compete — receipts go through Google, newsletters through Brevo.
 - **You get a record of every email.** FluentSMTP keeps an **Email Logs** list, so if a customer says "I didn't get my receipt," you can check whether it actually went out.
 
 ---
 
-# If something goes wrong
+# If you stay on your current setup (Option A)
+
+If you decide **not** to switch to Google Workspace for now, that's a valid choice — just keep these in mind:
+
+- 👀 **Watch your spam folder.** Every so often, place a small test order to a Gmail/Outlook address you control and confirm the receipt lands in the **inbox**, not spam.
+- 🧾 **Spot-check around busy periods.** During a sale or a burst of orders, your host is most likely to rate-limit. If customers report missing receipts, that's the usual cause.
+- ❓ **If a customer says they didn't get a receipt**, ask them to check spam first. There's no built-in log on this setup, so you're partly relying on the customer to check.
+- 🔁 **You can upgrade any time.** The moment receipts-in-spam becomes a real problem, follow Parts 1–5 above to switch to Google Workspace. Nothing is lost by starting on Option A.
+
+---
+
+# If something goes wrong (Option B)
 
 **"The test email failed."**
 → The Google connection (Part 3) likely needs attention. Send your developer the error message FluentSMTP shows.
@@ -159,7 +221,7 @@ Let's make sure receipts actually arrive.
 
 ---
 
-# Simple checklist
+# Simple checklist (Option B — Google Workspace)
 
 - [ ] Workspace admin created the `orders@yourdomain.com` alias (Part 1)
 - [ ] FluentSMTP plugin installed and activated (Part 2)

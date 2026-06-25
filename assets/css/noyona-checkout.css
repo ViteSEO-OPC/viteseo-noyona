@@ -2349,3 +2349,101 @@ body.noyona-pay-step h1.wp-block-post-title {
     font-size: 0.64rem;
   }
 }
+
+/* ═══════════════════════════════════════
+   ORDER-PAY — pay for an existing (unpaid) order
+   Re-uses the checkout card / order-item / payment-method styles; this block
+   only handles the standalone single-column page wrapper.
+   ═══════════════════════════════════════ */
+.noyona-order-pay {
+  width: 100%;
+  max-width: 640px;
+  margin: clamp(1.5rem, 4vw, 3rem) auto;
+  padding: 0 clamp(0.75rem, 3vw, 1.25rem);
+  box-sizing: border-box;
+}
+
+.noyona-order-pay__inner {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+/* Rely on the flex gap for spacing, not the card's own margin. */
+.noyona-order-pay__inner > .noyona-checkout-card {
+  margin-bottom: 0;
+}
+
+.noyona-order-pay__meta {
+  margin: 0 0 1rem;
+  font-size: var(--wp--preset--font-size--body);
+  color: #475467;
+}
+
+.noyona-order-pay .noyona-order-totals__row--total {
+  font-weight: var(--noyona-font-weight-bold);
+}
+
+.noyona-order-pay__actions {
+  margin-top: 1.25rem;
+}
+
+/* Don't show the empty terms/privacy card when no terms page is configured. */
+.noyona-order-pay .woocommerce-terms-and-conditions-wrapper {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.noyona-order-pay .woocommerce-privacy-policy-text:empty {
+  display: none;
+}
+
+.noyona-order-pay .noyona-checkout-btn {
+  width: 100%;
+}
+
+/* Neutralise WooCommerce's default grey #payment chrome inside order-pay. */
+.noyona-order-pay #payment {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.noyona-order-pay #payment::before {
+  content: none;
+}
+
+.noyona-order-pay #payment .wc_payment_methods {
+  border: 0;
+  padding: 0;
+}
+
+/* The main checkout visually hides the native #place_order (it uses its own
+   button + confirm modal). Order-pay submits this button directly, so undo the
+   screen-reader-only clipping and restore the brand CTA. Selector also beats
+   WooCommerce's `#payment #place_order` id-level specificity. */
+.noyona-order-pay #payment #place_order.noyona-checkout-btn {
+  position: static;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  float: none;
+  line-height: normal;
+  background: var(--noyona-cta-primary-bg);
+  border: 1px solid var(--noyona-cta-primary-border);
+  color: var(--noyona-cta-primary-text);
+  font-weight: var(--noyona-font-weight-bold);
+}
+
+.noyona-order-pay #payment #place_order.noyona-checkout-btn:hover,
+.noyona-order-pay #payment #place_order.noyona-checkout-btn:focus-visible {
+  background: var(--noyona-cta-primary-hover-bg);
+  color: var(--noyona-cta-primary-hover-text);
+  border-color: var(--noyona-cta-primary-hover-border);
+}
