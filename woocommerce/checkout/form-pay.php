@@ -121,7 +121,27 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 				<div class="form-row noyona-order-pay__actions">
 					<input type="hidden" name="woocommerce_pay" value="1" />
 
-					<?php wc_get_template( 'checkout/terms.php' ); ?>
+					<?php
+					/*
+					 * Replicate the main checkout's consent UI (.noyona-review-terms)
+					 * instead of WooCommerce's default terms.php, so the re-pay page
+					 * matches the initial checkout. The checkbox is the native `terms`
+					 * field (+ terms-field) so WC_Form_Handler::pay_action() enforces
+					 * acceptance server-side — no extra JS needed.
+					 */
+					$terms_url = home_url( '/terms-and-policies/' );
+					?>
+					<div class="noyona-review-terms noyona-order-pay__terms">
+						<label class="noyona-review-terms__label" for="terms">
+							<input type="checkbox" id="terms" name="terms" class="noyona-review-terms__checkbox" />
+							<input type="hidden" name="terms-field" value="1" />
+							<span class="noyona-review-terms__text">
+								<?php esc_html_e( 'I agree to the', 'noyona' ); ?>
+								<a href="<?php echo esc_url( $terms_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Terms of Service, Shipping Policy, and Refund Policy', 'noyona' ); ?></a>
+								<?php esc_html_e( '. I understand that this order is final.', 'noyona' ); ?>
+							</span>
+						</label>
+					</div>
 
 					<?php do_action( 'woocommerce_pay_order_before_submit' ); ?>
 

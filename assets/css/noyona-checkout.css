@@ -2388,16 +2388,13 @@ body.noyona-pay-step h1.wp-block-post-title {
   margin-top: 1.25rem;
 }
 
-/* Don't show the empty terms/privacy card when no terms page is configured. */
-.noyona-order-pay .woocommerce-terms-and-conditions-wrapper {
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  border: 0;
-}
-
-.noyona-order-pay .woocommerce-privacy-policy-text:empty {
-  display: none;
+/* Terms consent uses the same `.noyona-review-terms` UI as the main checkout's
+   review step. That shared component is display:none by default (only revealed
+   under body.noyona-review-step), so reveal it here on the order-pay page. */
+.noyona-order-pay .noyona-review-terms {
+  display: block;
+  margin-top: 1.25rem;
+  margin-bottom: 0;
 }
 
 .noyona-order-pay .noyona-checkout-btn {

@@ -937,22 +937,57 @@ function noyona_checkout_enqueue_paymongo_preview_assets() {
 		'public_key' => $public_key,
 	);
 
+	// Context: the order-pay endpoint posts the native #order_review form, while
+	// the main checkout posts form.checkout. PayMongo's paymongo-cc.js binds its
+	// card tokenizer to whichever form the isOrderPay/isCheckout flags select, so
+	// these MUST reflect the real page or the card token (cynder_paymongo_method_id)
+	// is never attached on order-pay and the gateway fails with PI001.
+	$is_order_pay = function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-pay' );
+	$pay_order    = null;
+	if ( $is_order_pay ) {
+		global $wp;
+		$pay_order_id = isset( $wp->query_vars['order-pay'] ) ? absint( $wp->query_vars['order-pay'] ) : 0;
+		if ( $pay_order_id ) {
+			$pay_order = wc_get_order( $pay_order_id );
+		}
+	}
+
 	$customer = WC()->customer;
-	$paymongo_cc = array(
-		'isCheckout'   => true,
-		'isOrderPay'   => false,
-		'total_amount' => WC()->cart ? WC()->cart->get_totals()['total'] : 0,
-		'billing_first_name' => $customer ? $customer->get_billing_first_name() : '',
-		'billing_last_name'  => $customer ? $customer->get_billing_last_name() : '',
-		'billing_address_1'  => $customer ? ( $customer->get_billing_address_1() ?: $customer->get_shipping_address_1() ) : '',
-		'billing_address_2'  => $customer ? ( $customer->get_billing_address_2() ?: $customer->get_shipping_address_2() ) : '',
-		'billing_state'      => $customer ? ( $customer->get_billing_state() ?: $customer->get_shipping_state() ) : '',
-		'billing_city'       => $customer ? ( $customer->get_billing_city() ?: $customer->get_shipping_city() ) : '',
-		'billing_postcode'   => $customer ? ( $customer->get_billing_postcode() ?: $customer->get_shipping_postcode() ) : '',
-		'billing_country'    => $customer ? ( $customer->get_billing_country() ?: $customer->get_shipping_country() ?: 'PH' ) : 'PH',
-		'billing_email'      => $customer ? $customer->get_billing_email() : '',
-		'billing_phone'      => $customer ? $customer->get_billing_phone() : '',
-	);
+
+	// On order-pay there is no cart; source the amount + billing from the order.
+	if ( $is_order_pay && $pay_order instanceof WC_Order ) {
+		$paymongo_cc = array(
+			'isCheckout'         => false,
+			'isOrderPay'         => true,
+			'total_amount'       => $pay_order->get_total(),
+			'billing_first_name' => $pay_order->get_billing_first_name(),
+			'billing_last_name'  => $pay_order->get_billing_last_name(),
+			'billing_address_1'  => $pay_order->get_billing_address_1() ?: $pay_order->get_shipping_address_1(),
+			'billing_address_2'  => $pay_order->get_billing_address_2() ?: $pay_order->get_shipping_address_2(),
+			'billing_state'      => $pay_order->get_billing_state() ?: $pay_order->get_shipping_state(),
+			'billing_city'       => $pay_order->get_billing_city() ?: $pay_order->get_shipping_city(),
+			'billing_postcode'   => $pay_order->get_billing_postcode() ?: $pay_order->get_shipping_postcode(),
+			'billing_country'    => $pay_order->get_billing_country() ?: $pay_order->get_shipping_country() ?: 'PH',
+			'billing_email'      => $pay_order->get_billing_email(),
+			'billing_phone'      => $pay_order->get_billing_phone(),
+		);
+	} else {
+		$paymongo_cc = array(
+			'isCheckout'         => true,
+			'isOrderPay'         => false,
+			'total_amount'       => WC()->cart ? WC()->cart->get_totals()['total'] : 0,
+			'billing_first_name' => $customer ? $customer->get_billing_first_name() : '',
+			'billing_last_name'  => $customer ? $customer->get_billing_last_name() : '',
+			'billing_address_1'  => $customer ? ( $customer->get_billing_address_1() ?: $customer->get_shipping_address_1() ) : '',
+			'billing_address_2'  => $customer ? ( $customer->get_billing_address_2() ?: $customer->get_shipping_address_2() ) : '',
+			'billing_state'      => $customer ? ( $customer->get_billing_state() ?: $customer->get_shipping_state() ) : '',
+			'billing_city'       => $customer ? ( $customer->get_billing_city() ?: $customer->get_shipping_city() ) : '',
+			'billing_postcode'   => $customer ? ( $customer->get_billing_postcode() ?: $customer->get_shipping_postcode() ) : '',
+			'billing_country'    => $customer ? ( $customer->get_billing_country() ?: $customer->get_shipping_country() ?: 'PH' ) : 'PH',
+			'billing_email'      => $customer ? $customer->get_billing_email() : '',
+			'billing_phone'      => $customer ? $customer->get_billing_phone() : '',
+		);
+	}
 
 	wp_localize_script( 'woocommerce_paymongo_client', 'cynder_paymongo_client_params', $paymongo_client );
 	wp_localize_script( 'woocommerce_paymongo_cc', 'cynder_paymongo_cc_params', $paymongo_cc );
@@ -2495,9 +2530,9 @@ function noyona_checkout_inline_js() {
 
 			var orderPayStepItems = document.querySelectorAll('.noyona-checkout-steps li');
 			if (orderPayStepItems.length >= 4) {
-				ensureStepLink(orderPayStepItems[0], cartUrl);
-				ensureStepLink(orderPayStepItems[1], detailsUrl);
-				ensureStepLink(orderPayStepItems[2], reviewUrl);
+				// In the payment step the order already exists, so earlier steps must
+				// not be navigable back to (same as the Done step).
+				lockCheckoutSteps();
 				orderPayStepItems.forEach(function (item) {
 					item.classList.remove('is-active');
 					item.classList.remove('is-complete');
@@ -2526,9 +2561,9 @@ function noyona_checkout_inline_js() {
 
 			var payStepItems = document.querySelectorAll('.noyona-checkout-steps li');
 			if (payStepItems.length >= 4) {
-				ensureStepLink(payStepItems[0], cartUrl);
-				ensureStepLink(payStepItems[1], detailsUrl);
-				ensureStepLink(payStepItems[2], reviewUrl);
+				// In the payment step the order already exists, so earlier steps must
+				// not be navigable back to (same as the Done step).
+				lockCheckoutSteps();
 				payStepItems.forEach(function (item) {
 					item.classList.remove('is-active');
 					item.classList.remove('is-complete');
