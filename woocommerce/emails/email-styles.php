@@ -790,6 +790,44 @@ h2.email-order-detail-heading span a {
 	color: #a9185f;
 }
 
+.noyona-order-meta-line {
+	color: #b6a6a8;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.6px;
+	margin: 0 0 14px;
+	text-align: left;
+	text-transform: uppercase;
+}
+
+.noyona-order-item-sku {
+	color: #b6a6a8;
+	font-weight: 600;
+}
+
+.noyona-order-note {
+	background: #fbf0f3;
+	border-radius: 7px;
+	margin: 0 0 24px;
+	width: 100%;
+}
+
+.noyona-order-note td {
+	padding: 18px !important;
+}
+
+.noyona-order-note .noyona-email-section-title {
+	margin-bottom: 8px;
+}
+
+.noyona-order-note p {
+	color: #8a7f82;
+	font-size: 12px;
+	line-height: 160%;
+	margin: 0 !important;
+	text-align: left;
+}
+
 .noyona-customer-info-title {
 	margin-top: 12px;
 }

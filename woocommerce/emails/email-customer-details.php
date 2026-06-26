@@ -2,17 +2,11 @@
 /**
  * Additional Customer Details
  *
- * This is extra customer data which can be filtered by plugins. It outputs below the order item table.
+ * Noyona customization: renders the extra customer fields in the branded
+ * "noyona-customer-info" block to match the rest of the email designs. Only
+ * $fields is passed to this template by WooCommerce.
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/email-customer-details.php.
- *
- * HOWEVER, on occasion WooCommerce will need to update template files and you
- * (the theme developer) will need to copy the new files to your theme to
- * maintain compatibility. We try to do this as little as possible, but it does
- * happen. When this occurs the version of the template file will be bumped and
- * the readme will list any important changes.
- *
- * @see     https://woocommerce.com/document/template-structure/
+ * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
  * @version 9.7.0
  */
@@ -20,12 +14,14 @@
 defined( 'ABSPATH' ) || exit;
 ?>
 <?php if ( ! empty( $fields ) ) : ?>
-	<div class="font-family" style="margin-bottom: 40px;">
-		<h2><?php esc_html_e( 'Customer details', 'woocommerce' ); ?></h2>
-		<ul>
-			<?php foreach ( $fields as $field ) : ?>
-				<li><strong><?php echo wp_kses_post( $field['label'] ); ?>:</strong> <span class="text"><?php echo wp_kses_post( $field['value'] ); ?></span></li>
-			<?php endforeach; ?>
-		</ul>
-	</div>
+	<h2 class="noyona-email-section-title"><?php esc_html_e( 'CUSTOMER DETAILS', 'noyona-childtheme' ); ?></h2>
+	<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" class="noyona-customer-info">
+		<tr>
+			<td style="width: 100%;">
+				<?php foreach ( $fields as $field ) : ?>
+					<p><strong><?php echo wp_kses_post( $field['label'] ); ?>:</strong> <?php echo wp_kses_post( $field['value'] ); ?></p>
+				<?php endforeach; ?>
+			</td>
+		</tr>
+	</table>
 <?php endif; ?>
