@@ -1115,6 +1115,65 @@ h2.email-order-detail-heading span a {
 }
 
 /**
+ * Noyona readability fix for the stock WooCommerce email templates.
+ *
+ * The default WooCommerce templates (order details, order items, addresses,
+ * customer details, customer note, the admin order emails and the invoice /
+ * "pay for order" email) colour their text from the admin-configurable e-mail
+ * colour options ($base / $text / $text_lighter_20). When those options resolve
+ * to a light/near-white value the text becomes invisible on the white e-mail
+ * body. The custom noyona-* emails are unaffected because they hardcode their
+ * colours, which left only these stock-markup emails broken.
+ *
+ * These rules pin that stock markup to the brand dark palette so it stays
+ * readable regardless of the WooCommerce colour settings. They are declared
+ * after the defaults (so they win on source order) and only use element/.class
+ * selectors that the higher-specificity noyona-* classes still override, so the
+ * custom email designs are not touched.
+ */
+#template_header {
+	background-color: #ffffff;
+}
+
+#template_header h1,
+#template_header h1 a {
+	color: #2d2d2d;
+}
+
+#body_content_inner {
+	color: #50474a;
+}
+
+h1,
+h2,
+h3 {
+	color: #2d2d2d;
+}
+
+blockquote {
+	color: #50474a;
+}
+
+.td,
+.address,
+.text,
+.address-title,
+.order-item-data,
+.additional-fields {
+	color: #50474a;
+}
+
+.email-order-item-meta,
+h2.email-order-detail-heading span {
+	color: #8a7f82;
+}
+
+#body_content table td td.email-additional-content,
+.email-additional-content {
+	color: #50474a;
+}
+
+/**
  * Media queries are not supported by all email clients, however they do work on modern mobile
  * Gmail clients and can help us achieve better consistency there.
  */
