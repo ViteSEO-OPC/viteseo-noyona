@@ -3998,7 +3998,7 @@ function noyona_download_einvoice_handler() {
         $items_html .= '<tr>';
         $items_html .= '<td style="padding:14px 12px;border-bottom:1px solid #F1E6EA;color:' . $brand_ink . ';font-weight:700;">' . esc_html( $order_item->get_name() ) . wp_kses_post( $item_meta ) . '</td>';
         $items_html .= '<td style="padding:14px 12px;border-bottom:1px solid #F1E6EA;text-align:center;color:' . $brand_muted . ';font-weight:700;">' . esc_html( (string) $order_item->get_quantity() ) . '</td>';
-        $items_html .= '<td style="padding:14px 12px;border-bottom:1px solid #F1E6EA;text-align:right;color:' . $brand_ink . ';font-weight:700;">' . wp_kses_post( $order->get_formatted_line_subtotal( $order_item ) ) . '</td>';
+        $items_html .= '<td style="font-family:\'DejaVu Sans\',Arial,Helvetica,sans-serif;padding:14px 12px;border-bottom:1px solid #F1E6EA;text-align:right;color:' . $brand_ink . ';font-weight:700;">' . wp_kses_post( $order->get_formatted_line_subtotal( $order_item ) ) . '</td>';
         $items_html .= '</tr>';
     }
 
@@ -4013,7 +4013,7 @@ function noyona_download_einvoice_handler() {
 
         $totals_html .= '<tr>';
         $totals_html .= '<td style="padding:10px 12px;border-bottom:1px solid #F1E6EA;background:' . esc_attr( $row_bg ) . ';color:' . esc_attr( $brand_muted ) . ';font-weight:' . esc_attr( $row_weight ) . ';">' . esc_html( $label ) . '</td>';
-        $totals_html .= '<td style="padding:10px 12px;border-bottom:1px solid #F1E6EA;background:' . esc_attr( $row_bg ) . ';text-align:right;color:' . esc_attr( $row_color ) . ';font-weight:' . esc_attr( $row_weight ) . ';">' . wp_kses_post( $value ) . '</td>';
+        $totals_html .= '<td style="font-family:\'DejaVu Sans\',Arial,Helvetica,sans-serif;padding:10px 12px;border-bottom:1px solid #F1E6EA;background:' . esc_attr( $row_bg ) . ';text-align:right;color:' . esc_attr( $row_color ) . ';font-weight:' . esc_attr( $row_weight ) . ';">' . wp_kses_post( $value ) . '</td>';
         $totals_html .= '</tr>';
     }
 
