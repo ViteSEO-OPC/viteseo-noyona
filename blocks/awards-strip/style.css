@@ -1,13 +1,34 @@
 .awards-strip {
-  background: var(--awards-strip-bg, var(--values-strip-bg, var(--noyona-color-pink-soft)));
+  position: relative;
+  background: var(--newsletter-strip-bg, var(--noyona-color-pink-light-blush));
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
 }
 
+/* Soft colored fade at the left/right edges of the whole section. */
+.awards-strip::before,
+.awards-strip::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6%;
+  z-index: 2;
+  pointer-events: none;
+}
+.awards-strip::before {
+  left: 0;
+  background: linear-gradient(90deg, #fffefe, rgba(255, 254, 254, 0));
+}
+.awards-strip::after {
+  right: 0;
+  background: linear-gradient(270deg, #fffefe, rgba(255, 254, 254, 0));
+}
+
 .awards-strip__inner {
-  --awards-gap: clamp(1rem, 2vw, 2rem);
+  --awards-gap: clamp(1.5rem, 4vw, 3.5rem);
   margin: 0 auto;
-  padding: 2rem var(--page-gutter-right, 1rem) 2rem var(--page-gutter-left, 1rem);
+  padding: 2rem 0;
   text-align: center;
 }
 
@@ -19,71 +40,51 @@
   color: #000;
 }
 
-.awards-strip__grid {
-  /* Flex wrap + center keeps every trailing/odd row centered (3-3-1, 2-2-2-1). */
+/* ── Marquee carousel ───────────────────────────────────────────────────────
+   The viewport clips the over-wide track; the track holds two identical copies
+   of the logos and slides left by exactly one copy (-50%) on an infinite loop,
+   so the motion is seamless. Spacing uses symmetric item margins (not flex gap)
+   so the seam between the two copies matches the interior spacing exactly.     */
+.awards-strip__viewport {
+  /* Clip the over-wide track horizontally, but keep vertical padding so the
+     logos' white die-cut outline (and any title) is never clipped top/bottom. */
+  overflow-x: hidden;
+  overflow-y: visible;
+  padding-block: clamp(1rem, 2.5vw, 2rem);
+}
+
+.awards-strip__track {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
   align-items: center;
-  gap: var(--awards-gap);
+  width: max-content;
+  animation: awards-scroll var(--awards-strip-speed, 40s) linear infinite;
 }
 
 .awards-strip__item {
-  /* Desktop: all logos on a single row. */
-  flex: 0 1 calc((100% - 6 * var(--awards-gap)) / 7);
-  min-width: 0;
+  flex: 0 0 auto;
+  margin-inline: calc(var(--awards-gap) / 2);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .awards-strip__item img {
-  width: 100%;
-  max-width: 220px;
+  /* Use the logo's own (intrinsic) dimensions — no forced box or square crop.
+     Only a max-height keeps the row aligned; remove it for fully original size. */
+  width: auto;
   height: auto;
-  aspect-ratio: 1 / 1;
+  max-width: 100%;
+  max-height: var(--awards-logo-height, 210px);
   object-fit: contain;
   display: block;
-  margin: 0 auto;
+  margin: 0 auto; 
 
-  /* Die-cut sticker outline: drop-shadow follows the logo's alpha silhouette,
-     not the rectangular box. Eight compounded shadows (4 cardinal + 4 diagonal)
-     at 0 blur build a uniform white cut-line that hugs the contour.
-     --award-outline is tunable within the 4px-6px range. */
-  --award-outline: 3px;
-  --award-outline-color: #fff;
-  --award-outline-d: calc(var(--award-outline) * 0.7); /* diagonal offset keeps corners even */
-  filter:
-    drop-shadow(var(--award-outline) 0 0 var(--award-outline-color))
-    drop-shadow(calc(-1 * var(--award-outline)) 0 0 var(--award-outline-color))
-    drop-shadow(0 var(--award-outline) 0 var(--award-outline-color))
-    drop-shadow(0 calc(-1 * var(--award-outline)) 0 var(--award-outline-color))
-    drop-shadow(var(--award-outline-d) var(--award-outline-d) 0 var(--award-outline-color))
-    drop-shadow(calc(-1 * var(--award-outline-d)) calc(-1 * var(--award-outline-d)) 0 var(--award-outline-color))
-    drop-shadow(var(--award-outline-d) calc(-1 * var(--award-outline-d)) 0 var(--award-outline-color))
-    drop-shadow(calc(-1 * var(--award-outline-d)) var(--award-outline-d) 0 var(--award-outline-color));
-}
-
-/* The 6th logo (award-6) reads smaller, so bump it up. */
-.awards-strip__item--6 img {
-  max-width: 250px;
-}
-
-/* Desktop: move award-6 into the centre slot of the single row (1,2,3,[6],4,5,7). */
-.awards-strip__item--1,
-.awards-strip__item--2,
-.awards-strip__item--3 {
-  order: 1;
-}
-.awards-strip__item--6 {
-  order: 2;
-}
-.awards-strip__item--4,
-.awards-strip__item--5 {
-  order: 3;
-}
-.awards-strip__item--7 {
-  order: 4;
+  /* Soft, light white glow that follows the logo's silhouette. Tunable below. */
+  --award-shadow-x: 0;
+  --award-shadow-y: 0;
+  --award-shadow-blur: 12px;
+  --award-shadow-color: rgba(255, 255, 255, 0.85);
+  filter: drop-shadow(var(--award-shadow-x) var(--award-shadow-y) var(--award-shadow-blur) var(--award-shadow-color));
 }
 
 .awards-strip__title {
@@ -95,34 +96,42 @@
   line-height: normal;
 }
 
-/* Tablet & below: 3 per row -> 3 / 3 / 1, lone last item centered by justify-content.
-   Reset the desktop ordering and push award-6 to last so it becomes that centered item. */
+@keyframes awards-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Respect reduced-motion: stop the loop and fall back to a centered, wrapping
+   row so every logo stays reachable without animation. */
+@media (prefers-reduced-motion: reduce) {
+  .awards-strip__track {
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--awards-gap);
+    animation: none;
+  }
+  /* Spacing comes from the flex gap here, so drop the marquee item margins. */
+  .awards-strip__item {
+    margin-inline: 0;
+  }
+  /* Hide the duplicated copy when not scrolling. */
+  .awards-strip__item[aria-hidden="true"] {
+    display: none;
+  }
+}
+
+/* Tablet: slightly shorter logos. */
 @media (max-width: 900px) {
-  .awards-strip__item {
-    flex: 0 1 calc((100% - 2 * var(--awards-gap)) / 3);
-    order: 0;
-  }
-  .awards-strip__item--6 {
-    order: 1;
+  .awards-strip__inner {
+    --awards-logo-height: 150px;
   }
 }
 
-/* Tablet only: award-6 is the lone, centered item on the last row (3 / 3 / 1).
-   Capping the <img> alone does nothing here because the grid track (~1/3 row) is
-   narrower than the cap, so the image just fills the track. Widen award-6's track
-   exclusively, then let the image grow into it. */
-@media (min-width: 521px) and (max-width: 900px) {
-  .awards-strip__item--6 {
-    flex-basis: 48%;
-  }
-  .awards-strip__item--6 img {
-    max-width: 320px;
-  }
-}
-
-/* Mobile: 2 per row -> 2 / 2 / 2 / 1, lone last item centered by justify-content. */
+/* Mobile: shorter still, tighter spacing. */
 @media (max-width: 520px) {
-  .awards-strip__item {
-    flex: 0 1 calc((100% - 1 * var(--awards-gap)) / 2);
+  .awards-strip__inner {
+    --awards-gap: 1.5rem;
+    --awards-logo-height: 120px;
   }
 }

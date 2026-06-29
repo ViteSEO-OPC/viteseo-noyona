@@ -5,7 +5,7 @@
   "title": "Awards Strip",
   "category": "design",
   "icon": "awards",
-  "description": "Reusable awards strip displaying a centered grid of award/badge logos.",
+  "description": "Auto-scrolling marquee carousel of award/badge logos, managed via the Awards post type.",
   "supports": {
     "align": ["full", "wide"],
     "html": false
@@ -14,6 +14,10 @@
     "backgroundColor": {
       "type": "string",
       "default": ""
+    },
+    "speed": {
+      "type": "number",
+      "default": 120
     },
     "items": {
       "type": "array",

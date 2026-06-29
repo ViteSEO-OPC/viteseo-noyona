@@ -37,6 +37,8 @@ function noyona_add_woocommerce_theme_support() {
     add_theme_support( 'wc-product-gallery-zoom' );
     add_theme_support( 'wc-product-gallery-lightbox' );
     add_theme_support( 'wc-product-gallery-slider' );
+    // Required so the Awards CPT (and others) expose the Featured Image box.
+    add_theme_support( 'post-thumbnails' );
 }
 
 /* ----- One-time stale header template-part reset ----- */
@@ -780,6 +782,152 @@ function noyona_lost_password_client_validation() {
     })();
     </script>
     <?php
+}
+
+/* ----- Register "Awards" custom post type ----- */
+/**
+ * Awards CPT — powers the noyona/awards-strip block.
+ *
+ * Each Award is one logo/badge: the Featured Image is the logo, the title is
+ * the (optional) caption, and the "Order" field (page-attributes) controls the
+ * left-to-right sequence in the strip. Manage everything from wp-admin → Awards.
+ */
+add_action( 'init', 'noyona_register_award_cpt' );
+function noyona_register_award_cpt() {
+    $labels = array(
+        'name'                  => __( 'Awards', 'noyona-childtheme' ),
+        'singular_name'         => __( 'Award', 'noyona-childtheme' ),
+        'menu_name'             => __( 'Awards', 'noyona-childtheme' ),
+        'add_new'               => __( 'Add New', 'noyona-childtheme' ),
+        'add_new_item'          => __( 'Add New Award', 'noyona-childtheme' ),
+        'edit_item'             => __( 'Edit Award', 'noyona-childtheme' ),
+        'new_item'              => __( 'New Award', 'noyona-childtheme' ),
+        'view_item'             => __( 'View Award', 'noyona-childtheme' ),
+        'search_items'          => __( 'Search Awards', 'noyona-childtheme' ),
+        'not_found'             => __( 'No awards found', 'noyona-childtheme' ),
+        'not_found_in_trash'    => __( 'No awards found in Trash', 'noyona-childtheme' ),
+        'all_items'             => __( 'All Awards', 'noyona-childtheme' ),
+        'featured_image'        => __( 'Award Logo', 'noyona-childtheme' ),
+        'set_featured_image'    => __( 'Set award logo', 'noyona-childtheme' ),
+        'remove_featured_image' => __( 'Remove award logo', 'noyona-childtheme' ),
+        'use_featured_image'    => __( 'Use as award logo', 'noyona-childtheme' ),
+    );
+
+    register_post_type( 'noyona_award', array(
+        'labels'              => $labels,
+        'public'              => false,
+        'show_ui'             => true,
+        'show_in_menu'        => true,
+        'show_in_rest'        => true,
+        'menu_position'       => 25,
+        'menu_icon'           => 'dashicons-awards',
+        'hierarchical'        => false,
+        'has_archive'         => false,
+        'rewrite'             => false,
+        'query_var'           => false,
+        'exclude_from_search' => true,
+        'publicly_queryable'  => false,
+        'supports'            => array( 'title', 'thumbnail', 'page-attributes' ),
+    ) );
+}
+
+/**
+ * Order the Awards admin list by the "Order" field by default so the list
+ * mirrors the front-end strip sequence.
+ */
+add_action( 'pre_get_posts', 'noyona_order_awards_admin' );
+function noyona_order_awards_admin( $query ) {
+    if ( ! is_admin() || ! $query->is_main_query() ) {
+        return;
+    }
+    if ( 'noyona_award' === $query->get( 'post_type' ) && ! $query->get( 'orderby' ) ) {
+        $query->set( 'orderby', 'menu_order' );
+        $query->set( 'order', 'ASC' );
+    }
+}
+
+/**
+ * One-time import of the bundled award logos into the Awards CPT.
+ *
+ * Runs once (guarded by an option). Copies assets/images/logo-awards/award-*.webp
+ * into the Media Library and creates a published Award for each, so the original
+ * seven logos become real, editable entries instead of a code fallback. Titles
+ * are left empty (logo only, no caption) to match the original strip.
+ */
+add_action( 'admin_init', 'noyona_seed_default_awards' );
+function noyona_seed_default_awards() {
+    if ( get_option( 'noyona_awards_seeded' ) || ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+
+    $dir   = trailingslashit( get_stylesheet_directory() ) . 'assets/images/logo-awards/';
+    $order = 10;
+
+    for ( $n = 1; $n <= 7; $n++ ) {
+        $file = $dir . 'award-' . $n . '.webp';
+        if ( ! file_exists( $file ) ) {
+            continue;
+        }
+
+        // Copy the bundled file into the uploads directory.
+        $upload = wp_upload_bits( 'award-' . $n . '.webp', null, file_get_contents( $file ) );
+        if ( ! empty( $upload['error'] ) || empty( $upload['file'] ) ) {
+            continue;
+        }
+
+        $filetype      = wp_check_filetype( $upload['file'], null );
+        $attachment_id = wp_insert_attachment( array(
+            'post_mime_type' => $filetype['type'],
+            'post_title'     => 'Award ' . $n,
+            'post_status'    => 'inherit',
+        ), $upload['file'] );
+
+        if ( is_wp_error( $attachment_id ) || ! $attachment_id ) {
+            continue;
+        }
+
+        $metadata = wp_generate_attachment_metadata( $attachment_id, $upload['file'] );
+        wp_update_attachment_metadata( $attachment_id, $metadata );
+
+        // Empty title => logo only, no caption (matches the original look).
+        $award_id = wp_insert_post( array(
+            'post_type'   => 'noyona_award',
+            'post_status' => 'publish',
+            'post_title'  => '',
+            'menu_order'  => $order,
+        ) );
+
+        if ( $award_id && ! is_wp_error( $award_id ) ) {
+            set_post_thumbnail( $award_id, $attachment_id );
+            $order += 10;
+        }
+    }
+
+    update_option( 'noyona_awards_seeded', 1 );
+}
+
+/* ----- Awards admin list: show the logo thumbnail ----- */
+add_filter( 'manage_noyona_award_posts_columns', 'noyona_award_admin_columns' );
+function noyona_award_admin_columns( $columns ) {
+    $with_logo = array();
+    foreach ( $columns as $key => $label ) {
+        if ( 'title' === $key ) {
+            $with_logo['award_logo'] = __( 'Logo', 'noyona-childtheme' );
+        }
+        $with_logo[ $key ] = $label;
+    }
+    return $with_logo;
+}
+
+add_action( 'manage_noyona_award_posts_custom_column', 'noyona_award_admin_column_content', 10, 2 );
+function noyona_award_admin_column_content( $column, $post_id ) {
+    if ( 'award_logo' === $column ) {
+        echo has_post_thumbnail( $post_id )
+            ? get_the_post_thumbnail( $post_id, array( 60, 60 ) )
+            : '&mdash;';
+    }
 }
 
 /* ----- Register custom blocks ----- */
