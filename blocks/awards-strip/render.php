@@ -142,8 +142,8 @@ $track_items = array_merge( $one_copy, $one_copy );
 ?>
 <section class="wp-block-noyona-awards-strip awards-strip alignfull" style="<?php echo esc_attr( $style_attr ); ?>">
     <div class="awards-strip__inner">
-        <h2 class="awards-strip__heading">AWARDS</h2>
-        <div class="awards-strip__viewport">
+        <h2 class="awards-strip__heading">Our Awards</h2>
+        <div class="awards-strip__viewport">    
             <div class="awards-strip__track" role="list">
             <?php foreach ( $track_items as $i => $item ) : ?>
                 <?php
