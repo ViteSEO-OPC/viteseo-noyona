@@ -284,6 +284,90 @@ function noyona_enforce_checkout_step_flow() {
     // preview-step session check is required here anymore.
 }
 
+/* ----- Guard the order-received (thank-you) endpoint ----- */
+/**
+ * Lock down Woo's `order-received` endpoint.
+ *
+ * WooCommerce core only validates the order KEY on this endpoint (see
+ * WC_Shortcode_Checkout::order_received) — it never checks that the current
+ * user actually owns the order. That means:
+ *   - A bare /checkout/order-received/ (no order id/key) renders a generic
+ *     "Thank you. Your order has been received." success line (HTTP 200).
+ *   - Any logged-in account holding a valid order link can view someone
+ *     else's confirmation (QR, address, email, items, etc.).
+ *
+ * This guard converts both cases into a genuine 404:
+ *   1. Missing order id, invalid/mismatched key  -> 404.
+ *   2. Order owned by a specific user, viewed by a different account -> 404.
+ *
+ * The real buyer is always logged in as the owner immediately after checkout,
+ * so their QRPH / thank-you flow is untouched. Guest/legacy orders (no
+ * user_id) keep working via the order key, and shop managers can still view
+ * any order for support. This does not touch order-pay or any other endpoint.
+ */
+add_action( 'template_redirect', 'noyona_guard_order_received_endpoint', 6 );
+function noyona_guard_order_received_endpoint() {
+    if ( is_admin() || wp_doing_ajax() ) {
+        return;
+    }
+
+    if ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() ) {
+        return;
+    }
+
+    if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+        return;
+    }
+
+    if ( ! function_exists( 'is_wc_endpoint_url' ) || ! is_wc_endpoint_url( 'order-received' ) ) {
+        return;
+    }
+
+    global $wp;
+    $order_id  = isset( $wp->query_vars['order-received'] ) ? absint( $wp->query_vars['order-received'] ) : 0;
+    $order_key = ( isset( $_GET['key'] ) && function_exists( 'wc_clean' ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        ? wc_clean( wp_unslash( $_GET['key'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        : '';
+
+    $order = ( $order_id > 0 && function_exists( 'wc_get_order' ) ) ? wc_get_order( $order_id ) : null;
+
+    // Case 1: no resolvable order, or a missing/mismatched key.
+    if ( ! $order instanceof WC_Order || '' === $order_key || ! hash_equals( $order->get_order_key(), $order_key ) ) {
+        noyona_render_404_and_exit();
+    }
+
+    // Case 2: ownership. Only enforce when the order actually belongs to a
+    // registered user (guest/legacy orders have no owner and stay key-gated).
+    $owner_id = (int) $order->get_user_id();
+    if ( $owner_id > 0
+        && (int) get_current_user_id() !== $owner_id
+        && ! current_user_can( 'manage_woocommerce' )
+    ) {
+        noyona_render_404_and_exit();
+    }
+}
+
+/**
+ * Force the current request to render the theme's 404 template and stop.
+ */
+function noyona_render_404_and_exit() {
+    global $wp_query;
+
+    if ( $wp_query instanceof WP_Query ) {
+        $wp_query->set_404();
+    }
+
+    status_header( 404 );
+    nocache_headers();
+
+    $template = get_404_template();
+    if ( $template ) {
+        include $template;
+    }
+
+    exit;
+}
+
 /* ----- Block guest access to cart/checkout flow routes ----- */
 /**
  * Enforce login on all checkout-flow entry points so guests cannot bypass
