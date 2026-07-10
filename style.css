@@ -2239,6 +2239,21 @@ body.post-type-archive-product:not(.tax-product_cat) .noyona-shop-category-all,
   transform: translateY(0);
 }
 
+/* Out of stock: hover bar reads "Out of stock" in the muted gray treatment
+   instead of the magenta "Buy Now". The card stays clickable (routes to PDP). */
+.noyona-shop-products .wc-block-product.is-out-of-stock::after {
+  content: "Out of stock";
+  border-color: var(--noyona-color-text-muted);
+  background: var(--noyona-color-text-muted);
+  color: var(--noyona-color-white);
+}
+
+.noyona-shop-products .wc-block-product.is-out-of-stock:hover,
+.noyona-shop-products .wc-block-product.is-out-of-stock:focus-within {
+  border-color: var(--noyona-color-text-muted);
+  box-shadow: 0 8px 28px rgba(82, 82, 82, 0.16);
+}
+
 /* Empty product list — shared shop/search styling, no card hover chrome */
 .noyona-shop-products .wc-block-product-template > .noyona-shop-no-products,
 .noyona-shop-products .wp-block-woocommerce-product-collection-no-results .noyona-shop-no-products {
@@ -7641,6 +7656,26 @@ body:not(.single-product) .noyona-shop-products .noyona-product-card-price__badg
     pointer-events: none;
     cursor: not-allowed;
     
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Out of stock: the cart icon + box turn theme gray (no lowered opacity) and
+     the button stays clickable so it can still route to the product page. In
+     list view the label reads "Out of stock" in the same gray. */
+  .noyona-product-card-cart.is-out-of-stock {
+    opacity: 1;
+    background: var(--noyona-cta-secondary-bg);
+    color: var(--noyona-color-text-muted);
+    border-color: var(--noyona-color-text-muted);
+    cursor: pointer;
+  }
+
+  .noyona-product-card-cart.is-out-of-stock:hover,
+  .noyona-product-card-cart.is-out-of-stock:focus-visible {
+    background: var(--noyona-cta-secondary-bg);
+    color: var(--noyona-color-text-muted);
+    border-color: var(--noyona-color-text-muted);
     transform: none;
     box-shadow: none;
   }

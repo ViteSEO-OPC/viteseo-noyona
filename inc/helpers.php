@@ -1101,10 +1101,10 @@ function noyona_get_product_card_cart_control_html( $product ) {
     $product_name = $product->get_name();
     $permalink    = $product->get_permalink();
 
-    $cart_action = 'navigate';
-    $product_url = $permalink;
-    $aria_label  = '';
-    $is_disabled = false;
+    $cart_action     = 'navigate';
+    $product_url     = $permalink;
+    $aria_label      = '';
+    $is_out_of_stock = false;
 
     if ( $product->is_type( 'simple' ) ) {
         if ( $product->is_purchasable() && $product->is_in_stock() ) {
@@ -1115,9 +1115,12 @@ function noyona_get_product_card_cart_control_html( $product ) {
                 $product_name
             );
         } else {
-            $cart_action = 'disabled';
-            $is_disabled = true;
-            $aria_label  = sprintf(
+            // Out of stock: stay clickable and route to the product page so the
+            // shopper can still view details (styled gray via .is-out-of-stock).
+            $cart_action     = 'navigate';
+            $product_url     = $permalink;
+            $is_out_of_stock = true;
+            $aria_label      = sprintf(
                 /* translators: %s: product name */
                 __( '%s is out of stock', 'noyona-childtheme' ),
                 $product_name
@@ -1134,9 +1137,12 @@ function noyona_get_product_card_cart_control_html( $product ) {
                 $product_name
             );
         } else {
-            $cart_action = 'disabled';
-            $is_disabled = true;
-            $aria_label  = sprintf(
+            // Out of stock: stay clickable and route to the product page so the
+            // shopper can still view details (styled gray via .is-out-of-stock).
+            $cart_action     = 'navigate';
+            $product_url     = $permalink;
+            $is_out_of_stock = true;
+            $aria_label      = sprintf(
                 /* translators: %s: product name */
                 __( '%s is out of stock', 'noyona-childtheme' ),
                 $product_name
@@ -1165,8 +1171,8 @@ function noyona_get_product_card_cart_control_html( $product ) {
     }
 
     $classes = array( 'noyona-product-card-cart' );
-    if ( $is_disabled ) {
-        $classes[] = 'is-disabled';
+    if ( $is_out_of_stock ) {
+        $classes[] = 'is-out-of-stock';
     }
 
     ob_start();
@@ -1182,13 +1188,9 @@ function noyona_get_product_card_cart_control_html( $product ) {
             data-product-url="<?php echo esc_url( $product_url ); ?>"
         <?php endif; ?>
         aria-label="<?php echo esc_attr( $aria_label ); ?>"
-        <?php if ( $is_disabled ) : ?>
-            disabled
-            aria-disabled="true"
-        <?php endif; ?>
     >
         <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
-        <span class="noyona-product-card-cart__label" aria-hidden="true"><?php echo esc_html( __( 'Add to cart', 'noyona-childtheme' ) ); ?></span>
+        <span class="noyona-product-card-cart__label" aria-hidden="true"><?php echo esc_html( $is_out_of_stock ? __( 'Out of stock', 'noyona-childtheme' ) : __( 'Add to cart', 'noyona-childtheme' ) ); ?></span>
     </button>
     <?php
     return trim( (string) ob_get_clean() );
@@ -1230,9 +1232,17 @@ function noyona_render_product_card( $product ) {
         $excerpt = wp_trim_words( $excerpt, 22 );
     }
 
+    // Out-of-stock cards get a modifier class so the hover "Buy Now" bar and the
+    // cart control render in the muted/gray out-of-stock treatment instead. Mirrors
+    // the disable logic used in noyona_get_product_card_cart_control_html().
+    $is_out_of_stock = ( $product->is_type( 'simple' ) || $product->is_type( 'variable' ) )
+        && ! ( $product->is_purchasable() && $product->is_in_stock() );
+
+    $card_classes = 'wc-block-product' . ( $is_out_of_stock ? ' is-out-of-stock' : '' );
+
     ob_start();
     ?>
-    <div class="wc-block-product" data-product-id="<?php echo esc_attr( (string) $product->get_id() ); ?>">
+    <div class="<?php echo esc_attr( $card_classes ); ?>" data-product-id="<?php echo esc_attr( (string) $product->get_id() ); ?>">
         <a href="<?php echo esc_url( $link ); ?>" class="wc-block-components-product-image">
         <?php echo $image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
