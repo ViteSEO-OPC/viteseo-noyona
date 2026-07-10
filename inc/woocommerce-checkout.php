@@ -3392,6 +3392,27 @@ function noyona_strip_checkout_pay_meta_breaks( $block_content, $block ) {
     );
 }
 
+/* ----- Strip <br> from the pay-confirm modal action buttons ----- */
+add_filter( 'render_block', 'noyona_strip_pay_confirm_modal_breaks', 35, 2 );
+function noyona_strip_pay_confirm_modal_breaks( $block_content, $block ) {
+    if ( is_admin() || '' === trim( (string) $block_content ) ) {
+        return $block_content;
+    }
+
+    if ( false === strpos( (string) $block_content, 'noyona-pay-confirm-modal' ) ) {
+        return $block_content;
+    }
+
+    return preg_replace_callback(
+        '/(<div\b[^>]*class=(["\'])[^"\']*\bnoyona-pay-confirm-modal__actions\b[^"\']*\2[^>]*>)(.*?)(<\/div>)/is',
+        function ( $matches ) {
+            $inner = preg_replace( '/\s*<br\s*\/?>\s*/i', '', (string) $matches[3] );
+            return $matches[1] . $inner . $matches[4];
+        },
+        (string) $block_content
+    );
+}
+
 /* ----- Force /checkout/ as Woo checkout URL ----- */
 add_filter( 'woocommerce_get_checkout_url', 'noyona_force_checkout_url', 99 );
 function noyona_force_checkout_url( $url ) {
