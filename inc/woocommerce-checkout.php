@@ -3392,7 +3392,7 @@ function noyona_strip_checkout_pay_meta_breaks( $block_content, $block ) {
     );
 }
 
-/* ----- Strip <br> from the pay-confirm modal action buttons ----- */
+/* ----- Strip <br> from the pay-confirm modal buttons (close, cancel, proceed) ----- */
 add_filter( 'render_block', 'noyona_strip_pay_confirm_modal_breaks', 35, 2 );
 function noyona_strip_pay_confirm_modal_breaks( $block_content, $block ) {
     if ( is_admin() || '' === trim( (string) $block_content ) ) {
@@ -3403,8 +3403,31 @@ function noyona_strip_pay_confirm_modal_breaks( $block_content, $block ) {
         return $block_content;
     }
 
+    // Strip <br> inside every modal button: __backdrop, __close (X), and the
+    // ghost/primary action buttons. [^>]* spans the multiline opening tags.
     return preg_replace_callback(
-        '/(<div\b[^>]*class=(["\'])[^"\']*\bnoyona-pay-confirm-modal__actions\b[^"\']*\2[^>]*>)(.*?)(<\/div>)/is',
+        '/(<button\b[^>]*\bnoyona-pay-confirm-modal[^>]*>)(.*?)(<\/button>)/is',
+        function ( $matches ) {
+            $inner = preg_replace( '/\s*<br\s*\/?>\s*/i', '', (string) $matches[2] );
+            return $matches[1] . $inner . $matches[3];
+        },
+        (string) $block_content
+    );
+}
+
+/* ----- Strip <br> from the empty-cart "Return to shop" button ----- */
+add_filter( 'render_block', 'noyona_strip_return_to_shop_breaks', 35, 2 );
+function noyona_strip_return_to_shop_breaks( $block_content, $block ) {
+    if ( is_admin() || '' === trim( (string) $block_content ) ) {
+        return $block_content;
+    }
+
+    if ( false === strpos( (string) $block_content, 'return-to-shop' ) ) {
+        return $block_content;
+    }
+
+    return preg_replace_callback(
+        '/(<p\b[^>]*class=(["\'])[^"\']*\breturn-to-shop\b[^"\']*\2[^>]*>)(.*?)(<\/p>)/is',
         function ( $matches ) {
             $inner = preg_replace( '/\s*<br\s*\/?>\s*/i', '', (string) $matches[3] );
             return $matches[1] . $inner . $matches[4];
