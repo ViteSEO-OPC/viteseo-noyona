@@ -607,6 +607,15 @@ function noyona_sync_checkout_fields() {
  * @return bool
  */
 function noyona_is_checkout_ui_context() {
+	// A blocked/invalid order-received request is forced to a 404 (see
+	// noyona_guard_order_received_endpoint). The path still starts with
+	// "checkout/", so the URL-based checks below would otherwise treat the
+	// 404 as a checkout context and inject checkout UI (e.g. the step pills)
+	// on top of the 404 page. Never treat a 404 as a checkout context.
+	if ( is_404() ) {
+		return false;
+	}
+
 	if ( function_exists( 'is_checkout' ) && is_checkout() ) {
 		return true;
 	}

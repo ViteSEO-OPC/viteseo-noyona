@@ -345,6 +345,24 @@ function noyona_guard_order_received_endpoint() {
     ) {
         noyona_render_404_and_exit();
     }
+
+    // Case 3: expired/cancelled orders. The received page's cancelled view is a
+    // styling dead end, so send the owner to their My Account "Orders" panel
+    // with this order's modal pre-opened — they'll see the cancelled status in
+    // the proper styled UI. Only redirect the actual owner (the account whose
+    // orders panel this URL targets); shop managers viewing another customer's
+    // order still see the page in place.
+    if ( $owner_id > 0
+        && (int) get_current_user_id() === $owner_id
+        && $order->has_status( 'cancelled' )
+        && function_exists( 'noyona_get_account_order_modal_url' )
+    ) {
+        $modal_url = noyona_get_account_order_modal_url( $order );
+        if ( '' !== $modal_url ) {
+            wp_safe_redirect( $modal_url );
+            exit;
+        }
+    }
 }
 
 /**
